@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -36,18 +35,19 @@ textarea{min-height:90px;resize:vertical}
 </style>
 </head>
 <body>
+
 <header>
 <h1>ALVIS</h1>
 <div class="status" id="status">● 起動しています</div>
 </header>
 
 <section id="lockScreen" class="panel" style="margin:16px">
-<h2 id="lockTitle">ALVISの記憶庫</h2>
-<p id="lockDescription">記憶を暗号化するパスワードを設定してね。</p>
-<input id="password" type="password" autocomplete="new-password" placeholder="パスワード（8文字以上）">
-<input id="passwordAgain" type="password" autocomplete="new-password" placeholder="確認用パスワード">
+<h2>ALVISの記憶庫</h2>
+<p id="lockDescription">記憶を暗号化するパスワードを入力してね。</p>
+<input id="password" type="password" autocomplete="current-password" placeholder="パスワード（8文字以上）">
+<input id="passwordAgain" type="password" autocomplete="new-password" placeholder="初回作成時のみ確認用">
 <button id="unlockButton">記憶庫を作成・解除</button>
-<p class="small" id="lockMessage">パスワードは端末内に保存しないよ。忘れないように保管してね。</p>
+<p class="small" id="lockMessage">パスワードは忘れないように保管してね。</p>
 </section>
 
 <div id="app" class="hidden">
@@ -94,7 +94,8 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 
 let cryptoKey = null;
-let data = { memories: [], candidates: [], history: [] };
+let encryptionSalt = null;
+let data = {memories:[], candidates:[], history:[]};
 
 const $ = id => document.getElementById(id);
 
@@ -108,8 +109,13 @@ function showMessage(text, type="alvis") {
 
 async function deriveKey(password, salt) {
   const base = await crypto.subtle.importKey(
-    "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+    "raw",
+    enc.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
   );
+
   return crypto.subtle.deriveKey(
     {name:"PBKDF2", salt, iterations:310000, hash:"SHA-256"},
     base,
@@ -120,16 +126,26 @@ async function deriveKey(password, salt) {
 }
 
 async function encryptData() {
+  if (!cryptoKey || !encryptionSalt) {
+    throw new Error("暗号化キーが準備されていないよ。");
+  }
+
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plain = enc.encode(JSON.stringify(data));
+
   const encrypted = await crypto.subtle.encrypt(
-    {name:"AES-GCM", iv}, cryptoKey, plain
+    {name:"AES-GCM", iv},
+    cryptoKey,
+    plain
   );
+
   const record = {
     version:1,
+    salt:Array.from(encryptionSalt),
     iv:Array.from(iv),
     encrypted:Array.from(new Uint8Array(encrypted))
   };
+
   localStorage.setItem(DB_KEY, JSON.stringify(record));
 }
 
@@ -139,6 +155,7 @@ async function decryptData(key, record) {
     key,
     new Uint8Array(record.encrypted)
   );
+
   return JSON.parse(dec.decode(plain));
 }
 
@@ -152,30 +169,51 @@ async function unlock() {
     return;
   }
 
+  $("unlockButton").disabled = true;
+  $("lockMessage").textContent = "記憶庫を確認しているよ……";
+
   try {
     if (!saved) {
       if (password !== again) {
         $("lockMessage").textContent = "確認用パスワードが一致しないよ。";
         return;
       }
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      cryptoKey = await deriveKey(password, salt);
+
+      encryptionSalt = crypto.getRandomValues(new Uint8Array(16));
+      cryptoKey = await deriveKey(password, encryptionSalt);
+
       data = {memories:[], candidates:[], history:[]};
-      const record = {version:1, salt:Array.from(salt)};
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const encrypted = await crypto.subtle.encrypt(
-        {name:"AES-GCM", iv}, cryptoKey, enc.encode(JSON.stringify(data))
-      );
-      record.iv = Array.from(iv);
-      record.encrypted = Array.from(new Uint8Array(encrypted));
-      localStorage.setItem(DB_KEY, JSON.stringify(record));
+
+      await encryptData();
+
     } else {
       const record = JSON.parse(saved);
-      if (record.version !== 1 || !record.salt || !record.iv || !record.encrypted) {
+
+      if (
+        record.version !== 1 ||
+        !Array.isArray(record.salt) ||
+        record.salt.length !== 16 ||
+        !Array.isArray(record.iv) ||
+        !Array.isArray(record.encrypted)
+      ) {
         throw new Error("保存データの形式が違うよ。");
       }
-      cryptoKey = await deriveKey(password, new Uint8Array(record.salt));
-      data = await decryptData(cryptoKey, record);
+
+      encryptionSalt = new Uint8Array(record.salt);
+      cryptoKey = await deriveKey(password, encryptionSalt);
+
+      const loadedData = await decryptData(cryptoKey, record);
+
+      if (
+        !loadedData ||
+        !Array.isArray(loadedData.memories) ||
+        !Array.isArray(loadedData.candidates) ||
+        !Array.isArray(loadedData.history)
+      ) {
+        throw new Error("記憶データの形式が違うよ。");
+      }
+
+      data = loadedData;
     }
 
     $("lockScreen").classList.add("hidden");
@@ -183,20 +221,30 @@ async function unlock() {
     $("status").textContent = "● 暗号化された記憶庫を解除しました";
     $("password").value = "";
     $("passwordAgain").value = "";
+
     renderAll();
+
     if (data.history.length === 0) {
       showMessage("こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？");
     } else {
-      data.history.forEach(m => showMessage(m.text, m.role));
+      data.history.forEach(m => {
+        showMessage(m.text, m.role);
+      });
     }
+
   } catch (error) {
     cryptoKey = null;
-    $("lockMessage").textContent = "解除できなかったよ。パスワードを確認してね。";
+    encryptionSalt = null;
+    $("lockMessage").textContent = "解除できなかったよ。パスワードか保存データを確認してね。";
+  } finally {
+    $("unlockButton").disabled = false;
   }
 }
 
 async function save() {
-  if (!cryptoKey) throw new Error("記憶庫がロックされているよ。");
+  if (!cryptoKey || !encryptionSalt) {
+    throw new Error("記憶庫がロックされているよ。");
+  }
   await encryptData();
 }
 
@@ -207,8 +255,10 @@ function renderAll() {
   data.candidates.forEach((item, index) => {
     const box = document.createElement("div");
     box.className = "item";
+
     const text = document.createElement("p");
     text.textContent = item;
+
     const actions = document.createElement("div");
     actions.className = "actions";
 
@@ -238,23 +288,33 @@ function renderAll() {
   data.memories.forEach((item, index) => {
     const box = document.createElement("div");
     box.className = "item";
+
     const text = document.createElement("p");
     text.textContent = item;
+
     const remove = document.createElement("button");
     remove.textContent = "削除";
     remove.className = "danger";
+
     remove.onclick = async () => {
       if (!confirm("この記憶を削除する？")) return;
+
       data.memories.splice(index, 1);
       await save();
       renderAll();
     };
+
     box.append(text, remove);
     $("memoryList").append(box);
   });
 
-  if (!data.candidates.length) $("candidateList").textContent = "記憶候補はまだないよ。";
-  if (!data.memories.length) $("memoryList").textContent = "承認済みの記憶はまだないよ。";
+  if (!data.candidates.length) {
+    $("candidateList").textContent = "記憶候補はまだないよ。";
+  }
+
+  if (!data.memories.length) {
+    $("memoryList").textContent = "承認済みの記憶はまだないよ。";
+  }
 }
 
 $("unlockButton").addEventListener("click", unlock);
@@ -262,26 +322,44 @@ $("unlockButton").addEventListener("click", unlock);
 $("addCandidate").addEventListener("click", async () => {
   const text = $("candidateInput").value.trim();
   if (!text) return;
+
   data.candidates.push(text);
   $("candidateInput").value = "";
-  await save();
-  renderAll();
+
+  try {
+    await save();
+    renderAll();
+  } catch (error) {
+    alert("保存できなかったよ。記憶庫の状態を確認してね。");
+  }
 });
 
 $("sendButton").addEventListener("click", async () => {
   const text = $("chatInput").value.trim();
   if (!text) return;
+
   showMessage(text, "user");
   data.history.push({role:"user", text});
   $("chatInput").value = "";
-  showMessage("メッセージを受け取ったよ。まだAIモデルには接続していないけれど、記憶候補として登録することはできるよ。");
-  data.history.push({role:"alvis", text:"メッセージを受け取ったよ。まだAIモデルには接続していないけれど、記憶候補として登録することはできるよ。"});
-  await save();
+
+  const reply = "メッセージを受け取ったよ。まだAIモデルには接続していないけれど、記憶候補として登録することはできるよ。";
+
+  showMessage(reply);
+  data.history.push({role:"alvis", text:reply});
+
+  try {
+    await save();
+  } catch (error) {
+    alert("会話を保存できなかったよ。");
+  }
 });
 
 document.querySelectorAll("nav button").forEach(button => {
   button.addEventListener("click", () => {
-    document.querySelectorAll("main section").forEach(section => section.classList.add("hidden"));
+    document.querySelectorAll("main section").forEach(section => {
+      section.classList.add("hidden");
+    });
+
     $(button.dataset.page).classList.remove("hidden");
   });
 });
