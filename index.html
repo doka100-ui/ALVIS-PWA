@@ -1,199 +1,294 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="./manifest.json">
-  <title>ALVIS</title>
-
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: #101827;
-      color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    header {
-      padding: 18px;
-      border-bottom: 1px solid #334155;
-      background: #172235;
-    }
-
-    header h1 {
-      margin: 0;
-      letter-spacing: 3px;
-      font-size: 22px;
-    }
-
-    .status {
-      margin-top: 6px;
-      color: #86efac;
-      font-size: 12px;
-    }
-
-    #chat {
-      height: calc(100dvh - 155px);
-      overflow-y: auto;
-      padding: 18px;
-    }
-
-    .message {
-      max-width: 85%;
-      margin: 12px 0;
-      padding: 13px 16px;
-      border-radius: 16px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-    }
-
-    .alvis {
-      background: #1e293b;
-      border: 1px solid #334155;
-      margin-right: auto;
-    }
-
-    .user {
-      background: #2563eb;
-      margin-left: auto;
-    }
-
-    .sender {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-bottom: 5px;
-    }
-
-    .input-area {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      gap: 8px;
-      padding: 12px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-      background: #172235;
-      border-top: 1px solid #334155;
-    }
-
-    input {
-      flex: 1;
-      min-width: 0;
-      padding: 14px;
-      border: 1px solid #475569;
-      border-radius: 12px;
-      background: #0f172a;
-      color: white;
-      font-size: 16px;
-      outline: none;
-    }
-
-    button {
-      padding: 0 20px;
-      border: 0;
-      border-radius: 12px;
-      background: #2563eb;
-      color: white;
-      font-size: 15px;
-      font-weight: bold;
-    }
-
-    button:active {
-      background: #1d4ed8;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<title>ALVIS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+header{padding:16px 18px;background:#172235;border-bottom:1px solid #334155}
+h1{margin:0;letter-spacing:3px}
+.status{font-size:12px;color:#86efac;margin-top:5px}
+nav{display:flex;gap:8px;padding:10px;background:#172235;overflow-x:auto}
+nav button{white-space:nowrap}
+button{border:0;border-radius:10px;padding:11px 14px;background:#2563eb;color:white;font-size:14px}
+button.secondary{background:#475569}
+button.danger{background:#991b1b}
+button:disabled{opacity:.5}
+main{max-width:720px;margin:auto;padding:16px}
+.panel{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:12px 0}
+input,textarea{width:100%;padding:13px;border-radius:10px;border:1px solid #475569;background:#0f172a;color:white;font-size:16px;margin:6px 0 12px}
+textarea{min-height:90px;resize:vertical}
+.message{padding:12px 14px;border-radius:14px;margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;max-width:90%}
+.alvis{background:#1e293b;border:1px solid #334155}
+.user{background:#2563eb;margin-left:auto}
+.small{font-size:12px;color:#94a3b8}
+.item{padding:12px 0;border-bottom:1px solid #334155}
+.item:last-child{border:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hidden{display:none!important}
+#chat{min-height:35vh;max-height:55vh;overflow-y:auto}
+</style>
 </head>
-
 <body>
-  <header>
-    <h1>ALVIS</h1>
-    <div class="status" id="status">● 起動しています</div>
-  </header>
+<header>
+<h1>ALVIS</h1>
+<div class="status" id="status">● 起動しています</div>
+</header>
 
-  <main id="chat">
-    <div class="message alvis">
-      <div class="sender">ALVIS</div>
-      こんにちは。ALVISだよ。
-      今日は何を一緒に進めようか？
-    </div>
-  </main>
+<section id="lockScreen" class="panel" style="margin:16px">
+<h2 id="lockTitle">ALVISの記憶庫</h2>
+<p id="lockDescription">記憶を暗号化するパスワードを設定してね。</p>
+<input id="password" type="password" autocomplete="new-password" placeholder="パスワード（8文字以上）">
+<input id="passwordAgain" type="password" autocomplete="new-password" placeholder="確認用パスワード">
+<button id="unlockButton">記憶庫を作成・解除</button>
+<p class="small" id="lockMessage">パスワードは端末内に保存しないよ。忘れないように保管してね。</p>
+</section>
 
-  <div class="input-area">
-    <input
-      id="messageInput"
-      type="text"
-      placeholder="ALVISにメッセージを送る..."
-      autocomplete="off"
-    >
-    <button id="sendButton">送信</button>
-  </div>
+<div id="app" class="hidden">
+<nav>
+<button data-page="chatPage">チャット</button>
+<button data-page="candidatePage">記憶候補</button>
+<button data-page="memoryPage">長期記憶</button>
+</nav>
 
-  <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
+<main>
+<section id="chatPage">
+<div class="panel">
+<h2>ALVISとの会話</h2>
+<div id="chat"></div>
+<textarea id="chatInput" placeholder="ALVISにメッセージを送る"></textarea>
+<button id="sendButton">送信</button>
+<p class="small">現在は画面と記憶機能の試作段階。AIモデルにはまだ接続していないよ。</p>
+</div>
+</section>
 
-    function addMessage(text, type) {
-      const message = document.createElement("div");
-      message.className = "message " + type;
+<section id="candidatePage" class="hidden">
+<div class="panel">
+<h2>記憶候補</h2>
+<p>保存したい内容を登録して、確認してから承認してね。</p>
+<textarea id="candidateInput" placeholder="例：私はラオス語を勉強している"></textarea>
+<button id="addCandidate">候補に登録</button>
+<div id="candidateList"></div>
+</div>
+</section>
 
-      const sender = document.createElement("div");
-      sender.className = "sender";
-      sender.textContent = type === "user" ? "あなた" : "ALVIS";
+<section id="memoryPage" class="hidden">
+<div class="panel">
+<h2>承認済みの長期記憶</h2>
+<p class="small">承認した内容だけが暗号化されて保存されるよ。</p>
+<div id="memoryList"></div>
+</div>
+</section>
+</main>
+</div>
 
-      const content = document.createElement("div");
-      content.textContent = text;
+<script>
+const DB_KEY = "ALVIS_ENCRYPTED_V1";
+const enc = new TextEncoder();
+const dec = new TextDecoder();
 
-      message.appendChild(sender);
-      message.appendChild(content);
-      chat.appendChild(message);
+let cryptoKey = null;
+let data = { memories: [], candidates: [], history: [] };
 
-      chat.scrollTop = chat.scrollHeight;
-    }
+const $ = id => document.getElementById(id);
 
-    function sendMessage() {
-      const text = input.value.trim();
+function showMessage(text, type="alvis") {
+  const el = document.createElement("div");
+  el.className = "message " + type;
+  el.textContent = text;
+  $("chat").appendChild(el);
+  $("chat").scrollTop = $("chat").scrollHeight;
+}
 
-      if (!text) return;
+async function deriveKey(password, salt) {
+  const base = await crypto.subtle.importKey(
+    "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    {name:"PBKDF2", salt, iterations:310000, hash:"SHA-256"},
+    base,
+    {name:"AES-GCM", length:256},
+    false,
+    ["encrypt","decrypt"]
+  );
+}
 
-      addMessage(text, "user");
-      input.value = "";
+async function encryptData() {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plain = enc.encode(JSON.stringify(data));
+  const encrypted = await crypto.subtle.encrypt(
+    {name:"AES-GCM", iv}, cryptoKey, plain
+  );
+  const record = {
+    version:1,
+    iv:Array.from(iv),
+    encrypted:Array.from(new Uint8Array(encrypted))
+  };
+  localStorage.setItem(DB_KEY, JSON.stringify(record));
+}
 
-      setTimeout(() => {
-        addMessage(
-          "メッセージを受け取ったよ。現在はチャット画面の試作段階なんだ。これからAIモデルと長期記憶を接続していくね。",
-          "alvis"
-        );
-      }, 300);
-    }
+async function decryptData(key, record) {
+  const plain = await crypto.subtle.decrypt(
+    {name:"AES-GCM", iv:new Uint8Array(record.iv)},
+    key,
+    new Uint8Array(record.encrypted)
+  );
+  return JSON.parse(dec.decode(plain));
+}
 
-    sendButton.addEventListener("click", sendMessage);
+async function unlock() {
+  const password = $("password").value;
+  const again = $("passwordAgain").value;
+  const saved = localStorage.getItem(DB_KEY);
 
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        sendMessage();
+  if (!password || password.length < 8) {
+    $("lockMessage").textContent = "パスワードは8文字以上にしてね。";
+    return;
+  }
+
+  try {
+    if (!saved) {
+      if (password !== again) {
+        $("lockMessage").textContent = "確認用パスワードが一致しないよ。";
+        return;
       }
-    });
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", async () => {
-        try {
-          await navigator.serviceWorker.register("./service-worker.js");
-          document.getElementById("status").textContent =
-            "● オフライン機能を準備しました";
-        } catch (error) {
-          document.getElementById("status").textContent =
-            "● オフライン設定を確認してください";
-        }
-      });
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      cryptoKey = await deriveKey(password, salt);
+      data = {memories:[], candidates:[], history:[]};
+      const record = {version:1, salt:Array.from(salt)};
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encrypted = await crypto.subtle.encrypt(
+        {name:"AES-GCM", iv}, cryptoKey, enc.encode(JSON.stringify(data))
+      );
+      record.iv = Array.from(iv);
+      record.encrypted = Array.from(new Uint8Array(encrypted));
+      localStorage.setItem(DB_KEY, JSON.stringify(record));
+    } else {
+      const record = JSON.parse(saved);
+      if (record.version !== 1 || !record.salt || !record.iv || !record.encrypted) {
+        throw new Error("保存データの形式が違うよ。");
+      }
+      cryptoKey = await deriveKey(password, new Uint8Array(record.salt));
+      data = await decryptData(cryptoKey, record);
     }
-  </script>
+
+    $("lockScreen").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    $("status").textContent = "● 暗号化された記憶庫を解除しました";
+    $("password").value = "";
+    $("passwordAgain").value = "";
+    renderAll();
+    if (data.history.length === 0) {
+      showMessage("こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？");
+    } else {
+      data.history.forEach(m => showMessage(m.text, m.role));
+    }
+  } catch (error) {
+    cryptoKey = null;
+    $("lockMessage").textContent = "解除できなかったよ。パスワードを確認してね。";
+  }
+}
+
+async function save() {
+  if (!cryptoKey) throw new Error("記憶庫がロックされているよ。");
+  await encryptData();
+}
+
+function renderAll() {
+  $("candidateList").replaceChildren();
+  $("memoryList").replaceChildren();
+
+  data.candidates.forEach((item, index) => {
+    const box = document.createElement("div");
+    box.className = "item";
+    const text = document.createElement("p");
+    text.textContent = item;
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const approve = document.createElement("button");
+    approve.textContent = "承認して保存";
+    approve.onclick = async () => {
+      data.memories.push(item);
+      data.candidates.splice(index, 1);
+      await save();
+      renderAll();
+    };
+
+    const reject = document.createElement("button");
+    reject.textContent = "却下";
+    reject.className = "danger";
+    reject.onclick = async () => {
+      data.candidates.splice(index, 1);
+      await save();
+      renderAll();
+    };
+
+    actions.append(approve, reject);
+    box.append(text, actions);
+    $("candidateList").append(box);
+  });
+
+  data.memories.forEach((item, index) => {
+    const box = document.createElement("div");
+    box.className = "item";
+    const text = document.createElement("p");
+    text.textContent = item;
+    const remove = document.createElement("button");
+    remove.textContent = "削除";
+    remove.className = "danger";
+    remove.onclick = async () => {
+      if (!confirm("この記憶を削除する？")) return;
+      data.memories.splice(index, 1);
+      await save();
+      renderAll();
+    };
+    box.append(text, remove);
+    $("memoryList").append(box);
+  });
+
+  if (!data.candidates.length) $("candidateList").textContent = "記憶候補はまだないよ。";
+  if (!data.memories.length) $("memoryList").textContent = "承認済みの記憶はまだないよ。";
+}
+
+$("unlockButton").addEventListener("click", unlock);
+
+$("addCandidate").addEventListener("click", async () => {
+  const text = $("candidateInput").value.trim();
+  if (!text) return;
+  data.candidates.push(text);
+  $("candidateInput").value = "";
+  await save();
+  renderAll();
+});
+
+$("sendButton").addEventListener("click", async () => {
+  const text = $("chatInput").value.trim();
+  if (!text) return;
+  showMessage(text, "user");
+  data.history.push({role:"user", text});
+  $("chatInput").value = "";
+  showMessage("メッセージを受け取ったよ。まだAIモデルには接続していないけれど、記憶候補として登録することはできるよ。");
+  data.history.push({role:"alvis", text:"メッセージを受け取ったよ。まだAIモデルには接続していないけれど、記憶候補として登録することはできるよ。"});
+  await save();
+});
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("main section").forEach(section => section.classList.add("hidden"));
+    $(button.dataset.page).classList.remove("hidden");
+  });
+});
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+}
+</script>
 </body>
 </html>
