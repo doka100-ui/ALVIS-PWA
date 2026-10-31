@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101827">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="./manifest.json">
   <title>ALVIS</title>
   <style>
     * { box-sizing: border-box; }
@@ -20,10 +21,7 @@
       margin: 40px auto;
     }
     h1 { letter-spacing: 3px; }
-    .status {
-      color: #86efac;
-      font-size: 14px;
-    }
+    .status { color: #86efac; font-size: 14px; }
     .panel {
       margin-top: 24px;
       padding: 20px;
@@ -36,12 +34,27 @@
 <body>
   <main>
     <h1>ALVIS</h1>
-    <p class="status">● ローカル記憶システム準備中</p>
+    <p class="status" id="status">● 起動準備中</p>
     <section class="panel">
       <h2>こんにちは。</h2>
       <p>ALVISだよ。今日は何を一緒に進めようか？</p>
       <p>ここから、オフラインで使える長期記憶システムを作っていくよ。</p>
     </section>
   </main>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", async () => {
+        try {
+          await navigator.serviceWorker.register("./service-worker.js");
+          document.getElementById("status").textContent =
+            "● オフライン機能を準備しました";
+        } catch (error) {
+          document.getElementById("status").textContent =
+            "● オフライン設定に失敗しました";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
