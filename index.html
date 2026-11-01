@@ -81,6 +81,12 @@ textarea{min-height:90px;resize:vertical}
 <section id="memoryPage" class="hidden">
 <div class="panel">
 <h2>承認済みの長期記憶</h2>
+<div class="actions">
+  <button id="backupButton">暗号化バックアップ</button>
+  <button id="restoreButton" class="secondary">バックアップから復元</button>
+  <input id="restoreFile" type="file" accept=".json,application/json" class="hidden">
+</div>
+<p class="small" id="backupStatus">バックアップは安全な場所に保管してね。</p>
 <p class="small">承認した内容だけが暗号化されて保存されるよ。</p>
 <div id="memoryList"></div>
 </div>
@@ -363,7 +369,127 @@ document.querySelectorAll("nav button").forEach(button => {
     $(button.dataset.page).classList.remove("hidden");
   });
 });
+// 暗号化バックアップの作成
+$("backupButton").addEventListener("click", async () => {
+  try {
+    if (!cryptoKey || !encryptionSalt) {
+      alert("先に記憶庫を解除してね。");
+      return;
+    }
 
+    const record = JSON.parse(localStorage.getItem(DB_KEY));
+
+    const backup = {
+      format: "ALVIS_BACKUP",
+      version: 1,
+      createdAt: new Date().toISOString(),
+      encryptedRecord: record
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(backup, null, 2)],
+      {type:"application/json"}
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ALVIS_Backup_" +
+      new Date().toISOString().slice(0,10) + ".json";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    $("backupStatus").textContent = "暗号化バックアップを作成したよ。";
+  } catch (error) {
+    alert("バックアップを作成できなかったよ。");
+  }
+});
+
+// バックアップファイルの選択
+$("restoreButton").addEventListener("click", () => {
+  $("restoreFile").click();
+});
+
+// バックアップの検証と復元
+$("restoreFile").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const backup = JSON.parse(await file.text());
+
+    if (
+      backup.format !== "ALVIS_BACKUP" ||
+      backup.version !== 1
+    ) {
+      throw new Error("バックアップ形式が違うよ。");
+    }
+
+    const record = backup.encryptedRecord;
+
+    if (
+      !record ||
+      record.version !== 1 ||
+      !Array.isArray(record.salt) ||
+      record.salt.length !== 16 ||
+      !Array.isArray(record.iv) ||
+      !Array.isArray(record.encrypted)
+    ) {
+      throw new Error("保存データが不正だよ。");
+    }
+
+    const password = prompt("バックアップ作成時のパスワードを入力してね。");
+    if (password === null || password.length < 8) {
+      alert("復元を中止したよ。");
+      return;
+    }
+
+    const backupKey = await deriveKey(
+      password,
+      new Uint8Array(record.salt)
+    );
+
+    const restoredData = await decryptData(backupKey, record);
+
+    if (
+      !restoredData ||
+      !Array.isArray(restoredData.memories) ||
+      !Array.isArray(restoredData.candidates) ||
+      !Array.isArray(restoredData.history)
+    ) {
+      throw new Error("記憶データの形式が違うよ。");
+    }
+
+    if (!confirm("現在の記憶をバックアップの内容に置き換えるよ。続ける？")) {
+      return;
+    }
+
+    // 検証成功後にだけ現在の記憶を置き換える
+    localStorage.setItem(DB_KEY, JSON.stringify(record));
+
+    cryptoKey = backupKey;
+    encryptionSalt = new Uint8Array(record.salt);
+    data = restoredData;
+
+    renderAll();
+    $("chat").replaceChildren();
+
+    data.history.forEach(m => {
+      showMessage(m.text, m.role);
+    });
+
+    alert("バックアップを復元したよ。");
+
+  } catch (error) {
+    alert("復元できなかったよ。パスワードやファイルを確認してね。");
+  } finally {
+    event.target.value = "";
+  }
+});
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./service-worker.js").catch(() => {});
 }
