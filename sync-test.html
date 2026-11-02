@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -28,13 +29,14 @@
     }
     .note { color: #555; font-size: 14px; }
     h2 { margin-top: 28px; }
+    .production { border-left: 4px solid #16834a; padding-left: 12px; }
   </style>
 </head>
 <body>
   <h1>ALVIS 同期テスト</h1>
   <p class="note">
-    このページはテスト専用です。本番データは使用しません。
-    入力したトークンは保存されません。
+    テスト専用ページです。保存するのはランダムなダミーデータのみです。
+    トークンは保存されません。
   </p>
 
   <label for="token">同期トークン</label>
@@ -46,10 +48,18 @@
   <button id="save">ダミーデータを保存する</button>
   <button id="conflict">競合検出をテストする</button>
 
-  <h2>Durable Objectテスト（新方式）</h2>
+  <h2>Durable Objectテスト（既存テスト領域）</h2>
   <button id="do-load">DOテストデータを読み込む</button>
   <button id="do-save">DOにダミーデータを保存する</button>
   <button id="do-conflict">DOの競合検出をテストする</button>
+
+  <h2 class="production">本番用Durable Objectテスト</h2>
+  <p class="note">
+    保存先は alvis-main です。実際のALVIS記憶データは使用しません。
+  </p>
+  <button id="main-load">本番領域の状態を読み込む</button>
+  <button id="main-save">本番領域にダミーデータを保存する</button>
+  <button id="main-conflict">本番領域の競合検出をテストする</button>
 
   <h2>結果</h2>
   <pre id="result">まだテストしていません。</pre>
@@ -60,6 +70,7 @@
 
     let currentRevision = 0;
     let doCurrentRevision = 0;
+    let mainCurrentRevision = 0;
 
     const result = document.getElementById("result");
 
@@ -109,14 +120,13 @@
       return { status: response.status, data };
     }
 
-    // KV: 読み込み
-    document.getElementById("load").addEventListener("click", async () => {
+    async function loadTest(path, setRevision, label) {
       try {
-        show("KVデータを読み込み中...");
-        const response = await api("/sync/test-load");
+        show(label + "を読み込み中...");
+        const response = await api(path);
 
         if (response.data.ok) {
-          currentRevision = response.data.revision;
+          setRevision(response.data.revision);
         }
 
         show({
@@ -126,24 +136,23 @@
       } catch (error) {
         show("エラー: " + error.message);
       }
-    });
+    }
 
-    // KV: 保存
-    document.getElementById("save").addEventListener("click", async () => {
+    async function saveTest(path, getRevision, setRevision, label) {
       try {
-        show("KVにダミーデータを保存中...");
+        show(label + "にダミーデータを保存中...");
 
-        const response = await api("/sync/test-save", {
+        const response = await api(path, {
           method: "POST",
           body: JSON.stringify({
             version: 1,
-            expectedRevision: currentRevision,
+            expectedRevision: getRevision(),
             encryptedRecord: makeDummyRecord()
           })
         });
 
         if (response.data.ok) {
-          currentRevision = response.data.revision;
+          setRevision(response.data.revision);
         }
 
         show({
@@ -153,89 +162,16 @@
       } catch (error) {
         show("エラー: " + error.message);
       }
-    });
+    }
 
-    // KV: 競合検出
-    document.getElementById("conflict").addEventListener("click", async () => {
+    async function conflictTest(path, getRevision, label) {
       try {
-        show("KVの競合検出をテスト中...");
+        show(label + "の競合検出をテスト中...");
 
-        const staleRevision =
-          currentRevision === 0 ? 1 : currentRevision - 1;
+        const revision = getRevision();
+        const staleRevision = revision === 0 ? 1 : revision - 1;
 
-        const response = await api("/sync/test-save", {
-          method: "POST",
-          body: JSON.stringify({
-            version: 1,
-            expectedRevision: staleRevision,
-            encryptedRecord: makeDummyRecord()
-          })
-        });
-
-        show({
-          status: response.status,
-          ...response.data
-        });
-      } catch (error) {
-        show("エラー: " + error.message);
-      }
-    });
-
-    // Durable Object: 読み込み
-    document.getElementById("do-load").addEventListener("click", async () => {
-      try {
-        show("Durable Objectデータを読み込み中...");
-        const response = await api("/sync/do-test-load");
-
-        if (response.data.ok) {
-          doCurrentRevision = response.data.revision;
-        }
-
-        show({
-          status: response.status,
-          ...response.data
-        });
-      } catch (error) {
-        show("エラー: " + error.message);
-      }
-    });
-
-    // Durable Object: 保存
-    document.getElementById("do-save").addEventListener("click", async () => {
-      try {
-        show("Durable Objectにダミーデータを保存中...");
-
-        const response = await api("/sync/do-test-save", {
-          method: "POST",
-          body: JSON.stringify({
-            version: 1,
-            expectedRevision: doCurrentRevision,
-            encryptedRecord: makeDummyRecord()
-          })
-        });
-
-        if (response.data.ok) {
-          doCurrentRevision = response.data.revision;
-        }
-
-        show({
-          status: response.status,
-          ...response.data
-        });
-      } catch (error) {
-        show("エラー: " + error.message);
-      }
-    });
-
-    // Durable Object: 競合検出
-    document.getElementById("do-conflict").addEventListener("click", async () => {
-      try {
-        show("Durable Objectの競合検出をテスト中...");
-
-        const staleRevision =
-          doCurrentRevision === 0 ? 1 : doCurrentRevision - 1;
-
-        const response = await api("/sync/do-test-save", {
+        const response = await api(path, {
           method: "POST",
           body: JSON.stringify({
             version: 1,
@@ -251,7 +187,73 @@
       } catch (error) {
         show("エラー: " + error.message);
       }
-    });
+    }
+
+    // KVテスト
+    document.getElementById("load").addEventListener("click", () =>
+      loadTest("/sync/test-load", v => currentRevision = v, "KV")
+    );
+
+    document.getElementById("save").addEventListener("click", () =>
+      saveTest(
+        "/sync/test-save",
+        () => currentRevision,
+        v => currentRevision = v,
+        "KV"
+      )
+    );
+
+    document.getElementById("conflict").addEventListener("click", () =>
+      conflictTest("/sync/test-save", () => currentRevision, "KV")
+    );
+
+    // 既存DOテスト
+    document.getElementById("do-load").addEventListener("click", () =>
+      loadTest("/sync/do-test-load", v => doCurrentRevision = v, "DOテスト領域")
+    );
+
+    document.getElementById("do-save").addEventListener("click", () =>
+      saveTest(
+        "/sync/do-test-save",
+        () => doCurrentRevision,
+        v => doCurrentRevision = v,
+        "DOテスト領域"
+      )
+    );
+
+    document.getElementById("do-conflict").addEventListener("click", () =>
+      conflictTest(
+        "/sync/do-test-save",
+        () => doCurrentRevision,
+        "DOテスト領域"
+      )
+    );
+
+    // 本番用DOテスト
+    document.getElementById("main-load").addEventListener("click", () =>
+      loadTest(
+        "/sync/main-load",
+        v => mainCurrentRevision = v,
+        "本番用DO領域"
+      )
+    );
+
+    document.getElementById("main-save").addEventListener("click", () =>
+      saveTest(
+        "/sync/main-save",
+        () => mainCurrentRevision,
+        v => mainCurrentRevision = v,
+        "本番用DO領域"
+      )
+    );
+
+    document.getElementById("main-conflict").addEventListener("click", () =>
+      conflictTest(
+        "/sync/main-save",
+        () => mainCurrentRevision,
+        "本番用DO領域"
+      )
+    );
   </script>
 </body>
 </html>
