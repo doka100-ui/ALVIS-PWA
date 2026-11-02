@@ -30,6 +30,7 @@
     .note { color: #555; font-size: 14px; }
     h2 { margin-top: 28px; }
     .production { border-left: 4px solid #16834a; padding-left: 12px; }
+    .vault { border-left: 4px solid #1769aa; padding-left: 12px; }
   </style>
 </head>
 <body>
@@ -61,6 +62,15 @@
   <button id="main-save">本番領域にダミーデータを保存する</button>
   <button id="main-conflict">本番領域の競合検出をテストする</button>
 
+  <h2 class="vault">ALVIS専用保存領域（alvis-vault）</h2>
+  <p class="note">
+    実際のALVIS同期用に新設した領域です。
+    既存のテスト領域とは分離されています。
+  </p>
+  <button id="vault-load">ALVIS専用領域の状態を読み込む</button>
+  <button id="vault-save">ALVIS専用領域にダミーデータを保存する</button>
+  <button id="vault-conflict">ALVIS専用領域の競合検出をテストする</button>
+
   <h2>結果</h2>
   <pre id="result">まだテストしていません。</pre>
 
@@ -71,6 +81,7 @@
     let currentRevision = 0;
     let doCurrentRevision = 0;
     let mainCurrentRevision = 0;
+    let vaultCurrentRevision = 0;
 
     const result = document.getElementById("result");
 
@@ -229,7 +240,7 @@
       )
     );
 
-    // 本番用DOテスト
+    // 本番用DOテスト（alvis-main）
     document.getElementById("main-load").addEventListener("click", () =>
       loadTest(
         "/sync/main-load",
@@ -252,6 +263,32 @@
         "/sync/main-save",
         () => mainCurrentRevision,
         "本番用DO領域"
+      )
+    );
+
+    // ALVIS専用保存領域（alvis-vault）
+    document.getElementById("vault-load").addEventListener("click", () =>
+      loadTest(
+        "/sync/vault-load",
+        v => vaultCurrentRevision = v,
+        "ALVIS専用領域"
+      )
+    );
+
+    document.getElementById("vault-save").addEventListener("click", () =>
+      saveTest(
+        "/sync/vault-save",
+        () => vaultCurrentRevision,
+        v => vaultCurrentRevision = v,
+        "ALVIS専用領域"
+      )
+    );
+
+    document.getElementById("vault-conflict").addEventListener("click", () =>
+      conflictTest(
+        "/sync/vault-save",
+        () => vaultCurrentRevision,
+        "ALVIS専用領域"
       )
     );
   </script>
