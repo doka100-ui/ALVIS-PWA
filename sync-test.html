@@ -27,6 +27,7 @@
       overflow-wrap: anywhere;
     }
     .note { color: #555; font-size: 14px; }
+    h2 { margin-top: 28px; }
   </style>
 </head>
 <body>
@@ -40,18 +41,25 @@
   <input id="token" type="password" autocomplete="off"
          placeholder="Cloudflare Workerのトークン">
 
+  <h2>KVテスト（従来方式）</h2>
   <button id="load">テストデータを読み込む</button>
   <button id="save">ダミーデータを保存する</button>
   <button id="conflict">競合検出をテストする</button>
+
+  <h2>Durable Objectテスト（新方式）</h2>
+  <button id="do-load">DOテストデータを読み込む</button>
+  <button id="do-save">DOにダミーデータを保存する</button>
+  <button id="do-conflict">DOの競合検出をテストする</button>
 
   <h2>結果</h2>
   <pre id="result">まだテストしていません。</pre>
 
   <script>
     const WORKER_URL =
-      "https://36ddc6d0-alvis-sync.dokodemodoa100.workers.dev";
+      "https://alvis-sync.dokodemodoa100.workers.dev";
 
     let currentRevision = 0;
+    let doCurrentRevision = 0;
 
     const result = document.getElementById("result");
 
@@ -101,9 +109,10 @@
       return { status: response.status, data };
     }
 
+    // KV: 読み込み
     document.getElementById("load").addEventListener("click", async () => {
       try {
-        show("読み込み中...");
+        show("KVデータを読み込み中...");
         const response = await api("/sync/test-load");
 
         if (response.data.ok) {
@@ -119,9 +128,10 @@
       }
     });
 
+    // KV: 保存
     document.getElementById("save").addEventListener("click", async () => {
       try {
-        show("ダミーデータを保存中...");
+        show("KVにダミーデータを保存中...");
 
         const response = await api("/sync/test-save", {
           method: "POST",
@@ -145,14 +155,87 @@
       }
     });
 
+    // KV: 競合検出
     document.getElementById("conflict").addEventListener("click", async () => {
       try {
-        show("競合検出をテスト中...");
+        show("KVの競合検出をテスト中...");
 
         const staleRevision =
           currentRevision === 0 ? 1 : currentRevision - 1;
 
         const response = await api("/sync/test-save", {
+          method: "POST",
+          body: JSON.stringify({
+            version: 1,
+            expectedRevision: staleRevision,
+            encryptedRecord: makeDummyRecord()
+          })
+        });
+
+        show({
+          status: response.status,
+          ...response.data
+        });
+      } catch (error) {
+        show("エラー: " + error.message);
+      }
+    });
+
+    // Durable Object: 読み込み
+    document.getElementById("do-load").addEventListener("click", async () => {
+      try {
+        show("Durable Objectデータを読み込み中...");
+        const response = await api("/sync/do-test-load");
+
+        if (response.data.ok) {
+          doCurrentRevision = response.data.revision;
+        }
+
+        show({
+          status: response.status,
+          ...response.data
+        });
+      } catch (error) {
+        show("エラー: " + error.message);
+      }
+    });
+
+    // Durable Object: 保存
+    document.getElementById("do-save").addEventListener("click", async () => {
+      try {
+        show("Durable Objectにダミーデータを保存中...");
+
+        const response = await api("/sync/do-test-save", {
+          method: "POST",
+          body: JSON.stringify({
+            version: 1,
+            expectedRevision: doCurrentRevision,
+            encryptedRecord: makeDummyRecord()
+          })
+        });
+
+        if (response.data.ok) {
+          doCurrentRevision = response.data.revision;
+        }
+
+        show({
+          status: response.status,
+          ...response.data
+        });
+      } catch (error) {
+        show("エラー: " + error.message);
+      }
+    });
+
+    // Durable Object: 競合検出
+    document.getElementById("do-conflict").addEventListener("click", async () => {
+      try {
+        show("Durable Objectの競合検出をテスト中...");
+
+        const staleRevision =
+          doCurrentRevision === 0 ? 1 : doCurrentRevision - 1;
+
+        const response = await api("/sync/do-test-save", {
           method: "POST",
           body: JSON.stringify({
             version: 1,
