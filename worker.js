@@ -1,4 +1,17 @@
-const ALLOWED_ORIGIN = "https://alvis-pwa.pages.dev";
+function isAllowedOrigin(origin) {
+  try {
+    const url = new URL(origin);
+    return (
+      url.protocol === "https:" &&
+      (
+        url.hostname === "alvis-pwa.pages.dev" ||
+        url.hostname.endsWith(".alvis-pwa.pages.dev")
+      )
+    );
+  } catch {
+    return false;
+  }
+}
 
 function corsHeaders(origin) {
   return {
@@ -42,7 +55,7 @@ export default {
     const origin = request.headers.get("Origin") || "";
 
     if (request.method === "OPTIONS") {
-      if (origin !== ALLOWED_ORIGIN) {
+      if (!isAllowedOrigin(origin)) {
         return new Response(null, { status: 403 });
       }
 
