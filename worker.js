@@ -314,7 +314,15 @@ export default {
       }, 200, origin);
     }
 
-    // 本番用Durable Object。テスト領域とは完全に分離。
+    // ALVIS実データ専用の新しい保存領域
+    if (
+      url.pathname === "/sync/vault-save" ||
+      url.pathname === "/sync/vault-load"
+    ) {
+      return forwardToDO(request, env, origin, "alvis-vault");
+    }
+
+    // 本番用テストDurable Object。既存データを維持。
     if (
       url.pathname === "/sync/main-save" ||
       url.pathname === "/sync/main-load"
