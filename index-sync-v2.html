@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>ALVIS Sync V2</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#101827;color:#e8edf5;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:760px;margin:auto}
+h1{font-size:27px}
+h2{font-size:18px}
+p{line-height:1.6;color:#b9c4d5}
+.card{background:#1b2738;border:1px solid #34445c;border-radius:14px;padding:16px;margin:14px 0}
+input,textarea,button{width:100%;font:inherit;padding:12px;border-radius:9px;margin:6px 0}
+input,textarea{background:#101827;color:white;border:1px solid #52627a}
+textarea{min-height:100px}
+button{border:0;background:#3978d5;color:white;font-weight:700}
+button.secondary{background:#34445c}
+button.danger{background:#9e4141}
+.row{display:flex;gap:8px}
+.row button{flex:1}
+.item{border-top:1px solid #34445c;padding:12px 0}
+small,.muted{color:#9eabc0;font-size:13px}
+.status{padding:12px;border-radius:9px;background:#26364c;white-space:pre-wrap;line-height:1.6}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>ALVIS</h1>
+<p>個人用メモリ管理・自動同期 V2</p>
+
+<section class="card" id="lockPanel">
+<h2>ロック解除</h2>
+<input id="password" type="password" placeholder="暗号化パスワード（8文字以上）">
+<button id="unlockButton">解除する</button>
+<p class="muted">既存データがある端末では、以前と同じパスワードを使ってね。</p>
+</section>
+
+<section id="appPanel" class="hidden">
+<section class="card">
+<h2>同期設定</h2>
+<input id="token" type="password" placeholder="Cloudflare同期トークン">
+<div class="row">
+<button id="connectButton">同期を開始</button>
+<button id="syncButton" class="secondary">今すぐ同期</button>
+</div>
+<button id="lockButton" class="secondary">ロックする</button>
+<div id="status" class="status">未接続</div>
+<p class="muted">トークンは端末内で暗号化して保存するよ。新しい端末では初回のみ入力が必要。</p>
+</section>
+
+<section class="card">
+<h2>記憶を追加</h2>
+<input id="memoryTitle" placeholder="タイトル">
+<textarea id="memoryBody" placeholder="記憶する内容"></textarea>
+<button id="addMemoryButton">記憶を保存</button>
+</section>
+
+<section class="card">
+<h2>記憶一覧</h2>
+<div id="memories"></div>
+</section>
+
+<section class="card">
+<h2>記憶候補</h2>
+<div id="candidates"></div>
+</section>
+
+<section class="card">
+<h2>履歴</h2>
+<div id="history"></div>
+</section>
+</section>
+</main>
+
+<script>
+"use strict";
+
+const DB_KEY="ALVIS_ENCRYPTED_V1";
+const TOKEN_KEY="ALVIS_SYNC_TOKEN_V2";
+const WORKER_URL="https://alvis-sync.dokodemodoa100.workers.dev";
+const LOAD_PATH="/sync/vault-load";
+const SAVE_PATH="/sync/vault-save";
+const POLL_INTERVAL=30000;
+
+let data={memories:[],candidates:[],history:[],tombstones:[]};
+let cryptoKey=null;
+let currentPassword=null;
+let localSalt=null;
+let syncToken=null;
+let cloudRevision=0;
+let syncBusy=false;
+let syncEnabled=false;
+let localDirty=false;
+let changeCounter=0;
+let autoTimer=null;
+let pollTimer=null;
+
+const $=id=>document.getElementById(id);
+const now=()=>new Date().toISOString();
+
+function setStatus(s){$("status").textContent=s}
+
+function uid(){
+  return crypto.randomUUID?crypto.randomUUID():
+    Date.now().toString(36)+Math.random().toString(36).slice(2);
+}
+
+function randomBytes(n){return crypto.getRandomValues(new Uint8Array(n))}
+
+function toB64(bytes){
+  let s="";
+  for(const b of bytes)s+=String.fromCharCode(b);
+  return btoa(s);
+}
+
+function fromB64(s){
+  const b=atob(s);
+  return Uint8Array.from(b,c=>c.charCodeAt(0));
+}
+
+async function deriveKey(password,salt){
+  const material=await crypto.subtle.importKey(
+    "raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    {name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},
+    material,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]
+  );
+}
+
+async function encryptObject(object,key){
+  const iv=randomBytes(12);
+  const plain=new TextEncoder().encode(JSON.stringify(object));
+  const encrypted=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,plain);
+  return {
+    version:1,
+    iv:toB64(iv),
+    encrypted:toB64(new Uint8Array(encrypted))
+  };
+}
+
+async function decryptObject(record,key){
+  const plain=await crypto.subtle.decrypt(
+    {name:"AES-GCM",iv:fromB64(record.iv)},
+    key,fromB64(record.encrypted)
+  );
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+/* 旧データ用の安定ID */
+function stableHash(text){
+  let a=2166136261,b=2246822519;
+  for(let i=0;i<text.length;i++){
+    const c=text.charCodeAt(i);
+    a=Math.imul(a^c,16777619);
+    b=Math.imul(b^c,3266489917);
+  }
+  return (a>>>0).toString(16).padStart(8,"0")+
+         (b>>>0).toString(16).padStart(8,"0");
+}
+
+function normalizeData(input){
+  const out={
+    memories:Array.isArray(input?.memories)?input.memories:[],
+    candidates:Array.isArray(input?.candidates)?input.candidates:[],
+    history:Array.isArray(input?.history)?input.history:[],
+    tombstones:Array.isArray(input?.tombstones)?input.tombstones:[]
+  };
+
+  for(const type of ["memories","candidates","history"]){
+    const counts=new Map();
+    out[type]=out[type].map(item=>{
+      const obj={...item};
+      if(!obj.createdAt)obj.createdAt="1970-01-01T00:00:00.000Z";
+      if(!obj.updatedAt)obj.updatedAt=obj.createdAt;
+
+      if(!obj.id){
+        const fingerprint=JSON.stringify({
+          type,
+          title:obj.title||"",
+          body:obj.body||"",
+          text:obj.text||"",
+          createdAt:obj.createdAt
+        });
+        const hash=stableHash(fingerprint);
+        const count=counts.get(hash)||0;
+        counts.set(hash,count+1);
+        obj.id="legacy-"+type+"-"+hash+"-"+count;
+      }
+      return obj;
+    });
+  }
+
+  out.tombstones=out.tombstones
+    .filter(t=>t&&t.id)
+    .map(t=>({id:String(t.id),deletedAt:t.deletedAt||"1970-01-01T00:00:00.000Z"}));
+
+  return out;
+}
+
+function clone(value){return JSON.parse(JSON.stringify(value))}
+
+function addHistory(text){
+  const t=now();
+  data.history.unshift({id:uid(),text,createdAt:t,updatedAt:t});
+  data.history=data.history.slice(0,300);
+}
+
+async function saveLocal(){
+  if(!cryptoKey)return;
+  const encrypted=await encryptObject(data,cryptoKey);
+  localStorage.setItem(DB_KEY,JSON.stringify({
+    version:1,
+    salt:toB64(localSalt),
+    iv:encrypted.iv,
+    encrypted:encrypted.encrypted
+  }));
+}
+
+function scheduleSync(delay=3000){
+  clearTimeout(autoTimer);
+  autoTimer=setTimeout(()=>synchronize(),delay);
+}
+
+function markChanged(){
+  changeCounter++;
+  localDirty=true;
+  saveLocal().catch(e=>setStatus("端末保存エラー: "+e.message));
+  if(syncEnabled)scheduleSync();
+}
+
+async function unlock(){
+  const password=$("password").value;
+  if(!password||password.length<8){
+    alert("パスワードは8文字以上で入力してね。");
+    return;
+  }
+
+  try{
+    const stored=localStorage.getItem(DB_KEY);
+
+    if(stored){
+      const record=JSON.parse(stored);
+      localSalt=fromB64(record.salt);
+      cryptoKey=await deriveKey(password,localSalt);
+      data=normalizeData(await decryptObject(record,cryptoKey));
+    }else{
+      localSalt=randomBytes(16);
+      cryptoKey=await deriveKey(password,localSalt);
+      data=normalizeData({});
+      await saveLocal();
+    }
+
+    currentPassword=password;
+    $("password").value="";
+
+    const saved=localStorage.getItem(TOKEN_KEY);
+    if(saved){
+      try{
+        syncToken=await decryptObject(JSON.parse(saved),cryptoKey);
+      }catch{
+        syncToken=null;
+      }
+    }
+
+    $("lockPanel").classList.add("hidden");
+    $("appPanel").classList.remove("hidden");
+    render();
+
+    if(syncToken){
+      setStatus("端末データを読み込みました。クラウドを確認中…");
+      await connectSync();
+    }else{
+      setStatus("端末データを読み込みました。同期トークンを入力してね。");
+    }
+  }catch(e){
+    cryptoKey=null;
+    currentPassword=null;
+    alert("解除できませんでした。パスワードを確認してね。");
+  }
+}
+
+async function storeToken(token){
+  const encrypted=await encryptObject(token,cryptoKey);
+  localStorage.setItem(TOKEN_KEY,JSON.stringify(encrypted));
+  syncToken=token;
+}
+
+function lockApp(){
+  clearTimeout(autoTimer);
+  clearInterval(pollTimer);
+  cryptoKey=null;
+  currentPassword=null;
+  syncToken=null;
+  syncEnabled=false;
+  syncBusy=false;
+  $("token").value="";
+  $("appPanel").classList.add("hidden");
+  $("lockPanel").classList.remove("hidden");
+  setStatus("ロック中");
+}
+
+function mergeData(local,remote){
+  const tombs=new Map();
+
+  for(const t of [...(local.tombstones||[]),...(remote.tombstones||[])]){
+    const old=tombs.get(t.id);
+    if(!old||t.deletedAt>old.deletedAt)tombs.set(t.id,t);
+  }
+
+  const result={
+    memories:[],
+    candidates:[],
+    history:[],
+    tombstones:[...tombs.values()]
+  };
+
+  for(const type of ["memories","candidates","history"]){
+    const map=new Map();
+
+    for(const item of [...(local[type]||[]),...(remote[type]||[])]){
+      if(!item?.id)continue;
+      const old=map.get(item.id);
+      if(!old||(item.updatedAt||item.createdAt)>(old.updatedAt||old.createdAt)){
+        map.set(item.id,item);
+      }
+    }
+
+    result[type]=[...map.values()].filter(item=>{
+      const t=tombs.get(item.id);
+      return !t||(item.updatedAt||item.createdAt)>t.deletedAt;
+    });
+  }
+
+  for(const type of ["memories","candidates","history"]){
+    result[type].sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  }
+  return result;
+}
+
+function equalData(a,b){
+  return JSON.stringify(a)===JSON.stringify(b);
+}
+
+async function cloudRequest(path,body){
+  const response=await fetch(WORKER_URL+path,{
+    method:body?"POST":"GET",
+    headers:{
+      "Authorization":"Bearer "+syncToken,
+      ...(body?{"Content-Type":"application/json"}:{})
+    },
+    body:body?JSON.stringify(body):undefined
+  });
+
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok){
+    const e=new Error(result.message||"通信エラー "+response.status);
+    e.status=response.status;
+    throw e;
+  }
+  return result;
+}
+
+async function loadCloud(){
+  const result=await cloudRequest(LOAD_PATH);
+  if(!result.exists){
+    return {exists:false,revision:result.revision||0,data:null};
+  }
+
+  const envelope=result.data?.encryptedRecord||result.data;
+  if(!envelope?.salt||!envelope?.iv||!envelope?.encrypted){
+    throw new Error("クラウドデータの形式が正しくありません。");
+  }
+
+  const record={
+    version:1,
+    salt:toB64(new Uint8Array(envelope.salt)),
+    iv:toB64(new Uint8Array(envelope.iv)),
+    encrypted:toB64(new Uint8Array(envelope.encrypted))
+  };
+
+  const key=await deriveKey(currentPassword,fromB64(record.salt));
+  const decoded=normalizeData(await decryptObject(record,key));
+
+  return {exists:true,revision:result.revision||0,data:decoded};
+}
+
+async function saveCloud(snapshot,revision){
+  const salt=randomBytes(16);
+  const key=await deriveKey(currentPassword,salt);
+  const encrypted=await encryptObject(snapshot,key);
+
+  return cloudRequest(SAVE_PATH,{
+    version:1,
+    expectedRevision:revision,
+    encryptedRecord:{
+      version:1,
+      salt:Array.from(salt),
+      iv:Array.from(fromB64(encrypted.iv)),
+      encrypted:Array.from(fromB64(encrypted.encrypted))
+    }
+  });
+}
+
+/* ローカルとクラウドを統合して必要なときだけ保存 */
+async function synchronize(){
+  if(!syncEnabled||!cryptoKey||!syncToken||syncBusy)return;
+  syncBusy=true;
+  setStatus("同期中…");
+
+  try{
+    for(let attempt=0;attempt<6;attempt++){
+      const remote=await loadCloud();
+      cloudRevision=remote.revision;
+
+      const merged=remote.exists
+        ?mergeData(normalizeData(data),remote.data)
+        :normalizeData(data);
+
+      data=merged;
+      render();
+      await saveLocal();
+
+      const snapshot=clone(data);
+      const counter=changeCounter;
+
+      /* クラウドと同じ内容なら保存しない */
+      if(remote.exists&&equalData(snapshot,remote.data)){
+        localDirty=changeCounter!==counter;
+        if(localDirty)continue;
+        setStatus("同期完了\nクラウド revision: "+cloudRevision);
+        return;
+      }
+
+      try{
+        const saved=await saveCloud(snapshot,cloudRevision);
+        cloudRevision=saved.revision;
+        localDirty=changeCounter!==counter;
+
+        if(localDirty)continue;
+
+        setStatus("同期完了\nクラウド revision: "+cloudRevision);
+        return;
+      }catch(e){
+        if(e.status===409){
+          setStatus("他端末の更新を検出。再統合中…");
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw new Error("競合が続いています。少し待って再試行してね。");
+  }catch(e){
+    localDirty=true;
+    setStatus("同期エラー: "+e.message+"\n端末内のデータは保持されています。");
+  }finally{
+    syncBusy=false;
+    if(localDirty&&syncEnabled)scheduleSync(5000);
+  }
+}
+
+/* 30秒ごとに別端末の変更を確認 */
+async function pollCloud(){
+  if(!syncEnabled||!cryptoKey||syncBusy)return;
+
+  try{
+    const remote=await loadCloud();
+
+    if(remote.revision!==cloudRevision){
+      setStatus("別端末の変更を検出。自動統合中…");
+      await synchronize();
+    }
+  }catch(e){
+    setStatus("クラウド確認エラー: "+e.message);
+  }
+}
+
+function startPolling(){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(pollCloud,POLL_INTERVAL);
+}
+
+async function connectSync(){
+  if(!cryptoKey)return;
+
+  const entered=$("token").value.trim();
+  if(entered)await storeToken(entered);
+
+  if(!syncToken){
+    alert("同期トークンを入力してね。");
+    return;
+  }
+
+  $("token").value="";
+  syncEnabled=true;
+  await synchronize();
+  startPolling();
+}
+
+function addMemory(){
+  const title=$("memoryTitle").value.trim();
+  const body=$("memoryBody").value.trim();
+
+  if(!title||!body){
+    alert("タイトルと内容を入力してね。");
+    return;
+  }
+
+  const t=now();
+  data.memories.unshift({
+    id:uid(),title,body,createdAt:t,updatedAt:t
+  });
+
+  addHistory("記憶を追加: "+title);
+  $("memoryTitle").value="";
+  $("memoryBody").value="";
+  render();
+  markChanged();
+}
+
+function deleteItem(type,id){
+  const item=data[type].find(x=>x.id===id);
+  if(!item)return;
+  if(!confirm("削除する？削除は他の端末にも反映されるよ。"))return;
+
+  data[type]=data[type].filter(x=>x.id!==id);
+  data.tombstones.push({id,deletedAt:now()});
+  addHistory("削除: "+(item.title||item.text||"項目"));
+  render();
+  markChanged();
+}
+
+function approveCandidate(id){
+  const item=data.candidates.find(x=>x.id===id);
+  if(!item)return;
+
+  const t=now();
+  data.candidates=data.candidates.filter(x=>x.id!==id);
+  data.tombstones.push({id,deletedAt:t});
+  data.memories.unshift({
+    id:uid(),
+    title:item.title||"承認した記憶",
+    body:item.body||item.text||"",
+    createdAt:t,
+    updatedAt:t
+  });
+
+  addHistory("記憶候補を承認");
+  render();
+  markChanged();
+}
+
+function rejectCandidate(id){
+  const item=data.candidates.find(x=>x.id===id);
+  if(!item)return;
+  if(!confirm("この候補を却下する？"))return;
+
+  data.candidates=data.candidates.filter(x=>x.id!==id);
+  data.tombstones.push({id,deletedAt:now()});
+  addHistory("記憶候補を却下");
+  render();
+  markChanged();
+}
+
+function renderList(targetId,items,type){
+  const target=$(targetId);
+  target.innerHTML="";
+
+  if(!items.length){
+    target.textContent="まだありません。";
+    return;
+  }
+
+  for(const item of items){
+    const div=document.createElement("div");
+    div.className="item";
+
+    const title=document.createElement("strong");
+    title.textContent=item.title||item.text||"記憶";
+
+    const body=document.createElement("p");
+    body.textContent=item.body||item.text||"";
+
+    const date=document.createElement("small");
+    date.textContent=item.createdAt||"";
+
+    div.append(title,body,date);
+
+    if(type==="memories"){
+      const button=document.createElement("button");
+      button.className="danger";
+      button.textContent="削除";
+      button.onclick=()=>deleteItem("memories",item.id);
+      div.append(button);
+    }
+
+    if(type==="candidates"){
+      const row=document.createElement("div");
+      row.className="row";
+
+      const yes=document.createElement("button");
+      yes.textContent="承認";
+      yes.onclick=()=>approveCandidate(item.id);
+
+      const no=document.createElement("button");
+      no.className="danger";
+      no.textContent="却下";
+      no.onclick=()=>rejectCandidate(item.id);
+
+      row.append(yes,no);
+      div.append(row);
+    }
+
+    target.append(div);
+  }
+}
+
+function render(){
+  renderList("memories",data.memories,"memories");
+  renderList("candidates",data.candidates,"candidates");
+
+  const target=$("history");
+  target.innerHTML="";
+
+  if(!data.history.length){
+    target.textContent="履歴はありません。";
+    return;
+  }
+
+  for(const item of data.history.slice(0,100)){
+    const div=document.createElement("div");
+    div.className="item";
+    div.textContent=(item.createdAt||"")+" "+(item.text||"");
+    target.append(div);
+  }
+}
+
+$("unlockButton").addEventListener("click",unlock);
+$("password").addEventListener("keydown",e=>{
+  if(e.key==="Enter")unlock();
+});
+$("lockButton").addEventListener("click",lockApp);
+$("connectButton").addEventListener("click",connectSync);
+$("syncButton").addEventListener("click",synchronize);
+$("addMemoryButton").addEventListener("click",addMemory);
+
+window.addEventListener("online",()=>{
+  if(syncEnabled)scheduleSync(1000);
+});
+</script>
+</body>
+</html>
