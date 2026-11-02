@@ -7,7 +7,6 @@
 <meta name="theme-color" content="#101827">
 <title>ALVIS</title>
 <style>
-:root{color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:#101827;color:#e8eef7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
 main{max-width:760px;margin:auto;padding:22px 16px 60px}
@@ -28,77 +27,77 @@ button:disabled{opacity:.5}
 .item{padding:12px 0;border-top:1px solid #34445a}
 .item strong{display:block}
 .hidden{display:none!important}
-.tag{display:inline-block;color:#9bd3b0;font-size:12px}
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <h1>ALVIS</h1>
-    <p>Personal AI Memory Vault</p>
-  </header>
+<header>
+<h1>ALVIS</h1>
+<p>Personal AI Memory Vault</p>
+</header>
 
-  <section id="lockPanel" class="panel">
-    <h2>🔐 ローカル保管庫</h2>
-    <p class="small">初回は新しい保管庫を作成します。2台目の端末でも、同じパスワードを設定してください。</p>
-    <label for="password">暗号化パスワード（8文字以上）</label>
-    <input id="password" type="password" autocomplete="new-password" placeholder="パスワード">
-    <button id="unlockButton">保管庫を作成・解除</button>
-    <div id="lockStatus" class="status">ロック中</div>
-  </section>
+<section id="lockPanel" class="panel">
+<h2>🔐 ローカル保管庫</h2>
+<p class="small">初回は保管庫を作成します。iPhoneでも同じパスワードを使用してください。</p>
+<label for="password">暗号化パスワード（8文字以上）</label>
+<input id="password" type="password" autocomplete="new-password" placeholder="パスワード">
+<button id="unlockButton">保管庫を作成・解除</button>
+<div id="lockStatus" class="status">ロック中</div>
+</section>
 
-  <section id="appPanel" class="hidden">
-    <section class="panel">
-      <h2>🧠 記憶を追加</h2>
-      <input id="memoryTitle" placeholder="タイトル">
-      <textarea id="memoryBody" placeholder="記憶したい内容"></textarea>
-      <button id="addMemory">記憶を保存</button>
-      <div id="memoryList"></div>
-    </section>
+<section id="appPanel" class="hidden">
 
-    <section class="panel">
-      <h2>💡 学習候補</h2>
-      <input id="candidateTitle" placeholder="候補のタイトル">
-      <textarea id="candidateBody" placeholder="学習・記憶する候補"></textarea>
-      <button id="addCandidate">候補に追加</button>
-      <div id="candidateList"></div>
-    </section>
+<section class="panel">
+<h2>🧠 記憶</h2>
+<input id="memoryTitle" placeholder="タイトル">
+<textarea id="memoryBody" placeholder="記憶したい内容"></textarea>
+<button id="addMemory">記憶を保存</button>
+<div id="memoryList"></div>
+</section>
 
-    <section class="panel">
-      <h2>💬 履歴</h2>
-      <textarea id="historyInput" placeholder="会話や作業の履歴を記録"></textarea>
-      <button id="addHistory">履歴に追加</button>
-      <div id="historyList"></div>
-    </section>
+<section class="panel">
+<h2>💡 学習候補</h2>
+<input id="candidateTitle" placeholder="候補のタイトル">
+<textarea id="candidateBody" placeholder="学習・記憶する候補"></textarea>
+<button id="addCandidate">候補に追加</button>
+<div id="candidateList"></div>
+</section>
 
-    <section class="panel">
-      <h2>☁️ クラウド同期</h2>
-      <p class="small">同期は手動です。送信するデータは暗号化済みです。トークンはこの画面を閉じると保持されません。</p>
-      <label for="syncToken">同期トークン</label>
-      <input id="syncToken" type="password" autocomplete="off" placeholder="Cloudflare Workerの同期トークン">
-      <div class="row">
-        <button id="syncCheck" class="secondary">状態を確認</button>
-        <button id="syncSave">クラウドへ保存</button>
-      </div>
-      <button id="syncLoad" class="secondary">クラウドから復元</button>
-      <div id="syncStatus" class="status">未確認</div>
-      <p class="small">注意：復元すると、この端末の現在の記憶データが置き換わります。復元前にバックアップを作成してください。</p>
-    </section>
+<section class="panel">
+<h2>💬 履歴</h2>
+<textarea id="historyInput" placeholder="会話や作業の履歴"></textarea>
+<button id="addHistory">履歴に追加</button>
+<div id="historyList"></div>
+</section>
 
-    <section class="panel">
-      <h2>📦 暗号化バックアップ</h2>
-      <button id="backupButton" class="secondary">バックアップを書き出す</button>
-      <label for="restoreFile">バックアップから復元</label>
-      <input id="restoreFile" type="file" accept="application/json,.json">
-      <button id="restoreButton" class="secondary">選択したファイルを復元</button>
-    </section>
+<section class="panel">
+<h2>☁️ クラウド同期</h2>
+<p class="small">同期は手動です。送信するデータは端末内で暗号化されます。トークンは保存しません。</p>
+<label for="syncToken">同期トークン</label>
+<input id="syncToken" type="password" autocomplete="off" placeholder="ALVIS_SYNC_TOKEN">
+<div class="row">
+<button id="syncCheck" class="secondary">状態を確認</button>
+<button id="syncSave">クラウドへ保存</button>
+</div>
+<button id="syncLoad" class="secondary">クラウドから復元</button>
+<div id="syncStatus" class="status">未確認</div>
+<p class="small">復元すると、この端末の現在のデータが置き換わります。復元前にバックアップしてください。</p>
+</section>
 
-    <section class="panel">
-      <h2>保管庫</h2>
-      <button id="lockButton" class="danger">画面をロック</button>
-      <div id="appStatus" class="status">準備完了</div>
-    </section>
-  </section>
+<section class="panel">
+<h2>📦 暗号化バックアップ</h2>
+<button id="backupButton" class="secondary">バックアップを書き出す</button>
+<label for="restoreFile">バックアップファイル</label>
+<input id="restoreFile" type="file" accept="application/json,.json">
+<button id="restoreButton" class="secondary">バックアップから復元</button>
+</section>
+
+<section class="panel">
+<h2>保管庫</h2>
+<button id="lockButton" class="danger">画面をロック</button>
+<div id="appStatus" class="status">準備完了</div>
+</section>
+</section>
 </main>
 
 <script>
@@ -110,7 +109,7 @@ const LOAD_PATH = "/sync/vault-load";
 const SAVE_PATH = "/sync/vault-save";
 const ITERATIONS = 310000;
 
-let data = { memories: [], candidates: [], history: [] };
+let data = {memories:[],candidates:[],history:[]};
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
@@ -118,22 +117,50 @@ let unlocked = false;
 
 const $ = id => document.getElementById(id);
 
-function setStatus(id, value) {
-  $(id).textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+function setStatus(id,value){
+  $(id).textContent = typeof value === "string"
+    ? value : JSON.stringify(value,null,2);
 }
 
-function bytesToBase64(bytes) {
+function bytesToBase64(bytes){
   let binary = "";
-  bytes.forEach(b => binary += String.fromCharCode(b));
+  bytes.forEach(b=>binary+=String.fromCharCode(b));
   return btoa(binary);
 }
 
-function base64ToBytes(value) {
+function base64ToBytes(value){
   const binary = atob(value);
-  return Uint8Array.from(binary, c => c.charCodeAt(0));
+  return Uint8Array.from(binary,c=>c.charCodeAt(0));
 }
 
-async function deriveKey(password, salt) {
+// ローカル形式からWorker形式へ変換
+function recordToCloud(record){
+  return {
+    version:1,
+    salt:Array.from(base64ToBytes(record.salt)),
+    iv:Array.from(base64ToBytes(record.iv)),
+    encrypted:Array.from(base64ToBytes(record.encrypted))
+  };
+}
+
+// Worker形式からローカル形式へ変換
+function cloudToRecord(record){
+  if(!record || record.version!==1 ||
+     !Array.isArray(record.salt) ||
+     !Array.isArray(record.iv) ||
+     !Array.isArray(record.encrypted)){
+    throw new Error("クラウドデータの形式が正しくありません。");
+  }
+
+  return {
+    version:1,
+    salt:bytesToBase64(Uint8Array.from(record.salt)),
+    iv:bytesToBase64(Uint8Array.from(record.iv)),
+    encrypted:bytesToBase64(Uint8Array.from(record.encrypted))
+  };
+}
+
+async function deriveKey(password,salt){
   const material = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(password),
@@ -141,6 +168,7 @@ async function deriveKey(password, salt) {
     false,
     ["deriveKey"]
   );
+
   return crypto.subtle.deriveKey(
     {name:"PBKDF2",salt,iterations:ITERATIONS,hash:"SHA-256"},
     material,
@@ -150,7 +178,7 @@ async function deriveKey(password, salt) {
   );
 }
 
-async function encryptData() {
+async function encryptData(){
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plain = new TextEncoder().encode(JSON.stringify(data));
   const encrypted = await crypto.subtle.encrypt(
@@ -158,6 +186,7 @@ async function encryptData() {
     cryptoKey,
     plain
   );
+
   return {
     version:1,
     salt:bytesToBase64(encryptionSalt),
@@ -166,195 +195,244 @@ async function encryptData() {
   };
 }
 
-async function decryptRecord(record, password) {
-  if (!record || record.version !== 1 || !record.salt || !record.iv || !record.encrypted) {
+async function decryptRecord(record,password){
+  if(!record || record.version!==1 ||
+     !record.salt || !record.iv || !record.encrypted){
     throw new Error("暗号化データの形式が正しくありません。");
   }
+
   const salt = base64ToBytes(record.salt);
   const iv = base64ToBytes(record.iv);
   const encrypted = base64ToBytes(record.encrypted);
-  const key = await deriveKey(password, salt);
-  const plain = await crypto.subtle.decrypt({name:"AES-GCM",iv},key,encrypted);
+  const key = await deriveKey(password,salt);
+
+  const plain = await crypto.subtle.decrypt(
+    {name:"AES-GCM",iv},
+    key,
+    encrypted
+  );
+
   const parsed = JSON.parse(new TextDecoder().decode(plain));
-  if (!parsed || !Array.isArray(parsed.memories) ||
-      !Array.isArray(parsed.candidates) || !Array.isArray(parsed.history)) {
+
+  if(!parsed ||
+     !Array.isArray(parsed.memories) ||
+     !Array.isArray(parsed.candidates) ||
+     !Array.isArray(parsed.history)){
     throw new Error("復号データの内容が正しくありません。");
   }
+
   return {parsed,key,salt};
 }
 
-async function saveLocal() {
+async function saveLocal(){
   const record = await encryptData();
   localStorage.setItem(DB_KEY,JSON.stringify(record));
 }
 
-function renderList(containerId, items, type) {
+function renderList(containerId,items,type){
   const container = $(containerId);
   container.replaceChildren();
-  if (!items.length) {
+
+  if(!items.length){
     const p = document.createElement("p");
     p.className = "small";
     p.textContent = "まだ登録されていません。";
     container.appendChild(p);
     return;
   }
-  items.forEach((item,index) => {
+
+  items.forEach((item,index)=>{
     const div = document.createElement("div");
     div.className = "item";
+
     const strong = document.createElement("strong");
     strong.textContent = item.title || item.text || "記録";
+
     const body = document.createElement("div");
     body.textContent = item.body || "";
     body.className = "small";
-    const button = document.createElement("button");
-    button.className = "danger";
-    button.textContent = "削除";
-    button.addEventListener("click",async () => {
-      if (!confirm("この項目を削除しますか？")) return;
+
+    const remove = document.createElement("button");
+    remove.className = "danger";
+    remove.textContent = "削除";
+    remove.addEventListener("click",async()=>{
+      if(!confirm("この項目を削除しますか？"))return;
       items.splice(index,1);
       await saveLocal();
       renderAll();
     });
-    div.append(strong,body,button);
+
+    div.append(strong,body,remove);
     container.appendChild(div);
-    if (type === "candidate") {
+
+    if(type==="candidate"){
       const approve = document.createElement("button");
       approve.textContent = "記憶に承認";
-      approve.addEventListener("click",async () => {
+      approve.addEventListener("click",async()=>{
         data.memories.push({...item,createdAt:new Date().toISOString()});
         data.candidates.splice(index,1);
         await saveLocal();
         renderAll();
       });
+
       const reject = document.createElement("button");
       reject.className = "secondary";
       reject.textContent = "候補を却下";
-      reject.addEventListener("click",async () => {
+      reject.addEventListener("click",async()=>{
         data.candidates.splice(index,1);
         await saveLocal();
         renderAll();
       });
+
       div.append(approve,reject);
     }
   });
 }
 
-function renderAll() {
+function renderAll(){
   renderList("memoryList",data.memories,"memory");
   renderList("candidateList",data.candidates,"candidate");
   renderList("historyList",data.history,"history");
 }
 
-async function unlock() {
+async function unlock(){
   const password = $("password").value;
-  if (password.length < 8) {
+
+  if(password.length<8){
     setStatus("lockStatus","パスワードは8文字以上にしてください。");
     return;
   }
-  try {
+
+  try{
     const stored = localStorage.getItem(DB_KEY);
-    if (stored) {
+
+    if(stored){
       const result = await decryptRecord(JSON.parse(stored),password);
       data = result.parsed;
       cryptoKey = result.key;
       encryptionSalt = result.salt;
-    } else {
+    }else{
       encryptionSalt = crypto.getRandomValues(new Uint8Array(16));
       cryptoKey = await deriveKey(password,encryptionSalt);
       data = {memories:[],candidates:[],history:[]};
       await saveLocal();
     }
+
     unlocked = true;
     $("password").value = "";
     $("lockPanel").classList.add("hidden");
     $("appPanel").classList.remove("hidden");
     renderAll();
     setStatus("appStatus","保管庫を解除しました。");
-  } catch (error) {
+
+  }catch(error){
     setStatus("lockStatus","解除できませんでした。パスワードを確認してください。\n"+error.message);
   }
 }
 
-async function api(path, options={}) {
+async function api(path,options={}){
   const token = $("syncToken").value.trim();
-  if (!token) throw new Error("同期トークンを入力してください。");
+  if(!token)throw new Error("同期トークンを入力してください。");
+
   const response = await fetch(WORKER_URL+path,{
     ...options,
     headers:{
       "Authorization":"Bearer "+token,
-      ...(options.body ? {"Content-Type":"application/json"} : {}),
-      ...(options.headers || {})
+      ...(options.body?{"Content-Type":"application/json"}:{}),
+      ...(options.headers||{})
     }
   });
+
   const result = await response.json().catch(()=>({}));
-  if (!response.ok) {
-    const error = new Error(result.error || "HTTP "+response.status);
+
+  if(!response.ok){
+    const error = new Error(
+      result.message || result.error || "HTTP "+response.status
+    );
     error.status = response.status;
     error.result = result;
     throw error;
   }
+
   return result;
 }
 
-async function checkCloud() {
+async function checkCloud(){
   const result = await api(LOAD_PATH);
-  serverRevision = Number(result.revision || 0);
+
+  serverRevision = Number(result.revision||0);
+
   setStatus("syncStatus",{
     status:"確認完了",
     exists:!!result.exists,
     revision:serverRevision
   });
+
   return result;
 }
 
-async function syncSave() {
-  if (!unlocked) throw new Error("先に保管庫を解除してください。");
-  if (serverRevision === null) {
-    throw new Error("先に「状態を確認」を押してください。");
-  }
-  const record = await encryptData();
+async function syncSave(){
+  if(!unlocked)throw new Error("先に保管庫を解除してください。");
+  if(serverRevision===null)throw new Error("先に状態を確認してください。");
+
+  const localRecord = await encryptData();
+  const cloudRecord = recordToCloud(localRecord);
+
   const result = await api(SAVE_PATH,{
     method:"POST",
     body:JSON.stringify({
       version:1,
       expectedRevision:serverRevision,
-      encryptedRecord:JSON.stringify(record)
+      encryptedRecord:cloudRecord
     })
   });
+
   serverRevision = Number(result.revision);
+
+  // 保存した暗号化データを端末にも保存
+  localStorage.setItem(DB_KEY,JSON.stringify(localRecord));
+
   setStatus("syncStatus",{
     status:"クラウド保存完了",
     revision:serverRevision
   });
 }
 
-async function syncLoad() {
-  if (!unlocked) throw new Error("先に保管庫を解除してください。");
+async function syncLoad(){
+  if(!unlocked)throw new Error("先に保管庫を解除してください。");
+
   const result = await api(LOAD_PATH);
-  serverRevision = Number(result.revision || 0);
-  if (!result.exists || !result.encryptedRecord) {
-    setStatus("syncStatus","クラウドに復元できるデータはありません。\nrevision: "+serverRevision);
+  serverRevision = Number(result.revision||0);
+
+  if(!result.exists || !result.data || !result.data.encryptedRecord){
+    setStatus("syncStatus","クラウドに復元データはありません。\nrevision: "+serverRevision);
     return;
   }
-  const password = prompt("クラウドデータを復号するパスワードを入力してください。");
-  if (password === null) return;
-  const record = typeof result.encryptedRecord === "string"
-    ? JSON.parse(result.encryptedRecord)
-    : result.encryptedRecord;
 
-  // 先に復号・検証する。失敗しても端末内データは変更しない。
-  const decrypted = await decryptRecord(record,password);
-  if (!confirm("クラウドの記憶データで、この端末の現在のデータを置き換えますか？\n先にバックアップを取ることをおすすめします。")) return;
+  const password = prompt("クラウドデータを復号するパスワードを入力してください。");
+  if(password===null)return;
+
+  const cloudRecord = result.data.encryptedRecord;
+  const localRecord = cloudToRecord(cloudRecord);
+
+  // 復号に成功するまでは端末データを変更しない
+  const decrypted = await decryptRecord(localRecord,password);
+
+  if(!confirm("クラウドの記憶で、この端末の現在のデータを置き換えますか？")){
+    return;
+  }
 
   data = decrypted.parsed;
   cryptoKey = decrypted.key;
   encryptionSalt = decrypted.salt;
+
   await saveLocal();
   renderAll();
+
   setStatus("syncStatus","クラウドから復元しました。\nrevision: "+serverRevision);
 }
 
-function lockApp() {
+function lockApp(){
   cryptoKey = null;
   encryptionSalt = null;
   data = {memories:[],candidates:[],history:[]};
@@ -367,37 +445,50 @@ function lockApp() {
 }
 
 $("unlockButton").addEventListener("click",unlock);
-$("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
+$("password").addEventListener("keydown",e=>{
+  if(e.key==="Enter")unlock();
+});
 
 $("addMemory").addEventListener("click",async()=>{
   const title=$("memoryTitle").value.trim();
   const body=$("memoryBody").value.trim();
   if(!title&&!body)return;
+
   data.memories.push({title,body,createdAt:new Date().toISOString()});
-  $("memoryTitle").value="";$("memoryBody").value="";
-  await saveLocal();renderAll();
+  $("memoryTitle").value="";
+  $("memoryBody").value="";
+  await saveLocal();
+  renderAll();
 });
 
 $("addCandidate").addEventListener("click",async()=>{
   const title=$("candidateTitle").value.trim();
   const body=$("candidateBody").value.trim();
   if(!title&&!body)return;
+
   data.candidates.push({title,body,createdAt:new Date().toISOString()});
-  $("candidateTitle").value="";$("candidateBody").value="";
-  await saveLocal();renderAll();
+  $("candidateTitle").value="";
+  $("candidateBody").value="";
+  await saveLocal();
+  renderAll();
 });
 
 $("addHistory").addEventListener("click",async()=>{
   const text=$("historyInput").value.trim();
   if(!text)return;
+
   data.history.push({text,createdAt:new Date().toISOString()});
   $("historyInput").value="";
-  await saveLocal();renderAll();
+  await saveLocal();
+  renderAll();
 });
 
 $("syncCheck").addEventListener("click",async()=>{
-  try{await checkCloud();}
-  catch(e){setStatus("syncStatus","確認エラー: "+e.message);}
+  try{
+    await checkCloud();
+  }catch(e){
+    setStatus("syncStatus","確認エラー: "+e.message);
+  }
 });
 
 $("syncSave").addEventListener("click",async()=>{
@@ -411,49 +502,63 @@ $("syncSave").addEventListener("click",async()=>{
 });
 
 $("syncLoad").addEventListener("click",async()=>{
-  try{await syncLoad();}
-  catch(e){setStatus("syncStatus","復元エラー: "+e.message+"\n端末内のデータは変更していません。");}
+  try{
+    await syncLoad();
+  }catch(e){
+    setStatus("syncStatus","復元エラー: "+e.message+"\n端末内データは変更していません。");
+  }
 });
 
 $("backupButton").addEventListener("click",()=>{
   const record=localStorage.getItem(DB_KEY);
   if(!record)return alert("バックアップするデータがありません。");
+
   const blob=new Blob([JSON.stringify({
     app:"ALVIS",
     backupVersion:1,
     createdAt:new Date().toISOString(),
     encryptedRecord:JSON.parse(record)
   },null,2)],{type:"application/json"});
+
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=url;a.download="ALVIS_BACKUP_"+new Date().toISOString().slice(0,10)+".json";
-  a.click();URL.revokeObjectURL(url);
+  a.href=url;
+  a.download="ALVIS_BACKUP_"+new Date().toISOString().slice(0,10)+".json";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 
 $("restoreButton").addEventListener("click",async()=>{
   const file=$("restoreFile").files[0];
   if(!file)return alert("バックアップファイルを選択してください。");
+
   try{
     const backup=JSON.parse(await file.text());
-    const record=backup.encryptedRecord || backup;
+    const record=backup.encryptedRecord||backup;
     const password=prompt("バックアップを復号するパスワードを入力してください。");
     if(password===null)return;
+
     const decrypted=await decryptRecord(record,password);
+
     if(!confirm("バックアップの内容で、この端末のデータを置き換えますか？"))return;
+
     data=decrypted.parsed;
     cryptoKey=decrypted.key;
     encryptionSalt=decrypted.salt;
+
     await saveLocal();
     renderAll();
     alert("復元しました。");
-  }catch(e){alert("復元できませんでした: "+e.message);}
+
+  }catch(e){
+    alert("復元できませんでした: "+e.message);
+  }
 });
 
 $("lockButton").addEventListener("click",()=>{
   if(confirm("画面をロックしますか？"))lockApp();
 });
 
-// Service Workerは同じフォルダに存在する場合のみ登録
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
 }
