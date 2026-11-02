@@ -1,3 +1,4 @@
+
 function isAllowedOrigin(origin) {
   try {
     const url = new URL(origin);
@@ -206,6 +207,65 @@ async function loadData(request, env, origin, storageKey) {
   }, 200, origin);
 }
 
+async function forwardToDO(request, env, origin, instanceName) {
+  if (!verifyToken(request, env)) {
+    return jsonResponse({ ok: false, message: "Unauthorized" }, 401, origin);
+  }
+
+  if (!env.ALVIS_TEST_DO) {
+    return jsonResponse(
+      { ok: false, message: "Durable Object binding unavailable" },
+      500,
+      origin
+    );
+  }
+
+  const id = env.ALVIS_TEST_DO.idFromName(instanceName);
+  const stub = env.ALVIS_TEST_DO.get(id);
+  const url = new URL(request.url);
+
+  let doResponse;
+
+  if (url.pathname.endsWith("-load") && request.method === "GET") {
+    doResponse = await stub.fetch("https://alvis-do/load");
+  } else if (url.pathname.endsWith("-save") && request.method === "POST") {
+    let raw;
+
+    try {
+      raw = await request.text();
+    } catch {
+      return jsonResponse({ ok: false, message: "Unable to read request" }, 400, origin);
+    }
+
+    if (raw.length > 2000000) {
+      return jsonResponse({ ok: false, message: "Payload too large" }, 413, origin);
+    }
+
+    doResponse = await stub.fetch("https://alvis-do/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: raw
+    });
+  } else {
+    return jsonResponse(
+      { ok: false, message: "Method not allowed" },
+      405,
+      origin
+    );
+  }
+
+  const headers = new Headers(doResponse.headers);
+
+  for (const [name, value] of Object.entries(corsHeaders(origin))) {
+    headers.set(name, value);
+  }
+
+  return new Response(doResponse.body, {
+    status: doResponse.status,
+    headers
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -231,7 +291,8 @@ export default {
         ok: true,
         worker: "ALVIS-SYNC",
         kv: env.ALVIS_KV ? "connected" : "not connected",
-        durableObject: env.ALVIS_TEST_DO ? "connected" : "not connected"
+        durableObject: env.ALVIS_TEST_DO ? "connected" : "not connected",
+        productionStorage: "durable-object-isolated"
       }, 200, origin);
     }
 
@@ -253,65 +314,23 @@ export default {
       }, 200, origin);
     }
 
-    // Isolated Durable Object test storage
+    // 本番用Durable Object。テスト領域とは完全に分離。
+    if (
+      url.pathname === "/sync/main-save" ||
+      url.pathname === "/sync/main-load"
+    ) {
+      return forwardToDO(request, env, origin, "alvis-main");
+    }
+
+    // テスト用Durable Object
     if (
       url.pathname === "/sync/do-test-save" ||
       url.pathname === "/sync/do-test-load"
     ) {
-      if (!verifyToken(request, env)) {
-        return jsonResponse({ ok: false, message: "Unauthorized" }, 401, origin);
-      }
-
-      if (!env.ALVIS_TEST_DO) {
-        return jsonResponse(
-          { ok: false, message: "Durable Object binding unavailable" },
-          500,
-          origin
-        );
-      }
-
-      const id = env.ALVIS_TEST_DO.idFromName("alvis-test");
-      const stub = env.ALVIS_TEST_DO.get(id);
-      let doResponse;
-
-      if (url.pathname === "/sync/do-test-load" && request.method === "GET") {
-        doResponse = await stub.fetch("https://alvis-do/load");
-      } else if (
-        url.pathname === "/sync/do-test-save" &&
-        request.method === "POST"
-      ) {
-        const raw = await request.text();
-
-        if (raw.length > 2000000) {
-          return jsonResponse({ ok: false, message: "Payload too large" }, 413, origin);
-        }
-
-        doResponse = await stub.fetch("https://alvis-do/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: raw
-        });
-      } else {
-        return jsonResponse(
-          { ok: false, message: "Method not allowed" },
-          405,
-          origin
-        );
-      }
-
-      const headers = new Headers(doResponse.headers);
-
-      for (const [name, value] of Object.entries(corsHeaders(origin))) {
-        headers.set(name, value);
-      }
-
-      return new Response(doResponse.body, {
-        status: doResponse.status,
-        headers
-      });
+      return forwardToDO(request, env, origin, "alvis-test");
     }
 
-    // Production storage (KV)
+    // 既存の本番KV領域。移行確認まで維持する。
     if (url.pathname === "/sync/save" && request.method === "POST") {
       return saveData(request, env, origin, "alvis:shared-memory");
     }
@@ -320,7 +339,7 @@ export default {
       return loadData(request, env, origin, "alvis:shared-memory");
     }
 
-    // Isolated KV test storage
+    // 既存のKVテスト領域
     if (url.pathname === "/sync/test-save" && request.method === "POST") {
       return saveData(request, env, origin, "alvis:test:shared-memory");
     }
