@@ -1,4 +1,3 @@
-
 function isAllowedOrigin(origin) {
   try {
     const url = new URL(origin);
@@ -18,9 +17,11 @@ function corsHeaders(origin) {
     "Cache-Control": "no-store",
     "Vary": "Origin"
   };
+
   if (isAllowedOrigin(origin)) {
     headers["Access-Control-Allow-Origin"] = origin;
   }
+
   return headers;
 }
 
@@ -40,12 +41,15 @@ function verifyToken(request, env) {
 
   const authorization = request.headers.get("Authorization") || "";
   const expected = `Bearer ${secret}`;
+
   if (authorization.length !== expected.length) return false;
 
   let difference = 0;
+
   for (let i = 0; i < expected.length; i++) {
     difference |= authorization.charCodeAt(i) ^ expected.charCodeAt(i);
   }
+
   return difference === 0;
 }
 
@@ -75,6 +79,7 @@ async function saveData(request, env, origin, storageKey) {
   }
 
   let raw;
+
   try {
     raw = await request.text();
   } catch {
@@ -86,6 +91,7 @@ async function saveData(request, env, origin, storageKey) {
   }
 
   let body;
+
   try {
     body = JSON.parse(raw);
   } catch {
@@ -108,6 +114,7 @@ async function saveData(request, env, origin, storageKey) {
   if (currentRaw) {
     try {
       const current = JSON.parse(currentRaw);
+
       if (
         current.version !== 1 ||
         !Number.isInteger(current.revision) ||
@@ -116,6 +123,7 @@ async function saveData(request, env, origin, storageKey) {
       ) {
         throw new Error("Invalid stored data");
       }
+
       currentRevision = current.revision;
     } catch {
       return jsonResponse({ ok: false, message: "Stored data is invalid" }, 500, origin);
@@ -131,6 +139,7 @@ async function saveData(request, env, origin, storageKey) {
   }
 
   const nextRevision = currentRevision + 1;
+
   const payload = JSON.stringify({
     version: 1,
     revision: nextRevision,
@@ -170,8 +179,10 @@ async function loadData(request, env, origin, storageKey) {
   }
 
   let payload;
+
   try {
     payload = JSON.parse(saved);
+
     if (
       payload.version !== 1 ||
       !Number.isInteger(payload.revision) ||
@@ -204,6 +215,7 @@ export default {
       if (!isAllowedOrigin(origin)) {
         return new Response(null, { status: 403 });
       }
+
       return new Response(null, {
         status: 204,
         headers: corsHeaders(origin)
@@ -218,8 +230,9 @@ export default {
       return jsonResponse({
         ok: true,
         worker: "ALVIS-SYNC",
-        kv: env.ALVIS_KV ? "connected" : "not connected"
-      }, env.ALVIS_KV ? 200 : 500, origin);
+        kv: env.ALVIS_KV ? "connected" : "not connected",
+        durableObject: env.ALVIS_TEST_DO ? "connected" : "not connected"
+      }, 200, origin);
     }
 
     if (url.pathname === "/auth-check" && request.method === "GET") {
@@ -229,27 +242,89 @@ export default {
           message: "Server secret is not configured"
         }, 500, origin);
       }
+
       if (!verifyToken(request, env)) {
         return jsonResponse({ ok: false, message: "Unauthorized" }, 401, origin);
       }
+
       return jsonResponse({
         ok: true,
         message: "ALVIS authentication successful"
       }, 200, origin);
     }
 
-    // Production storage
+    // Isolated Durable Object test storage
+    if (
+      url.pathname === "/sync/do-test-save" ||
+      url.pathname === "/sync/do-test-load"
+    ) {
+      if (!verifyToken(request, env)) {
+        return jsonResponse({ ok: false, message: "Unauthorized" }, 401, origin);
+      }
+
+      if (!env.ALVIS_TEST_DO) {
+        return jsonResponse(
+          { ok: false, message: "Durable Object binding unavailable" },
+          500,
+          origin
+        );
+      }
+
+      const id = env.ALVIS_TEST_DO.idFromName("alvis-test");
+      const stub = env.ALVIS_TEST_DO.get(id);
+      let doResponse;
+
+      if (url.pathname === "/sync/do-test-load" && request.method === "GET") {
+        doResponse = await stub.fetch("https://alvis-do/load");
+      } else if (
+        url.pathname === "/sync/do-test-save" &&
+        request.method === "POST"
+      ) {
+        const raw = await request.text();
+
+        if (raw.length > 2000000) {
+          return jsonResponse({ ok: false, message: "Payload too large" }, 413, origin);
+        }
+
+        doResponse = await stub.fetch("https://alvis-do/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: raw
+        });
+      } else {
+        return jsonResponse(
+          { ok: false, message: "Method not allowed" },
+          405,
+          origin
+        );
+      }
+
+      const headers = new Headers(doResponse.headers);
+
+      for (const [name, value] of Object.entries(corsHeaders(origin))) {
+        headers.set(name, value);
+      }
+
+      return new Response(doResponse.body, {
+        status: doResponse.status,
+        headers
+      });
+    }
+
+    // Production storage (KV)
     if (url.pathname === "/sync/save" && request.method === "POST") {
       return saveData(request, env, origin, "alvis:shared-memory");
     }
+
     if (url.pathname === "/sync/load" && request.method === "GET") {
       return loadData(request, env, origin, "alvis:shared-memory");
     }
 
-    // Isolated test storage
+    // Isolated KV test storage
     if (url.pathname === "/sync/test-save" && request.method === "POST") {
       return saveData(request, env, origin, "alvis:test:shared-memory");
     }
+
     if (url.pathname === "/sync/test-load" && request.method === "GET") {
       return loadData(request, env, origin, "alvis:test:shared-memory");
     }
@@ -260,3 +335,128 @@ export default {
     }, 404, origin);
   }
 };
+
+export class ALVISSyncObject {
+  constructor(ctx, env) {
+    this.ctx = ctx;
+    this.sql = ctx.storage.sql;
+
+    this.sql.exec(`
+      CREATE TABLE IF NOT EXISTS sync_state (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        revision INTEGER NOT NULL,
+        payload TEXT NOT NULL
+      )
+    `);
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/load" && request.method === "GET") {
+      const rows = this.sql.exec(
+        "SELECT revision, payload FROM sync_state WHERE id = 1"
+      ).toArray();
+
+      if (rows.length === 0) {
+        return Response.json({
+          ok: true,
+          exists: false,
+          revision: 0
+        });
+      }
+
+      const row = rows[0];
+
+      return Response.json({
+        ok: true,
+        exists: true,
+        revision: row.revision,
+        data: JSON.parse(row.payload)
+      });
+    }
+
+    if (url.pathname === "/save" && request.method === "POST") {
+      let body;
+
+      try {
+        body = await request.json();
+      } catch {
+        return Response.json({
+          ok: false,
+          message: "Invalid JSON"
+        }, { status: 400 });
+      }
+
+      if (
+        !body ||
+        body.version !== 1 ||
+        !Number.isInteger(body.expectedRevision) ||
+        body.expectedRevision < 0 ||
+        !validEncryptedRecord(body.encryptedRecord)
+      ) {
+        return Response.json({
+          ok: false,
+          message: "Invalid encrypted record or revision"
+        }, { status: 400 });
+      }
+
+      const result = this.ctx.storage.transactionSync(() => {
+        const rows = this.sql.exec(
+          "SELECT revision FROM sync_state WHERE id = 1"
+        ).toArray();
+
+        const currentRevision =
+          rows.length === 0 ? 0 : rows[0].revision;
+
+        if (body.expectedRevision !== currentRevision) {
+          return {
+            conflict: true,
+            currentRevision
+          };
+        }
+
+        const nextRevision = currentRevision + 1;
+
+        const payload = JSON.stringify({
+          version: 1,
+          encryptedRecord: body.encryptedRecord
+        });
+
+        this.sql.exec(
+          `INSERT INTO sync_state (id, revision, payload)
+           VALUES (1, ?, ?)
+           ON CONFLICT(id) DO UPDATE SET
+             revision = excluded.revision,
+             payload = excluded.payload`,
+          nextRevision,
+          payload
+        );
+
+        return {
+          conflict: false,
+          revision: nextRevision
+        };
+      });
+
+      if (result.conflict) {
+        return Response.json({
+          ok: false,
+          message: "Revision conflict",
+          currentRevision: result.currentRevision
+        }, { status: 409 });
+      }
+
+      return Response.json({
+        ok: true,
+        message: "Encrypted data saved",
+        revision: result.revision
+      });
+    }
+
+    return Response.json({
+      ok: false,
+      message: "Not found"
+    }, { status: 404 });
+  }
+}

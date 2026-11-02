@@ -8,5 +8,21 @@
       "binding": "ALVIS_KV",
       "id": "3313e4fe6e294bad85c27ad362fd99b9"
     }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ALVIS_TEST_DO",
+        "class_name": "ALVISSyncObject"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "ALVISSyncObject"
+      ]
+    }
   ]
 }
