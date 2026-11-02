@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>ALVIS 双方向同期テスト</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:#e8eef7;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:850px;margin:auto;padding:16px}
+h1{font-size:24px}
+p{color:#b8c7d9;line-height:1.6}
+.status{background:#1a2638;border:1px solid #40516a;border-radius:10px;padding:12px;margin:12px 0;white-space:pre-wrap}
+button{background:#3678d8;color:white;border:0;border-radius:8px;padding:12px;width:100%;font-size:16px}
+iframe{width:100%;height:1100px;border:1px solid #40516a;border-radius:10px;background:#101827}
+</style>
+</head>
+<body>
+<main>
+<h1>ALVIS 双方向同期テスト</h1>
+<p>既存の自動同期ページを開き、クラウドの更新を監視します。</p>
+<div id="status" class="status">ページを読み込んでいます。</div>
+<button id="check">クラウド更新を確認</button>
+<p>クラウドに新しい更新が見つかった場合、復元するか確認します。復元すると現在の端末の記憶が置き換わります。未保存の変更がある場合は復元しないでください。</p>
+<iframe id="app" src="./index-sync-test.html"></iframe>
+</main>
+<script>
+"use strict";
+
+const WORKER="https://alvis-sync.dokodemodoa100.workers.dev";
+const LOAD="/sync/vault-load";
+const frame=document.getElementById("app");
+const status=document.getElementById("status");
+let lastRevision=null;
+let checking=false;
+let timer=null;
+
+function say(message){
+  status.textContent=message;
+}
+
+async function checkCloud(){
+  if(checking)return;
+  checking=true;
+
+  try{
+    const doc=frame.contentDocument;
+    if(!doc)throw new Error("同期ページを読み込めません。");
+
+    const tokenInput=doc.getElementById("syncToken");
+    if(!tokenInput)throw new Error("同期ページの同期トークン欄が見つかりません。");
+
+    const token=tokenInput.value.trim();
+    if(!token)throw new Error("先に下の同期ページでトークンを入力してください。");
+
+    const response=await fetch(WORKER+LOAD,{
+      headers:{"Authorization":"Bearer "+token}
+    });
+
+    const result=await response.json();
+    if(!response.ok)throw new Error(result.message||"通信エラー");
+
+    const revision=Number(result.revision||0);
+
+    if(lastRevision===null){
+      lastRevision=revision;
+      say("監視開始\n現在のクラウド revision: "+revision+
+        "\n30秒ごとに更新を確認します。");
+      return;
+    }
+
+    if(revision>lastRevision){
+      const oldRevision=lastRevision;
+      lastRevision=revision;
+
+      say("クラウド更新を検出\n以前: "+oldRevision+
+        "\n現在: "+revision+
+        "\n復元するか確認してください。");
+
+      const ok=confirm(
+        "クラウドに新しいデータがあります。\n"+
+        "revision "+oldRevision+" → "+revision+
+        "\n\n現在の端末の記憶を置き換えて復元しますか？\n"+
+        "未保存の変更がある場合はキャンセルしてください。"
+      );
+
+      if(ok){
+        const loadButton=doc.getElementById("syncLoad");
+        if(!loadButton)throw new Error("復元ボタンが見つかりません。");
+        loadButton.click();
+        say("復元操作を開始しました。\n復元結果を下の同期ページで確認してください。");
+      }else{
+        say("復元をキャンセルしました。\nクラウド revision: "+revision);
+      }
+    }else{
+      say("確認完了\nクラウド revision: "+revision+
+        "\n新しい更新はありません。");
+    }
+  }catch(error){
+    say("確認エラー\n"+error.message);
+  }finally{
+    checking=false;
+  }
+}
+
+document.getElementById("check").addEventListener("click",checkCloud);
+
+frame.addEventListener("load",()=>{
+  say("同期ページを読み込みました。\n下のページで保管庫を解除し、同期トークンを入力してください。");
+});
+
+timer=setInterval(checkCloud,30000);
+</script>
+</body>
+</html>
