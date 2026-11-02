@@ -15,7 +15,7 @@ function isAllowedOrigin(origin) {
 
 function corsHeaders(origin) {
   return {
-    "Access-Control-Allow-Origin": origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : "null",
+    "Access-Control-Allow-Origin": isAllowedOrigin(origin) ? origin : "null",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Authorization, Content-Type",
     "Cache-Control": "no-store",
