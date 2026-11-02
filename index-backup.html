@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>ALVIS Backup</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#101827;color:#e8edf5;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:650px;margin:auto}
+h1{font-size:27px}
+.card{background:#1b2738;border:1px solid #34445c;border-radius:14px;padding:18px;margin:16px 0}
+p{line-height:1.7;color:#c1ccdc}
+input,button{width:100%;font:inherit;padding:13px;border-radius:9px;margin:8px 0}
+input{background:#101827;color:white;border:1px solid #52627a}
+button{border:0;background:#3978d5;color:white;font-weight:700}
+button:disabled{opacity:.5}
+.warning{color:#ffcc80}
+.status{white-space:pre-wrap;background:#26364c;padding:12px;border-radius:9px;line-height:1.6}
+small{color:#9eabc0}
+</style>
+</head>
+<body>
+<main>
+<h1>ALVIS Backup</h1>
+<p>暗号化バックアップ・復元</p>
+
+<section class="card">
+<h2>バックアップを書き出す</h2>
+<p>この端末に保存されているALVISの暗号化データをファイルに保存するよ。</p>
+<button id="exportButton">暗号化バックアップを作成</button>
+</section>
+
+<section class="card">
+<h2>バックアップから復元</h2>
+<p class="warning">復元すると、この端末の現在のALVISデータが置き換わるよ。必要なら先にバックアップを作ってね。</p>
+<input id="backupFile" type="file" accept=".json,application/json">
+<input id="password" type="password" autocomplete="current-password" placeholder="バックアップ作成時のパスワード">
+<button id="restoreButton">バックアップを検証して復元</button>
+</section>
+
+<section class="card">
+<h2>状態</h2>
+<div id="status" class="status">待機中</div>
+</section>
+
+<p><small>バックアップファイルとパスワードは別々に保管してね。バックアップファイルだけでは復元できないよ。</small></p>
+</main>
+
+<script>
+"use strict";
+
+const DB_KEY="ALVIS_ENCRYPTED_V1";
+const TOKEN_KEY="ALVIS_SYNC_TOKEN_V2";
+const FORMAT="ALVIS_BACKUP_V1";
+
+const $=id=>document.getElementById(id);
+
+function status(message){
+  $("status").textContent=message;
+}
+
+function fromB64(s){
+  const binary=atob(s);
+  return Uint8Array.from(binary,c=>c.charCodeAt(0));
+}
+
+function toB64(bytes){
+  let binary="";
+  for(const b of bytes)binary+=String.fromCharCode(b);
+  return btoa(binary);
+}
+
+async function deriveKey(password,salt){
+  const material=await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  return crypto.subtle.deriveKey(
+    {name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},
+    material,
+    {name:"AES-GCM",length:256},
+    false,
+    ["decrypt"]
+  );
+}
+
+async function verifyRecord(record,password){
+  if(!record||record.version!==1||
+     typeof record.salt!=="string"||
+     typeof record.iv!=="string"||
+     typeof record.encrypted!=="string"){
+    throw new Error("バックアップ形式が正しくありません。");
+  }
+
+  const salt=fromB64(record.salt);
+  const iv=fromB64(record.iv);
+  const encrypted=fromB64(record.encrypted);
+
+  if(salt.length!==16||iv.length!==12||encrypted.length<16){
+    throw new Error("バックアップデータが破損している可能性があります。");
+  }
+
+  const key=await deriveKey(password,salt);
+  const plain=await crypto.subtle.decrypt(
+    {name:"AES-GCM",iv},
+    key,
+    encrypted
+  );
+
+  const decoded=JSON.parse(new TextDecoder().decode(plain));
+
+  if(!decoded||typeof decoded!=="object"||
+     !Array.isArray(decoded.memories)||
+     !Array.isArray(decoded.candidates)||
+     !Array.isArray(decoded.history)){
+    throw new Error("ALVISデータの内容を確認できません。");
+  }
+
+  return decoded;
+}
+
+$("exportButton").addEventListener("click",()=>{
+  try{
+    const raw=localStorage.getItem(DB_KEY);
+    if(!raw){
+      status("この端末にALVISデータが見つかりません。");
+      return;
+    }
+
+    const record=JSON.parse(raw);
+
+    const backup={
+      format:FORMAT,
+      createdAt:new Date().toISOString(),
+      encryption:"AES-GCM",
+      keyDerivation:"PBKDF2-SHA-256",
+      iterations:310000,
+      record
+    };
+
+    const blob=new Blob(
+      [JSON.stringify(backup,null,2)],
+      {type:"application/json"}
+    );
+
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    const date=new Date().toISOString().slice(0,10);
+
+    a.href=url;
+    a.download="ALVIS-backup-"+date+".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    status("バックアップファイルを作成しました。\n暗号化された状態で書き出しています。");
+  }catch(e){
+    status("バックアップエラー: "+e.message);
+  }
+});
+
+$("restoreButton").addEventListener("click",async()=>{
+  const file=$("backupFile").files[0];
+  const password=$("password").value;
+
+  if(!file){
+    status("先にバックアップファイルを選択してね。");
+    return;
+  }
+
+  if(!password){
+    status("バックアップ作成時のパスワードを入力してね。");
+    return;
+  }
+
+  if(!confirm("現在の端末にあるALVISデータを置き換えるよ。続ける？")){
+    return;
+  }
+
+  $("restoreButton").disabled=true;
+  status("バックアップを検証中…");
+
+  try{
+    const text=await file.text();
+    const backup=JSON.parse(text);
+
+    if(backup.format!==FORMAT||!backup.record){
+      throw new Error("ALVISバックアップファイルではありません。");
+    }
+
+    await verifyRecord(backup.record,password);
+
+    localStorage.setItem(DB_KEY,JSON.stringify(backup.record));
+
+    /* 暗号化キーが変わる可能性があるため、端末保存トークンを消す */
+    localStorage.removeItem(TOKEN_KEY);
+
+    $("password").value="";
+    $("backupFile").value="";
+
+    status(
+      "復元に成功しました。\n"+
+      "データは暗号化された状態で端末に保存されました。\n\n"+
+      "次にALVIS Sync V2を開き、同じパスワードで解除してね。\n"+
+      "同期トークンはこの端末で再入力が必要です。"
+    );
+  }catch(e){
+    status("復元できませんでした。\n"+e.message+"\n元の端末データは変更していません。");
+  }finally{
+    $("restoreButton").disabled=false;
+  }
+});
+</script>
+</body>
+</html>
