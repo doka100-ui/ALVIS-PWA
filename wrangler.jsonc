@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "alvis-sync",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-02",
+  "workers_dev": true,
+  "kv_namespaces": [
+    {
+      "binding": "ALVIS_KV",
+      "id": "3313e4fe6e294bad85c27ad362fd99b9"
+    }
+  ]
+}
