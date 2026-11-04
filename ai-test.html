@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>ALVIS AI 接続テスト</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101827;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+header{padding:18px;background:#172235;border-bottom:1px solid #334155}h1{margin:0;letter-spacing:2px;font-size:24px}
+main{max-width:760px;margin:auto;padding:16px}.panel{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:12px 0}
+p{line-height:1.6}.small{font-size:12px;color:#aab7c8}select,textarea,input{width:100%;padding:12px;border-radius:9px;border:1px solid #475569;background:#0f172a;color:white;font-size:16px;margin:6px 0 12px}
+button{border:0;border-radius:10px;padding:12px 16px;background:#2563eb;color:white;font-size:15px;margin:4px 4px 4px 0}
+button:disabled{opacity:.45}#status{white-space:pre-wrap;overflow-wrap:anywhere;background:#0f172a;padding:12px;border-radius:9px;min-height:70px}
+#chat{min-height:120px;max-height:42vh;overflow:auto}.bubble{white-space:pre-wrap;line-height:1.6;padding:11px 13px;border-radius:12px;margin:8px 0;max-width:92%;overflow-wrap:anywhere}.user{background:#2563eb;margin-left:auto}.ai{background:#0f172a;border:1px solid #475569}
+</style>
+</head>
+<body>
+<header><h1>ALVIS</h1><div class="small">Qwen3 ローカルAI 接続テスト</div></header>
+<main>
+<div class="panel">
+<h2>モデル選択</h2>
+<p class="small">最初は4Bを推奨。モデル本体は外部配信元からiPadへダウンロードされ、端末内で推論するよ。初回は大きな通信量と空き容量が必要。</p>
+<select id="model">
+<option value="4b">Qwen3-4B Q4（先にテスト）</option>
+<option value="8b">Qwen3-8B Q4（4B確認後）</option>
+</select>
+<button id="load">モデルを読み込む</button>
+<button id="unload" disabled>モデルを終了</button>
+<div id="status">WebGPUを確認中…</div>
+</div>
+<div class="panel">
+<h2>会話テスト</h2>
+<div id="chat"></div>
+<textarea id="prompt" placeholder="例：こんにちは。自己紹介して。"></textarea>
+<button id="send" disabled>送信</button>
+</div>
+<p class="small">これはALVIS本体とは分離した安全なテスト画面。ALVISの記憶・履歴・クラウド同期データには触れないよ。</p>
+</main>
+<script type="module">
+import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.80";
+
+const $=id=>document.getElementById(id);
+let engine=null;
+let busy=false;
+
+const modelRecords={
+  "4b":{
+    id:"Qwen3-4B-q4f16_1-MLC",
+    model:"https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC",
+    model_lib:"https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_80/Qwen3-4B-q4f16_1-ctx4k_cs1k-webgpu.wasm",
+    overrides:{context_window_size:4096,prefill_chunk_size:1024}
+  },
+  "8b":{
+    id:"Qwen3-8B-q4f16_1-MLC",
+    model:"https://huggingface.co/mlc-ai/Qwen3-8B-q4f16_1-MLC",
+    model_lib:"https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_80/Qwen3-8B-q4f16_1-ctx4k_cs1k-webgpu.wasm",
+    overrides:{context_window_size:4096,prefill_chunk_size:1024}
+  }
+};
+
+function status(s){$("status").textContent=s;}
+function addBubble(text,role){const d=document.createElement("div");d.className="bubble "+role;d.textContent=text;$("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight;}
+
+if(!navigator.gpu){
+  status("このブラウザではWebGPUを利用できないようです。Safariの設定とOSバージョンを確認してください。");
+}else{
+  try{
+    const adapter=await navigator.gpu.requestAdapter();
+    status(adapter?"WebGPUアダプターを確認できたよ。モデルを読み込めます。":"WebGPUアダプターを取得できませんでした。");
+  }catch(e){status("WebGPU確認エラー: "+e.message);}
+}
+
+$("load").addEventListener("click",async()=>{
+  if(busy)return;
+  busy=true;$("load").disabled=true;$("send").disabled=true;
+  try{
+    if(engine){await engine.unload();engine=null;}
+    const rec=modelRecords[$("model").value];
+    status(rec.id+" を準備中…\n初回は数GBのダウンロードが発生する場合があります。画面を閉じずに待ってね。");
+    engine=await CreateMLCEngine(rec.id,{
+      appConfig:{model_list:[rec]},
+      initProgressCallback:p=>{
+        const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
+        status("モデル読み込み中 "+percent+"%\n"+(p.text||"")+"\n"+(p.timeElapsed||""));
+      }
+    });
+    status(rec.id+" の読み込み完了！会話テストができるよ。");
+    $("send").disabled=false;$("unload").disabled=false;
+  }catch(e){
+    engine=null;
+    status("モデル読み込みに失敗しました。\n"+(e?.stack||e?.message||String(e))+"\n\n4Bで失敗した場合は、8Bへ進まず、このエラーを送ってね。");
+  }finally{busy=false;$("load").disabled=false;}
+});
+
+$("send").addEventListener("click",async()=>{
+  const prompt=$("prompt").value.trim();
+  if(!prompt||!engine||busy)return;
+  busy=true;$("send").disabled=true;
+  $("prompt").value="";addBubble(prompt,"user");
+  const messages=[{role:"system",content:"あなたはALVISという日本語で会話する個人用AIです。簡潔で自然な日本語で答えてください。"},{role:"user",content:prompt}];
+  try{
+    const result=await engine.chat.completions.create({messages,temperature:0.7,max_tokens:512});
+    addBubble(result.choices?.[0]?.message?.content||"返答が空でした。","ai");
+  }catch(e){addBubble("生成エラー: "+(e?.message||String(e)),"ai");}
+  finally{busy=false;$("send").disabled=false;}
+});
+$("prompt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("send").click();}});
+$("unload").addEventListener("click",async()=>{
+  if(!engine)return;
+  $("unload").disabled=true;$("send").disabled=true;
+  try{await engine.unload();engine=null;status("モデルを終了しました。GPUメモリを解放しました。");}
+  catch(e){status("終了時のエラー: "+e.message);}
+  $("load").disabled=false;
+});
+</script>
+</body>
+</html>
