@@ -140,9 +140,11 @@ textarea{min-height:90px;resize:vertical}
 <section id="syncPage" class="hidden">
 <div class="panel">
 <h2>☁️ クラウド同期</h2>
-<p class="small">端末内で暗号化してから送信します。最初に同期トークンを入力して状態を確認してください。</p>
+<p class="small">端末内で暗号化してから送信します。初回のみ同期トークンを入力してください。</p>
 <label for="syncToken">同期トークン</label>
 <input id="syncToken" type="password" autocomplete="off" placeholder="ALVIS_SYNC_TOKEN">
+<label class="inline-option"><input id="rememberSyncToken" type="checkbox"> この端末に同期トークンを暗号化して保存する</label>
+<p class="small">ONにすると、ALVISのログインパスワードで暗号化して保存し、次回のロック解除後に自動入力します。共有端末ではOFFにしてください。</p>
 <div class="row">
 <button id="syncCheck" class="secondary">状態を確認</button>
 <button id="syncSave">クラウドへ保存</button>
@@ -168,6 +170,8 @@ import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.87";
 "use strict";
 
 const DB_KEY = "ALVIS_ENCRYPTED_V1";
+const SYNC_TOKEN_KEY = "ALVIS_SYNC_TOKEN_ENCRYPTED_V1";
+const SYNC_TOKEN_AAD = new TextEncoder().encode("ALVIS_SYNC_TOKEN_V1");
 const WORKER_URL = "https://alvis-sync.dokodemodoa100.workers.dev";
 const LOAD_PATH = "/sync/vault-load";
 const SAVE_PATH = "/sync/vault-save";
@@ -245,6 +249,30 @@ async function deriveKey(password,salt){
     material,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]
   );
 }
+async function rememberSyncToken(){
+  const checkbox=$("rememberSyncToken");
+  const token=$("syncToken").value.trim();
+  if(!checkbox.checked||!token){localStorage.removeItem(SYNC_TOKEN_KEY);return;}
+  if(!cryptoKey)throw new Error("保管庫の暗号化キーがありません。");
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const encrypted=await crypto.subtle.encrypt({name:"AES-GCM",iv,additionalData:SYNC_TOKEN_AAD},cryptoKey,new TextEncoder().encode(token));
+  localStorage.setItem(SYNC_TOKEN_KEY,JSON.stringify({version:1,iv:Array.from(iv),encrypted:Array.from(new Uint8Array(encrypted))}));
+}
+async function restoreRememberedSyncToken(){
+  const stored=localStorage.getItem(SYNC_TOKEN_KEY);
+  if(!stored){$("rememberSyncToken").checked=false;return;}
+  try{
+    const record=JSON.parse(stored);
+    if(record?.version!==1||!Array.isArray(record.iv)||!Array.isArray(record.encrypted)||record.iv.length!==12)throw new Error("保存形式が正しくありません。");
+    const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(record.iv),additionalData:SYNC_TOKEN_AAD},cryptoKey,new Uint8Array(record.encrypted));
+    $("syncToken").value=new TextDecoder().decode(plain);
+    $("rememberSyncToken").checked=true;
+  }catch(error){
+    $("syncToken").value="";$("rememberSyncToken").checked=false;
+    setStatus("syncStatus","保存済みトークンを復号できませんでした。同期トークンを再入力してください。");
+  }
+}
+
 async function encryptData(){
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plain = new TextEncoder().encode(JSON.stringify(data));
@@ -490,6 +518,7 @@ async function unlock(){
       localStorage.setItem(DB_KEY,JSON.stringify(record));
     }
     unlocked=true;
+    await restoreRememberedSyncToken();
     $("password").value="";
     $("lockPanel").classList.add("hidden");
     $("appPanel").classList.remove("hidden");
@@ -678,7 +707,7 @@ function lockApp(){
   unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
   $("appPanel").classList.add("hidden");
   $("lockPanel").classList.remove("hidden");
-  $("syncToken").value="";
+  $("syncToken").value="";$("rememberSyncToken").checked=false;
   setStatus("lockStatus","ロック中");
 }
 
@@ -944,9 +973,16 @@ $("addHistory").addEventListener("click",async()=>{
   $("historyInput").value="";await saveLocal();renderAll();
 });
 
+$("rememberSyncToken").addEventListener("change",async()=>{
+  if(!$("rememberSyncToken").checked){localStorage.removeItem(SYNC_TOKEN_KEY);return;}
+  if($("syncToken").value.trim()&&unlocked){
+    try{await rememberSyncToken();}catch(e){setStatus("syncStatus","トークンを暗号化保存できませんでした: "+e.message);}
+  }
+});
 $("syncCheck").addEventListener("click",async()=>{
   try{
     const result=await checkCloud({enable:true});
+    await rememberSyncToken();
     if(result.exists && Number(result.revision||0)>0 && !localDirty){
       setStatus("syncStatus",{
         status:"確認完了",
