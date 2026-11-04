@@ -82,6 +82,7 @@ textarea{min-height:90px;resize:vertical}
 </select>
 <div class="actions"><button id="previewVoice" type="button">声を試聴</button><button id="stopSpeech" class="secondary" type="button">読み上げ停止</button></div>
 <div id="voiceStatus" class="small">端末の日本語音声を確認しています。</div>
+<audio id="kokoroPlayer" class="hidden" controls playsinline style="width:100%;margin-top:8px"></audio>
 <p class="small">Kokoroは初回オンライン時に音声モデルと日本語辞書を取得します。取得・キャッシュ後は端末内で合成する設計です。初回準備には空き容量と時間が必要です。</p>
 </div>
 <div class="panel" style="margin:0 0 12px">
@@ -657,17 +658,24 @@ async function speakKokoro(text){
   if(!kokoroTts){setStatus("voiceStatus","先に「Kokoroを準備・モデルを取得」を押してください。");return;}
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
-    if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
+    const player=$("kokoroPlayer");
+    if(player){player.pause();player.removeAttribute("src");player.classList.add("hidden");}
     if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
     setStatus("voiceStatus","Kokoroで音声を生成しています…");
     const result=await kokoroTts.speak(clean,$("kokoroVoice").value||"jf_alpha");
     const blob=result.toBlob();
     kokoroObjectUrl=URL.createObjectURL(blob);
-    kokoroAudio=new Audio(kokoroObjectUrl);
+    kokoroAudio=player||new Audio();
+    kokoroAudio.src=kokoroObjectUrl;
+    if(player){player.classList.remove("hidden");player.load();}
     kokoroAudio.onended=()=>setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
-    kokoroAudio.onerror=()=>setStatus("voiceStatus","Kokoro音声の再生に失敗しました。もう一度試してください。");
-    await kokoroAudio.play();
-    setStatus("voiceStatus","Kokoroが話しています…");
+    kokoroAudio.onerror=()=>setStatus("voiceStatus","Kokoro音声の再生に失敗しました。再生ボタンを押してもう一度試してください。");
+    try{
+      await kokoroAudio.play();
+      setStatus("voiceStatus","Kokoroが話しています…");
+    }catch(playError){
+      setStatus("voiceStatus","音声を生成しました。iPhone/iPadでは下の再生ボタンを押してください。");
+    }
   }catch(error){
     setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error))+"。標準音声へ切り替えて試せます。");
   }
@@ -701,8 +709,9 @@ function speakAlvis(text){
 }
 function stopAlvisSpeech(){
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
-  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
+  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
+  const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
   setStatus("voiceStatus","読み上げを停止しました。");
 }
 
