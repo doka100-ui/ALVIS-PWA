@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v8-integrated";
+const CACHE_NAME = "alvis-cache-v9-integrated";
 
 const FILES_TO_CACHE = [
   "./",
