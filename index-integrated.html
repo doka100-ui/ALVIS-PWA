@@ -595,13 +595,13 @@ function generateMemoryCandidates(userMessage){
   if(!text || text.length>500) return 0;
   const sensitive = /薬|服薬|病気|病歴|症状|診断|血圧|心拍|妊娠|性行為|性的|住所|電話番号|口座|借金|収入|給料|政治|宗教|信仰|国籍|在留資格/i;
   if(sensitive.test(text)) return 0;
-  const question = /[?？]\\s*$/.test(text) || /^(なぜ|どうして|何|どこ|いつ|誰|いくら|どうやって)/.test(text);
+  const question = /[?？]\s*$/.test(text) || /^(なぜ|どうして|何|どこ|いつ|誰|いくら|どうやって)/.test(text);
   if(question) return 0;
   const explicit = /(?:私は|自分は|私の好みは|目標は|今後は|これからは|覚えておいて|記憶して|開発している|取り組んでいる|続けている|が好き|が嫌い|が苦手|を目指している|を作っている)/.test(text);
   if(!explicit) return 0;
-  const normalized = text.replace(/[\\s　。、,.!！?？]/g,"").toLowerCase();
+  const normalized = text.replace(/[\s　。、,.!！?？]/g,"").toLowerCase();
   const duplicate = data.candidates.some(existing=>{
-    const existingText = ((existing.title||"")+" "+(existing.body||"")).replace(/[\\s　。、,.!！?？]/g,"").toLowerCase();
+    const existingText = ((existing.title||"")+" "+(existing.body||"")).replace(/[\s　。、,.!！?？]/g,"").toLowerCase();
     return existingText===normalized || existingText.includes(normalized) || normalized.includes(existingText);
   });
   if(duplicate) return 0;
