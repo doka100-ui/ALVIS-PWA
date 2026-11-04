@@ -1,5 +1,5 @@
-const CACHE_NAME = "alvis-cache-v19-integrated";
-const DEPENDENCY_CACHE_NAME = "alvis-deps-v1";
+const CACHE_NAME = "alvis-cache-v20-integrated";
+const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
   "https://esm.run",
   "https://cdn.jsdelivr.net"
@@ -47,15 +47,16 @@ self.addEventListener("fetch", (event) => {
     if (cached) return cached;
 
     const url = new URL(request.url);
-    const isTrustedModule =
-      request.destination === "script" &&
-      DEPENDENCY_ORIGINS.has(url.origin);
+    // module import / Worker / WASM fetches may have an empty destination.
+    // Cache successful assets from explicitly trusted CDNs, including Kokoro's
+    // Japanese dictionary, Worker and WASM files.
+    const isTrustedDependency = DEPENDENCY_ORIGINS.has(url.origin);
 
     try {
       const response = await fetch(request);
-      // WebLLMのES module依存コードのみを別キャッシュへ保存する。
-      // 大容量モデル資材はWebLLM自身のCache API管理に任せる。
-      if (isTrustedModule && response.ok && response.type !== "opaque") {
+      // 許可したCDNの依存コード/音声用アセットを専用キャッシュへ保存する。
+      // Hugging Face上の大容量モデルは各推論ライブラリのモデルキャッシュに任せる。
+      if (isTrustedDependency && response.ok && response.type !== "opaque" && request.headers.get("range") === null) {
         const cache = await caches.open(DEPENDENCY_CACHE_NAME);
         await cache.put(request, response.clone());
       }
