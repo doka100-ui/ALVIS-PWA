@@ -135,6 +135,17 @@ textarea{min-height:90px;resize:vertical}
 <label for="growthAction">最初の一歩</label><textarea id="growthAction" placeholder="まず何を試すか"></textarea>
 <button id="saveGrowthProposal">この改善案を計画に登録</button>
 </div>
+<div class="panel">
+<h2>目標と自律タスク</h2>
+<p class="small">目標から次の行動をAIが提案します。内容を確認して登録し、開始・完了はあなたが操作します。</p>
+<label for="autonomyGoal">ALVISに取り組ませたい目標</label><textarea id="autonomyGoal" placeholder="例：会話の文脈理解を高める"></textarea>
+<button id="proposeAutonomyTask">AIに次の行動を提案</button>
+<div id="autonomyStatus" class="small" style="margin:10px 0">目標を入力して提案を作成できます。</div>
+<label for="autonomyTaskDraft">提案された次の行動（編集可）</label><textarea id="autonomyTaskDraft" placeholder="AIの提案がここに表示されます"></textarea>
+<button id="saveAutonomyTask">確認してタスクに登録</button>
+</div>
+<div class="panel"><h2>自律タスク</h2><div id="autonomyTaskList"></div></div>
+<div class="panel"><h2>学習メモ</h2><p class="small">AIの振り返りから作った学びは、承認するまで会話の知識として使いません。</p><div id="learningList"></div></div>
 <div class="panel"><h2>改善計画・振り返り</h2><div id="growthList"></div></div>
 </section>
 
@@ -180,7 +191,7 @@ const ITERATIONS = 310000;
 const AUTO_SAVE_DELAY = 3000;
 const POLL_INTERVAL = 30000;
 
-let data = {memories:[],candidates:[],history:[],improvements:[]};
+let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[],learnings:[]};
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
@@ -476,6 +487,52 @@ function renderGrowthPlans(){
     card.appendChild(actions);container.appendChild(card);
   });
 }
+function renderAutonomy(){
+  const taskBox=$("autonomyTaskList"),learningBox=$("learningList");if(!taskBox||!learningBox)return;
+  taskBox.replaceChildren();learningBox.replaceChildren();
+  const tasks=Array.isArray(data.autonomyTasks)?data.autonomyTasks:[];
+  if(!tasks.length){const p=document.createElement("p");p.className="small";p.textContent="まだ自律タスクはありません。";taskBox.appendChild(p);}
+  tasks.forEach((task,index)=>{
+    const card=document.createElement("div");card.className="growth-item";
+    const state=document.createElement("span");state.className="growth-status";state.textContent=task.status==="done"?"完了":task.status==="active"?"実行中":"未着手";
+    const title=document.createElement("strong");title.textContent=task.title||"自律タスク";
+    const goal=document.createElement("p");goal.className="small";goal.textContent="目標："+(task.goal||"未設定");
+    const action=document.createElement("p");action.className="growth-copy";action.textContent=task.action||"";
+    card.append(state,title,goal,action);
+    if(task.note){const note=document.createElement("p");note.className="small";note.textContent="実行メモ："+task.note;card.appendChild(note);}
+    if(task.review){const review=document.createElement("p");review.className="growth-copy";review.textContent="AI振り返り："+task.review;card.appendChild(review);}
+    const actions=document.createElement("div");actions.className="actions";
+    if(task.status==="proposed"){
+      const start=document.createElement("button");start.textContent="タスク開始";start.addEventListener("click",async()=>{task.status="active";task.startedAt=new Date().toISOString();await saveLocal();renderAll();});actions.appendChild(start);
+    }else if(task.status==="active"){
+      const done=document.createElement("button");done.textContent="実行完了";done.addEventListener("click",async()=>{const note=prompt("実行して分かったことを入力してください（空欄でも可）。");if(note===null)return;task.note=note.trim();task.status="done";task.completedAt=new Date().toISOString();await saveLocal();renderAll();});actions.appendChild(done);
+    }else if(!task.review){
+      const reflect=document.createElement("button");reflect.textContent="AIで学習を振り返る";
+      reflect.addEventListener("click",async()=>{
+        if(!aiEngine){alert("先にQwen3-4Bを読み込んでください。");return;}
+        reflect.disabled=true;reflect.textContent="分析中…";
+        try{
+          const promptText=["次のタスクを振り返り、事実に基づく学びを1〜2文で作ってください。実行メモにない成果を作らないでください。","目標："+(task.goal||""),"行動："+(task.action||""),"実行メモ："+(task.note||"未記入")].join("\n");
+          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは慎重な学習支援AIです。誇張せず具体的に答えてください。"},{role:"user",content:promptText}],temperature:0.25,max_tokens:150,extra_body:{enable_thinking:false}});
+          task.review=String(result.choices?.[0]?.message?.content||"学びを生成できませんでした。").trim();
+          data.learnings.push({text:task.review,sourceTask:task.title,status:"pending",createdAt:new Date().toISOString()});await saveLocal();renderAll();
+        }catch(error){alert("振り返りに失敗しました: "+(error?.message||String(error)));reflect.disabled=false;reflect.textContent="AIで学習を振り返る";}
+      });actions.appendChild(reflect);
+    }
+    card.appendChild(actions);taskBox.appendChild(card);
+  });
+  const learnings=Array.isArray(data.learnings)?data.learnings:[];
+  if(!learnings.length){const p=document.createElement("p");p.className="small";p.textContent="まだ学習メモはありません。";learningBox.appendChild(p);}
+  learnings.forEach(learning=>{
+    const card=document.createElement("div");card.className="growth-item";
+    const label=document.createElement("span");label.className="growth-status";label.textContent=learning.status==="approved"?"承認済み":"承認待ち";
+    const body=document.createElement("p");body.className="growth-copy";body.textContent=learning.text||"";
+    const source=document.createElement("p");source.className="small";source.textContent="元タスク："+(learning.sourceTask||"");card.append(label,body,source);
+    if(learning.status!=="approved"){const approve=document.createElement("button");approve.textContent="学びを承認";approve.addEventListener("click",async()=>{learning.status="approved";learning.approvedAt=new Date().toISOString();await saveLocal();renderAll();});card.appendChild(approve);}
+    learningBox.appendChild(card);
+  });
+}
+
 function renderAll(){
   updateMemoryCategorySummary();renderList("memoryList",data.memories,"memory");renderList("candidateList",data.candidates,"candidate");renderList("historyList",data.history,"history");renderGrowthPlans();renderChat();
 }
@@ -488,6 +545,8 @@ function normalizeData(value){
   value.candidates=value.candidates.map(item=>typeof item==="string"?{title:item,body:""}:item);
   // 旧バックアップ/クラウドデータに成長計画がなくても、そのまま読み込める。
   if(!Array.isArray(value.improvements))value.improvements=[];
+  if(!Array.isArray(value.autonomyTasks))value.autonomyTasks=[];
+  if(!Array.isArray(value.learnings))value.learnings=[];
   return value;
 }
 function renderChat(){
@@ -514,7 +573,7 @@ async function unlock(){
     }else{
       encryptionSalt=crypto.getRandomValues(new Uint8Array(16));
       cryptoKey=await deriveKey(password,encryptionSalt);
-      data={memories:[],candidates:[],history:[],improvements:[]};
+      data={memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[],learnings:[]};
       const record=await encryptData();
       localStorage.setItem(DB_KEY,JSON.stringify(record));
     }
@@ -704,7 +763,7 @@ function lockApp(){
   stopPolling();
   if(aiEngine){aiEngine.unload().catch(()=>{});aiEngine=null;}
   cryptoKey=null;encryptionSalt=null;
-  data={memories:[],candidates:[],history:[],improvements:[]};
+  data={memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[],learnings:[]};
   unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
   $("appPanel").classList.add("hidden");
   $("lockPanel").classList.remove("hidden");
@@ -778,6 +837,19 @@ function generateMemoryCandidates(userMessage){
   return 1;
 }
 
+function buildConversationMessages(history,currentText){
+  const turns=(Array.isArray(history)?history:[]).filter(item=>item.role==="user"||item.role==="alvis");
+  const followUp=/^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ＯＫ|ありがとう|次は|やろう)/i.test(String(currentText||"").trim())||String(currentText||"").trim().length<=18;
+  const maxMessages=followUp?16:12, charBudget=followUp?7200:6000;
+  const selected=[];let used=0;
+  for(let i=turns.length-1;i>=0&&selected.length<maxMessages;i--){
+    const item=turns[i],content=String(item.text||"").slice(0,2400);
+    if(selected.length>0&&used+content.length>charBudget)break;
+    selected.unshift({role:item.role==="user"?"user":"assistant",content});used+=content.length;
+  }
+  return selected;
+}
+
 function selectRelevantMemories(query, memories){
   // 承認済み長期記憶だけを、ユーザーの今回の質問との関連度で選ぶ。
   // 外部通信・追加AI推論・保存データの変更は行わない。
@@ -847,10 +919,7 @@ async function sendToAlvis(){
     const memoryText=relevantMemories.map(item=>item.text).join("\n").slice(0,5000);
     // AIへ渡す履歴は直近12メッセージ（約6往復）に限定。
     // 保存済みの全履歴は削除せず、そのまま保持する。
-    const recent=data.history
-      .filter(item=>item.role==="user"||item.role==="alvis")
-      .slice(-12)
-      .map(item=>({role:item.role==="user"?"user":"assistant",content:String(item.text||"")}));
+    const recent=buildConversationMessages(data.history,text);
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
       "最優先：直近のユーザー発言の意図に沿って返答し、質問には答えを先に示す。",
@@ -862,11 +931,17 @@ async function sendToAlvis(){
       "同じ意味の文を繰り返さず、不要な前置きや定型的な締めくくりを避ける。",
       "不明なことは不明と伝え、事実・推測・提案を混同しない。知らない過去の出来事を作らない。",
       "会話履歴と承認済み長期記憶を参照する。長期記憶はユーザーが承認した情報だけを事実として扱う。",
+      "短い返答（はい、できた、違う、それ、続けて等）は、直前の質問や作業手順への返答として解釈する。直前の文脈を確認し、必要な次の一歩だけを案内する。",
+      "話題が変わった場合は古い話題に無理につなげず、新しい質問を優先する。代名詞や省略表現は直近の会話から参照先を判断し、曖昧で誤解の可能性が高い場合だけ一つ確認する。",
+      "ユーザー発言を事実の根拠とし、過去のAI回答をユーザーの事実として扱わない。複数の訂正がある場合は最も新しい明示的な訂正を優先する。",
       "ユーザーから訂正された情報は、古い情報より新しい訂正を優先する。",
       "ユーザーが『こんにちは』だけを送った場合は、短く『こんにちは。』と返す。それ以上話題を広げない。",
       "",
       "【承認済みの長期記憶】",
-      memoryText||"まだ登録されていません。"
+      memoryText||"まだ登録されていません。",
+      "",
+      "【ALVISがユーザー承認済みの作業から得た学び】",
+      data.learnings.filter(item=>item.status==="approved").slice(-5).map(item=>item.text).join("\n")||"まだありません。"
     ].join("\n");
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
@@ -934,6 +1009,26 @@ $("reviewGrowth").addEventListener("click",async()=>{
   }catch(error){setStatus("growthStatus","改善案を作成できませんでした: "+(error?.message||String(error)));}
   finally{button.disabled=false;button.textContent="会話を振り返って改善案を作る";}
 });
+$("proposeAutonomyTask").addEventListener("click",async()=>{
+  const goal=$("autonomyGoal").value.trim();if(!goal){setStatus("autonomyStatus","先に目標を入力してください。");return;}
+  if(!aiEngine){setStatus("autonomyStatus","先にチャット画面でQwen3-4Bを読み込んでください。");return;}
+  const button=$("proposeAutonomyTask");button.disabled=true;button.textContent="次の行動を考えています…";
+  try{
+    const context=data.history.filter(item=>item.role==="user"||item.role==="alvis").slice(-8).map(item=>(item.role==="user"?"ユーザー":"ALVIS")+"："+String(item.text||"")).join("\n");
+    const promptText=["目標達成のために、今すぐ実行できる小さな行動を1つだけ提案してください。説明や番号は付けず、行動文だけを出してください。コード変更・データ削除・外部送信・無断の設定変更は提案しないでください。","目標："+goal,"最近の会話："+(context||"なし")].join("\n");
+    const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは安全性を重視する個人AIのタスク計画担当です。"},{role:"user",content:promptText}],temperature:0.3,max_tokens:120,extra_body:{enable_thinking:false}});
+    $("autonomyTaskDraft").value=String(result.choices?.[0]?.message?.content||"").trim();setStatus("autonomyStatus","提案を作成しました。内容を確認・編集してから登録してください。");
+  }catch(error){setStatus("autonomyStatus","提案に失敗しました: "+(error?.message||String(error)));}
+  finally{button.disabled=false;button.textContent="AIに次の行動を提案";}
+});
+$("saveAutonomyTask").addEventListener("click",async()=>{
+  const goal=$("autonomyGoal").value.trim(),action=$("autonomyTaskDraft").value.trim();
+  if(!goal||!action){alert("目標と次の行動を入力してください。");return;}
+  if(data.autonomyTasks.some(task=>task.goal===goal&&task.action===action)){alert("同じタスクが登録済みです。");return;}
+  data.autonomyTasks.push({title:action.slice(0,60),goal,action,status:"proposed",createdAt:new Date().toISOString()});
+  $("autonomyTaskDraft").value="";setStatus("autonomyStatus","タスクを登録しました。開始ボタンを押すまで実行されません。");await saveLocal();renderAll();
+});
+
 $("saveGrowthProposal").addEventListener("click",async()=>{
   const title=$("growthTitle").value.trim(),reason=$("growthReason").value.trim(),action=$("growthAction").value.trim();if(!title||!action){alert("タイトルと最初の一歩を入力してください。");return;}
   if(data.improvements.some(item=>String(item.title||"").trim()===title&&String(item.action||"").trim()===action)){alert("同じ改善計画がすでに登録されています。");return;}
