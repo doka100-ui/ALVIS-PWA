@@ -228,3 +228,12 @@
 - 検証: GitHubソース上のUI・遅延import・voice IDs・標準音声fallback・キャッシュ更新を静的確認。iPad Safariでの初回ロード、音質、メモリ負荷、オフライン再起動は未検証。
 
 - 追加修正コミット: `61f10eb8db38473b645926fd5cb92cb8141b9d3e`。標準音声へ戻す際にKokoroの再生要素・Object URLを解放する。
+
+## 2026-11-05 — Kokoro日本語女性音声の個別試聴
+
+- `index-integrated.html`: jf_alpha / jf_gongitsune / jf_nezumi / jf_tebukuro を同一文で個別試聴できるボタンを追加。
+- 試聴時に選択音声とKokoroエンジン設定を保存。既存の音声選択UI・再生・停止機能は維持。
+- Qwen3-4Bが起動中/読み込み中の場合は、メモリ競合回避のため試聴を開始せず、モデル終了を案内。
+- `service-worker.js`: アプリキャッシュをv21へ更新。依存キャッシュv2は維持。
+- 保存データ、暗号化、バックアップ、同期形式に変更なし。
+- テスト: GitHub上の静的確認のみ。iPad Safari実機での再生・音質・オフライン動作は未確認。
