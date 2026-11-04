@@ -38,25 +38,15 @@ button:disabled{opacity:.45}#status{white-space:pre-wrap;overflow-wrap:anywhere;
 <p class="small">これはALVIS本体とは分離した安全なテスト画面。ALVISの記憶・履歴・クラウド同期データには触れないよ。</p>
 </main>
 <script type="module">
-import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.80";
+import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.87";
 
 const $=id=>document.getElementById(id);
 let engine=null;
 let busy=false;
 
 const modelRecords={
-  "4b":{
-    id:"Qwen3-4B-q4f16_1-MLC",
-    model:"https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC",
-    model_lib:"https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_80/Qwen3-4B-q4f16_1-ctx4k_cs1k-webgpu.wasm",
-    overrides:{context_window_size:4096,prefill_chunk_size:1024}
-  },
-  "8b":{
-    id:"Qwen3-8B-q4f16_1-MLC",
-    model:"https://huggingface.co/mlc-ai/Qwen3-8B-q4f16_1-MLC",
-    model_lib:"https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_80/Qwen3-8B-q4f16_1-ctx4k_cs1k-webgpu.wasm",
-    overrides:{context_window_size:4096,prefill_chunk_size:1024}
-  }
+  "4b": { id:"Qwen3-4B-q4f16_1-MLC" },
+  "8b": { id:"Qwen3-8B-q4f16_1-MLC" }
 };
 
 function status(s){$("status").textContent=s;}
@@ -79,7 +69,6 @@ $("load").addEventListener("click",async()=>{
     const rec=modelRecords[$("model").value];
     status(rec.id+" を準備中…\n初回は数GBのダウンロードが発生する場合があります。画面を閉じずに待ってね。");
     engine=await CreateMLCEngine(rec.id,{
-      appConfig:{model_list:[rec]},
       initProgressCallback:p=>{
         const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
         status("モデル読み込み中 "+percent+"%\n"+(p.text||"")+"\n"+(p.timeElapsed||""));
