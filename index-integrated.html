@@ -978,24 +978,57 @@ function isTimeQuestion(text){
   const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
   return /(?:今|いま|現在|ただいま).*(?:何時|時刻)|(?:何時|時刻).*(?:ですか|でしょうか|教えて|知りたい|現在|今)|今何時/i.test(value);
 }
+const COUNTRY_TIME_ZONES=[
+  {names:["アメリカ","米国","USA","US","アメリカ合衆国"],zones:[["東部（ニューヨーク）","America/New_York"],["中部（シカゴ）","America/Chicago"],["山岳部（デンバー）","America/Denver"],["太平洋（ロサンゼルス）","America/Los_Angeles"]]},
+  {names:["カナダ"],zones:[["東部（トロント）","America/Toronto"],["中部（ウィニペグ）","America/Winnipeg"],["山岳部（カルガリー）","America/Edmonton"],["太平洋（バンクーバー）","America/Vancouver"]]},
+  {names:["メキシコ"],zones:[["メキシコシティ","America/Mexico_City"]]},
+  {names:["ブラジル"],zones:[["ブラジリア","America/Sao_Paulo"]]},
+  {names:["イギリス","英国","UK","イギリス連合王国"],zones:[["ロンドン","Europe/London"]]},
+  {names:["フランス"],zones:[["パリ","Europe/Paris"]]},
+  {names:["ドイツ"],zones:[["ベルリン","Europe/Berlin"]]},
+  {names:["イタリア"],zones:[["ローマ","Europe/Rome"]]},
+  {names:["スペイン"],zones:[["マドリード","Europe/Madrid"]]},
+  {names:["オランダ"],zones:[["アムステルダム","Europe/Amsterdam"]]},
+  {names:["スイス"],zones:[["チューリッヒ","Europe/Zurich"]]},
+  {names:["ロシア"],zones:[["モスクワ","Europe/Moscow"],["ウラジオストク","Asia/Vladivostok"]]},
+  {names:["トルコ"],zones:[["イスタンブール","Europe/Istanbul"]]},
+  {names:["アラブ首長国連邦","UAE","ドバイ"],zones:[["ドバイ","Asia/Dubai"]]},
+  {names:["インド"],zones:[["ニューデリー","Asia/Kolkata"]]},
+  {names:["タイ"],zones:[["バンコク","Asia/Bangkok"]]},
+  {names:["ベトナム"],zones:[["ホーチミン","Asia/Ho_Chi_Minh"]]},
+  {names:["ラオス"],zones:[["ビエンチャン","Asia/Vientiane"]]},
+  {names:["カンボジア"],zones:[["プノンペン","Asia/Phnom_Penh"]]},
+  {names:["シンガポール"],zones:[["シンガポール","Asia/Singapore"]]},
+  {names:["マレーシア"],zones:[["クアラルンプール","Asia/Kuala_Lumpur"]]},
+  {names:["インドネシア"],zones:[["ジャカルタ","Asia/Jakarta"],["マカッサル","Asia/Makassar"],["ジャヤプラ","Asia/Jayapura"]]},
+  {names:["フィリピン"],zones:[["マニラ","Asia/Manila"]]},
+  {names:["中国"],zones:[["北京","Asia/Shanghai"]]},
+  {names:["台湾"],zones:[["台北","Asia/Taipei"]]},
+  {names:["香港"],zones:[["香港","Asia/Hong_Kong"]]},
+  {names:["韓国","大韓民国"],zones:[["ソウル","Asia/Seoul"]]},
+  {names:["オーストラリア"],zones:[["東部（シドニー）","Australia/Sydney"],["中部（アデレード）","Australia/Adelaide"],["西部（パース）","Australia/Perth"]]},
+  {names:["ニュージーランド"],zones:[["オークランド","Pacific/Auckland"]]},
+  {names:["エジプト"],zones:[["カイロ","Africa/Cairo"]]},
+  {names:["南アフリカ"],zones:[["ヨハネスブルグ","Africa/Johannesburg"]]},
+  {names:["日本"],zones:[["日本","Asia/Tokyo"]]}
+];
+function findCountryTimeEntry(text){
+  const value=String(text||"").normalize("NFKC").replace(/[\\s　？?！!。、]/g,"").toUpperCase();
+  return COUNTRY_TIME_ZONES.find(entry=>entry.names.some(name=>value===name.normalize("NFKC").toUpperCase()||value.includes(name.normalize("NFKC").toUpperCase())));
+}
 function isCountryTimeFollowup(text,history){
-  const value=String(text||"").normalize("NFKC").replace(/[\\s　？?！!。]/g,"");
-  if(!/(アメリカ|米国|USA|US|アメリカ合衆国)/i.test(value))return false;
+  if(!findCountryTimeEntry(text))return false;
   return (history||[]).filter(item=>item.role==="user").slice(-1).some(item=>isTimeQuestion(item.text));
 }
-function getUSCurrentTimeReply(){
+function getCountryCurrentTimeReply(text){
+  const entry=findCountryTimeEntry(text);
+  if(!entry)return "国名を確認できなかったよ。国名をもう一度教えてね。";
   const now=new Date();
-  const zones=[
-    ["東部（ニューヨーク）","America/New_York"],
-    ["中部（シカゴ）","America/Chicago"],
-    ["山岳部（デンバー）","America/Denver"],
-    ["太平洋（ロサンゼルス）","America/Los_Angeles"]
-  ];
-  const lines=zones.map(([label,zone])=>{
+  const lines=entry.zones.map(([label,zone])=>{
     const time=new Intl.DateTimeFormat("ja-JP",{timeZone:zone,hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(now);
     return label+" "+time;
   });
-  return "アメリカは国内に複数の時間帯があります。現在は、\n"+lines.join("\n")+"\nです。";
+  return entry.names[0]+"は"+(entry.zones.length>1?"国内に複数の時間帯があります。現在は、\n":"現在、")+lines.join("\n")+"\nです。";
 }
 function isCorruptedModelReply(reply){
   return (String(reply||"").match(/ViewGroup/gi)||[]).length>=2;
@@ -1072,7 +1105,7 @@ async function sendToAlvis(){
       reply="現在の日本時間は"+japanDateTime.time+"です。";
       setStatus("aiStatus","日本時間の時刻を端末で取得しました。");
     }else if(userIsCountryTimeFollowup){
-      reply=getUSCurrentTimeReply();
+      reply=getCountryCurrentTimeReply(text);
       setStatus("aiStatus","アメリカの各時間帯を端末で取得しました。");
     }else{
       const startedAt=performance.now();
