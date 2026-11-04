@@ -35,6 +35,7 @@ textarea{min-height:90px;resize:vertical}
 .row button{width:100%}
 .auto-state{font-weight:700;color:#9bd4ff}
 .memory-category{display:inline-block;font-size:11px;color:#bfdbfe;background:#1e3a5f;border:1px solid #365579;border-radius:999px;padding:2px 8px;margin:0 0 6px}
+.growth-item{padding:14px 0;border-bottom:1px solid #334155}.growth-item:last-child{border:0}.growth-status{display:inline-block;font-size:11px;color:#bfdbfe;background:#1e3a5f;border-radius:999px;padding:3px 8px;margin-bottom:8px}.growth-copy{white-space:pre-wrap;line-height:1.6;margin:8px 0}
 </style>
 </head>
 <body>
@@ -57,6 +58,7 @@ textarea{min-height:90px;resize:vertical}
 <button data-page="candidatePage">記憶候補</button>
 <button data-page="memoryPage">長期記憶</button>
 <button data-page="historyPage">履歴</button>
+<button data-page="growthPage">成長計画</button>
 <button data-page="syncPage">クラウド同期</button>
 </nav>
 <main>
@@ -95,6 +97,10 @@ textarea{min-height:90px;resize:vertical}
 <textarea id="memoryBody" placeholder="記憶したい内容"></textarea>
 <button id="addMemory">記憶を保存</button>
 <div id="memoryCategorySummary" class="small" style="margin:10px 0"></div>
+<input id="memorySearch" type="search" placeholder="長期記憶を検索">
+<select id="memoryCategoryFilter" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 12px">
+<option value="すべて">すべての分類</option><option>基本情報</option><option>好み</option><option>仕事</option><option>趣味</option><option>目標</option><option>プロジェクト</option><option>その他</option>
+</select>
 <div id="memoryList"></div>
 </div>
 <div class="panel">
@@ -115,6 +121,20 @@ textarea{min-height:90px;resize:vertical}
 <button id="addHistory">履歴に追加</button>
 <div id="historyList"></div>
 </div>
+</section>
+
+<section id="growthPage" class="hidden">
+<div class="panel">
+<h2>ALVISの成長計画</h2>
+<p>会話を振り返り、ALVISが改善案を提案します。提案は自動登録・自動実行されず、あなたが確認して計画に登録します。</p>
+<button id="reviewGrowth">会話を振り返って改善案を作る</button>
+<div id="growthStatus" class="small" style="margin:10px 0">AIモデルを読み込むと改善案を作成できます。</div>
+<label for="growthTitle">改善案のタイトル</label><input id="growthTitle" placeholder="例：記憶検索の精度を上げる">
+<label for="growthReason">なぜ改善するのか</label><textarea id="growthReason" placeholder="改善が必要だと考えた理由"></textarea>
+<label for="growthAction">最初の一歩</label><textarea id="growthAction" placeholder="まず何を試すか"></textarea>
+<button id="saveGrowthProposal">この改善案を計画に登録</button>
+</div>
+<div class="panel"><h2>改善計画・振り返り</h2><div id="growthList"></div></div>
 </section>
 
 <section id="syncPage" class="hidden">
@@ -155,7 +175,7 @@ const ITERATIONS = 310000;
 const AUTO_SAVE_DELAY = 3000;
 const POLL_INTERVAL = 30000;
 
-let data = {memories:[],candidates:[],history:[]};
+let data = {memories:[],candidates:[],history:[],improvements:[]};
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
@@ -320,7 +340,15 @@ function renderList(containerId,items,type){
     p.className="small";p.textContent="まだ登録されていません。";
     container.appendChild(p);return;
   }
-  items.forEach((item,index)=>{
+  const entries=items.map((item,index)=>({item,index})).filter(({item})=>{
+    if(type!=="memory")return true;
+    const query=String($("memorySearch")?.value||"").trim().normalize("NFKC").toLowerCase();
+    const category=$("memoryCategoryFilter")?.value||"すべて";
+    const content=[item?.title,item?.body].filter(Boolean).join(" ").normalize("NFKC").toLowerCase();
+    return (!query||content.includes(query))&&(category==="すべて"||classifyMemory(item)===category);
+  });
+  if(!entries.length){const p=document.createElement("p");p.className="small";p.textContent="条件に一致する記憶はありません。";container.appendChild(p);return;}
+  entries.forEach(({item,index})=>{
     const div=document.createElement("div");div.className="item";
     if(type==="memory"){
       const category=document.createElement("span");
@@ -389,12 +417,38 @@ function renderList(containerId,items,type){
     }
   });
 }
+function renderGrowthPlans(){
+  const container=$("growthList");if(!container)return;
+  container.replaceChildren();
+  const plans=Array.isArray(data.improvements)?data.improvements:[];
+  if(!plans.length){const p=document.createElement("p");p.className="small";p.textContent="まだ改善計画はありません。";container.appendChild(p);return;}
+  plans.forEach((plan,index)=>{
+    const card=document.createElement("div");card.className="growth-item";
+    const status=document.createElement("span");status.className="growth-status";status.textContent=plan.status==="done"?"完了・振り返り待ち":plan.status==="active"?"取り組み中":"提案・未着手";
+    const title=document.createElement("strong");title.textContent=plan.title||"改善計画";card.append(status,title);
+    const addBlock=(label,value)=>{if(!value)return;const p=document.createElement("p");p.className="growth-copy";p.textContent=label+"："+value;card.appendChild(p);};
+    addBlock("理由",plan.reason);addBlock("最初の一歩",plan.action);addBlock("実行メモ",plan.userReflection);addBlock("AIの振り返り",plan.aiReview);
+    const actions=document.createElement("div");actions.className="actions";
+    if(plan.status==="proposed"){
+      const start=document.createElement("button");start.textContent="計画を開始";start.addEventListener("click",async()=>{plan.status="active";plan.startedAt=new Date().toISOString();await saveLocal();renderAll();});
+      const reject=document.createElement("button");reject.className="danger";reject.textContent="提案を削除";reject.addEventListener("click",async()=>{if(!confirm("この改善案を削除しますか？"))return;data.improvements.splice(index,1);await saveLocal();renderAll();});actions.append(start,reject);
+    }else if(plan.status==="active"){
+      const done=document.createElement("button");done.textContent="完了・振り返りへ";done.addEventListener("click",async()=>{const note=prompt("実行して分かったことを入力してください（空欄でも可）。");if(note===null)return;plan.userReflection=note.trim();plan.status="done";plan.completedAt=new Date().toISOString();await saveLocal();renderAll();});actions.append(done);
+    }else{
+      const reflect=document.createElement("button");reflect.textContent="AIで振り返る";reflect.addEventListener("click",async()=>{
+        if(!aiEngine){alert("先にQwen3-4Bを読み込んでください。");return;}
+        reflect.disabled=true;reflect.textContent="振り返り中…";
+        try{const promptText=["あなたはALVISの改善コーチです。次の計画について、実行メモを踏まえて短く振り返ってください。","達成できた点、残った課題、次の小さな一歩を日本語で各1行にまとめてください。事実にない成果を作らないでください。","計画："+plan.title,"理由："+(plan.reason||"未記入"),"実行内容："+(plan.action||"未記入"),"実行メモ："+(plan.userReflection||"未記入")].join("\n");
+          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは慎重で実務的な改善コーチです。"},{role:"user",content:promptText}],temperature:0.3,max_tokens:220,extra_body:{enable_thinking:false}});
+          plan.aiReview=String(result.choices?.[0]?.message?.content||"振り返りを取得できませんでした。").trim();await saveLocal();renderAll();
+        }catch(error){alert("振り返りを作成できませんでした: "+(error?.message||String(error)));reflect.disabled=false;reflect.textContent="AIで振り返る";}
+      });actions.append(reflect);
+    }
+    card.appendChild(actions);container.appendChild(card);
+  });
+}
 function renderAll(){
-  updateMemoryCategorySummary();
-  renderList("memoryList",data.memories,"memory");
-  renderList("candidateList",data.candidates,"candidate");
-  renderList("historyList",data.history,"history");
-  renderChat();
+  updateMemoryCategorySummary();renderList("memoryList",data.memories,"memory");renderList("candidateList",data.candidates,"candidate");renderList("historyList",data.history,"history");renderGrowthPlans();renderChat();
 }
 function normalizeData(value){
   if(!value || !Array.isArray(value.memories)||!Array.isArray(value.candidates)||!Array.isArray(value.history)){
@@ -403,6 +457,8 @@ function normalizeData(value){
   // 通常版の文字列形式をSync V2の表示形式へ変換。本文そのものは保持する。
   value.memories=value.memories.map(item=>typeof item==="string"?{title:item,body:""}:item);
   value.candidates=value.candidates.map(item=>typeof item==="string"?{title:item,body:""}:item);
+  // 旧バックアップ/クラウドデータに成長計画がなくても、そのまま読み込める。
+  if(!Array.isArray(value.improvements))value.improvements=[];
   return value;
 }
 function renderChat(){
@@ -831,6 +887,28 @@ async function sendToAlvis(){
   }
 }
 $("sendChat").addEventListener("click",sendToAlvis);
+$("memorySearch").addEventListener("input",()=>renderList("memoryList",data.memories,"memory"));
+$("memoryCategoryFilter").addEventListener("change",()=>renderList("memoryList",data.memories,"memory"));
+$("reviewGrowth").addEventListener("click",async()=>{
+  if(!aiEngine){setStatus("growthStatus","先にチャット画面でQwen3-4Bを読み込んでください。");return;}
+  const recent=data.history.filter(item=>item.role==="user"||item.role==="alvis").slice(-8).map(item=>(item.role==="user"?"ユーザー":"ALVIS")+"："+String(item.text||"")).join("\n");
+  if(!recent.trim()){setStatus("growthStatus","振り返る会話がまだありません。まずALVISと会話してください。");return;}
+  const button=$("reviewGrowth");button.disabled=true;button.textContent="会話を分析中…";
+  try{
+    const promptText=["あなたは個人用AI ALVISの改善担当です。次の直近会話を読み、ALVIS自身または利用体験を改善するための、実行可能で小さな改善案を1件だけ提案してください。","コードの自動変更、記憶の自動承認、データ削除、外部サービスへの送信は提案しないでください。改善案はユーザーが確認してから実行します。","会話にない事実や成果を作らず、個人情報を推測しないでください。","必ず次の3行だけで回答してください。","タイトル：短い題名","理由：会話から分かる改善理由","最初の一歩：ユーザーが確認できる具体的な作業","【直近の会話】",recent].join("\n");
+    const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは安全性を重視するALVISの改善計画担当です。"},{role:"user",content:promptText}],temperature:0.35,max_tokens:220,extra_body:{enable_thinking:false}});
+    const output=String(result.choices?.[0]?.message?.content||"").trim();
+    const pick=(label)=>{const match=output.match(new RegExp("(?:^|\\n)"+label+"\\s*[：:]\\s*(.+)","i"));return match?.[1]?.trim()||"";};
+    $("growthTitle").value=pick("タイトル")||"会話からの改善案";$("growthReason").value=pick("理由")||output;$("growthAction").value=pick("最初の一歩");
+    setStatus("growthStatus","改善案を作成しました。内容を確認し、必要なら編集してから計画に登録してください。");
+  }catch(error){setStatus("growthStatus","改善案を作成できませんでした: "+(error?.message||String(error)));}
+  finally{button.disabled=false;button.textContent="会話を振り返って改善案を作る";}
+});
+$("saveGrowthProposal").addEventListener("click",async()=>{
+  const title=$("growthTitle").value.trim(),reason=$("growthReason").value.trim(),action=$("growthAction").value.trim();if(!title||!action){alert("タイトルと最初の一歩を入力してください。");return;}
+  if(data.improvements.some(item=>String(item.title||"").trim()===title&&String(item.action||"").trim()===action)){alert("同じ改善計画がすでに登録されています。");return;}
+  data.improvements.push({title,reason,action,status:"proposed",createdAt:new Date().toISOString()});$("growthTitle").value="";$("growthReason").value="";$("growthAction").value="";setStatus("growthStatus","改善計画に登録しました。実行するかどうかは、計画一覧から選べます。");await saveLocal();renderAll();
+});
 $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("sendChat").click();}});
 $("addMemory").addEventListener("click",async()=>{
   const title=$("memoryTitle").value.trim(),body=$("memoryBody").value.trim();
