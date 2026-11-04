@@ -656,12 +656,27 @@ async function sendToAlvis(){
       "【承認済みの長期記憶】",
       memoryText||"まだ登録されていません。"
     ].join("\n");
-    const result=await aiEngine.chat.completions.create({
-      messages:[{role:"system",content:systemPrompt},...recent],
-      temperature:0.45,
-      max_tokens:256
-    });
-    let reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+    // 単独の挨拶はモデルに任せず、短く自然に返す。
+    // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
+    let reply;
+    if(userIsGreeting){
+      const greeting=text.replace(/[！!。\s]+$/g,"");
+      reply=({
+        "こんにちは":"こんにちは。",
+        "おはようございます":"おはようございます。",
+        "こんばんは":"こんばんは。",
+        "おはよう":"おはよう。",
+        "やあ":"やあ。",
+        "はじめまして":"はじめまして。"
+      })[greeting]||"こんにちは。";
+    }else{
+      const result=await aiEngine.chat.completions.create({
+        messages:[{role:"system",content:systemPrompt},...recent],
+        temperature:0.45,
+        max_tokens:256
+      });
+      reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+    }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(priorConversationCount>0 && !userIsGreeting){
       reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\s]*/i,"").trim();
