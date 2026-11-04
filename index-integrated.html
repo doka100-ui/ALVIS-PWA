@@ -619,7 +619,7 @@ async function sendToAlvis(){
   const text=input.value.trim();
   if(!text)return;
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
-  const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\\s]*$/i.test(text);
+  const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\s]*$/i.test(text);
   if(!aiEngine){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
@@ -662,7 +662,7 @@ async function sendToAlvis(){
     let reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(priorConversationCount>0 && !userIsGreeting){
-      reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\\s]*/i,"").trim();
+      reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\s]*/i,"").trim();
     }
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
     data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
