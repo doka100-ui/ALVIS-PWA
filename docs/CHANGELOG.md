@@ -226,3 +226,5 @@
 - アプリコミット: `f9b83192d42425604f2d7abe51d5ff11ade825ea`、iOS再生UI `330fa78b152e4207e3f7f51f47508beaab7575bc`。Service Workerコミット: `7700e94aafb80d36538aa75e5cc331c9077d2637`。
 - 既存の暗号化保管庫、履歴、バックアップ、クラウド同期データ形式は変更なし。
 - 検証: GitHubソース上のUI・遅延import・voice IDs・標準音声fallback・キャッシュ更新を静的確認。iPad Safariでの初回ロード、音質、メモリ負荷、オフライン再起動は未検証。
+
+- 追加修正コミット: `61f10eb8db38473b645926fd5cb92cb8141b9d3e`。標準音声へ戻す際にKokoroの再生要素・Object URLを解放する。
