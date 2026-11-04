@@ -485,7 +485,7 @@ async function unlock(){
     }else{
       encryptionSalt=crypto.getRandomValues(new Uint8Array(16));
       cryptoKey=await deriveKey(password,encryptionSalt);
-      data={memories:[],candidates:[],history:[]};
+      data={memories:[],candidates:[],history:[],improvements:[]};
       const record=await encryptData();
       localStorage.setItem(DB_KEY,JSON.stringify(record));
     }
@@ -674,7 +674,7 @@ function lockApp(){
   stopPolling();
   if(aiEngine){aiEngine.unload().catch(()=>{});aiEngine=null;}
   cryptoKey=null;encryptionSalt=null;
-  data={memories:[],candidates:[],history:[]};
+  data={memories:[],candidates:[],history:[],improvements:[]};
   unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
   $("appPanel").classList.add("hidden");
   $("lockPanel").classList.remove("hidden");
@@ -995,7 +995,7 @@ $("restoreButton").addEventListener("click",async()=>{
     if(password===null)return;
     const decrypted=await decryptRecord(record,password);
     if(!confirm("バックアップの内容で、この端末のデータを置き換えますか？"))return;
-    data=decrypted.parsed;cryptoKey=decrypted.key;encryptionSalt=decrypted.salt;
+    data=normalizeData(decrypted.parsed);cryptoKey=decrypted.key;encryptionSalt=decrypted.salt;
     await saveLocal();renderAll();
     alert("端末内に復元しました。クラウドにも反映するには同期状態を確認してください。");
   }catch(e){alert("復元できませんでした: "+e.message);}
