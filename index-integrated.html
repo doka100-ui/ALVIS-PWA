@@ -978,6 +978,28 @@ function isTimeQuestion(text){
   const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
   return /(?:今|いま|現在|ただいま).*(?:何時|時刻)|(?:何時|時刻).*(?:ですか|でしょうか|教えて|知りたい|現在|今)|今何時/i.test(value);
 }
+function isCountryTimeFollowup(text,history){
+  const value=String(text||"").normalize("NFKC").replace(/[\\s　？?！!。]/g,"");
+  if(!/(アメリカ|米国|USA|US|アメリカ合衆国)/i.test(value))return false;
+  return (history||[]).filter(item=>item.role==="user").slice(-3,-1).some(item=>isTimeQuestion(item.text));
+}
+function getUSCurrentTimeReply(){
+  const now=new Date();
+  const zones=[
+    ["東部（ニューヨーク）","America/New_York"],
+    ["中部（シカゴ）","America/Chicago"],
+    ["山岳部（デンバー）","America/Denver"],
+    ["太平洋（ロサンゼルス）","America/Los_Angeles"]
+  ];
+  const lines=zones.map(([label,zone])=>{
+    const time=new Intl.DateTimeFormat("ja-JP",{timeZone:zone,hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(now);
+    return label+" "+time;
+  });
+  return "アメリカは国内に複数の時間帯があります。現在は、\\n"+lines.join("\\n")+"\\nです。";
+}
+function isCorruptedModelReply(reply){
+  return (String(reply||"").match(/ViewGroup/gi)||[]).length>=2;
+}
 
 async function sendToAlvis(){
   const input=$("chatInput");
@@ -988,7 +1010,8 @@ async function sendToAlvis(){
   const japanDateTime=getJapanDateTime();
   const userIsDateQuestion=isDateQuestion(text);
   const userIsTimeQuestion=isTimeQuestion(text);
-  if(!aiEngine){
+  const userIsCountryTimeFollowup=isCountryTimeFollowup(text,data.history);
+  if(!aiEngine&&!userIsDateQuestion&&!userIsTimeQuestion&&!userIsCountryTimeFollowup&&!userIsGreeting){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
   }
@@ -1048,6 +1071,9 @@ async function sendToAlvis(){
     }else if(userIsTimeQuestion){
       reply="現在の日本時間は"+japanDateTime.time+"です。";
       setStatus("aiStatus","日本時間の時刻を端末で取得しました。");
+    }else if(userIsCountryTimeFollowup){
+      reply=getUSCurrentTimeReply();
+      setStatus("aiStatus","アメリカの各時間帯を端末で取得しました。");
     }else{
       const startedAt=performance.now();
       const result=await aiEngine.chat.completions.create({
@@ -1062,6 +1088,11 @@ async function sendToAlvis(){
       setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
+    // WebLLM/Qwenの異常出力やUI内部語の反復を、そのまま表示しない。
+    if(isCorruptedModelReply(reply)){
+      reply="ごめん、回答の生成中に表示用の内部文字列が混ざってしまったよ。もう一度質問してね。";
+      setStatus("aiStatus","異常な回答出力を検出し、安全なメッセージに置き換えました。");
+    }
     if(priorConversationCount>0 && !userIsGreeting){
       reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\s]*/i,"").trim();
     }
