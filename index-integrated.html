@@ -974,6 +974,10 @@ function isDateQuestion(text){
   const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
   return /(?:今日|きょう|本日).*(?:何年|何月|何日|日付|西暦)|(?:現在|今日|本日)の日付|西暦.*(?:何年|何月|何日)/i.test(value);
 }
+function isTimeQuestion(text){
+  const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
+  return /(?:今|いま|現在|ただいま).*(?:何時|時刻)|(?:何時|時刻).*(?:ですか|でしょうか|教えて|知りたい|現在|今)|今何時/i.test(value);
+}
 
 async function sendToAlvis(){
   const input=$("chatInput");
@@ -983,6 +987,7 @@ async function sendToAlvis(){
   const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\s]*$/i.test(text);
   const japanDateTime=getJapanDateTime();
   const userIsDateQuestion=isDateQuestion(text);
+  const userIsTimeQuestion=isTimeQuestion(text);
   if(!aiEngine){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
@@ -1040,6 +1045,9 @@ async function sendToAlvis(){
     }else if(userIsDateQuestion){
       reply="今日は"+japanDateTime.date+"です。";
       setStatus("aiStatus","日本時間の日付を端末で取得しました。");
+    }else if(userIsTimeQuestion){
+      reply="現在の日本時間は"+japanDateTime.time+"です。";
+      setStatus("aiStatus","日本時間の時刻を端末で取得しました。");
     }else{
       const startedAt=performance.now();
       const result=await aiEngine.chat.completions.create({
