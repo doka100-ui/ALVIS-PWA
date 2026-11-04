@@ -588,6 +588,52 @@ $("unloadAiModel").addEventListener("click",async()=>{
 $("unlockButton").addEventListener("click",unlock);
 $("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 
+async function generateMemoryCandidates(userMessage){
+  // ユーザーの最新発言だけを根拠に、長期的に役立つ候補を抽出する。
+  // 自動承認はせず、既存候補との重複も避ける。
+  const extractionPrompt = [
+    "次のユーザー発言から、将来の会話に役立つ、長期的に有効な好み・目標・継続中のプロジェクト・明確な設定だけを抽出してください。",
+    "一時的な話題、質問しただけの内容、推測、アシスタントの発言は候補にしないでください。",
+    "健康・病歴・服薬、金融情報、正確な住所や位置、性的情報、政治・宗教などのセンシティブ情報は候補にしないでください。",
+    "該当する内容がなければ空配列 [] を返してください。",
+    "出力はJSON配列のみ。形式は [{\"title\":\"短いタイトル\",\"body\":\"ユーザーが明確に述べた内容\"}]。最大3件。",
+    "ユーザー発言：",
+    userMessage
+  ].join("\\n");
+  const result = await aiEngine.chat.completions.create({
+    messages:[
+      {role:"system",content:"あなたはALVISの記憶候補抽出器です。ユーザーの明示した事実だけを抽出し、推測や補完をしません。"},
+      {role:"user",content:extractionPrompt}
+    ],
+    temperature:0.1,
+    max_tokens:220
+  });
+  let raw = result.choices?.[0]?.message?.content || "";
+  raw = raw.replace(/<think>[\\s\\S]*?<\\/think>/gi,"").trim();
+  raw = raw.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  const start = raw.indexOf("[");
+  const end = raw.lastIndexOf("]");
+  if(start < 0 || end < start) return 0;
+  let parsed;
+  try { parsed = JSON.parse(raw.slice(start,end+1)); } catch(error) { return 0; }
+  if(!Array.isArray(parsed)) return 0;
+  let added = 0;
+  for(const item of parsed.slice(0,3)){
+    const title = typeof item?.title === "string" ? item.title.trim().slice(0,80) : "";
+    const body = typeof item?.body === "string" ? item.body.trim().slice(0,500) : "";
+    if(!title && !body) continue;
+    const key = (title+" "+body).replace(/[\\s　。、,.!！?？]/g,"").toLowerCase();
+    const duplicate = data.candidates.some(existing=>{
+      const existingKey = ((existing.title||"")+" "+(existing.body||"")).replace(/[\\s　。、,.!！?？]/g,"").toLowerCase();
+      return existingKey === key || (key.length>12 && existingKey.includes(key)) || (existingKey.length>12 && key.includes(existingKey));
+    });
+    if(duplicate) continue;
+    data.candidates.push({title:title||"会話からの記憶候補",body,createdAt:new Date().toISOString(),source:"auto"});
+    added++;
+  }
+  return added;
+}
+
 async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
@@ -611,7 +657,7 @@ async function sendToAlvis(){
       .filter(item=>item.role==="user"||item.role==="alvis")
       .slice(-16)
       .map(item=>({role:item.role==="user"?"user":"assistant",content:String(item.text||"")}));
-    const systemPrompt="あなたはALVISというユーザー専用の日本語AIです。自然で分かりやすい日本語で、質問に直接答えてください。ユーザーが登録・承認した長期記憶は参考情報として扱ってください。記憶にないことを知っているふりをしないでください。\n\n【承認済みの長期記憶】\n"+(memoryText||"まだ登録されていません。");
+    const systemPrompt="あなたはALVISというユーザー専用の日本語AIです。自然で分かりやすい日本語で、質問に直接答えてください。会話の途中では毎回『こんにちは』などの挨拶を繰り返さず、直前の話題を引き継いでください。会話の最初やユーザーが挨拶したときだけ、必要に応じて短く挨拶してください。ユーザーが登録・承認した長期記憶は参考情報として扱ってください。記憶にないことを知っているふりをしないでください。\n\n【承認済みの長期記憶】\n"+(memoryText||"まだ登録されていません。");
     const result=await aiEngine.chat.completions.create({
       messages:[{role:"system",content:systemPrompt},...recent],
       temperature:0.7,
@@ -621,8 +667,11 @@ async function sendToAlvis(){
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
     data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+    let candidateCount = 0;
+    try { candidateCount = await generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
-    setStatus("aiStatus","Qwen3-4B 接続中・準備完了");
+    renderAll();
+    setStatus("aiStatus",candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）" : "Qwen3-4B 接続中・準備完了");
   }catch(error){
     const message="AI生成エラー: "+(error?.message||String(error));
     data.history.push({role:"alvis",text:message,createdAt:new Date().toISOString()});
