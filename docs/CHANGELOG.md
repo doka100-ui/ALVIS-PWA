@@ -202,3 +202,15 @@
 - 現状の制約: WebLLM依存コードの外部import、モデル初回ダウンロード、端末別WebGPU/ストレージ制約、端末標準TTSの差異を明記。
 - 既存アプリコード、暗号化保管庫、バックアップ、同期Worker/APIは変更なし。
 - テスト: GitHub上の既存ファイル確認と設計資料追加。実機オフラインテストは未実施。
+
+
+## 2026-11-04 — WebLLM依存コードのオフラインキャッシュ基盤を追加
+
+- ブランチ: `development`
+- アプリコミット: `d313a585075d9c17a5bf397543276cebe0e66fd3`
+- Service Workerコミット: `49add232a84a449de2cebbe465a04388b4fe7677`（アプリキャッシュv19）
+- 変更: WebLLMを静的importから遅延importへ変更し、Service Workerの起動後に読み込む。Service Workerは `esm.run` / `cdn.jsdelivr.net` のscriptリクエストを専用キャッシュ `alvis-deps-v1` に保存する。
+- オフライン時のナビゲーションはキャッシュ済みアプリシェルへフォールバックし、取得できないサブリソースへHTMLを返さず503を返す。
+- 大容量AIモデル資材のキャッシュはWebLLM自身に任せ、Service Workerの有効化時にもWebLLMの既存モデルキャッシュを削除しない。
+- 既存の保管庫、`ALVIS_ENCRYPTED_V1`、暗号化、バックアップ、同期Worker/APIは変更していない。
+- 検証: GitHub上の置換対象とコミットを確認。iPhone/iPad/PC実機でのオンライン初回取得、2回目起動、機内モード起動、モデル再利用は未確認。初回オンラインロード後、Service Workerが制御する状態でモデル読み込み操作を行い、依存コードが保存される必要がある。
