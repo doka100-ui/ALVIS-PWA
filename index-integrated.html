@@ -69,15 +69,20 @@ textarea{min-height:90px;resize:vertical}
 <div class="panel" style="margin:0 0 12px">
 <strong>音声会話（試作）</strong>
 <label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
-<label for="voiceSelect" class="small">音声（端末が提供する日本語の声）</label>
+<label for="ttsEngine" class="small">音声エンジン</label>
+<select id="ttsEngine" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="standard">標準音声（端末）</option><option value="kokoro">Kokoro（端末内AI音声）</option></select>
+<label for="voiceSelect" class="small">標準音声（端末が提供する日本語の声）</label>
 <select id="voiceSelect" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="">日本語の標準音声</option></select>
-<label for="voiceStyle" class="small">声の雰囲気</label>
+<label for="kokoroVoice" class="small">Kokoroの日本語女性音声</label>
+<select id="kokoroVoice" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="jf_alpha">Alpha（女性）</option><option value="jf_gongitsune">Gongitsune（女性）</option><option value="jf_nezumi">Nezumi（女性）</option><option value="jf_tebukuro">Tebukuro（女性）</option></select>
+<div class="actions"><button id="prepareKokoro" class="secondary" type="button">Kokoroを準備・モデルを取得</button></div>
+<label for="voiceStyle" class="small">声の雰囲気（標準音声用）</label>
 <select id="voiceStyle" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px">
 <option value="natural">自然</option><option value="gentle">やさしい</option><option value="bright">明るい</option><option value="calm">落ち着いた</option><option value="energetic">元気</option>
 </select>
 <div class="actions"><button id="previewVoice" type="button">声を試聴</button><button id="stopSpeech" class="secondary" type="button">読み上げ停止</button></div>
 <div id="voiceStatus" class="small">端末の日本語音声を確認しています。</div>
-<p class="small">※「声の雰囲気」は話す速さ・高さの調整です。声そのものの種類は端末が提供する音声に依存します。</p>
+<p class="small">Kokoroは初回オンライン時に音声モデルと日本語辞書を取得します。取得・キャッシュ後は端末内で合成する設計です。初回準備には空き容量と時間が必要です。</p>
 </div>
 <div class="panel" style="margin:0 0 12px">
 <strong>ローカルAIモデル</strong>
@@ -609,6 +614,10 @@ function normalizeData(value){
 
 let availableSpeechVoices=[];
 let speechReady=false;
+let kokoroTts=null;
+let kokoroLoading=false;
+let kokoroAudio=null;
+let kokoroObjectUrl=null;
 function loadSpeechVoices(){
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザは音声読み上げに対応していません。");return;}
   availableSpeechVoices=window.speechSynthesis.getVoices();
@@ -623,7 +632,50 @@ function loadSpeechVoices(){
   speechReady=true;
   setStatus("voiceStatus",japanese.length?"日本語音声 "+japanese.length+"種類が利用できます。":"日本語音声がまだ見つかりません。端末の音声設定を確認してください。");
 }
+async function prepareKokoroTTS(){
+  if(kokoroTts)return kokoroTts;
+  if(kokoroLoading){setStatus("voiceStatus","Kokoroを準備中です。完了まで待ってください。");return null;}
+  const button=$("prepareKokoro");
+  kokoroLoading=true;if(button)button.disabled=true;
+  try{
+    setStatus("voiceStatus",navigator.onLine?"Kokoroのプログラムを読み込んでいます…":"保存済みのKokoroをオフラインで読み込んでいます…");
+    await alvisServiceWorkerReady;
+    const {KokoroJP}=await import("https://cdn.jsdelivr.net/npm/kokoro-js-jp@0.2.0/dist/kokoro-jp.web.js");
+    setStatus("voiceStatus","Kokoroの音声モデルを確認・準備しています。初回は数分かかる場合があります…");
+    kokoroTts=await KokoroJP.load({japanese:{assetsUrl:"https://cdn.jsdelivr.net/npm/kokoro-js-jp@0.2.0/dist"}});
+    localStorage.setItem("ALVIS_KOKORO_READY_HINT","true");
+    setStatus("voiceStatus","Kokoroの準備ができました。日本語女性音声を選んで試聴できます。");
+    return kokoroTts;
+  }catch(error){
+    kokoroTts=null;
+    setStatus("voiceStatus","Kokoroの準備に失敗しました: "+(error?.message||String(error))+"。標準音声は引き続き使えます。");
+    return null;
+  }finally{kokoroLoading=false;if(button)button.disabled=false;}
+}
+async function speakKokoro(text){
+  const clean=String(text||"").replace(/<[^>]*>/g," ").trim();if(!clean)return;
+  if(!kokoroTts){setStatus("voiceStatus","先に「Kokoroを準備・モデルを取得」を押してください。");return;}
+  try{
+    if("speechSynthesis" in window)window.speechSynthesis.cancel();
+    if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
+    if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
+    setStatus("voiceStatus","Kokoroで音声を生成しています…");
+    const result=await kokoroTts.speak(clean,$("kokoroVoice").value||"jf_alpha");
+    const blob=result.toBlob();
+    kokoroObjectUrl=URL.createObjectURL(blob);
+    kokoroAudio=new Audio(kokoroObjectUrl);
+    kokoroAudio.onended=()=>setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
+    kokoroAudio.onerror=()=>setStatus("voiceStatus","Kokoro音声の再生に失敗しました。もう一度試してください。");
+    await kokoroAudio.play();
+    setStatus("voiceStatus","Kokoroが話しています…");
+  }catch(error){
+    setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error))+"。標準音声へ切り替えて試せます。");
+  }
+}
 function speakAlvis(text){
+  if($("ttsEngine")?.value==="kokoro"){speakKokoro(text);return;}
+  if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
+  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザでは音声読み上げを利用できません。");return;}
   const clean=String(text||"").replace(/<[^>]*>/g," ").trim();
   if(!clean)return;
@@ -649,6 +701,8 @@ function speakAlvis(text){
 }
 function stopAlvisSpeech(){
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
+  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
+  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
   setStatus("voiceStatus","読み上げを停止しました。");
 }
 
@@ -1226,6 +1280,11 @@ async function sendToAlvis(){
 }
 $("sendChat").addEventListener("click",sendToAlvis);
 $("stopSpeech").addEventListener("click",stopAlvisSpeech);
+$("prepareKokoro").addEventListener("click",prepareKokoroTTS);
+$("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
+$("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
+$("ttsEngine").addEventListener("change",()=>{localStorage.setItem("ALVIS_TTS_ENGINE",$("ttsEngine").value);if($("ttsEngine").value==="kokoro"&&!kokoroTts)prepareKokoroTTS();});
+$("kokoroVoice").addEventListener("change",()=>localStorage.setItem("ALVIS_KOKORO_VOICE",$("kokoroVoice").value));
 $("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
 $("autoSpeak").addEventListener("change",()=>localStorage.setItem("ALVIS_AUTO_SPEAK",$("autoSpeak").checked?"true":"false"));
 $("voiceSelect").addEventListener("change",()=>localStorage.setItem("ALVIS_VOICE_NAME",$("voiceSelect").value));
