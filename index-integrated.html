@@ -472,7 +472,7 @@ async function syncLoad(){
   if(!confirm("クラウドの記憶で、この端末の現在のデータを置き換えますか？"))return;
 
   if(saveTimer)clearTimeout(saveTimer);
-  data=decrypted.parsed;cryptoKey=decrypted.key;encryptionSalt=decrypted.salt;
+  data=normalizeData(decrypted.parsed);cryptoKey=decrypted.key;encryptionSalt=decrypted.salt;
   const newLocalRecord=await encryptData();
   localStorage.setItem(DB_KEY,JSON.stringify(newLocalRecord));
   serverRevision=revision;
