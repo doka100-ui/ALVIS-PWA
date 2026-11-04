@@ -61,6 +61,7 @@ textarea{min-height:90px;resize:vertical}
 <button data-page="historyPage">履歴</button>
 <button data-page="growthPage">成長計画</button>
 <button data-page="syncPage">クラウド同期</button>
+<button data-page="devicePage">端末診断</button>
 </nav>
 <main>
 <section id="chatPage">
@@ -210,6 +211,25 @@ textarea{min-height:90px;resize:vertical}
 <h2>保管庫</h2>
 <button id="lockButton" class="danger">画面をロック</button>
 <div id="appStatus" class="small">準備完了</div>
+</div>
+</section>
+
+<section id="devicePage" class="hidden">
+<div class="panel">
+<h2>端末・オフライン診断</h2>
+<p class="small">この診断は端末の機能とキャッシュの存在を確認します。AIモデルのオフライン再利用を保証するものではありません。</p>
+<button id="runDeviceDiagnostics">この端末を診断する</button>
+<div id="deviceDiagnosticsStatus" class="small" style="margin:12px 0;white-space:pre-wrap;line-height:1.8">まだ診断していません。</div>
+</div>
+<div class="panel">
+<h2>オフライン動作の確認方法</h2>
+<ol class="small" style="line-height:1.8;padding-left:20px">
+<li>オンラインでこの画面を開き、AIモデルとKokoroをそれぞれ一度準備します。メモリ競合を避けるため同時に読み込まず、片方を終了してからもう片方を準備してください。</li>
+<li>ページを再読み込みし、保管庫にログインできることを確認します。</li>
+<li>機内モードにして、アプリの再読み込み・AIモデルの読み込み・短い会話・音声再生を個別に試します。</li>
+<li>失敗した機能は、表示されたエラーを記録してオンラインへ戻します。</li>
+</ol>
+<p class="small">「アプリ画面が開く」「AIモデルが再利用できる」「Kokoro音声が再生できる」は別々の確認項目です。診断結果だけで完全オフライン対応とは判定しません。</p>
 </div>
 </section>
 </main>
@@ -1569,6 +1589,53 @@ window.addEventListener("online",()=>{
 });
 window.addEventListener("offline",()=>setAutoState("オフライン・端末内保存を継続"));
 
+
+$("runDeviceDiagnostics").addEventListener("click",async()=>{
+  const button=$("runDeviceDiagnostics"),output=$("deviceDiagnosticsStatus");
+  button.disabled=true;button.textContent="診断しています…";
+  const lines=[];
+  const yesNo=value=>value?"利用可能":"利用不可";
+  try{
+    lines.push("接続状態の目安："+(navigator.onLine?"オンライン":"オフライン/接続なし"));
+    lines.push("ブラウザ："+(navigator.userAgentData?.brands?.map(item=>item.brand+" "+item.version).join(", ")||navigator.userAgent));
+    lines.push("WebGPU："+yesNo(!!navigator.gpu));
+    lines.push("標準音声読み上げ："+yesNo(!!window.speechSynthesis));
+    lines.push("Service Worker："+yesNo("serviceWorker" in navigator));
+    if("serviceWorker" in navigator){
+      const registration=await navigator.serviceWorker.getRegistration();
+      lines.push("Service Worker登録："+(registration?"登録あり":"登録なし"));
+      lines.push("Service Worker制御："+(navigator.serviceWorker.controller?"制御中":"まだ制御していない"));
+      lines.push("Service Worker状態："+(registration?.active?.state||registration?.waiting?.state||registration?.installing?.state||"状態不明"));
+    }
+    if("caches" in window){
+      const keys=await caches.keys();
+      const appCaches=keys.filter(key=>key.startsWith("alvis-cache-"));
+      const dependencyCaches=keys.filter(key=>key.startsWith("alvis-deps-"));
+      lines.push("ALVISアプリキャッシュ："+(appCaches.join(", ")||"見つかりません"));
+      lines.push("依存コードキャッシュ："+(dependencyCaches.join(", ")||"見つかりません"));
+      lines.push("その他のキャッシュ："+keys.filter(key=>!key.startsWith("alvis-cache-")&&!key.startsWith("alvis-deps-")).length+"件");
+    }else{
+      lines.push("Cache Storage：利用不可");
+    }
+    if(navigator.storage?.estimate){
+      const estimate=await navigator.storage.estimate();
+      const used=Number.isFinite(estimate.usage)?(estimate.usage/1024/1024).toFixed(1)+" MB":"不明";
+      const quota=Number.isFinite(estimate.quota)?(estimate.quota/1024/1024).toFixed(1)+" MB":"不明";
+      lines.push("ブラウザ保存領域："+used+" 使用 / "+quota+" 推定上限");
+    }else{
+      lines.push("ブラウザ保存領域：容量情報を取得できません");
+    }
+    lines.push("AIモデルの保存状態：この画面から個別判定できません");
+    lines.push("Kokoroモデルの保存状態：この画面から個別判定できません");
+    lines.push("");
+    lines.push("注意：オンライン/オフライン表示やキャッシュ件数だけでは、モデルの再利用・完全オフライン動作は証明できません。機内モードで実際に試してください。");
+    output.textContent=lines.join("\n");
+  }catch(error){
+    output.textContent="診断中にエラーが発生しました："+(error?.message||String(error));
+  }finally{
+    button.disabled=false;button.textContent="この端末を診断する";
+  }
+});
 
 document.querySelectorAll("nav button[data-page]").forEach(button=>{
   button.addEventListener("click",()=>{
