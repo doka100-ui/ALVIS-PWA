@@ -1367,16 +1367,40 @@ async function sendToAlvis(){
       setStatus("aiStatus","アメリカの各時間帯を端末で取得しました。");
     }else{
       const startedAt=performance.now();
-      const result=await aiEngine.chat.completions.create({
+      const extractVisibleAnswer=message=>{
+        const raw=Array.isArray(message?.content)
+          ? message.content.map(part=>typeof part==="string"?part:(part?.text||"")).join("\\n")
+          : String(message?.content||"");
+        return raw.replace(/<think>[\\s\\S]*?<\\/think>/gi,"").replace(/^\\s*<think>[\\s\\S]*$/i,"").trim();
+      };
+      let result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
         temperature:0.45,
-        max_tokens:256,
-        // Qwen3の思考モードを無効化し、回答本文が空になる問題を避ける。
+        max_tokens:384,
         extra_body:{enable_thinking:false}
       });
-      reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+      reply=extractVisibleAnswer(result.choices?.[0]?.message);
+      // Qwen3が思考タグだけを返して回答本文が空になった場合、履歴を外した短い入力で一度だけ再試行する。
+      if(!reply){
+        setStatus("aiStatus","回答本文が空でした。短い質問で再試行しています…");
+        result=await aiEngine.chat.completions.create({
+          messages:[
+            {role:"system",content:"あなたはALVISです。日本語で、質問に直接答えてください。思考過程やタグは出力せず、回答本文だけを簡潔に返してください。"},
+            {role:"user",content:text}
+          ],
+          temperature:0.3,
+          max_tokens:384,
+          extra_body:{enable_thinking:false}
+        });
+        reply=extractVisibleAnswer(result.choices?.[0]?.message);
+      }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
-      setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
+      if(!reply){
+        reply="回答本文を取得できませんでした。モデルが空の回答を返したため、もう一度試してください。";
+        setStatus("aiStatus","Qwen3-4Bは応答しましたが回答本文が空でした（再試行後も空）。");
+      }else{
+        setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
+      }
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     // WebLLM/Qwenの異常出力やUI内部語の反復を、そのまま表示しない。
