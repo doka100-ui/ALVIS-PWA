@@ -653,11 +653,11 @@ async function sendToAlvis(){
       "",
       "【承認済みの長期記憶】",
       memoryText||"まだ登録されていません。"
-    ].join("\\n")
+    ].join("\n");
     const result=await aiEngine.chat.completions.create({
       messages:[{role:"system",content:systemPrompt},...recent],
-      temperature:0.7,
-      max_tokens:512
+      temperature:0.55,
+      max_tokens:384
     });
     let reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
