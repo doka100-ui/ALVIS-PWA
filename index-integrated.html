@@ -673,57 +673,14 @@ async function sendToAlvis(){
       })[greeting]||"こんにちは。";
     }else{
       const startedAt=performance.now();
-      let firstTokenAt=null;
-      let streamedText="";
-      let streamingItem=null;
-      try{
-        const stream=await aiEngine.chat.completions.create({
-          messages:[{role:"system",content:systemPrompt},...recent],
-          temperature:0.45,
-          max_tokens:256,
-          stream:true
-        });
-        for await (const chunk of stream){
-          const piece=chunk.choices?.[0]?.delta?.content||"";
-          if(!piece)continue;
-          if(firstTokenAt===null){
-            firstTokenAt=performance.now();
-            const firstSeconds=((firstTokenAt-startedAt)/1000).toFixed(1);
-            setStatus("aiStatus","Qwen3-4B 接続中・最初の文字 "+firstSeconds+"秒");
-          }
-          streamedText+=piece;
-          const visibleText=streamedText
-            .replace(/<think>[\\s\\S]*?<\\/think>/gi,"")
-            .replace(/^\\s*<think>[\\s\\S]*$/i,"")
-            .trimStart();
-          if(!streamingItem){
-            streamingItem={role:"alvis",text:visibleText,createdAt:new Date().toISOString()};
-            data.history.push(streamingItem);
-          }else{
-            streamingItem.text=visibleText;
-          }
-          renderAll();
-        }
-      }catch(streamError){
-        // ストリーミング非対応・途中失敗時は通常生成へフォールバックする。
-        if(!streamedText){
-          setStatus("aiStatus","ストリーミングを切替中…");
-        }
-      }
-      if(!streamedText){
-        const result=await aiEngine.chat.completions.create({
-          messages:[{role:"system",content:systemPrompt},...recent],
-          temperature:0.45,
-          max_tokens:256
-        });
-        reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
-      }else{
-        reply=streamedText;
-      }
+      const result=await aiEngine.chat.completions.create({
+        messages:[{role:"system",content:systemPrompt},...recent],
+        temperature:0.45,
+        max_tokens:256
+      });
+      reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
-      const firstSeconds=firstTokenAt===null?"未取得":((firstTokenAt-startedAt)/1000).toFixed(1)+"秒";
-      setStatus("aiStatus","Qwen3-4B 接続中・最初の文字 "+firstSeconds+"／生成完了 "+totalSeconds+"秒");
-      if(streamingItem)streamingItem.text=reply;
+      setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(priorConversationCount>0 && !userIsGreeting){
