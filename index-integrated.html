@@ -959,12 +959,30 @@ function selectRelevantLearnings(query, history, learnings){
   return relevant;
 }
 
+function getJapanDateTime(){
+  const parts=new Intl.DateTimeFormat("ja-JP",{
+    timeZone:"Asia/Tokyo",year:"numeric",month:"numeric",day:"numeric",
+    weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+  }).formatToParts(new Date());
+  const values=Object.fromEntries(parts.map(part=>[part.type,part.value]));
+  return {
+    date:values.year+"年"+values.month+"月"+values.day+"日（"+values.weekday+"）",
+    time:values.hour+":"+values.minute
+  };
+}
+function isDateQuestion(text){
+  const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
+  return /(?:今日|きょう|本日).*(?:何年|何月|何日|日付|西暦)|(?:現在|今日|本日)の日付|西暦.*(?:何年|何月|何日)/i.test(value);
+}
+
 async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
   if(!text)return;
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
   const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\s]*$/i.test(text);
+  const japanDateTime=getJapanDateTime();
+  const userIsDateQuestion=isDateQuestion(text);
   if(!aiEngine){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
@@ -983,6 +1001,8 @@ async function sendToAlvis(){
     const recent=buildConversationMessages(data.history,text);
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
+      "【現在日時・日本時間】"+japanDateTime.date+" "+japanDateTime.time,
+      "現在の日付や時刻を尋ねられたら、上記の日本時間を最優先し、モデルの学習知識から推測しない。",
       "最優先：直近のユーザー発言の意図に沿って返答し、質問には答えを先に示す。",
       "挨拶は会話の最初、またはユーザーが挨拶したときだけ短く返す。会話の途中で挨拶を繰り返さない。",
       "ユーザーがすでに伝えた好みや事実を、毎回そのまま言い直さない。必要な場面で自然に活用する。",
@@ -1017,6 +1037,9 @@ async function sendToAlvis(){
         "やあ":"やあ。",
         "はじめまして":"はじめまして。"
       })[greeting]||"こんにちは。";
+    }else if(userIsDateQuestion){
+      reply="今日は"+japanDateTime.date+"です。";
+      setStatus("aiStatus","日本時間の日付を端末で取得しました。");
     }else{
       const startedAt=performance.now();
       const result=await aiEngine.chat.completions.create({
