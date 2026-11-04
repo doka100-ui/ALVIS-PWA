@@ -534,7 +534,7 @@ function renderAutonomy(){
 }
 
 function renderAll(){
-  updateMemoryCategorySummary();renderList("memoryList",data.memories,"memory");renderList("candidateList",data.candidates,"candidate");renderList("historyList",data.history,"history");renderGrowthPlans();renderChat();
+  updateMemoryCategorySummary();renderList("memoryList",data.memories,"memory");renderList("candidateList",data.candidates,"candidate");renderList("historyList",data.history,"history");renderGrowthPlans();renderAutonomy();renderChat();
 }
 function normalizeData(value){
   if(!value || !Array.isArray(value.memories)||!Array.isArray(value.candidates)||!Array.isArray(value.history)){
