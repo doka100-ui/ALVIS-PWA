@@ -34,6 +34,7 @@ textarea{min-height:90px;resize:vertical}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .row button{width:100%}
 .auto-state{font-weight:700;color:#9bd4ff}
+.memory-category{display:inline-block;font-size:11px;color:#bfdbfe;background:#1e3a5f;border:1px solid #365579;border-radius:999px;padding:2px 8px;margin:0 0 6px}
 </style>
 </head>
 <body>
@@ -93,6 +94,7 @@ textarea{min-height:90px;resize:vertical}
 <input id="memoryTitle" placeholder="タイトル（省略可）">
 <textarea id="memoryBody" placeholder="記憶したい内容"></textarea>
 <button id="addMemory">記憶を保存</button>
+<div id="memoryCategorySummary" class="small" style="margin:10px 0"></div>
 <div id="memoryList"></div>
 </div>
 <div class="panel">
@@ -277,6 +279,28 @@ function scheduleAutoSave(){
   },AUTO_SAVE_DELAY);
 }
 
+function classifyMemory(item){
+  const value=[item?.title,item?.body,typeof item==="string"?item:""].filter(Boolean).join(" ").normalize("NFKC");
+  const rules=[
+    ["好み",/好き|嫌い|苦手|好み|お気に入り|食べ物|食事/],
+    ["仕事",/仕事|職場|職業|勤務|会社|同僚|上司|介護職|給料|給与|シフト/],
+    ["プロジェクト",/開発|プロジェクト|ALVIS|アプリ|プログラム|コード|AI/],
+    ["目標",/目標|将来|目指|達成|計画|挑戦|やりたい|夢/],
+    ["趣味",/趣味|ゲーム|音楽|映画|読書|旅行|スポーツ|釣り|車/],
+    ["基本情報",/生年月日|誕生日|年齢|住んで|居住|出身|家族構成|身長/]
+  ];
+  for(const [name,pattern] of rules)if(pattern.test(value))return name;
+  return "その他";
+}
+function updateMemoryCategorySummary(){
+  const counts={};
+  for(const item of data.memories){const name=classifyMemory(item);counts[name]=(counts[name]||0)+1;}
+  const order=["基本情報","好み","仕事","趣味","目標","プロジェクト","その他"];
+  const summary=order.filter(name=>counts[name]).map(name=>name+" "+counts[name]+"件");
+  $("memoryCategorySummary").textContent=data.memories.length
+    ?"自動分類："+summary.join(" ／ ")
+    :"記憶が登録されると、内容に応じて自動分類されます。";
+}
 function renderList(containerId,items,type){
   const container=$(containerId);
   container.replaceChildren();
@@ -287,6 +311,12 @@ function renderList(containerId,items,type){
   }
   items.forEach((item,index)=>{
     const div=document.createElement("div");div.className="item";
+    if(type==="memory"){
+      const category=document.createElement("span");
+      category.className="memory-category";
+      category.textContent=classifyMemory(item);
+      div.appendChild(category);
+    }
     const strong=document.createElement("strong");
     strong.textContent=item.title||item.text||"記録";
     const body=document.createElement("div");body.textContent=item.body||"";body.className="small";
@@ -311,6 +341,7 @@ function renderList(containerId,items,type){
   });
 }
 function renderAll(){
+  updateMemoryCategorySummary();
   renderList("memoryList",data.memories,"memory");
   renderList("candidateList",data.candidates,"candidate");
   renderList("historyList",data.history,"history");
