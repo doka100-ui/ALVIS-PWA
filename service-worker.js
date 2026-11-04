@@ -1,8 +1,9 @@
-const CACHE_NAME = "alvis-cache-v2";
+const CACHE_NAME = "alvis-cache-v3-integrated";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
+  "./index-integrated.html",
   "./manifest.json"
 ];
 
