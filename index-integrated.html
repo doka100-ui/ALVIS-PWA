@@ -75,6 +75,13 @@ textarea{min-height:90px;resize:vertical}
 <select id="voiceSelect" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="">日本語の標準音声</option></select>
 <label for="kokoroVoice" class="small">Kokoroの日本語女性音声</label>
 <select id="kokoroVoice" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="jf_alpha">Alpha（女性）</option><option value="jf_gongitsune">Gongitsune（女性）</option><option value="jf_nezumi">Nezumi（女性）</option><option value="jf_tebukuro">Tebukuro（女性）</option></select>
+<p class="small">4種類を同じ文章で比較できます。ボタンを押すと、その声を選択・保存して試聴します。iPadのメモリ競合を避けるため、Qwen3-4Bを使用中の場合は先に「モデルを終了」してください。</p>
+<div class="actions" id="kokoroVoiceSamples">
+<button type="button" class="secondary" data-kokoro-voice="jf_alpha">Alphaを試聴</button>
+<button type="button" class="secondary" data-kokoro-voice="jf_gongitsune">Gongitsuneを試聴</button>
+<button type="button" class="secondary" data-kokoro-voice="jf_nezumi">Nezumiを試聴</button>
+<button type="button" class="secondary" data-kokoro-voice="jf_tebukuro">Tebukuroを試聴</button>
+</div>
 <div class="actions"><button id="prepareKokoro" class="secondary" type="button">Kokoroを準備・モデルを取得</button></div>
 <label for="voiceStyle" class="small">声の雰囲気（標準音声用）</label>
 <select id="voiceStyle" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px">
@@ -1291,6 +1298,27 @@ async function sendToAlvis(){
 $("sendChat").addEventListener("click",sendToAlvis);
 $("stopSpeech").addEventListener("click",stopAlvisSpeech);
 $("prepareKokoro").addEventListener("click",prepareKokoroTTS);
+async function previewKokoroVoice(voiceId,button){
+  if(aiEngine||aiLoading){setStatus("voiceStatus","メモリ競合を避けるため、先にQwen3-4Bの「モデルを終了」を押してください。");return;}
+  const select=$("kokoroVoice");
+  if(!select||!["jf_alpha","jf_gongitsune","jf_nezumi","jf_tebukuro"].includes(voiceId))return;
+  select.value=voiceId;
+  $("ttsEngine").value="kokoro";
+  localStorage.setItem("ALVIS_KOKORO_VOICE",voiceId);
+  localStorage.setItem("ALVIS_TTS_ENGINE","kokoro");
+  const buttons=Array.from(document.querySelectorAll("[data-kokoro-voice]"));
+  buttons.forEach(item=>item.disabled=true);
+  if(button)button.textContent="準備中…";
+  try{
+    const engine=await prepareKokoroTTS();
+    if(!engine)return;
+    await speakKokoro("こんにちは。ALVISです。今日も一緒に、いろいろなことを考えていきましょう。何でも気軽に話してくださいね。");
+  }finally{
+    buttons.forEach(item=>item.disabled=false);
+    buttons.forEach(item=>item.textContent=({jf_alpha:"Alphaを試聴",jf_gongitsune:"Gongitsuneを試聴",jf_nezumi:"Nezumiを試聴",jf_tebukuro:"Tebukuroを試聴"})[item.dataset.kokoroVoice]);
+  }
+}
+document.querySelectorAll("[data-kokoro-voice]").forEach(button=>button.addEventListener("click",()=>previewKokoroVoice(button.dataset.kokoroVoice,button)));
 $("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
 $("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
 $("ttsEngine").addEventListener("change",()=>{localStorage.setItem("ALVIS_TTS_ENGINE",$("ttsEngine").value);if($("ttsEngine").value==="kokoro"&&!kokoroTts)prepareKokoroTTS();});
