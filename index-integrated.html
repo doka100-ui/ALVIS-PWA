@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>ALVIS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:#e8eef7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+main{max-width:760px;margin:auto;padding:22px 16px 60px}
+h1{font-size:30px;letter-spacing:2px;margin:0}
+h2{font-size:18px;margin:0 0 12px}
+p{color:#aab8ca}
+.panel{background:#1a2638;border:1px solid #304158;border-radius:14px;padding:16px;margin:16px 0}
+input,textarea,button{width:100%;font:inherit;border-radius:9px;padding:12px;margin:6px 0}
+input,textarea{background:#0e1725;border:1px solid #40516a;color:#fff}
+textarea{min-height:90px;resize:vertical}
+button{border:0;background:#3678d8;color:white;font-weight:650;cursor:pointer}
+button.secondary{background:#34465e}
+button.danger{background:#9b3945}
+button:disabled{opacity:.5}
+.small{font-size:13px;color:#9fb0c5}
+.status{white-space:pre-wrap;background:#0c1420;border-radius:9px;padding:12px;font-size:13px;overflow-wrap:anywhere}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.item{padding:12px 0;border-top:1px solid #34445a}
+.item strong{display:block}
+.hidden{display:none!important}
+.auto-state{font-weight:700;color:#9bd4ff}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>ALVIS</h1>
+<p>Personal AI Memory Vault</p>
+</header>
+
+<section id="lockPanel" class="panel">
+<h2>🔐 ローカル保管庫</h2>
+<p class="small">初回は保管庫を作成します。iPhoneでも同じパスワードを使用してください。</p>
+<label for="password">暗号化パスワード（8文字以上）</label>
+<input id="password" type="password" autocomplete="new-password" placeholder="パスワード">
+<button id="unlockButton">保管庫を作成・解除</button>
+<div id="lockStatus" class="status">ロック中</div>
+</section>
+
+<section id="appPanel" class="hidden">
+<section class="panel">
+<h2>💬 ALVISとの会話</h2>
+<div id="chatLog" class="status" style="min-height:120px;max-height:300px;overflow-y:auto"></div>
+<textarea id="chatInput" placeholder="ALVISにメッセージを送る"></textarea>
+<button id="sendChat">送信</button>
+<p class="small">現在は通常版の会話機能を統合しています。AIモデル接続は次の段階で追加します。</p>
+</section>
+<section class="panel">
+<h2>🧠 記憶</h2>
+<input id="memoryTitle" placeholder="タイトル">
+<textarea id="memoryBody" placeholder="記憶したい内容"></textarea>
+<button id="addMemory">記憶を保存</button>
+<div id="memoryList"></div>
+</section>
+
+<section class="panel">
+<h2>💡 学習候補</h2>
+<input id="candidateTitle" placeholder="候補のタイトル">
+<textarea id="candidateBody" placeholder="学習・記憶する候補"></textarea>
+<button id="addCandidate">候補に追加</button>
+<div id="candidateList"></div>
+</section>
+
+<section class="panel">
+<h2>💬 履歴</h2>
+<textarea id="historyInput" placeholder="会話や作業の履歴"></textarea>
+<button id="addHistory">履歴に追加</button>
+<div id="historyList"></div>
+</section>
+
+<section class="panel">
+<h2>☁️ クラウド同期</h2>
+<p class="small">自動同期は「状態を確認」後に有効になります。端末内で暗号化してから送信します。</p>
+<label for="syncToken">同期トークン</label>
+<input id="syncToken" type="password" autocomplete="off" placeholder="ALVIS_SYNC_TOKEN">
+<div class="row">
+<button id="syncCheck" class="secondary">状態を確認</button>
+<button id="syncSave">クラウドへ保存</button>
+</div>
+<button id="syncLoad" class="secondary">クラウドから復元</button>
+<div id="syncStatus" class="status">未確認（同期トークンを入力して状態を確認してください）</div>
+<p class="small auto-state" id="autoState">自動同期：未接続</p>
+<p class="small">変更後、約3秒待って自動保存します。約30秒ごとにクラウドの更新を確認します。別端末の更新を検出した場合は自動上書きせず停止します。</p>
+<p class="small">復元すると、この端末の現在のデータが置き換わります。復元前にバックアップしてください。</p>
+</section>
+
+<section class="panel">
+<h2>📦 暗号化バックアップ</h2>
+<button id="backupButton" class="secondary">バックアップを書き出す</button>
+<label for="restoreFile">バックアップファイル</label>
+<input id="restoreFile" type="file" accept="application/json,.json">
+<button id="restoreButton" class="secondary">バックアップから復元</button>
+</section>
+
+<section class="panel">
+<h2>保管庫</h2>
+<button id="lockButton" class="danger">画面をロック</button>
+<div id="appStatus" class="status">準備完了</div>
+</section>
+</section>
+</main>
+
+<script>
+"use strict";
+
+const DB_KEY = "ALVIS_ENCRYPTED_V1";
+const WORKER_URL = "https://alvis-sync.dokodemodoa100.workers.dev";
+const LOAD_PATH = "/sync/vault-load";
+const SAVE_PATH = "/sync/vault-save";
+const ITERATIONS = 310000;
+const AUTO_SAVE_DELAY = 3000;
+const POLL_INTERVAL = 30000;
+
+let data = {memories:[],candidates:[],history:[]};
+let cryptoKey = null;
+let encryptionSalt = null;
+let serverRevision = null;
+let unlocked = false;
+let autoSyncEnabled = false;
+let localDirty = false;
+let remoteChanged = false;
+let saveTimer = null;
+let pollTimer = null;
+let syncBusy = false;
+let lastLocalChange = 0;
+
+const $ = id => document.getElementById(id);
+
+function setStatus(id,value){
+  $(id).textContent = typeof value === "string" ? value : JSON.stringify(value,null,2);
+}
+function setAutoState(value){ $("autoState").textContent = "自動同期：" + value; }
+
+function bytesToBase64(bytes){
+  let binary = "";
+  bytes.forEach(b=>binary+=String.fromCharCode(b));
+  return btoa(binary);
+}
+function base64ToBytes(value){
+  if(Array.isArray(value)) return Uint8Array.from(value);
+  if(typeof value!=="string") throw new Error("暗号化データのバイト形式が正しくありません。");
+  const binary = atob(value);
+  return Uint8Array.from(binary,c=>c.charCodeAt(0));
+}
+function recordToCloud(record){
+  return {
+    version:1,
+    salt:Array.from(base64ToBytes(record.salt)),
+    iv:Array.from(base64ToBytes(record.iv)),
+    encrypted:Array.from(base64ToBytes(record.encrypted))
+  };
+}
+function cloudToRecord(record){
+  if(!record || record.version!==1 ||
+     !Array.isArray(record.salt) || record.salt.length!==16 ||
+     !Array.isArray(record.iv) || record.iv.length!==12 ||
+     !Array.isArray(record.encrypted) || record.encrypted.length<16 ||
+     record.encrypted.length>1500000){
+    throw new Error("クラウドデータの形式が正しくありません。");
+  }
+  const validBytes = a => a.every(n=>Number.isInteger(n)&&n>=0&&n<=255);
+  if(!validBytes(record.salt)||!validBytes(record.iv)||!validBytes(record.encrypted)){
+    throw new Error("クラウドデータに不正な値があります。");
+  }
+  return {
+    version:1,
+    salt:Array.from(record.salt),
+    iv:Array.from(record.iv),
+    encrypted:Array.from(record.encrypted)
+  };
+}
+
+async function deriveKey(password,salt){
+  const material = await crypto.subtle.importKey(
+    "raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    {name:"PBKDF2",salt,iterations:ITERATIONS,hash:"SHA-256"},
+    material,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]
+  );
+}
+async function encryptData(){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plain = new TextEncoder().encode(JSON.stringify(data));
+  const encrypted = await crypto.subtle.encrypt({name:"AES-GCM",iv},cryptoKey,plain);
+  // 通常版と同じ配列形式でローカル保存し、既存データとの互換性を維持する
+  return {
+    version:1,
+    salt:Array.from(encryptionSalt),
+    iv:Array.from(iv),
+    encrypted:Array.from(new Uint8Array(encrypted))
+  };
+}
+async function decryptRecord(record,password){
+  if(!record || record.version!==1 || !record.salt || !record.iv || !record.encrypted){
+    throw new Error("暗号化データの形式が正しくありません。");
+  }
+  const salt=base64ToBytes(record.salt);
+  const iv=base64ToBytes(record.iv);
+  const encrypted=base64ToBytes(record.encrypted);
+  if(salt.length!==16||iv.length!==12||encrypted.length<16||encrypted.length>1500000){
+    throw new Error("暗号化データのサイズが正しくありません。");
+  }
+  const key=await deriveKey(password,salt);
+  const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv},key,encrypted);
+  const parsed=JSON.parse(new TextDecoder().decode(plain));
+  if(!parsed||!Array.isArray(parsed.memories)||!Array.isArray(parsed.candidates)||!Array.isArray(parsed.history)){
+    throw new Error("復号データの内容が正しくありません。");
+  }
+  return {parsed,key,salt};
+}
+
+async function saveLocal(){
+  const record=await encryptData();
+  localStorage.setItem(DB_KEY,JSON.stringify(record));
+  localDirty=true;
+  lastLocalChange=Date.now();
+  scheduleAutoSave();
+}
+
+function scheduleAutoSave(){
+  if(saveTimer)clearTimeout(saveTimer);
+  if(!unlocked||!autoSyncEnabled)return;
+  if(remoteChanged){
+    setAutoState("別端末の更新あり・自動保存停止中");
+    return;
+  }
+  saveTimer=setTimeout(()=>{
+    autoSaveToCloud().catch(error=>{
+      setStatus("syncStatus","自動保存エラー: "+error.message+"\n端末内の暗号化データは保存済みです。");
+      setAutoState("保存待ち（通信を確認してください）");
+    });
+  },AUTO_SAVE_DELAY);
+}
+
+function renderList(containerId,items,type){
+  const container=$(containerId);
+  container.replaceChildren();
+  if(!items.length){
+    const p=document.createElement("p");
+    p.className="small";p.textContent="まだ登録されていません。";
+    container.appendChild(p);return;
+  }
+  items.forEach((item,index)=>{
+    const div=document.createElement("div");div.className="item";
+    const strong=document.createElement("strong");
+    strong.textContent=item.title||item.text||"記録";
+    const body=document.createElement("div");body.textContent=item.body||"";body.className="small";
+    const remove=document.createElement("button");remove.className="danger";remove.textContent="削除";
+    remove.addEventListener("click",async()=>{
+      if(!confirm("この項目を削除しますか？"))return;
+      items.splice(index,1);await saveLocal();renderAll();
+    });
+    div.append(strong,body,remove);container.appendChild(div);
+    if(type==="candidate"){
+      const approve=document.createElement("button");approve.textContent="記憶に承認";
+      approve.addEventListener("click",async()=>{
+        data.memories.push({...item,createdAt:new Date().toISOString()});
+        data.candidates.splice(index,1);await saveLocal();renderAll();
+      });
+      const reject=document.createElement("button");reject.className="secondary";reject.textContent="候補を却下";
+      reject.addEventListener("click",async()=>{
+        data.candidates.splice(index,1);await saveLocal();renderAll();
+      });
+      div.append(approve,reject);
+    }
+  });
+}
+function renderAll(){
+  renderList("memoryList",data.memories,"memory");
+  renderList("candidateList",data.candidates,"candidate");
+  renderList("historyList",data.history,"history");
+  renderChat();
+}
+function normalizeData(value){
+  if(!value || !Array.isArray(value.memories)||!Array.isArray(value.candidates)||!Array.isArray(value.history)){
+    throw new Error("記憶データの内容が正しくありません。");
+  }
+  // 通常版の文字列形式をSync V2の表示形式へ変換。本文そのものは保持する。
+  value.memories=value.memories.map(item=>typeof item==="string"?{title:item,body:""}:item);
+  value.candidates=value.candidates.map(item=>typeof item==="string"?{title:item,body:""}:item);
+  return value;
+}
+function renderChat(){
+  const box=$("chatLog");
+  box.replaceChildren();
+  if(!data.history.length){
+    const p=document.createElement("div");p.textContent="こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？";box.appendChild(p);
+  }else{
+    data.history.forEach(item=>{
+      const line=document.createElement("div");
+      line.style.margin="6px 0";
+      line.textContent=(item.role==="user"?"あなた：": "ALVIS：")+(item.text||item.body||item.title||"");
+      box.appendChild(line);
+    });
+  }
+  box.scrollTop=box.scrollHeight;
+}
+
+async function unlock(){
+  const password=$("password").value;
+  if(password.length<8){setStatus("lockStatus","パスワードは8文字以上にしてください。");return;}
+  try{
+    const stored=localStorage.getItem(DB_KEY);
+    if(stored){
+      const result=await decryptRecord(JSON.parse(stored),password);
+      data=normalizeData(result.parsed);cryptoKey=result.key;encryptionSalt=result.salt;
+    }else{
+      encryptionSalt=crypto.getRandomValues(new Uint8Array(16));
+      cryptoKey=await deriveKey(password,encryptionSalt);
+      data={memories:[],candidates:[],history:[]};
+      const record=await encryptData();
+      localStorage.setItem(DB_KEY,JSON.stringify(record));
+    }
+    unlocked=true;
+    $("password").value="";
+    $("lockPanel").classList.add("hidden");
+    $("appPanel").classList.remove("hidden");
+    renderAll();
+    setStatus("appStatus","保管庫を解除しました。");
+    setAutoState("未接続（同期状態を確認してください）");
+  }catch(error){
+    setStatus("lockStatus","解除できませんでした。パスワードを確認してください。\n"+error.message);
+  }
+}
+
+async function api(path,options={}){
+  const token=$("syncToken").value.trim();
+  if(!token)throw new Error("同期トークンを入力してください。");
+  const response=await fetch(WORKER_URL+path,{
+    ...options,
+    headers:{
+      "Authorization":"Bearer "+token,
+      ...(options.body?{"Content-Type":"application/json"}:{}),
+      ...(options.headers||{})
+    }
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok){
+    const error=new Error(result.message||result.error||"HTTP "+response.status);
+    error.status=response.status;error.result=result;throw error;
+  }
+  return result;
+}
+
+async function checkCloud(options={}){
+  const result=await api(LOAD_PATH);
+  const revision=Number(result.revision||0);
+  if(!Number.isInteger(revision)||revision<0)throw new Error("revisionが不正です。");
+
+  if(serverRevision!==null && revision>serverRevision && localDirty && !options.initial){
+    remoteChanged=true;
+    autoSyncEnabled=false;
+    if(saveTimer)clearTimeout(saveTimer);
+    setAutoState("別端末の更新あり・自動保存停止中");
+    setStatus("syncStatus",{
+      status:"別端末の更新を検出",
+      localRevision:serverRevision,
+      cloudRevision:revision,
+      message:"自動上書きを停止しました。内容を確認してから復元してください。"
+    });
+    return result;
+  }
+
+  if(serverRevision!==null && revision>serverRevision && !localDirty && !options.initial){
+    remoteChanged=true;
+    autoSyncEnabled=false;
+    setAutoState("クラウドに新しいデータあり・復元待ち");
+    setStatus("syncStatus",{
+      status:"クラウド更新あり",
+      revision,
+      message:"別端末の更新があります。「クラウドから復元」で取得してください。"
+    });
+    return result;
+  }
+
+  serverRevision=revision;
+  if(options.enable!==false){
+    autoSyncEnabled=true;
+    remoteChanged=false;
+    setAutoState("有効・変更後に自動保存");
+  }
+  setStatus("syncStatus",{
+    status:"確認完了",
+    exists:!!result.exists,
+    revision:serverRevision,
+    autoSync:autoSyncEnabled
+  });
+  return result;
+}
+
+async function saveCloudCore(){
+  if(!unlocked)throw new Error("先に保管庫を解除してください。");
+  if(serverRevision===null)throw new Error("先に状態を確認してください。");
+  const localRecord=await encryptData();
+  const result=await api(SAVE_PATH,{
+    method:"POST",
+    body:JSON.stringify({
+      version:1,
+      expectedRevision:serverRevision,
+      encryptedRecord:recordToCloud(localRecord)
+    })
+  });
+  serverRevision=Number(result.revision);
+  localStorage.setItem(DB_KEY,JSON.stringify(localRecord));
+  localDirty=false;
+  remoteChanged=false;
+  return result;
+}
+
+async function autoSaveToCloud(){
+  if(!unlocked||!autoSyncEnabled||remoteChanged||!localDirty)return;
+  if(syncBusy)return;
+  if(!navigator.onLine)throw new Error("オフラインです。");
+  if(Date.now()-lastLocalChange<AUTO_SAVE_DELAY-100)return;
+  syncBusy=true;
+  try{
+    const result=await saveCloudCore();
+    setStatus("syncStatus",{status:"自動クラウド保存完了",revision:serverRevision});
+    setAutoState("有効・最新 revision "+serverRevision);
+    setStatus("appStatus","端末内保存・クラウド自動保存ともに完了しました。");
+  }catch(error){
+    if(error.status===409){
+      autoSyncEnabled=false;
+      remoteChanged=true;
+      setAutoState("競合を検出・自動保存停止中");
+      setStatus("syncStatus","競合を検出しました。別端末のデータを上書きしないため自動保存を停止しました。状態を確認してください。");
+      return;
+    }
+    throw error;
+  }finally{
+    syncBusy=false;
+  }
+}
+
+async function manualSyncSave(){
+  if(!unlocked)throw new Error("先に保管庫を解除してください。");
+  if(serverRevision===null)throw new Error("先に状態を確認してください。");
+  if(remoteChanged)throw new Error("クラウドに別端末の更新があります。先に内容を確認してください。");
+  if(syncBusy)throw new Error("同期処理中です。少し待ってください。");
+  syncBusy=true;
+  try{
+    const result=await saveCloudCore();
+    autoSyncEnabled=true;
+    setStatus("syncStatus",{status:"クラウド保存完了",revision:serverRevision});
+    setAutoState("有効・最新 revision "+serverRevision);
+    return result;
+  }finally{syncBusy=false;}
+}
+
+async function syncLoad(){
+  if(!unlocked)throw new Error("先に保管庫を解除してください。");
+  const result=await api(LOAD_PATH);
+  const revision=Number(result.revision||0);
+  if(!result.exists||!result.data||!result.data.encryptedRecord){
+    serverRevision=revision;
+    setStatus("syncStatus","クラウドに復元データはありません。\nrevision: "+revision);
+    return;
+  }
+  const password=prompt("クラウドデータを復号するパスワードを入力してください。");
+  if(password===null)return;
+  const localRecord=cloudToRecord(result.data.encryptedRecord);
+  const decrypted=await decryptRecord(localRecord,password);
+  if(!confirm("クラウドの記憶で、この端末の現在のデータを置き換えますか？"))return;
+
+  if(saveTimer)clearTimeout(saveTimer);
+  data=decrypted.parsed;cryptoKey=decrypted.key;encryptionSalt=decrypted.salt;
+  const newLocalRecord=await encryptData();
+  localStorage.setItem(DB_KEY,JSON.stringify(newLocalRecord));
+  serverRevision=revision;
+  localDirty=false;remoteChanged=false;autoSyncEnabled=true;
+  renderAll();
+  setAutoState("有効・最新 revision "+serverRevision);
+  setStatus("syncStatus","クラウドから復元しました。\nrevision: "+serverRevision+"\n自動同期を再開しました。");
+}
+
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    if(!unlocked||!autoSyncEnabled||syncBusy||!navigator.onLine)return;
+    try{
+      await checkCloud({enable:false});
+    }catch(error){
+      setAutoState("確認失敗・次回再試行");
+      setStatus("syncStatus","クラウド状態の確認に失敗しました: "+error.message);
+    }
+  },POLL_INTERVAL);
+}
+function stopPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=null;
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=null;
+}
+
+function lockApp(){
+  stopPolling();
+  cryptoKey=null;encryptionSalt=null;
+  data={memories:[],candidates:[],history:[]};
+  unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
+  $("appPanel").classList.add("hidden");
+  $("lockPanel").classList.remove("hidden");
+  $("syncToken").value="";
+  setStatus("lockStatus","ロック中");
+}
+
+$("unlockButton").addEventListener("click",unlock);
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
+
+$("sendChat").addEventListener("click",async()=>{
+  const text=$("chatInput").value.trim();
+  if(!text)return;
+  data.history.push({role:"user",text,createdAt:new Date().toISOString()});
+  const reply="メッセージを受け取ったよ。AIモデル接続はまだだけれど、会話履歴は保存できるよ。";
+  data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+  $("chatInput").value="";
+  await saveLocal();renderAll();
+});
+$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("sendChat").click();}});
+$("addMemory").addEventListener("click",async()=>{
+  const title=$("memoryTitle").value.trim(),body=$("memoryBody").value.trim();
+  if(!title&&!body)return;
+  data.memories.push({title,body,createdAt:new Date().toISOString()});
+  $("memoryTitle").value="";$("memoryBody").value="";
+  await saveLocal();renderAll();
+});
+$("addCandidate").addEventListener("click",async()=>{
+  const title=$("candidateTitle").value.trim(),body=$("candidateBody").value.trim();
+  if(!title&&!body)return;
+  data.candidates.push({title,body,createdAt:new Date().toISOString()});
+  $("candidateTitle").value="";$("candidateBody").value="";
+  await saveLocal();renderAll();
+});
+$("addHistory").addEventListener("click",async()=>{
+  const text=$("historyInput").value.trim();if(!text)return;
+  data.history.push({text,createdAt:new Date().toISOString()});
+  $("historyInput").value="";await saveLocal();renderAll();
+});
+
+$("syncCheck").addEventListener("click",async()=>{
+  try{
+    const result=await checkCloud({enable:true});
+    if(result.exists && Number(result.revision||0)>0 && !localDirty){
+      setStatus("syncStatus",{
+        status:"確認完了",
+        exists:true,
+        revision:serverRevision,
+        message:"クラウドにデータがあります。別端末のデータを取り込む場合は「クラウドから復元」を押してください。"
+      });
+    }
+    startPolling();
+  }catch(e){setStatus("syncStatus","確認エラー: "+e.message);}
+});
+$("syncSave").addEventListener("click",async()=>{
+  try{
+    if(!confirm("この端末の暗号化データをクラウドへ保存しますか？"))return;
+    await manualSyncSave();
+    startPolling();
+  }catch(e){
+    if(e.status===409){autoSyncEnabled=false;serverRevision=null;setAutoState("競合・状態再確認が必要");}
+    setStatus("syncStatus","保存エラー: "+e.message+"\n状態を再確認してください。");
+  }
+});
+$("syncLoad").addEventListener("click",async()=>{
+  try{await syncLoad();startPolling();}
+  catch(e){setStatus("syncStatus","復元エラー: "+e.message+"\n端末内データは変更していません。");}
+});
+
+$("backupButton").addEventListener("click",()=>{
+  const record=localStorage.getItem(DB_KEY);
+  if(!record)return alert("バックアップするデータがありません。");
+  const blob=new Blob([JSON.stringify({
+    app:"ALVIS",backupVersion:1,createdAt:new Date().toISOString(),
+    encryptedRecord:JSON.parse(record)
+  },null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;
+  a.download="ALVIS_BACKUP_"+new Date().toISOString().slice(0,10)+".json";
+  a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$("restoreButton").addEventListener("click",async()=>{
+  const file=$("restoreFile").files[0];
+  if(!file)return alert("バックアップファイルを選択してください。");
+  try{
+    const backup=JSON.parse(await file.text());
+    const record=backup.encryptedRecord||backup;
+    const password=prompt("バックアップを復号するパスワードを入力してください。");
+    if(password===null)return;
+    const decrypted=await decryptRecord(record,password);
+    if(!confirm("バックアップの内容で、この端末のデータを置き換えますか？"))return;
+    data=decrypted.parsed;cryptoKey=decrypted.key;encryptionSalt=decrypted.salt;
+    await saveLocal();renderAll();
+    alert("端末内に復元しました。クラウドにも反映するには同期状態を確認してください。");
+  }catch(e){alert("復元できませんでした: "+e.message);}
+});
+$("lockButton").addEventListener("click",()=>{if(confirm("画面をロックしますか？"))lockApp();});
+window.addEventListener("online",()=>{
+  if(unlocked&&autoSyncEnabled&&localDirty)scheduleAutoSave();
+});
+window.addEventListener("offline",()=>setAutoState("オフライン・端末内保存を継続"));
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
