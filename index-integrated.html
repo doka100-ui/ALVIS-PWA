@@ -1535,7 +1535,8 @@ $("syncLoad").addEventListener("click",async()=>{
   catch(e){setStatus("syncStatus","復元エラー: "+e.message+"\n端末内データは変更していません。");}
 });
 
-$("backupButton").addEventListener("click",()=>{
+$("backupButton").addEventListener("click",async()=>{
+  await persistVoiceSettings();
   const record=localStorage.getItem(DB_KEY);
   if(!record)return alert("バックアップするデータがありません。");
   const blob=new Blob([JSON.stringify({
