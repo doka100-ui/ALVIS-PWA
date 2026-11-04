@@ -687,8 +687,8 @@ async function sendToAlvis(){
       reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\s]*/i,"").trim();
     }
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
-    const alreadyStreamed=data.history.some(item=>item.role==="alvis"&&item.text===reply);
-    if(!alreadyStreamed)data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+    // 通常の非ストリーミング応答では、過去と同じ文章でも毎回新しい返答として追加する。
+    data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
