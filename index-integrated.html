@@ -67,6 +67,14 @@ textarea{min-height:90px;resize:vertical}
 <div class="panel">
 <h2>ALVISとの会話</h2>
 <div class="panel" style="margin:0 0 12px">
+<strong>音声会話（試作）</strong>
+<label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
+<label for="voiceSelect" class="small">ALVISの声</label>
+<select id="voiceSelect" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="">日本語の標準音声</option></select>
+<div class="actions"><button id="stopSpeech" class="secondary" type="button">読み上げ停止</button></div>
+<div id="voiceStatus" class="small">端末の日本語音声を確認しています。</div>
+</div>
+<div class="panel" style="margin:0 0 12px">
 <strong>ローカルAIモデル</strong>
 <p class="small">Qwen3-4B Q4をiPad内で実行します。初回はモデルのダウンロードが必要です。</p>
 <button id="loadAiModel">Qwen3-4Bを読み込む</button>
@@ -591,6 +599,43 @@ function normalizeData(value){
   if(!Array.isArray(value.autonomyIssues))value.autonomyIssues=[];
   return value;
 }
+
+let availableSpeechVoices=[];
+let speechReady=false;
+function loadSpeechVoices(){
+  if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザは音声読み上げに対応していません。");return;}
+  availableSpeechVoices=window.speechSynthesis.getVoices();
+  const select=$("voiceSelect"),previous=localStorage.getItem("ALVIS_VOICE_NAME")||"";
+  select.replaceChildren();
+  const defaultOption=document.createElement("option");defaultOption.value="";defaultOption.textContent="日本語の標準音声";select.appendChild(defaultOption);
+  const japanese=availableSpeechVoices.filter(voice=>/^ja(?:-|$)/i.test(voice.lang));
+  japanese.forEach(voice=>{
+    const option=document.createElement("option");option.value=voice.name;option.textContent=voice.name+"（"+voice.lang+"）";select.appendChild(option);
+  });
+  if(japanese.some(voice=>voice.name===previous))select.value=previous;
+  speechReady=true;
+  setStatus("voiceStatus",japanese.length?"日本語音声 "+japanese.length+"種類が利用できます。":"日本語音声がまだ見つかりません。端末の音声設定を確認してください。");
+}
+function speakAlvis(text){
+  if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザでは音声読み上げを利用できません。");return;}
+  const clean=String(text||"").replace(/<[^>]*>/g," ").trim();
+  if(!clean)return;
+  window.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(clean);
+  utterance.lang="ja-JP";utterance.rate=0.98;utterance.pitch=1.0;
+  const selected=$("voiceSelect").value;
+  const voice=availableSpeechVoices.find(item=>item.name===selected)||availableSpeechVoices.find(item=>/^ja(?:-|$)/i.test(item.lang));
+  if(voice)utterance.voice=voice;
+  utterance.onstart=()=>setStatus("voiceStatus","ALVISが話しています…");
+  utterance.onend=()=>setStatus("voiceStatus","読み上げ完了");
+  utterance.onerror=event=>setStatus("voiceStatus","音声再生エラー: "+event.error);
+  window.speechSynthesis.speak(utterance);
+}
+function stopAlvisSpeech(){
+  if("speechSynthesis" in window)window.speechSynthesis.cancel();
+  setStatus("voiceStatus","読み上げを停止しました。");
+}
+
 function renderChat(){
   const box=$("chatLog");
   box.replaceChildren();
@@ -598,7 +643,16 @@ function renderChat(){
   entries.forEach(item=>{
     const line=document.createElement("div");
     line.className="message "+(item.role==="user"?"user":"alvis");
-    line.textContent=item.text||item.body||item.title||"";
+    const body=document.createElement("div");
+    body.textContent=item.text||item.body||item.title||"";
+    line.appendChild(body);
+    if(item.role==="alvis" && (item.text||item.body||item.title)){
+      const speakButton=document.createElement("button");
+      speakButton.type="button";speakButton.className="secondary";
+      speakButton.textContent="🔊 聞く";speakButton.style.marginTop="8px";
+      speakButton.addEventListener("click",()=>speakAlvis(body.textContent));
+      line.appendChild(speakButton);
+    }
     box.appendChild(line);
   });
   box.scrollTop=box.scrollHeight;
@@ -1132,6 +1186,7 @@ async function sendToAlvis(){
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
     // 通常の非ストリーミング応答では、過去と同じ文章でも毎回新しい返答として追加する。
     data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+    if($("autoSpeak").checked)setTimeout(()=>speakAlvis(reply),80);
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
@@ -1148,6 +1203,16 @@ async function sendToAlvis(){
   }
 }
 $("sendChat").addEventListener("click",sendToAlvis);
+$("stopSpeech").addEventListener("click",stopAlvisSpeech);
+$("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
+$("autoSpeak").addEventListener("change",()=>localStorage.setItem("ALVIS_AUTO_SPEAK",$("autoSpeak").checked?"true":"false"));
+$("voiceSelect").addEventListener("change",()=>localStorage.setItem("ALVIS_VOICE_NAME",$("voiceSelect").value));
+if("speechSynthesis" in window){
+  loadSpeechVoices();
+  window.speechSynthesis.addEventListener?.("voiceschanged",loadSpeechVoices);
+  setTimeout(loadSpeechVoices,500);
+}else setStatus("voiceStatus","このブラウザは音声読み上げに対応していません。");
+
 $("memorySearch").addEventListener("input",()=>renderList("memoryList",data.memories,"memory"));
 $("memoryCategoryFilter").addEventListener("change",()=>renderList("memoryList",data.memories,"memory"));
 $("reviewGrowth").addEventListener("click",async()=>{
