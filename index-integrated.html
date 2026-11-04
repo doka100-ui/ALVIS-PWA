@@ -802,8 +802,9 @@ async function unlock(){
       localStorage.setItem(DB_KEY,JSON.stringify(record));
     }
     unlocked=true;
-    // 旧保管庫にも現在の音声設定を取り込み、次回バックアップから端末間で復元できるようにする。
-    await saveLocal();
+    // 旧保管庫にも現在の音声設定を暗号化して取り込む。ログインだけで同期の未保存フラグは立てない。
+    data.voiceSettings=collectVoiceSettings();
+    localStorage.setItem(DB_KEY,JSON.stringify(await encryptData()));
     await restoreRememberedSyncToken();
     $("password").value="";
     $("lockPanel").classList.add("hidden");
