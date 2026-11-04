@@ -199,7 +199,7 @@ textarea{min-height:90px;resize:vertical}
 </div>
 
 <script type="module">
-import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.87";
+// WebLLMはService Worker登録後に遅延importし、依存コードを端末キャッシュへ保存できるようにする。
 
 "use strict";
 
@@ -227,6 +227,8 @@ let syncBusy = false;
 let lastLocalChange = 0;
 let aiEngine = null;
 let aiLoading = false;
+let CreateMLCEngine = null;
+let alvisServiceWorkerReady = Promise.resolve(false);
 
 const $ = id => document.getElementById(id);
 
@@ -888,7 +890,13 @@ $("loadAiModel").addEventListener("click",async()=>{
   $("loadAiModel").disabled=true;
   $("sendChat").disabled=true;
   try{
-    setStatus("aiStatus","Qwen3-4B-q4f16_1-MLC を準備中…");
+    setStatus("aiStatus","AI実行エンジンとQwen3-4Bを準備中…");
+    // Service Workerが利用可能なら先に起動を待ち、WebLLMのJavaScript依存コードをキャッシュできる状態にする。
+    await alvisServiceWorkerReady;
+    if(!CreateMLCEngine){
+      const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
+      CreateMLCEngine=webllm.CreateMLCEngine;
+    }
     aiEngine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
       initProgressCallback:p=>{
         const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
@@ -1424,7 +1432,16 @@ document.querySelectorAll("nav button[data-page]").forEach(button=>{
 });
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
-  navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  alvisServiceWorkerReady=(async()=>{
+    try{
+      await navigator.serviceWorker.register("./service-worker.js");
+      await navigator.serviceWorker.ready;
+      return true;
+    }catch(error){
+      // Service Workerが使えない環境でも、オンライン時の通常読み込みは妨げない。
+      return !!navigator.serviceWorker.controller;
+    }
+  })();
 }
 </script>
 </body>
