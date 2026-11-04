@@ -301,6 +301,17 @@ function updateMemoryCategorySummary(){
     ?"自動分類："+summary.join(" ／ ")
     :"記憶が登録されると、内容に応じて自動分類されます。";
 }
+function memoryDuplicateKey(item){
+  const title=typeof item==="string"?item:String(item?.title||"");
+  const body=typeof item==="string"?"":String(item?.body||"");
+  return (body.trim()||title.trim()).normalize("NFKC").toLowerCase()
+    .replace(/[\s　。、,.!！?？:：;；「」『』（）()【】\[\]]/g,"");
+}
+function findDuplicateMemory(item,items,excludeIndex=-1){
+  const key=memoryDuplicateKey(item);
+  if(!key)return -1;
+  return items.findIndex((existing,index)=>index!==excludeIndex&&memoryDuplicateKey(existing)===key);
+}
 function renderList(containerId,items,type){
   const container=$(containerId);
   container.replaceChildren();
@@ -320,6 +331,32 @@ function renderList(containerId,items,type){
     const strong=document.createElement("strong");
     strong.textContent=item.title||item.text||"記録";
     const body=document.createElement("div");body.textContent=item.body||"";body.className="small";
+    if(type==="memory"){
+      const editButton=document.createElement("button");
+      editButton.className="secondary";editButton.textContent="編集";
+      const editPanel=document.createElement("div");editPanel.className="hidden";
+      const titleInput=document.createElement("input");
+      titleInput.placeholder="タイトル（省略可）";titleInput.value=item.title||"";
+      const bodyInput=document.createElement("textarea");
+      bodyInput.placeholder="記憶する内容";bodyInput.value=item.body||"";
+      const saveButton=document.createElement("button");saveButton.textContent="変更を保存";
+      const cancelButton=document.createElement("button");cancelButton.className="secondary";cancelButton.textContent="キャンセル";
+      saveButton.addEventListener("click",async()=>{
+        const title=titleInput.value.trim(),text=bodyInput.value.trim();
+        if(!title&&!text){alert("タイトルか記憶内容を入力してください。");return;}
+        const updated={...item,title,body:text};
+        if(findDuplicateMemory(updated,items,index)!==-1){
+          alert("同じ内容の記憶がすでに登録されています。内容を確認してください。");
+          return;
+        }
+        items[index]=updated;
+        await saveLocal();renderAll();
+      });
+      cancelButton.addEventListener("click",()=>editPanel.classList.add("hidden"));
+      editPanel.append(titleInput,bodyInput,saveButton,cancelButton);
+      editButton.addEventListener("click",()=>editPanel.classList.toggle("hidden"));
+      div.append(editButton,editPanel);
+    }
     const remove=document.createElement("button");remove.className="danger";remove.textContent="削除";
     remove.addEventListener("click",async()=>{
       if(!confirm("この項目を削除しますか？"))return;
@@ -327,8 +364,20 @@ function renderList(containerId,items,type){
     });
     div.append(strong,body,remove);container.appendChild(div);
     if(type==="candidate"){
-      const approve=document.createElement("button");approve.textContent="記憶に承認";
+      const duplicate=findDuplicateMemory(item,data.memories)!==-1;
+      if(duplicate){
+        const note=document.createElement("div");note.className="small";
+        note.textContent="同じ内容の記憶がすでに登録されています。";
+        div.appendChild(note);
+      }
+      const approve=document.createElement("button");
+      approve.textContent=duplicate?"登録済み":"記憶に承認";
+      approve.disabled=duplicate;
       approve.addEventListener("click",async()=>{
+        if(findDuplicateMemory(item,data.memories)!==-1){
+          alert("同じ内容の記憶がすでに登録されています。");
+          return;
+        }
         data.memories.push({...item,createdAt:new Date().toISOString()});
         data.candidates.splice(index,1);await saveLocal();renderAll();
       });
@@ -631,11 +680,9 @@ function generateMemoryCandidates(userMessage){
   const explicit = /(?:私は|自分は|私の好みは|目標は|今後は|これからは|覚えておいて|記憶して|開発している|取り組んでいる|続けている|が好き|が嫌い|が苦手|を目指している|を作っている)/.test(text);
   if(!explicit) return 0;
   const normalized = text.replace(/[\s　。、,.!！?？]/g,"").toLowerCase();
-  const duplicate = data.candidates.some(existing=>{
-    const existingText = ((existing.title||"")+" "+(existing.body||"")).replace(/[\s　。、,.!！?？]/g,"").toLowerCase();
-    return existingText===normalized || existingText.includes(normalized) || normalized.includes(existingText);
-  });
-  if(duplicate) return 0;
+  const duplicateCandidate=findDuplicateMemory({body:text},data.candidates)!==-1;
+  const duplicateMemory=findDuplicateMemory({body:text},data.memories)!==-1;
+  if(duplicateCandidate||duplicateMemory)return 0;
   data.candidates.push({
     title:"会話からの記憶候補",
     body:text,
@@ -788,14 +835,28 @@ $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e
 $("addMemory").addEventListener("click",async()=>{
   const title=$("memoryTitle").value.trim(),body=$("memoryBody").value.trim();
   if(!title&&!body)return;
-  data.memories.push({title,body,createdAt:new Date().toISOString()});
+  const memory={title,body,createdAt:new Date().toISOString()};
+  if(findDuplicateMemory(memory,data.memories)!==-1){
+    alert("同じ内容の記憶がすでに登録されています。");
+    return;
+  }
+  data.memories.push(memory);
   $("memoryTitle").value="";$("memoryBody").value="";
   await saveLocal();renderAll();
 });
 $("addCandidate").addEventListener("click",async()=>{
   const title=$("candidateTitle").value.trim(),body=$("candidateBody").value.trim();
   if(!title&&!body)return;
-  data.candidates.push({title,body,createdAt:new Date().toISOString()});
+  const candidate={title,body,createdAt:new Date().toISOString()};
+  if(findDuplicateMemory(candidate,data.candidates)!==-1){
+    alert("同じ内容の候補がすでに登録されています。");
+    return;
+  }
+  if(findDuplicateMemory(candidate,data.memories)!==-1){
+    alert("同じ内容は長期記憶に登録済みです。");
+    return;
+  }
+  data.candidates.push({...candidate,createdAt:new Date().toISOString()});
   $("candidateTitle").value="";$("candidateBody").value="";
   await saveLocal();renderAll();
 });
