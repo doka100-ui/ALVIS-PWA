@@ -223,3 +223,13 @@ iPad / iPhone Safari
 - 音声設定は暗号化保管庫JSONの `voiceSettings` に含める。既存の保管庫暗号化（PBKDF2/AES-GCM）をそのまま適用し、バックアップ/復元・クラウド同期で共有する。
 - Kokoroのモデル資材は端末固有キャッシュであり、保管庫バックアップには含めない。別端末ではモデルの初回取得が必要。
 - 旧データで `voiceSettings` が欠けていても、従来データ互換を維持する。
+
+
+## 端末・オフライン診断（2026-11-05）
+
+- UI: `devicePage`。ユーザー操作で読み取り専用診断を実行する。
+- 確認項目: `navigator.onLine`（接続状態の目安）、ブラウザ情報、WebGPU API有無、Speech Synthesis有無、Service Worker登録/制御/状態、Cache Storage内のALVISアプリ/依存コードキャッシュ名、`navigator.storage.estimate()` による推定使用量と上限。
+- モデル本体のキャッシュ状態はWebLLM/Transformers.js側の内部管理に依存するため、診断画面から「保存済み」と判定しない。
+- 診断はLocalStorage、暗号化保管庫、会話、記憶、バックアップ、同期データへ書き込まない。
+- Service Workerのアプリシェルcacheをv24へ更新。ALVIS専用の旧アプリキャッシュだけを置き換え、他ライブラリのモデルキャッシュは削除しない。
+- 実機の機内モード試験は別途必要。オンライン状態表示、API有無、キャッシュ名だけで完全オフライン動作を保証しない。
