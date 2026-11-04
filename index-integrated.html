@@ -7,6 +7,7 @@
 <title>ALVIS</title>
 <style>
 *{box-sizing:border-box}
+.inline-option{display:flex;align-items:center;gap:8px;font-size:14px;margin:8px 0}.inline-option input{width:auto;margin:0;flex:0 0 auto}
 body{margin:0;background:#101827;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 header{padding:16px 18px;background:#172235;border-bottom:1px solid #334155}
 h1{margin:0;letter-spacing:3px}
@@ -973,11 +974,8 @@ $("addHistory").addEventListener("click",async()=>{
   $("historyInput").value="";await saveLocal();renderAll();
 });
 
-$("rememberSyncToken").addEventListener("change",async()=>{
-  if(!$("rememberSyncToken").checked){localStorage.removeItem(SYNC_TOKEN_KEY);return;}
-  if($("syncToken").value.trim()&&unlocked){
-    try{await rememberSyncToken();}catch(e){setStatus("syncStatus","トークンを暗号化保存できませんでした: "+e.message);}
-  }
+$("rememberSyncToken").addEventListener("change",()=>{
+  if(!$("rememberSyncToken").checked)localStorage.removeItem(SYNC_TOKEN_KEY);
 });
 $("syncCheck").addEventListener("click",async()=>{
   try{
