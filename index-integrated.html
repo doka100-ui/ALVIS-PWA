@@ -638,7 +638,8 @@ document.querySelectorAll("nav button[data-page]").forEach(button=>{
     document.querySelectorAll("nav button[data-page]").forEach(item=>item.classList.toggle("secondary",item!==button));
   });
 });
-\nif("serviceWorker" in navigator && location.protocol.startsWith("http")){
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
 }
 </script>
