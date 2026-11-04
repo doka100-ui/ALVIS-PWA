@@ -188,3 +188,13 @@ iPad / iPhone Safari
 - Service Workerはアプリ基本ファイルをキャッシュし、ALVIS専用旧キャッシュのみ削除する。WebLLMのモデルキャッシュは保持する設計だが、全端末での永続性は未検証。
 - 現在のSpeech Synthesisは端末提供音声に依存する。音声の共通化とオフライン再生を保証するには、Kokoro等の端末内TTSを別途検証する必要がある。
 - オフライン対応はアプリ画面の表示だけで完了としない。モデル推論・記憶保存・音声を含めてネットワーク遮断状態で実機試験する。
+
+
+## 12. WebLLM依存コードのキャッシュ（2026-11-04）
+
+- `index-integrated.html` はWebLLMを静的importせず、Service Worker準備後に `import("https://esm.run/@mlc-ai/web-llm@0.2.87")` で遅延読み込みする。
+- `service-worker.js` は `esm.run` と `cdn.jsdelivr.net` のscriptリクエストを専用Cache Storage `alvis-deps-v1` に保存する。モデル重みなど大容量資材はWebLLM自身のキャッシュへ任せる。
+- オフライン時のHTMLフォールバックはnavigationだけに限定し、取得できないscript等にHTMLを返さない。
+- キャッシュ名は `alvis-cache-v19-integrated`。WebLLMの既存モデルキャッシュは削除対象に含めない。
+- 初回アクセス時はService Workerが制御を開始する前にアプリシェルが読み込まれる場合がある。Service Worker準備後にモデル読み込み操作を行い、依存コードをキャッシュさせる設計。
+- これはオフライン対応の初期基盤であり、全依存コード・モデル資材の取得とiOS Safariを含む全端末でのオフライン動作は未検証。実機テストで確認する。
