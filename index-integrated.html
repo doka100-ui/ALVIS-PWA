@@ -673,21 +673,49 @@ async function sendToAlvis(){
       })[greeting]||"こんにちは。";
     }else{
       const startedAt=performance.now();
-      const result=await aiEngine.chat.completions.create({
+      let firstTokenAt=null;
+      let streamedText="";
+      let streamingItem=null;
+      const stream=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
         temperature:0.45,
-        max_tokens:256
+        max_tokens:256,
+        stream:true
       });
-      reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+      for await (const chunk of stream){
+        const piece=chunk.choices?.[0]?.delta?.content||"";
+        if(!piece)continue;
+        if(firstTokenAt===null){
+          firstTokenAt=performance.now();
+          const firstSeconds=((firstTokenAt-startedAt)/1000).toFixed(1);
+          setStatus("aiStatus","Qwen3-4B 接続中・最初の文字 "+firstSeconds+"秒");
+        }
+        streamedText+=piece;
+        const visibleText=streamedText
+          .replace(/<think>[\\s\\S]*?<\\/think>/gi,"")
+          .replace(/^\\s*<think>[\\s\\S]*$/i,"")
+          .trimStart();
+        if(!streamingItem){
+          streamingItem={role:"alvis",text:visibleText,createdAt:new Date().toISOString()};
+          data.history.push(streamingItem);
+        }else{
+          streamingItem.text=visibleText;
+        }
+        renderAll();
+      }
+      reply=streamedText||"返答を取得できませんでした。";
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
-      setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
+      const firstSeconds=firstTokenAt===null?"未取得":((firstTokenAt-startedAt)/1000).toFixed(1)+"秒";
+      setStatus("aiStatus","Qwen3-4B 接続中・最初の文字 "+firstSeconds+"／生成完了 "+totalSeconds+"秒");
+      if(streamingItem)streamingItem.text=reply;
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(priorConversationCount>0 && !userIsGreeting){
       reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\s]*/i,"").trim();
     }
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
-    data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+    const alreadyStreamed=data.history.some(item=>item.role==="alvis"&&item.text===reply);
+    if(!alreadyStreamed)data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
