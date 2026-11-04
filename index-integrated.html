@@ -599,7 +599,7 @@ async function generateMemoryCandidates(userMessage){
     "出力はJSON配列のみ。形式は [{\"title\":\"短いタイトル\",\"body\":\"ユーザーが明確に述べた内容\"}]。最大3件。",
     "ユーザー発言：",
     userMessage
-  ].join("\\n");
+  ].join("\n");
   const result = await aiEngine.chat.completions.create({
     messages:[
       {role:"system",content:"あなたはALVISの記憶候補抽出器です。ユーザーの明示した事実だけを抽出し、推測や補完をしません。"},
@@ -609,7 +609,7 @@ async function generateMemoryCandidates(userMessage){
     max_tokens:220
   });
   let raw = result.choices?.[0]?.message?.content || "";
-  raw = raw.replace(/<think>[\\s\\S]*?<\\/think>/gi,"").trim();
+  raw = raw.replace(/<think>[\s\S]*?<\/think>/gi,"").trim();
   raw = raw.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
   const start = raw.indexOf("[");
   const end = raw.lastIndexOf("]");
@@ -622,9 +622,9 @@ async function generateMemoryCandidates(userMessage){
     const title = typeof item?.title === "string" ? item.title.trim().slice(0,80) : "";
     const body = typeof item?.body === "string" ? item.body.trim().slice(0,500) : "";
     if(!title && !body) continue;
-    const key = (title+" "+body).replace(/[\\s　。、,.!！?？]/g,"").toLowerCase();
+    const key = (title+" "+body).replace(/[\s　。、,.!！?？]/g,"").toLowerCase();
     const duplicate = data.candidates.some(existing=>{
-      const existingKey = ((existing.title||"")+" "+(existing.body||"")).replace(/[\\s　。、,.!！?？]/g,"").toLowerCase();
+      const existingKey = ((existing.title||"")+" "+(existing.body||"")).replace(/[\s　。、,.!！?？]/g,"").toLowerCase();
       return existingKey === key || (key.length>12 && existingKey.includes(key)) || (existingKey.length>12 && key.includes(existingKey));
     });
     if(duplicate) continue;
