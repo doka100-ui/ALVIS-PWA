@@ -647,6 +647,12 @@ function normalizeData(value){
     if(typeof settings.voiceName==="string"&&settings.voiceName.length<=200)localStorage.setItem("ALVIS_VOICE_NAME",settings.voiceName);
     if(["natural","gentle","bright","calm","energetic"].includes(settings.voiceStyle))localStorage.setItem("ALVIS_VOICE_STYLE",settings.voiceStyle);
     if(typeof settings.autoSpeak==="boolean")localStorage.setItem("ALVIS_AUTO_SPEAK",settings.autoSpeak?"true":"false");
+    if($("ttsEngine"))$("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
+    if($("kokoroVoice"))$("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
+    if($("kokoroRate")){$("kokoroRate").value=localStorage.getItem("ALVIS_KOKORO_RATE")||"1.04";updateKokoroRateLabel();}
+    if($("voiceStyle"))$("voiceStyle").value=localStorage.getItem("ALVIS_VOICE_STYLE")||"natural";
+    if($("autoSpeak"))$("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
+    if($("voiceSelect")&&Array.from($("voiceSelect").options).some(option=>option.value===localStorage.getItem("ALVIS_VOICE_NAME")))$("voiceSelect").value=localStorage.getItem("ALVIS_VOICE_NAME");
   }
   return value;
 }
@@ -1341,6 +1347,7 @@ async function previewKokoroVoice(voiceId,button){
   $("ttsEngine").value="kokoro";
   localStorage.setItem("ALVIS_KOKORO_VOICE",voiceId);
   localStorage.setItem("ALVIS_TTS_ENGINE","kokoro");
+  await persistVoiceSettings();
   const buttons=Array.from(document.querySelectorAll("[data-kokoro-voice]"));
   buttons.forEach(item=>item.disabled=true);
   if(button)button.textContent="準備中…";
