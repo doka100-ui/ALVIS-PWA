@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v9-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v18-integrated`。
 
 ## 4. データの流れ
 
@@ -176,3 +176,15 @@ iPad / iPhone Safari
 - 外部API、音声送信、保管庫/同期データ形式の変更なし。
 - Service Worker cache: `alvis-cache-v18-integrated`。
 - 検証: ソース変更と設定保存・試聴イベントの静的確認。iPad Safari実機での音質・音声数・試聴はユーザー確認待ち。
+
+
+## 11. オフラインファースト・マルチデバイス方針（2026-11-04）
+
+詳細計画は `docs/OFFLINE_FIRST_ROADMAP.md` を参照。
+
+- 対応目標はiPhone、iPad、PC。将来的にAndroidも対象とする。端末ごとに適切なローカルAIモデル/実行方式を選び、ALVISの記憶・人格・設定は共通化する。
+- 会話・推論・記憶・音声入出力は可能な限り端末内で実行する。外部TTS APIを必須にしない。
+- 現行アプリはWebLLMを `https://esm.run/@mlc-ai/web-llm@0.2.87` からimportしているため、依存コードのオフライン利用は保証されていない。Qwen3-4Bモデルも初回取得はオンライン必須。
+- Service Workerはアプリ基本ファイルをキャッシュし、ALVIS専用旧キャッシュのみ削除する。WebLLMのモデルキャッシュは保持する設計だが、全端末での永続性は未検証。
+- 現在のSpeech Synthesisは端末提供音声に依存する。音声の共通化とオフライン再生を保証するには、Kokoro等の端末内TTSを別途検証する必要がある。
+- オフライン対応はアプリ画面の表示だけで完了としない。モデル推論・記憶保存・音声を含めてネットワーク遮断状態で実機試験する。
