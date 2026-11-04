@@ -1145,8 +1145,13 @@ function scoreContextMatch(query, candidate){
 }
 
 function selectRelevantMemories(query, memories, history){
-  // 今の質問を最優先し、短い返答・指示語の場合だけ直前の会話を補助検索に使う。
+  // 現在の質問を最優先。短い返答では直近のユーザー発言を個別に照合し、古い話題の混入を抑える。
   const context=buildContextualQuery(query,history);
+  const normalize=value=>String(value||"").normalize("NFKC").toLowerCase();
+  const compact=value=>normalize(value).replace(/[\\s　。、,.!！?？:：;；「」『』()（）]/g,"");
+  const contextLines=context.usedContext
+    ?context.context.split("\n").filter(line=>line.startsWith("ユーザー：")).slice(-3).map(line=>line.replace(/^ユーザー：/,""))
+    :[];
   const groups=[
     {pattern:/食べ物|食事|料理|好物|好きなもの/,terms:["ラーメン","味噌","麺","食事","料理","食べる","肉","魚","野菜","甘い","辛い"]},
     {pattern:/仕事|職場|職業|働き|勤務/,terms:["仕事","職場","職業","勤務","介護","職員","会社","働く"]},
@@ -1155,19 +1160,31 @@ function selectRelevantMemories(query, memories, history){
     {pattern:/住んで|住まい|自宅|家/,terms:["住まい","自宅","家","住所","暮らし"]},
     {pattern:/目標|将来|やりたい/,terms:["目標","将来","計画","やりたい"]}
   ];
+  const q=compact(query);
   const ranked=[];
   (Array.isArray(memories)?memories:[]).forEach((item,index)=>{
-    const value=typeof item==="string"?item:[item.title,item.body].filter(Boolean).join("：");
+    const title=typeof item==="string"?item:String(item?.title||"");
+    const body=typeof item==="string"?"":String(item?.body||item?.text||"");
+    const value=[title,body].filter(Boolean).join("：");
     if(!value.trim())return;
-    const direct=scoreContextMatch(query,value);
-    const contextual=context.usedContext?scoreContextMatch(context.text,value)*0.42:0;
-    let score=Math.max(direct,contextual);
+    const titleScore=scoreContextMatch(query,title);
+    const bodyScore=scoreContextMatch(query,body);
+    const phraseMatch=q.length>=3&&compact(value).includes(q);
+    const direct=Math.max(titleScore*1.2,bodyScore)+(phraseMatch?3:0);
+    const contextual=contextLines.length
+      ?Math.max(...contextLines.map(line=>scoreContextMatch(line,value)),0)*0.32
+      :0;
+    let topicBoost=0;
     groups.forEach(group=>{
-      if(group.pattern.test(query)&&group.terms.some(term=>value.normalize("NFKC").toLowerCase().includes(term.toLowerCase())))score+=2.5;
+      if(group.pattern.test(query)&&group.terms.some(term=>normalize(value).includes(normalize(term))))topicBoost=Math.max(topicBoost,1.4);
     });
-    if(score>=1.6)ranked.push({text:value,score,index});
+    const score=Math.max(direct,contextual)+topicBoost;
+    if(score>=1.6){
+      const timestamp=Date.parse(item?.updatedAt||item?.createdAt||"");
+      ranked.push({text:value,score,index,timestamp:Number.isFinite(timestamp)?timestamp:0});
+    }
   });
-  return ranked.sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,5);
+  return ranked.sort((a,b)=>b.score-a.score||b.timestamp-a.timestamp||a.index-b.index).slice(0,5);
 }
 
 function selectRelevantLearnings(query, history, learnings){
