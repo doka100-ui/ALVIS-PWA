@@ -892,52 +892,71 @@ function buildConversationMessages(history,currentText){
   return selected;
 }
 
-function selectRelevantMemories(query, memories){
-  // 承認済み長期記憶だけを、ユーザーの今回の質問との関連度で選ぶ。
-  // 外部通信・追加AI推論・保存データの変更は行わない。
+function buildContextualQuery(query, history){
+  const current=String(query||"").trim();
+  const followUp=/^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ＯＫ|ありがとう|次は|やろう|どれ|どっち|どうして|なぜ)/i.test(current)||current.length<=18;
+  if(!followUp)return {text:current,usedContext:false,context:""};
+  const turns=(Array.isArray(history)?history:[])
+    .filter(item=>item.role==="user"||item.role==="alvis")
+    .slice(0,-1).slice(-6);
+  const context=turns.map(item=>(item.role==="user"?"ユーザー":"ALVIS")+"："+String(item.text||"").slice(0,700)).join("\n");
+  return {text:[current,context].filter(Boolean).join("\n"),usedContext:!!context,context};
+}
+
+function scoreContextMatch(query, candidate){
   const normalize=value=>String(value||"").normalize("NFKC").toLowerCase();
   const stop=/私|自分|あなた|について|教えて|覚えて|記憶して|ありますか|あります|ですか|でしたか|でした|です|ます|だった|こと|もの|は|が|を|に|へ|と|も|の|から|まで|何|どんな|どこ|いつ|誰|？|\?/g;
   const core=value=>normalize(value).replace(stop," ").replace(/[\s　。、,.!！:：;；()（）「」『』]/g,"");
   const grams=value=>{
-    const result=new Set();
-    const compact=core(value);
-    const runs=compact.match(/[一-龯々ぁ-んァ-ヶーa-z0-9]+/g)||[];
+    const result=new Set(),runs=core(value).match(/[一-龯々ぁ-んァ-ヶーa-z0-9]+/g)||[];
     for(const run of runs){
       if(run.length===1)result.add(run);
       for(let i=0;i<run.length-1;i++)result.add(run.slice(i,i+2));
     }
     return result;
   };
-  const queryCore=core(query);
-  const queryGrams=grams(query);
+  const q=core(query),c=core(candidate),qg=grams(query),cg=grams(candidate);
+  if(!q||!c)return 0;
+  let score= q.length>=2&&c.includes(q)?5:0, overlap=0;
+  qg.forEach(g=>{if(g.length>=2&&cg.has(g))overlap++;});
+  score+=Math.min(overlap,6)*0.8;
+  return score;
+}
+
+function selectRelevantMemories(query, memories, history){
+  // 今の質問を最優先し、短い返答・指示語の場合だけ直前の会話を補助検索に使う。
+  const context=buildContextualQuery(query,history);
   const groups=[
     {pattern:/食べ物|食事|料理|好物|好きなもの/,terms:["ラーメン","味噌","麺","食事","料理","食べる","肉","魚","野菜","甘い","辛い"]},
     {pattern:/仕事|職場|職業|働き|勤務/,terms:["仕事","職場","職業","勤務","介護","職員","会社","働く"]},
     {pattern:/趣味|休日|遊び/,terms:["趣味","休日","ゲーム","旅行","音楽","映画","読書"]},
     {pattern:/開発|プログラム|アプリ|alvis|ai/,terms:["開発","alvis","アプリ","ai","プログラム","コード"]},
     {pattern:/住んで|住まい|自宅|家/,terms:["住まい","自宅","家","住所","暮らし"]},
-    {pattern:/目標|将来|やりたい/,terms:["目標","将来","計画","やりたい"]},
+    {pattern:/目標|将来|やりたい/,terms:["目標","将来","計画","やりたい"]}
   ];
   const ranked=[];
   (Array.isArray(memories)?memories:[]).forEach((item,index)=>{
-    const text=typeof item==="string"?item:[item.title,item.body].filter(Boolean).join("：");
-    if(!text.trim())return;
-    const memoryCore=core(text);
-    const memoryGrams=grams(text);
-    let score=0;
-    if(queryCore.length>=2&&memoryCore.includes(queryCore))score+=5;
-    let overlap=0;
-    queryGrams.forEach(gram=>{if(gram.length>=2&&memoryGrams.has(gram))overlap++;});
-    score+=Math.min(overlap,5)*0.8;
+    const value=typeof item==="string"?item:[item.title,item.body].filter(Boolean).join("：");
+    if(!value.trim())return;
+    const direct=scoreContextMatch(query,value);
+    const contextual=context.usedContext?scoreContextMatch(context.text,value)*0.42:0;
+    let score=Math.max(direct,contextual);
     groups.forEach(group=>{
-      if(group.pattern.test(query)){
-        const matched=group.terms.some(term=>memoryCore.includes(core(term)));
-        if(matched)score+=3;
-      }
+      if(group.pattern.test(query)&&group.terms.some(term=>value.normalize("NFKC").toLowerCase().includes(term.toLowerCase())))score+=2.5;
     });
-    if(score>=1.6)ranked.push({text,score,index});
+    if(score>=1.6)ranked.push({text:value,score,index});
   });
   return ranked.sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,5);
+}
+
+function selectRelevantLearnings(query, history, learnings){
+  const context=buildContextualQuery(query,history);
+  const approved=(Array.isArray(learnings)?learnings:[]).filter(item=>item.status==="approved"&&String(item.text||"").trim());
+  const ranked=approved.map((item,index)=>({text:String(item.text),score:scoreContextMatch(query,item.text)+(context.usedContext?scoreContextMatch(context.text,item.text)*0.4:0),index,createdAt:item.approvedAt||item.createdAt||""}));
+  const relevant=ranked.filter(item=>item.score>=1.6).sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,5);
+  // 短いフォローアップで関連語が少ない場合だけ、直近の承認済み学びを補助として最大2件使う。
+  if(!relevant.length&&context.usedContext)return ranked.slice(-2).reverse();
+  return relevant;
 }
 
 async function sendToAlvis(){
@@ -957,7 +976,7 @@ async function sendToAlvis(){
   try{
     await saveLocal();
     setStatus("aiStatus","ALVISが考えています…");
-    const relevantMemories=selectRelevantMemories(text,data.memories);
+    const relevantMemories=selectRelevantMemories(text,data.memories,data.history);
     const memoryText=relevantMemories.map(item=>item.text).join("\n").slice(0,5000);
     // AIへ渡す履歴は直近12メッセージ（約6往復）に限定。
     // 保存済みの全履歴は削除せず、そのまま保持する。
@@ -983,7 +1002,7 @@ async function sendToAlvis(){
       memoryText||"まだ登録されていません。",
       "",
       "【ALVISがユーザー承認済みの作業から得た学び】",
-      data.learnings.filter(item=>item.status==="approved").slice(-5).map(item=>item.text).join("\n")||"まだありません。"
+      selectRelevantLearnings(text,data.history,data.learnings).map(item=>item.text).join("\n")||"今回の質問に関連する承認済み学びはありません。"
     ].join("\n");
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
