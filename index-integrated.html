@@ -7,78 +7,111 @@
 <title>ALVIS</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101827;color:#e8eef7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
-main{max-width:760px;margin:auto;padding:22px 16px 60px}
-h1{font-size:30px;letter-spacing:2px;margin:0}
+body{margin:0;background:#101827;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+header{padding:16px 18px;background:#172235;border-bottom:1px solid #334155}
+h1{margin:0;letter-spacing:3px}
 h2{font-size:18px;margin:0 0 12px}
-p{color:#aab8ca}
-.panel{background:#1a2638;border:1px solid #304158;border-radius:14px;padding:16px;margin:16px 0}
-input,textarea,button{width:100%;font:inherit;border-radius:9px;padding:12px;margin:6px 0}
-input,textarea{background:#0e1725;border:1px solid #40516a;color:#fff}
-textarea{min-height:90px;resize:vertical}
-button{border:0;background:#3678d8;color:white;font-weight:650;cursor:pointer}
-button.secondary{background:#34465e}
-button.danger{background:#9b3945}
+.status{font-size:12px;color:#86efac;margin-top:5px}
+nav{display:flex;gap:8px;padding:10px;background:#172235;overflow-x:auto}
+nav button{white-space:nowrap;width:auto;margin:0}
+button{border:0;border-radius:10px;padding:11px 14px;background:#2563eb;color:white;font-size:14px;cursor:pointer}
+button.secondary{background:#475569}
+button.danger{background:#991b1b}
 button:disabled{opacity:.5}
-.small{font-size:13px;color:#9fb0c5}
-.status{white-space:pre-wrap;background:#0c1420;border-radius:9px;padding:12px;font-size:13px;overflow-wrap:anywhere}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.item{padding:12px 0;border-top:1px solid #34445a}
-.item strong{display:block}
+main{max-width:720px;margin:auto;padding:16px}
+.panel{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin:12px 0}
+input,textarea{width:100%;padding:13px;border-radius:10px;border:1px solid #475569;background:#0f172a;color:white;font-size:16px;margin:6px 0 12px}
+textarea{min-height:90px;resize:vertical}
+.message{padding:12px 14px;border-radius:14px;margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;max-width:90%}
+.alvis{background:#1e293b;border:1px solid #334155}
+.user{background:#2563eb;margin-left:auto}
+.small{font-size:12px;color:#94a3b8}
+.item{padding:12px 0;border-bottom:1px solid #334155}
+.item:last-child{border:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .hidden{display:none!important}
+#chatLog{min-height:35vh;max-height:55vh;overflow-y:auto;background:transparent;border:0;padding:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row button{width:100%}
 .auto-state{font-weight:700;color:#9bd4ff}
 </style>
 </head>
 <body>
-<main>
 <header>
 <h1>ALVIS</h1>
-<p>Personal AI Memory Vault</p>
+<div class="status" id="status">● 起動しています</div>
 </header>
 
-<section id="lockPanel" class="panel">
-<h2>🔐 ローカル保管庫</h2>
-<p class="small">初回は保管庫を作成します。iPhoneでも同じパスワードを使用してください。</p>
-<label for="password">暗号化パスワード（8文字以上）</label>
-<input id="password" type="password" autocomplete="new-password" placeholder="パスワード">
-<button id="unlockButton">保管庫を作成・解除</button>
-<div id="lockStatus" class="status">ロック中</div>
+<section id="lockPanel" class="panel" style="margin:16px">
+<h2>ALVISの記憶庫</h2>
+<p id="lockDescription">記憶を暗号化するパスワードを入力してね。</p>
+<input id="password" type="password" autocomplete="current-password" placeholder="パスワード（8文字以上）">
+<button id="unlockButton">記憶庫を作成・解除</button>
+<div id="lockStatus" class="small">パスワードは忘れないように保管してね。</div>
 </section>
 
-<section id="appPanel" class="hidden">
-<section class="panel">
-<h2>💬 ALVISとの会話</h2>
-<div id="chatLog" class="status" style="min-height:120px;max-height:300px;overflow-y:auto"></div>
+<div id="appPanel" class="hidden">
+<nav>
+<button data-page="chatPage">チャット</button>
+<button data-page="candidatePage">記憶候補</button>
+<button data-page="memoryPage">長期記憶</button>
+<button data-page="historyPage">履歴</button>
+<button data-page="syncPage">クラウド同期</button>
+</nav>
+<main>
+<section id="chatPage">
+<div class="panel">
+<h2>ALVISとの会話</h2>
+<div id="chatLog"></div>
 <textarea id="chatInput" placeholder="ALVISにメッセージを送る"></textarea>
 <button id="sendChat">送信</button>
-<p class="small">現在は通常版の会話機能を統合しています。AIモデル接続は次の段階で追加します。</p>
+<p class="small">現在は会話と記憶機能の試作段階。AIモデルにはまだ接続していないよ。</p>
+</div>
 </section>
-<section class="panel">
-<h2>🧠 記憶</h2>
-<input id="memoryTitle" placeholder="タイトル">
+
+<section id="candidatePage" class="hidden">
+<div class="panel">
+<h2>記憶候補</h2>
+<p>保存したい内容を登録して、確認してから承認してね。</p>
+<input id="candidateTitle" placeholder="タイトル（省略可）">
+<textarea id="candidateBody" placeholder="記憶する候補"></textarea>
+<button id="addCandidate">候補に登録</button>
+<div id="candidateList"></div>
+</div>
+</section>
+
+<section id="memoryPage" class="hidden">
+<div class="panel">
+<h2>承認済みの長期記憶</h2>
+<input id="memoryTitle" placeholder="タイトル（省略可）">
 <textarea id="memoryBody" placeholder="記憶したい内容"></textarea>
 <button id="addMemory">記憶を保存</button>
 <div id="memoryList"></div>
+</div>
+<div class="panel">
+<h2>暗号化バックアップ</h2>
+<div class="actions">
+<button id="backupButton" class="secondary">バックアップを書き出す</button>
+</div>
+<label for="restoreFile" class="small">バックアップファイル</label>
+<input id="restoreFile" type="file" accept="application/json,.json">
+<button id="restoreButton" class="secondary">バックアップから復元</button>
+</div>
 </section>
 
-<section class="panel">
-<h2>💡 学習候補</h2>
-<input id="candidateTitle" placeholder="候補のタイトル">
-<textarea id="candidateBody" placeholder="学習・記憶する候補"></textarea>
-<button id="addCandidate">候補に追加</button>
-<div id="candidateList"></div>
-</section>
-
-<section class="panel">
-<h2>💬 履歴</h2>
+<section id="historyPage" class="hidden">
+<div class="panel">
+<h2>会話・作業履歴</h2>
 <textarea id="historyInput" placeholder="会話や作業の履歴"></textarea>
 <button id="addHistory">履歴に追加</button>
 <div id="historyList"></div>
+</div>
 </section>
 
-<section class="panel">
+<section id="syncPage" class="hidden">
+<div class="panel">
 <h2>☁️ クラウド同期</h2>
-<p class="small">自動同期は「状態を確認」後に有効になります。端末内で暗号化してから送信します。</p>
+<p class="small">端末内で暗号化してから送信します。最初に同期トークンを入力して状態を確認してください。</p>
 <label for="syncToken">同期トークン</label>
 <input id="syncToken" type="password" autocomplete="off" placeholder="ALVIS_SYNC_TOKEN">
 <div class="row">
@@ -90,23 +123,15 @@ button:disabled{opacity:.5}
 <p class="small auto-state" id="autoState">自動同期：未接続</p>
 <p class="small">変更後、約3秒待って自動保存します。約30秒ごとにクラウドの更新を確認します。別端末の更新を検出した場合は自動上書きせず停止します。</p>
 <p class="small">復元すると、この端末の現在のデータが置き換わります。復元前にバックアップしてください。</p>
-</section>
-
-<section class="panel">
-<h2>📦 暗号化バックアップ</h2>
-<button id="backupButton" class="secondary">バックアップを書き出す</button>
-<label for="restoreFile">バックアップファイル</label>
-<input id="restoreFile" type="file" accept="application/json,.json">
-<button id="restoreButton" class="secondary">バックアップから復元</button>
-</section>
-
-<section class="panel">
+</div>
+<div class="panel">
 <h2>保管庫</h2>
 <button id="lockButton" class="danger">画面をロック</button>
-<div id="appStatus" class="status">準備完了</div>
-</section>
+<div id="appStatus" class="small">準備完了</div>
+</div>
 </section>
 </main>
+</div>
 
 <script>
 "use strict";
@@ -607,7 +632,16 @@ window.addEventListener("online",()=>{
 });
 window.addEventListener("offline",()=>setAutoState("オフライン・端末内保存を継続"));
 
-if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+
+document.querySelectorAll("nav button[data-page]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll("main section[id$='Page']").forEach(section=>section.classList.add("hidden"));
+    const page=$(button.dataset.page);
+    if(page)page.classList.remove("hidden");
+    document.querySelectorAll("nav button[data-page]").forEach(item=>item.classList.toggle("secondary",item!==button));
+  });
+});
+\nif("serviceWorker" in navigator && location.protocol.startsWith("http")){
   navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
 }
 </script>
