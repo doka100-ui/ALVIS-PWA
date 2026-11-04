@@ -1043,7 +1043,17 @@ $("loadAiModel").addEventListener("click",async()=>{
     $("unloadAiModel").disabled=false;
   }catch(error){
     aiEngine=null;
-    setStatus("aiStatus","モデル読み込みエラー: "+(error?.message||String(error)));
+    const detail=String(error?.message||error||"不明なエラー");
+    const lower=detail.toLowerCase();
+    let guidance="エラー内容を確認し、必要ならページを再読み込みしてから再試行してください。";
+    if(/device was lost|device lost|gpu.*lost|out of memory|oom|allocation failed|memory access out of bounds/.test(lower)){
+      guidance="iPadのメモリ不足またはWebGPU停止の可能性があります。Kokoroや他のタブを閉じ、ページを再読み込みしてからQwenだけを起動してください。繰り返す場合は、より軽いモデルが必要です。";
+    }else if(/network|fetch|failed to load|http|offline|load failed/.test(lower)){
+      guidance="モデルまたは実行ファイルの取得に失敗した可能性があります。初回取得は通信が必要です。通信状態を確認して再試行してください。";
+    }else if(/webgpu|adapter|gpu/.test(lower)){
+      guidance="このSafari環境でWebGPUが利用できない、またはGPUを初期化できない可能性があります。端末診断でWebGPUの項目を確認してください。";
+    }
+    setStatus("aiStatus","モデル読み込みエラー: "+detail+"\n"+guidance);
   }finally{
     aiLoading=false;
     $("loadAiModel").disabled=false;
