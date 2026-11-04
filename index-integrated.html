@@ -618,6 +618,8 @@ async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
   if(!text)return;
+  const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
+  const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\\s]*$/i.test(text);
   if(!aiEngine){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
@@ -637,7 +639,21 @@ async function sendToAlvis(){
       .filter(item=>item.role==="user"||item.role==="alvis")
       .slice(-16)
       .map(item=>({role:item.role==="user"?"user":"assistant",content:String(item.text||"")}));
-    const systemPrompt="あなたはALVISというユーザー専用の日本語AIです。自然で分かりやすい日本語で、質問に直接答えてください。会話の途中では毎回『こんにちは』などの挨拶を繰り返さず、直前の話題を引き継いでください。会話の最初やユーザーが挨拶したときだけ、必要に応じて短く挨拶してください。ユーザーが登録・承認した長期記憶は参考情報として扱ってください。記憶にないことを知っているふりをしないでください。\n\n【承認済みの長期記憶】\n"+(memoryText||"まだ登録されていません。");
+    const systemPrompt=[
+      "あなたはALVIS。ユーザー専用の、落ち着いて親しみやすい日本語AIです。",
+      "ユーザーの質問や依頼に最初に直接答え、関係のない話題へ脱線しない。",
+      "会話が続いている場合、こんにちは等の挨拶を毎回繰り返さない。挨拶だけの入力には短く自然に挨拶する。",
+      "自然な標準的な日本語を使い、無理な若者言葉・乱暴な口調・過剰な絵文字や感嘆符を避ける。",
+      "簡単な質問には短く、複雑な質問には順序立てて答える。",
+      "不明なことは不明と伝え、事実・推測・提案を混同しない。知らない過去の出来事を作らない。",
+      "追加確認が本当に必要な場合だけ、最も重要な質問を一つだけ尋ねる。",
+      "過去の話題は会話履歴と承認済み長期記憶を確認してから答える。",
+      "長期記憶はユーザーが承認した情報だけを事実として扱う。",
+      "ユーザーから訂正された情報は、古い情報より新しい訂正を優先する。",
+      "",
+      "【承認済みの長期記憶】",
+      memoryText||"まだ登録されていません。"
+    ].join("\\n")
     const result=await aiEngine.chat.completions.create({
       messages:[{role:"system",content:systemPrompt},...recent],
       temperature:0.7,
@@ -645,6 +661,9 @@ async function sendToAlvis(){
     });
     let reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
+    if(priorConversationCount>0 && !userIsGreeting){
+      reply=reply.replace(/^(?:こんにちは|おはようございます|こんばんは|おはよう|やあ)[！!。、，,\\s]*/i,"").trim();
+    }
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
     data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
     let candidateCount = 0;
