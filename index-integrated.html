@@ -676,7 +676,9 @@ async function sendToAlvis(){
       const result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
         temperature:0.45,
-        max_tokens:256
+        max_tokens:256,
+        // Qwen3の思考モードを無効化し、回答本文が空になる問題を避ける。
+        extra_body:{enable_thinking:false}
       });
       reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
