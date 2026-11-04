@@ -317,16 +317,13 @@ function normalizeData(value){
 function renderChat(){
   const box=$("chatLog");
   box.replaceChildren();
-  if(!data.history.length){
-    const p=document.createElement("div");p.textContent="こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？";box.appendChild(p);
-  }else{
-    data.history.forEach(item=>{
-      const line=document.createElement("div");
-      line.style.margin="6px 0";
-      line.textContent=(item.role==="user"?"あなた：": "ALVIS：")+(item.text||item.body||item.title||"");
-      box.appendChild(line);
-    });
-  }
+  const entries=data.history.length?data.history:[{role:"alvis",text:"こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？"}];
+  entries.forEach(item=>{
+    const line=document.createElement("div");
+    line.className="message "+(item.role==="user"?"user":"alvis");
+    line.textContent=item.text||item.body||item.title||"";
+    box.appendChild(line);
+  });
   box.scrollTop=box.scrollHeight;
 }
 
