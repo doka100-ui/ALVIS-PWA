@@ -672,40 +672,15 @@ async function sendToAlvis(){
         "はじめまして":"はじめまして。"
       })[greeting]||"こんにちは。";
     }else{
-      // ストリーミングで、生成された文章を届いた順に表示する。
       const startedAt=performance.now();
-      let firstTokenAt=null;
-      let streamedText="";
-      const streamBubble=document.createElement("div");
-      streamBubble.className="message alvis";
-      streamBubble.textContent="考えています…";
-      $("chatLog").appendChild(streamBubble);
-      $("chatLog").scrollTop=$("chatLog").scrollHeight;
-      const stream=await aiEngine.chat.completions.create({
+      const result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
         temperature:0.45,
-        max_tokens:256,
-        stream:true
+        max_tokens:256
       });
-      try{
-        for await (const chunk of stream){
-          const piece=chunk.choices?.[0]?.delta?.content;
-          if(typeof piece==="string" && piece.length){
-            if(firstTokenAt===null)firstTokenAt=performance.now();
-            streamedText+=piece;
-            streamBubble.textContent=streamedText;
-            $("chatLog").scrollTop=$("chatLog").scrollHeight;
-          }
-        }
-      }catch(streamError){
-        streamBubble.remove();
-        throw streamError;
-      }
-      reply=streamedText||"返答を取得できませんでした。";
-      const completedAt=performance.now();
-      const firstSeconds=firstTokenAt===null?"計測不可":((firstTokenAt-startedAt)/1000).toFixed(1)+"秒";
-      const totalSeconds=((completedAt-startedAt)/1000).toFixed(1)+"秒";
-      setStatus("aiStatus","Qwen3-4B 接続中・最初の文字 "+firstSeconds+" / 生成完了 "+totalSeconds);
+      reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+      const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
+      setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(priorConversationCount>0 && !userIsGreeting){
