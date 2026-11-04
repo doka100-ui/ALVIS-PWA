@@ -635,9 +635,11 @@ async function sendToAlvis(){
       if(typeof item==="string")return item;
       return [item.title,item.body].filter(Boolean).join("：");
     }).filter(Boolean).join("\n").slice(0,5000);
+    // AIへ渡す履歴は直近12メッセージ（約6往復）に限定。
+    // 保存済みの全履歴は削除せず、そのまま保持する。
     const recent=data.history
       .filter(item=>item.role==="user"||item.role==="alvis")
-      .slice(-16)
+      .slice(-12)
       .map(item=>({role:item.role==="user"?"user":"assistant",content:String(item.text||"")}));
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
@@ -670,12 +672,40 @@ async function sendToAlvis(){
         "はじめまして":"はじめまして。"
       })[greeting]||"こんにちは。";
     }else{
-      const result=await aiEngine.chat.completions.create({
+      // ストリーミングで、生成された文章を届いた順に表示する。
+      const startedAt=performance.now();
+      let firstTokenAt=null;
+      let streamedText="";
+      const streamBubble=document.createElement("div");
+      streamBubble.className="message alvis";
+      streamBubble.textContent="考えています…";
+      $("chatLog").appendChild(streamBubble);
+      $("chatLog").scrollTop=$("chatLog").scrollHeight;
+      const stream=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
         temperature:0.45,
-        max_tokens:256
+        max_tokens:256,
+        stream:true
       });
-      reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+      try{
+        for await (const chunk of stream){
+          const piece=chunk.choices?.[0]?.delta?.content;
+          if(typeof piece==="string" && piece.length){
+            if(firstTokenAt===null)firstTokenAt=performance.now();
+            streamedText+=piece;
+            streamBubble.textContent=streamedText;
+            $("chatLog").scrollTop=$("chatLog").scrollHeight;
+          }
+        }
+      }catch(streamError){
+        streamBubble.remove();
+        throw streamError;
+      }
+      reply=streamedText||"返答を取得できませんでした。";
+      const completedAt=performance.now();
+      const firstSeconds=firstTokenAt===null?"計測不可":((firstTokenAt-startedAt)/1000).toFixed(1)+"秒";
+      const totalSeconds=((completedAt-startedAt)/1000).toFixed(1)+"秒";
+      setStatus("aiStatus","Qwen3-4B 接続中・最初の文字 "+firstSeconds+" / 生成完了 "+totalSeconds);
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
     if(priorConversationCount>0 && !userIsGreeting){
