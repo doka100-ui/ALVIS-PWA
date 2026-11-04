@@ -62,10 +62,17 @@ textarea{min-height:90px;resize:vertical}
 <section id="chatPage">
 <div class="panel">
 <h2>ALVISとの会話</h2>
+<div class="panel" style="margin:0 0 12px">
+<strong>ローカルAIモデル</strong>
+<p class="small">Qwen3-4B Q4をiPad内で実行します。初回はモデルのダウンロードが必要です。</p>
+<button id="loadAiModel">Qwen3-4Bを読み込む</button>
+<button id="unloadAiModel" class="secondary" disabled>モデルを終了</button>
+<div id="aiStatus" class="small">AI未接続。モデルを読み込んでください。</div>
+</div>
 <div id="chatLog"></div>
 <textarea id="chatInput" placeholder="ALVISにメッセージを送る"></textarea>
-<button id="sendChat">送信</button>
-<p class="small">現在は会話と記憶機能の試作段階。AIモデルにはまだ接続していないよ。</p>
+<button id="sendChat" disabled>送信</button>
+<p class="small">Qwen3-4Bは端末内で推論します。承認済み長期記憶の内容を会話時にAIへ渡します。</p>
 </div>
 </section>
 
@@ -133,7 +140,9 @@ textarea{min-height:90px;resize:vertical}
 </main>
 </div>
 
-<script>
+<script type="module">
+import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm@0.2.87";
+
 "use strict";
 
 const DB_KEY = "ALVIS_ENCRYPTED_V1";
@@ -156,6 +165,8 @@ let saveTimer = null;
 let pollTimer = null;
 let syncBusy = false;
 let lastLocalChange = 0;
+let aiEngine = null;
+let aiLoading = false;
 
 const $ = id => document.getElementById(id);
 
@@ -525,6 +536,7 @@ function stopPolling(){
 
 function lockApp(){
   stopPolling();
+  if(aiEngine){aiEngine.unload().catch(()=>{});aiEngine=null;}
   cryptoKey=null;encryptionSalt=null;
   data={memories:[],candidates:[],history:[]};
   unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
@@ -534,18 +546,94 @@ function lockApp(){
   setStatus("lockStatus","ロック中");
 }
 
+$("loadAiModel").addEventListener("click",async()=>{
+  if(aiLoading)return;
+  if(aiEngine){setStatus("aiStatus","Qwen3-4Bはすでに起動しています。");return;}
+  aiLoading=true;
+  $("loadAiModel").disabled=true;
+  $("sendChat").disabled=true;
+  try{
+    setStatus("aiStatus","Qwen3-4B-q4f16_1-MLC を準備中…");
+    aiEngine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
+      initProgressCallback:p=>{
+        const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
+        setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
+      }
+    });
+    setStatus("aiStatus","Qwen3-4B 接続中・準備完了");
+    $("sendChat").disabled=false;
+    $("unloadAiModel").disabled=false;
+  }catch(error){
+    aiEngine=null;
+    setStatus("aiStatus","モデル読み込みエラー: "+(error?.message||String(error)));
+  }finally{
+    aiLoading=false;
+    $("loadAiModel").disabled=false;
+  }
+});
+$("unloadAiModel").addEventListener("click",async()=>{
+  if(!aiEngine)return;
+  $("unloadAiModel").disabled=true;
+  $("sendChat").disabled=true;
+  try{
+    await aiEngine.unload();
+    aiEngine=null;
+    setStatus("aiStatus","モデルを終了しました。");
+  }catch(error){
+    setStatus("aiStatus","終了エラー: "+(error?.message||String(error)));
+  }
+  $("sendChat").disabled=true;
+  $("loadAiModel").disabled=false;
+});
 $("unlockButton").addEventListener("click",unlock);
 $("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 
-$("sendChat").addEventListener("click",async()=>{
-  const text=$("chatInput").value.trim();
+async function sendToAlvis(){
+  const input=$("chatInput");
+  const text=input.value.trim();
   if(!text)return;
+  if(!aiEngine){
+    setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
+    return;
+  }
+  $("sendChat").disabled=true;
+  input.value="";
   data.history.push({role:"user",text,createdAt:new Date().toISOString()});
-  const reply="メッセージを受け取ったよ。AIモデル接続はまだだけれど、会話履歴は保存できるよ。";
-  data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
-  $("chatInput").value="";
-  await saveLocal();renderAll();
-});
+  renderAll();
+  try{
+    await saveLocal();
+    setStatus("aiStatus","ALVISが考えています…");
+    const memoryText=data.memories.map(item=>{
+      if(typeof item==="string")return item;
+      return [item.title,item.body].filter(Boolean).join("：");
+    }).filter(Boolean).join("\n").slice(0,5000);
+    const recent=data.history
+      .filter(item=>item.role==="user"||item.role==="alvis")
+      .slice(-16)
+      .map(item=>({role:item.role==="user"?"user":"assistant",content:String(item.text||"")}));
+    const systemPrompt="あなたはALVISというユーザー専用の日本語AIです。自然で分かりやすい日本語で、質問に直接答えてください。ユーザーが登録・承認した長期記憶は参考情報として扱ってください。記憶にないことを知っているふりをしないでください。\n\n【承認済みの長期記憶】\n"+(memoryText||"まだ登録されていません。");
+    const result=await aiEngine.chat.completions.create({
+      messages:[{role:"system",content:systemPrompt},...recent],
+      temperature:0.7,
+      max_tokens:512
+    });
+    let reply=result.choices?.[0]?.message?.content||"返答を取得できませんでした。";
+    reply=reply.replace(/<think>[\\s\\S]*?<\\/think>/gi,"").replace(/^\\s*<think>[\\s\\S]*$/i,"").trim();
+    if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
+    data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+    await saveLocal();
+    setStatus("aiStatus","Qwen3-4B 接続中・準備完了");
+  }catch(error){
+    const message="AI生成エラー: "+(error?.message||String(error));
+    data.history.push({role:"alvis",text:message,createdAt:new Date().toISOString()});
+    try{await saveLocal();}catch(saveError){}
+    setStatus("aiStatus",message);
+  }finally{
+    $("sendChat").disabled=false;
+    renderAll();
+  }
+}
+$("sendChat").addEventListener("click",sendToAlvis);
 $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("sendChat").click();}});
 $("addMemory").addEventListener("click",async()=>{
   const title=$("memoryTitle").value.trim(),body=$("memoryBody").value.trim();
