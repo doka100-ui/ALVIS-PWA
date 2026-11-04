@@ -69,10 +69,15 @@ textarea{min-height:90px;resize:vertical}
 <div class="panel" style="margin:0 0 12px">
 <strong>音声会話（試作）</strong>
 <label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
-<label for="voiceSelect" class="small">ALVISの声</label>
+<label for="voiceSelect" class="small">音声（端末が提供する日本語の声）</label>
 <select id="voiceSelect" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="">日本語の標準音声</option></select>
-<div class="actions"><button id="stopSpeech" class="secondary" type="button">読み上げ停止</button></div>
+<label for="voiceStyle" class="small">声の雰囲気</label>
+<select id="voiceStyle" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px">
+<option value="natural">自然</option><option value="gentle">やさしい</option><option value="bright">明るい</option><option value="calm">落ち着いた</option><option value="energetic">元気</option>
+</select>
+<div class="actions"><button id="previewVoice" type="button">声を試聴</button><button id="stopSpeech" class="secondary" type="button">読み上げ停止</button></div>
 <div id="voiceStatus" class="small">端末の日本語音声を確認しています。</div>
+<p class="small">※「声の雰囲気」は話す速さ・高さの調整です。声そのものの種類は端末が提供する音声に依存します。</p>
 </div>
 <div class="panel" style="margin:0 0 12px">
 <strong>ローカルAIモデル</strong>
@@ -622,7 +627,16 @@ function speakAlvis(text){
   if(!clean)return;
   window.speechSynthesis.cancel();
   const utterance=new SpeechSynthesisUtterance(clean);
-  utterance.lang="ja-JP";utterance.rate=0.98;utterance.pitch=1.0;
+  utterance.lang="ja-JP";
+  const styles={
+    natural:{rate:0.98,pitch:1.0},
+    gentle:{rate:0.91,pitch:1.08},
+    bright:{rate:1.06,pitch:1.16},
+    calm:{rate:0.88,pitch:0.92},
+    energetic:{rate:1.12,pitch:1.10}
+  };
+  const style=styles[$("voiceStyle")?.value||"natural"]||styles.natural;
+  utterance.rate=style.rate;utterance.pitch=style.pitch;
   const selected=$("voiceSelect").value;
   const voice=availableSpeechVoices.find(item=>item.name===selected)||availableSpeechVoices.find(item=>/^ja(?:-|$)/i.test(item.lang));
   if(voice)utterance.voice=voice;
@@ -1207,6 +1221,9 @@ $("stopSpeech").addEventListener("click",stopAlvisSpeech);
 $("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
 $("autoSpeak").addEventListener("change",()=>localStorage.setItem("ALVIS_AUTO_SPEAK",$("autoSpeak").checked?"true":"false"));
 $("voiceSelect").addEventListener("change",()=>localStorage.setItem("ALVIS_VOICE_NAME",$("voiceSelect").value));
+$("voiceStyle").value=localStorage.getItem("ALVIS_VOICE_STYLE")||"natural";
+$("voiceStyle").addEventListener("change",()=>localStorage.setItem("ALVIS_VOICE_STYLE",$("voiceStyle").value));
+$("previewVoice").addEventListener("click",()=>speakAlvis("こんにちは。ALVISです。今日は何を一緒に進めようか？"));
 if("speechSynthesis" in window){
   loadSpeechVoices();
   window.speechSynthesis.addEventListener?.("voiceschanged",loadSpeechVoices);
