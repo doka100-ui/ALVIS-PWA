@@ -1021,8 +1021,10 @@ function lockApp(){
 $("loadAiModel").addEventListener("click",async()=>{
   if(aiLoading)return;
   if(aiEngine){setStatus("aiStatus","Qwen3-4Bはすでに起動しています。");return;}
+  if(!unlocked){setStatus("aiStatus","先に記憶庫へログインしてください。");return;}
   aiLoading=true;
   $("loadAiModel").disabled=true;
+  $("unloadAiModel").disabled=true;
   $("sendChat").disabled=true;
   try{
     setStatus("aiStatus","AI実行エンジンとQwen3-4Bを準備中…");
@@ -1032,12 +1034,19 @@ $("loadAiModel").addEventListener("click",async()=>{
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
       CreateMLCEngine=webllm.CreateMLCEngine;
     }
-    aiEngine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
+    const engine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
       initProgressCallback:p=>{
         const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
         setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
       }
     });
+    // 読み込み中にロックされた場合、エンジンを残さず解放する。
+    if(!unlocked){
+      try{await engine.unload();}catch(cleanupError){}
+      setStatus("aiStatus","ログアウトを検出したため、モデルを解放しました。");
+      return;
+    }
+    aiEngine=engine;
     setStatus("aiStatus","Qwen3-4B 接続中・準備完了");
     $("sendChat").disabled=false;
     $("unloadAiModel").disabled=false;
@@ -1057,21 +1066,28 @@ $("loadAiModel").addEventListener("click",async()=>{
   }finally{
     aiLoading=false;
     $("loadAiModel").disabled=false;
+    $("unloadAiModel").disabled=!aiEngine;
   }
 });
 $("unloadAiModel").addEventListener("click",async()=>{
-  if(!aiEngine)return;
+  if(!aiEngine||aiLoading)return;
+  const engine=aiEngine;
   $("unloadAiModel").disabled=true;
+  $("loadAiModel").disabled=true;
   $("sendChat").disabled=true;
+  setStatus("aiStatus","Qwen3-4Bを終了してメモリを解放しています…");
   try{
-    await aiEngine.unload();
-    aiEngine=null;
-    setStatus("aiStatus","モデルを終了しました。");
+    await engine.unload();
+    if(aiEngine===engine)aiEngine=null;
+    setStatus("aiStatus","モデルを終了しました。メモリ解放処理が完了しました。");
   }catch(error){
-    setStatus("aiStatus","終了エラー: "+(error?.message||String(error)));
+    // unload失敗時は参照を保持し、状態を偽って再ロードさせない。
+    setStatus("aiStatus","終了エラー: "+(error?.message||String(error))+"\nモデルの状態を保持しています。ページを再読み込みしてから再試行してください。");
+  }finally{
+    $("sendChat").disabled=!!aiEngine;
+    $("loadAiModel").disabled=!!aiEngine;
+    $("unloadAiModel").disabled=!aiEngine;
   }
-  $("sendChat").disabled=true;
-  $("loadAiModel").disabled=false;
 });
 $("unlockButton").addEventListener("click",unlock);
 $("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
