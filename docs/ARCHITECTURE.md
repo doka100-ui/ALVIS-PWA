@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v5-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v6-integrated`。
 
 ## 4. データの流れ
 
@@ -97,6 +97,13 @@ iPad / iPhone Safari
 - `renderList()` は長期記憶一覧に分類ラベルを付ける。
 - 分類情報は保存せず、既存の暗号化・同期データ構造に影響しない。
 - 判定はキーワードルールであり、誤分類や「その他」になる場合がある。カテゴリの手動変更・学習機能は未実装。
+
+## 8. 長期記憶の編集・重複防止
+
+- `renderList()` は長期記憶項目ごとに編集UIを生成し、保存時は既存オブジェクトの他属性を保持したままtitle/bodyを更新する。
+- `memoryDuplicateKey()` は本文（本文が空ならタイトル）をNFKC正規化・小文字化し、空白と一部句読点を除去して比較キーを作る。
+- `findDuplicateMemory()` は比較キーの完全一致を検出する。手動追加、候補追加、会話からの候補抽出、候補承認、編集時に使用する。
+- 意味的類似判定・自動統合・自動削除は行わない。既存データ形式や暗号化・同期処理は変更しない。
 
 ## 8. 将来の分割案（現時点では実施しない）
 
