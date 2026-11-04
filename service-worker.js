@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v13-integrated";
+const CACHE_NAME = "alvis-cache-v14-integrated";
 
 const FILES_TO_CACHE = [
   "./",
@@ -23,7 +23,9 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          // ALVIS自身の古いアプリキャッシュだけを削除する。
+          // WebLLMのモデルキャッシュなど、他ライブラリのCache Storageは保持する。
+          .filter((key) => key.startsWith("alvis-cache-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )
