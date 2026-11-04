@@ -198,3 +198,15 @@ iPad / iPhone Safari
 - キャッシュ名は `alvis-cache-v19-integrated`。WebLLMの既存モデルキャッシュは削除対象に含めない。
 - 初回アクセス時はService Workerが制御を開始する前にアプリシェルが読み込まれる場合がある。Service Worker準備後にモデル読み込み操作を行い、依存コードをキャッシュさせる設計。
 - これはオフライン対応の初期基盤であり、全依存コード・モデル資材の取得とiOS Safariを含む全端末でのオフライン動作は未検証。実機テストで確認する。
+
+
+
+## KokoroローカルTTS（2026-11-05、試験導入）
+
+- 音声エンジン設定はLocalStorageに保持し、暗号化保管庫・会話履歴・クラウド同期形式には追加しない。
+- 標準音声: Web Speech API。Kokoro: `kokoro-js-jp@0.2.0` のCDN用自己完結ESMをユーザー操作で遅延importし、`KokoroJP.load()` で初期化する。
+- 日本語音声ID: `jf_alpha`、`jf_gongitsune`、`jf_nezumi`、`jf_tebukuro`。Kokoro音声生成は端末内で行う。
+- 初回はKokoroモデルをHugging Faceから取得し、日本語G2P辞書・Worker・WASM等をjsDelivrから取得する。jsDelivr資材はService Workerの `alvis-deps-v2` へ保存。モデルファイルはTransformers.jsのブラウザCache API経路を利用する設計であり、全Safari環境でのオフライン永続性は未保証。
+- iOS Safariで自動再生が拒否された場合に備え、生成済み音声をaudio controlsで手動再生できる。
+- Kokoro未準備/エラー時は標準音声へ切替可能。音声合成モデルの保持はメモリを使用するため、端末の空きメモリによりQwenとの同時利用に影響する可能性がある。
+- 実機での音質・性能・オフライン再利用テストはユーザー確認待ち。
