@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v6-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v9-integrated`。
 
 ## 4. データの流れ
 
@@ -125,3 +125,12 @@ iPad / iPhone Safari
 - データ: `data.improvements` にタイトル、理由、最初の一歩、状態、作成/開始/完了日時、実行メモ、AI振り返りを保存。
 - 旧データ: `normalizeData()` が `improvements` の欠落を空配列として補う。新規保管庫、クラウド復元、バックアップ復元にも互換処理を適用。
 - 安全: AIは提案のみ。計画登録・開始・完了・削除はユーザー操作であり、コードや記憶データをAIが自動変更しない。
+
+
+## 10. 文脈理解・自律タスクの追加構成
+
+- `buildConversationMessages()` が直近履歴を文脈に応じて選択する。短いフォローアップでは16メッセージまで拡張し、文字数上限を設ける。
+- `sendToAlvis()` は文脈ルールと承認済み学びをシステムプロンプトに含める。
+- 成長計画画面に目標入力、AIによる次の行動提案、タスク登録/開始/完了、実行メモ、AI振り返り、学びの承認UIを追加。
+- `data.autonomyTasks` と `data.learnings` は既存の暗号化データ本体に含まれ、既存の暗号化・バックアップ・クラウド同期経路を利用する。旧データは `normalizeData()` で空配列を補う。
+- 承認済み学びのみ最大5件を会話プロンプトへ追加。タスク実行と学びの承認はユーザー操作であり、バックグラウンド実行やコード自己改変はしない。
