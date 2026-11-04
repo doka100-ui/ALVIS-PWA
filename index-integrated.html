@@ -326,7 +326,23 @@ async function restoreRememberedSyncToken(){
   }
 }
 
+function collectVoiceSettings(){
+  return {
+    engine:["standard","kokoro"].includes($("ttsEngine")?.value)?$("ttsEngine").value:"standard",
+    kokoroVoice:["jf_alpha","jf_gongitsune","jf_nezumi","jf_tebukuro"].includes($("kokoroVoice")?.value)?$("kokoroVoice").value:"jf_alpha",
+    kokoroRate:Math.min(1.10,Math.max(0.96,Number($("kokoroRate")?.value||1.04))),
+    voiceName:String($("voiceSelect")?.value||"").slice(0,200),
+    voiceStyle:["natural","gentle","bright","calm","energetic"].includes($("voiceStyle")?.value)?$("voiceStyle").value:"natural",
+    autoSpeak:!!$("autoSpeak")?.checked
+  };
+}
+async function persistVoiceSettings(){
+  if(!unlocked||!cryptoKey)return;
+  data.voiceSettings=collectVoiceSettings();
+  await saveLocal();
+}
 async function encryptData(){
+  data.voiceSettings=collectVoiceSettings();
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plain = new TextEncoder().encode(JSON.stringify(data));
   const encrypted = await crypto.subtle.encrypt({name:"AES-GCM",iv},cryptoKey,plain);
@@ -621,6 +637,17 @@ function normalizeData(value){
   if(!Array.isArray(value.autonomyTasks))value.autonomyTasks=[];
   if(!Array.isArray(value.learnings))value.learnings=[];
   if(!Array.isArray(value.autonomyIssues))value.autonomyIssues=[];
+  // 音声設定は保管庫データと一緒に暗号化して端末間で引き継ぐ。
+  if(value.voiceSettings && typeof value.voiceSettings==="object"){
+    const settings=value.voiceSettings;
+    if(["standard","kokoro"].includes(settings.engine))localStorage.setItem("ALVIS_TTS_ENGINE",settings.engine);
+    if(["jf_alpha","jf_gongitsune","jf_nezumi","jf_tebukuro"].includes(settings.kokoroVoice))localStorage.setItem("ALVIS_KOKORO_VOICE",settings.kokoroVoice);
+    const rate=Number(settings.kokoroRate);
+    if(Number.isFinite(rate)&&rate>=0.96&&rate<=1.10)localStorage.setItem("ALVIS_KOKORO_RATE",String(rate));
+    if(typeof settings.voiceName==="string"&&settings.voiceName.length<=200)localStorage.setItem("ALVIS_VOICE_NAME",settings.voiceName);
+    if(["natural","gentle","bright","calm","energetic"].includes(settings.voiceStyle))localStorage.setItem("ALVIS_VOICE_STYLE",settings.voiceStyle);
+    if(typeof settings.autoSpeak==="boolean")localStorage.setItem("ALVIS_AUTO_SPEAK",settings.autoSpeak?"true":"false");
+  }
   return value;
 }
 
@@ -1329,18 +1356,18 @@ async function previewKokoroVoice(voiceId,button){
 document.querySelectorAll("[data-kokoro-voice]").forEach(button=>button.addEventListener("click",()=>previewKokoroVoice(button.dataset.kokoroVoice,button)));
 function updateKokoroRateLabel(){const rate=Number($("kokoroRate")?.value||1.04);const label=$("kokoroRateValue");if(label)label.textContent=rate===1?"標準":(rate<1?"低め ":"高め ")+rate.toFixed(2)+"倍";if(kokoroAudio)kokoroAudio.playbackRate=rate;}
 $("kokoroRate")?.addEventListener("input",updateKokoroRateLabel);
-$("kokoroRate")?.addEventListener("change",()=>localStorage.setItem("ALVIS_KOKORO_RATE",$("kokoroRate").value));
+$("kokoroRate")?.addEventListener("change",()=>{localStorage.setItem("ALVIS_KOKORO_RATE",$("kokoroRate").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
 $("previewKokoroTuned")?.addEventListener("click",async()=>{if(aiEngine||aiLoading){setStatus("voiceStatus","メモリ競合を避けるため、先にQwen3-4Bの「モデルを終了」を押してください。");return;}const engine=await prepareKokoroTTS();if(engine)await speakKokoro("こんにちは。ALVISです。今日も一緒に、いろいろなことを考えていきましょう。何でも気軽に話してくださいね。");});
 $("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
 $("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
 $("kokoroRate").value=localStorage.getItem("ALVIS_KOKORO_RATE")||"1.04";updateKokoroRateLabel();
-$("ttsEngine").addEventListener("change",()=>{localStorage.setItem("ALVIS_TTS_ENGINE",$("ttsEngine").value);if($("ttsEngine").value==="kokoro"&&!kokoroTts)prepareKokoroTTS();});
-$("kokoroVoice").addEventListener("change",()=>localStorage.setItem("ALVIS_KOKORO_VOICE",$("kokoroVoice").value));
+$("ttsEngine").addEventListener("change",()=>{localStorage.setItem("ALVIS_TTS_ENGINE",$("ttsEngine").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));if($("ttsEngine").value==="kokoro"&&!kokoroTts)prepareKokoroTTS();});
+$("kokoroVoice").addEventListener("change",()=>{localStorage.setItem("ALVIS_KOKORO_VOICE",$("kokoroVoice").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
 $("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
-$("autoSpeak").addEventListener("change",()=>localStorage.setItem("ALVIS_AUTO_SPEAK",$("autoSpeak").checked?"true":"false"));
-$("voiceSelect").addEventListener("change",()=>localStorage.setItem("ALVIS_VOICE_NAME",$("voiceSelect").value));
+$("autoSpeak").addEventListener("change",()=>{localStorage.setItem("ALVIS_AUTO_SPEAK",$("autoSpeak").checked?"true":"false");persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
+$("voiceSelect").addEventListener("change",()=>{localStorage.setItem("ALVIS_VOICE_NAME",$("voiceSelect").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
 $("voiceStyle").value=localStorage.getItem("ALVIS_VOICE_STYLE")||"natural";
-$("voiceStyle").addEventListener("change",()=>localStorage.setItem("ALVIS_VOICE_STYLE",$("voiceStyle").value));
+$("voiceStyle").addEventListener("change",()=>{localStorage.setItem("ALVIS_VOICE_STYLE",$("voiceStyle").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
 $("previewVoice").addEventListener("click",()=>speakAlvis("こんにちは。ALVISです。今日は何を一緒に進めようか？"));
 if("speechSynthesis" in window){
   loadSpeechVoices();
