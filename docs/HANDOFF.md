@@ -206,3 +206,14 @@
 - WebLLMモデルキャッシュ、既存の暗号化保管庫、バックアップ、同期APIは変更しない。
 - 未確認: Service Worker制御下での依存コードキャッシュ、モデル初回取得後の機内モード起動、iOS Safariでの永続性。オンラインで一度モデルを読み込んだだけでオフライン対応完了とは扱わない。
 - 次の実機テスト: 開発URLをオンラインで開き、ページ読み込み後にQwen3-4Bをロード。完了後にページを再読み込みしてから機内モードで再起動し、アプリ表示・AIモデル読み込みを確認する。失敗時はエラー文を確認し、キャッシュ方式を見直す。
+
+## 2026-11-05 — Kokoro日本語TTSの試験導入
+
+- ブランチ: `development` のみ。
+- `index-integrated.html`: 端末標準Speech Synthesisを維持したまま、Kokoro音声エンジンを選択できるUIを追加。日本語女性ボイス `jf_alpha` / `jf_gongitsune` / `jf_nezumi` / `jf_tebukuro` を選択可能。
+- Kokoroは `kokoro-js-jp@0.2.0` のブラウザ向けCDNビルドを遅延import。初回準備ボタンからモデル・日本語辞書を取得する。音声合成はブラウザ内で実行し、会話テキストをTTSサーバーへ送らない。
+- Service Worker: `alvis-cache-v20-integrated` / `alvis-deps-v2`。jsDelivr/esm.runの許可済みCDN資材をdestination判定に依存せずキャッシュする。モデル重みはTransformers.js側のCache API管理を利用する想定。
+- iOS Safariの再生制限に備え、生成後のHTML audio controlsを表示。標準音声への切り替えも維持。
+- 変更コミット: アプリ `f9b83192d42425604f2d7abe51d5ff11ade825ea`、iOS再生UI `330fa78b152e4207e3f7f51f47508beaab7575bc`、Service Worker `7700e94aafb80d36538aa75e5cc331c9077d2637`。
+- 未確認: iPad Safariでのモデル初回取得・実音声・メモリ負荷・オフライン再起動。モデルの保存容量/キャッシュ永続性は端末とブラウザに依存。Kokoroを選択しただけでは準備完了とみなさず、準備ボタンで初回ロードを行う。
+- 次の実機試験: 開発版をオンラインで開き、Qwen3-4Bを一度終了してメモリを空けることを検討しつつ、Kokoro準備→女性音声を試聴→再読み込み→オフラインで再準備・再生を確認する。失敗時はエラー表示を記録し、標準音声へ戻せることを確認する。
