@@ -1148,7 +1148,7 @@ function selectRelevantMemories(query, memories, history){
   // 現在の質問を最優先。短い返答では直近のユーザー発言を個別に照合し、古い話題の混入を抑える。
   const context=buildContextualQuery(query,history);
   const normalize=value=>String(value||"").normalize("NFKC").toLowerCase();
-  const compact=value=>normalize(value).replace(/[\\s　。、,.!！?？:：;；「」『』()（）]/g,"");
+  const compact=value=>normalize(value).replace(/[\s　。、,.!！?？:：;；「」『』()（）]/g,"");
   const contextLines=context.usedContext
     ?context.context.split("\n").filter(line=>line.startsWith("ユーザー：")).slice(-3).map(line=>line.replace(/^ユーザー：/,""))
     :[];
