@@ -614,6 +614,54 @@ function generateMemoryCandidates(userMessage){
   return 1;
 }
 
+function selectRelevantMemories(query, memories){
+  // 承認済み長期記憶だけを、ユーザーの今回の質問との関連度で選ぶ。
+  // 外部通信・追加AI推論・保存データの変更は行わない。
+  const normalize=value=>String(value||"").normalize("NFKC").toLowerCase();
+  const stop=/私|自分|あなた|について|教えて|覚えて|記憶して|ありますか|あります|ですか|でしたか|でした|です|ます|だった|こと|もの|は|が|を|に|へ|と|も|の|から|まで|何|どんな|どこ|いつ|誰|？|\?/g;
+  const core=value=>normalize(value).replace(stop," ").replace(/[\s　。、,.!！:：;；()（）「」『』]/g,"");
+  const grams=value=>{
+    const result=new Set();
+    const compact=core(value);
+    const runs=compact.match(/[一-龯々ぁ-んァ-ヶーa-z0-9]+/g)||[];
+    for(const run of runs){
+      if(run.length===1)result.add(run);
+      for(let i=0;i<run.length-1;i++)result.add(run.slice(i,i+2));
+    }
+    return result;
+  };
+  const queryCore=core(query);
+  const queryGrams=grams(query);
+  const groups=[
+    {pattern:/食べ物|食事|料理|好物|好きなもの/,terms:["ラーメン","味噌","麺","食事","料理","食べる","肉","魚","野菜","甘い","辛い"]},
+    {pattern:/仕事|職場|職業|働き|勤務/,terms:["仕事","職場","職業","勤務","介護","職員","会社","働く"]},
+    {pattern:/趣味|休日|遊び/,terms:["趣味","休日","ゲーム","旅行","音楽","映画","読書"]},
+    {pattern:/開発|プログラム|アプリ|alvis|ai/,terms:["開発","alvis","アプリ","ai","プログラム","コード"]},
+    {pattern:/住んで|住まい|自宅|家/,terms:["住まい","自宅","家","住所","暮らし"]},
+    {pattern:/目標|将来|やりたい/,terms:["目標","将来","計画","やりたい"]},
+  ];
+  const ranked=[];
+  (Array.isArray(memories)?memories:[]).forEach((item,index)=>{
+    const text=typeof item==="string"?item:[item.title,item.body].filter(Boolean).join("：");
+    if(!text.trim())return;
+    const memoryCore=core(text);
+    const memoryGrams=grams(text);
+    let score=0;
+    if(queryCore.length>=2&&memoryCore.includes(queryCore))score+=5;
+    let overlap=0;
+    queryGrams.forEach(gram=>{if(gram.length>=2&&memoryGrams.has(gram))overlap++;});
+    score+=Math.min(overlap,5)*0.8;
+    groups.forEach(group=>{
+      if(group.pattern.test(query)){
+        const matched=group.terms.some(term=>memoryCore.includes(core(term)));
+        if(matched)score+=3;
+      }
+    });
+    if(score>=1.6)ranked.push({text,score,index});
+  });
+  return ranked.sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,5);
+}
+
 async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
@@ -631,10 +679,8 @@ async function sendToAlvis(){
   try{
     await saveLocal();
     setStatus("aiStatus","ALVISが考えています…");
-    const memoryText=data.memories.map(item=>{
-      if(typeof item==="string")return item;
-      return [item.title,item.body].filter(Boolean).join("：");
-    }).filter(Boolean).join("\n").slice(0,5000);
+    const relevantMemories=selectRelevantMemories(text,data.memories);
+    const memoryText=relevantMemories.map(item=>item.text).join("\n").slice(0,5000);
     // AIへ渡す履歴は直近12メッセージ（約6往復）に限定。
     // 保存済みの全履歴は削除せず、そのまま保持する。
     const recent=data.history
