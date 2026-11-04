@@ -682,7 +682,8 @@ async function speakKokoro(text){
 }
 function speakAlvis(text){
   if($("ttsEngine")?.value==="kokoro"){speakKokoro(text);return;}
-  if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
+  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
+  const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザでは音声読み上げを利用できません。");return;}
   const clean=String(text||"").replace(/<[^>]*>/g," ").trim();
