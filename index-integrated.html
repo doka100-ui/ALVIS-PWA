@@ -1117,7 +1117,7 @@ function generateMemoryCandidates(userMessage){
 }
 
 function buildConversationMessages(history,currentText){
-  const turns=(Array.isArray(history)?history:[]).filter(item=>item.role==="user"||item.role==="alvis");
+  const turns=(Array.isArray(history)?history:[]).filter(item=>(item.role==="user"||item.role==="alvis")&&!(item.role==="alvis"&&isCorruptedModelReply(item.text)));
   const followUp=/^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ＯＫ|ありがとう|次は|やろう)/i.test(String(currentText||"").trim())||String(currentText||"").trim().length<=18;
   const maxMessages=followUp?16:12, charBudget=followUp?7200:6000;
   const selected=[];let used=0;
@@ -1285,7 +1285,11 @@ function getCountryCurrentTimeReply(text){
   return entry.names[0]+"は"+(entry.zones.length>1?"国内に複数の時間帯があります。現在は、\n":"現在、")+lines.join("\n")+"\nです。";
 }
 function isCorruptedModelReply(reply){
-  return (String(reply||"").match(/ViewGroup/gi)||[]).length>=2;
+  const value=String(reply||"").trim();
+  if((value.match(/ViewGroup/gi)||[]).length>=2)return true;
+  // Qwenが短い中国語フレーズ等を延々と反復した異常出力を検出する。
+  if(/([\\u3400-\\u9fff]{2,8})(?:[\\s\\u3000]*\\1){2,}/u.test(value))return true;
+  return false;
 }
 
 async function sendToAlvis(){
@@ -1323,7 +1327,7 @@ async function sendToAlvis(){
       "ユーザーがすでに伝えた好みや事実を、毎回そのまま言い直さない。必要な場面で自然に活用する。",
       "返答は簡潔にする。雑談は原則1〜3文、説明が必要な場合だけ詳しくする。",
       "会話を続けるためだけの質問を末尾に付けない。確認が必要な場合に限り質問を一つだけする。",
-      "自然な標準日本語を使う。若者言葉、乱暴な口調、過剰な絵文字、過剰な感嘆符を使わない。",
+      "自然な標準日本語を使う。ユーザーが求めない限り中国語など他言語へ切り替えない。若者言葉、乱暴な口調、過剰な絵文字、過剰な感嘆符を使わない。",
       "同じ意味の文を繰り返さず、不要な前置きや定型的な締めくくりを避ける。",
       "不明なことは不明と伝え、事実・推測・提案を混同しない。知らない過去の出来事を作らない。",
       "会話履歴と承認済み長期記憶を参照する。長期記憶はユーザーが承認した情報だけを事実として扱う。",
