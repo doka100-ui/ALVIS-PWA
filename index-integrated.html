@@ -1403,9 +1403,9 @@ async function sendToAlvis(){
       };
       let result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
-        temperature:0.35,
-        frequency_penalty:0.5,
-        presence_penalty:0.2,
+        temperature:0.6,
+        top_p:0.95,
+        repetition_penalty:1.05,
         max_tokens:384,
         extra_body:{enable_thinking:false}
       });
@@ -1419,6 +1419,8 @@ async function sendToAlvis(){
             {role:"user",content:text}
           ],
           temperature:0.3,
+          top_p:0.95,
+          repetition_penalty:1.05,
           max_tokens:384,
           extra_body:{enable_thinking:false}
         });
@@ -1433,6 +1435,8 @@ async function sendToAlvis(){
             {role:"user",content:text}
           ],
           temperature:0.2,
+          top_p:0.95,
+          repetition_penalty:1.05,
           max_tokens:384,
           extra_body:{enable_thinking:false}
         });
@@ -1448,6 +1452,8 @@ async function sendToAlvis(){
             {role:"user",content:text}
           ],
           temperature:0.2,
+          top_p:0.95,
+          repetition_penalty:1.05,
           max_tokens:256,
           extra_body:{enable_thinking:false}
         });
