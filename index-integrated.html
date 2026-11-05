@@ -1608,7 +1608,7 @@ function analyzeJapaneseIntent(value){
   else if(/(?:と思う|そう思う|気がする|好き|嫌い|いいね|すごい|なるほど)/u.test(text))intent="opinion";
   else if(/(?:できた|終わった|行ってきた|帰った|始めた|買った|食べた|今日は|今は|さっき)/u.test(text))intent="report";
   let tense="unspecified";
-  if(/(?:だった|ました|たよ|たね|ていた|てた|終わった|できた)[。！!？?]*$/u.test(text))tense="past";
+  if(/(?:だった|ました|ていた|てた|た)[。！!？?]*$/u.test(text))tense="past";
   else if(/(?:明日|これから|今度|予定|つもり|する？|しますか)/u.test(text))tense="future";
   else if(/(?:今|現在|いつも|している|してる|です|ます)/u.test(text))tense="present";
   const register=/(?:です|ます|ください|でしょう|ございます)[。！!？?]*$/u.test(text)?"polite":"casual";
