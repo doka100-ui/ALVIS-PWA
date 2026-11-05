@@ -483,3 +483,10 @@
 - 生成したゲートウェイトークンをコピーするボタンを追加。
 - 外部AI参考資料のメッセージ区切りを修正。
 - Service Worker cacheを `alvis-cache-v53-integrated` に更新。
+
+
+### オンラインAIゲートウェイ検証
+
+- アプリ/Worker構文解析 PASS。
+- Workerのhealth、認証拒否、Origin制限、入力検証、2社並列・部分成功を含む8ケースのモックテストが全件PASS。
+- 実Cloudflareデプロイ・実API接続・iPad Safari確認は未実施。
