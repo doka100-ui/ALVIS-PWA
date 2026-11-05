@@ -1781,6 +1781,42 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
           lines.push("標準GPUデバイス作成：失敗（"+(deviceError?.message||String(deviceError))+"）");
         }
       }
+      try{
+        const adapter=await navigator.gpu.requestAdapter({powerPreference:"high-performance"});
+        if(!adapter){
+          lines.push("WebLLM相当GPUテスト：高性能アダプター取得失敗");
+        }else{
+          const limits=adapter.limits;
+          const requestedMaxBufferSize=Math.min(1<<30,limits.maxBufferSize);
+          const requestedMaxStorageBufferBindingSize=Math.min(1<<30,limits.maxStorageBufferBindingSize);
+          const requiredLimits={
+            maxBufferSize:requestedMaxBufferSize,
+            maxStorageBufferBindingSize:requestedMaxStorageBufferBindingSize,
+            maxComputeWorkgroupStorageSize:32<<10,
+            maxStorageBuffersPerShaderStage:10
+          };
+          const invocationCandidates=[1024,512,256];
+          const invocationLimit=invocationCandidates.find(value=>value<=limits.maxComputeInvocationsPerWorkgroup);
+          if(invocationLimit)requiredLimits.maxComputeInvocationsPerWorkgroup=invocationLimit;
+          const requiredFeatures=[];
+          if(adapter.features.has("shader-f16"))requiredFeatures.push("shader-f16");
+          if(adapter.features.has("subgroups"))requiredFeatures.push("subgroups");
+          lines.push("WebLLM要求 maxBufferSize："+Math.round(requestedMaxBufferSize/1024/1024)+" MB");
+          lines.push("WebLLM要求 maxStorageBufferBindingSize："+Math.round(requestedMaxStorageBufferBindingSize/1024/1024)+" MB");
+          lines.push("WebLLM要求 maxComputeWorkgroupStorageSize："+requiredLimits.maxComputeWorkgroupStorageSize);
+          lines.push("WebLLM要求 maxStorageBuffersPerShaderStage："+requiredLimits.maxStorageBuffersPerShaderStage);
+          lines.push("WebLLM対応GPU機能："+(requiredFeatures.join(", ")||"追加機能なし"));
+          try{
+            const device=await adapter.requestDevice({requiredLimits,requiredFeatures});
+            lines.push("WebLLM相当GPUデバイス作成：成功");
+            device.destroy();
+          }catch(deviceError){
+            lines.push("WebLLM相当GPUデバイス作成：失敗（"+(deviceError?.message||String(deviceError))+"）");
+          }
+        }
+      }catch(webllmDiagError){
+        lines.push("WebLLM相当GPUテスト：エラー（"+(webllmDiagError?.message||String(webllmDiagError))+"）");
+      }
     }
     lines.push("標準音声読み上げ："+yesNo(!!window.speechSynthesis));
     lines.push("Service Worker："+yesNo("serviceWorker" in navigator));
