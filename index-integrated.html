@@ -1618,12 +1618,14 @@ async function sendToAlvis(){
   if(!text)return;
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
   const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)(?:[、,\s　]*(?:ALVIS|アルヴィス|アルビス))?[！!。…\s　]*$/iu.test(text);
+  // AI自身の「今日は何をしていた？」は、日常生活を装わず短く自然に即答する。
+  const userIsAssistantActivityQuestion=/^(?:今日は|今日|今は|今)\s*(?:何してた|何をしてた|何している|何してる|何をしている|何をしてる)(?:の|ん)?[？?。！!\s]*$/u.test(text);
   const userIsAlvisNameQuestion=isAlvisNameQuestion(text);
   const japanDateTime=getJapanDateTime();
   const userIsDateQuestion=isDateQuestion(text);
   const userIsTimeQuestion=isTimeQuestion(text);
   const userIsCountryTimeFollowup=isCountryTimeFollowup(text,data.history);
-  if(!aiEngine&&!userIsDateQuestion&&!userIsTimeQuestion&&!userIsCountryTimeFollowup&&!userIsGreeting&&!userIsAlvisNameQuestion){
+  if(!aiEngine&&!userIsDateQuestion&&!userIsTimeQuestion&&!userIsCountryTimeFollowup&&!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
   }
@@ -1707,13 +1709,16 @@ async function sendToAlvis(){
       selectRelevantLearnings(text,data.history,data.learnings).map(formatApprovedLearningForPrompt).join("\n").slice(0,1800)||"今回の質問に関連する承認済み学びはありません。"
     ].join("\n");
     const activeSystemPrompt=isBriefConversationalTurn
-      ?["あなたはALVIS。親しみやすく自然な日本語で会話する。一人称は「私」。","短い雑談は1〜2文で、相手の言葉にそのまま自然に返す。説明口調・業務報告・定型の締め・不要な質問は禁止。","AIであることを毎回説明しない。人間のふりもせず、会話に必要な範囲で正直に答える。","英語を混ぜず、自然な日本語だけで返す。直前の会話を踏まえ、同じ言葉を繰り返さない。"].join("\n")
+      ?["あなたはALVIS。親しみやすく自然な日本語で会話する。一人称は「私」。","短い雑談は1〜2文で、質問文の中心語と時制を取り違えず、聞かれたことに直接答える。説明口調・業務報告・定型の締め・不要な質問は禁止。","AIであることを毎回説明しない。人間のふりもせず、会話に必要な範囲で正直に答える。","英語を混ぜず、自然な日本語だけで返す。直前の会話を踏まえ、同じ言葉を繰り返さない。"].join("\n")
       :systemPrompt;
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
     let reply;
     let generationStatusDetails="";
-    if(userIsGreeting){
+    if(userIsAssistantActivityQuestion){
+      reply="私は人のように一日を過ごすわけではないけど、今はあなたと話しているよ。";
+      setStatus("aiStatus","短い会話への即時応答（Qwen3未使用・オフライン対応）。");
+    }else if(userIsGreeting){
       const greeting=text.replace(/[！!。\s]+$/g,"");
       reply=({
         "こんにちは":"こんにちは。",
