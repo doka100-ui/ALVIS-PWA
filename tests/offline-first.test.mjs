@@ -15,7 +15,7 @@ for (const sample of ["こんにちは", "こんにちはアルビス", "こん�
 for (const sample of ["今日は何してた？", "こんにちは、天気は？"]) assert.equal(isGreeting(sample), false, `must not misclassify question: ${sample}`);
 const activityMatch = send.match(/const userIsAssistantActivityQuestion=(\/[^;]+\/u)\.test\(text\);/);
 assert.ok(activityMatch, "assistant activity question classifier must be explicit");
-const isAssistantActivityQuestion = new Function("text", `return ${activityMatch[1]}.test(text);`)();
+const isAssistantActivityQuestion = new Function("text", `return ${activityMatch[1]}.test(text);`);
 for (const sample of ["今日は何してた？", "今日何してたの？", "今何してる？", "今は何をしている？"]) assert.equal(isAssistantActivityQuestion(sample), true, `must fast-path assistant activity question: ${sample}`);
 for (const sample of ["今日は何する？", "今日は何してた？明日は？", "今日は何してた？天気は？", "何してた？"]) assert.equal(isAssistantActivityQuestion(sample), false, `must not overmatch: ${sample}`);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
