@@ -504,3 +504,12 @@
 - OpenAI Responses API / Gemini Interactions APIへ移行後、Workerのモックテスト10/10 PASS。
 - 認証、CORS、入力検証、両社応答、保存無効化、片側失敗時の継続を確認。
 - 実サービス接続と実機確認は未実施。
+
+
+## 2026-11-05 — ChatGPTプラン連携の実現条件を調査
+- OpenAI公式のSign in with ChatGPTを確認。対応するオープンソース/ローカル実行アプリでは、Plus/ProのChatGPT利用枠をAPIキーなしで使える仕組みがある。
+- Freeプランでの利用資格は確認できず、公式開発例ではPlusまたはProを要件としている。
+- 現行ALVISはCloudflare Pages配信のSafari PWAのため、ローカルランタイム・端末内トークン保護要件を満たす実装方式の検討が必要。共有WorkerへChatGPT OAuthトークンを送る方式は採用しない。
+- オフラインQwen3-4Bを維持し、オンラインAIが利用不可ならローカルへフォールバックする方針を明文化。
+- 有料APIゲートウェイは別経路として維持するが、ユーザーの明示承認前に実デプロイ・課金設定は行わない。
+- 今回は調査・設計記録のみ。アプリ実装、OAuth接続、iPad実機テストは未実施。
