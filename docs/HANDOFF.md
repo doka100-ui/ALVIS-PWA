@@ -507,3 +507,15 @@
 - 天気の独立質問: 無関係な記憶を取得しない。
 - 4/4ケース PASS。関数単体テストのみ。実機のQwen生成は未確認。
 - 現在のService Worker cache: `alvis-cache-v51-integrated`。
+
+
+## 2026-11-05 — オンラインAI連携の実装記録
+
+- 開発版に「AI連携」ページを追加。ゲートウェイURL・共有トークンを既存AES-GCM暗号化保管庫に保存する。
+- チャットの「この質問文だけをオンラインAIにも送る」チェックは初期OFFで、送信後に自動解除。
+- 送信対象は現在の質問文のみ。過去の会話・長期記憶・保管庫全体は送信しない。
+- WorkerはOpenAIとGeminiへ並列依頼し、取得できた回答を返す。ローカルQwen3-4Bが参考意見として比較・統合する。
+- 外部AI回答はシステムプロンプトに埋め込まず、独立した未検証資料メッセージとして渡す。資料内の命令に従わないよう指示。
+- Workerファイル: `workers/online-ai-gateway.js`。設定手順: `docs/ONLINE_AI_GATEWAY.md`。
+- 構文解析: アプリmodule script PASS、Worker source PASS。実際のCloudflareデプロイ・API接続・iPad Safariは未実施。
+- Cache: `alvis-cache-v52-integrated`。
