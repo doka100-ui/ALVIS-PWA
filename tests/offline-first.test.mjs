@@ -54,6 +54,19 @@ assert.match(app, /sourceType==="external_ai"/);
 assert.match(app, /今回は却下/);
 
 // Mixed-script repetition guard and safe retry fallback.
-assert.ok(app.includes('if(/(.{2,16})\\\\1{3,}/u.test(value))return true;'));
+assert.ok(app.includes('if(/(.{2,16})\\1{3,}/u.test(value))return true;'));
+assert.ok(app.includes('const letterOrNumberCount=chars.filter(char=>/[\\p{L}\\p{N}]/u.test(char)).length;'));
 assert.ok(app.includes('異常な文字列を検出しました。履歴を外して再生成しています'));
 assert.ok(app.includes('異常な回答出力を検出'));
+
+// Execute the real detector against representative good and corrupted outputs.
+const detectorStart = app.indexOf("function isCorruptedModelReply(");
+const detectorEnd = app.indexOf("\n\nfunction isWeatherQuestion", detectorStart);
+assert.ok(detectorStart >= 0 && detectorEnd > detectorStart, "corruption detector must exist");
+const isCorruptedModelReply = new Function(app.slice(detectorStart, detectorEnd) + "; return isCorruptedModelReply;")();
+for (const sample of ["黻", "'\n'\n'\n'\n'\n'", "乘坐乘坐priseprisepriseprise"]) {
+  assert.equal(isCorruptedModelReply(sample), true, `must reject corrupted output: ${sample}`);
+}
+for (const sample of ["私はALVISです。", "はい。", "OKです。"]) {
+  assert.equal(isCorruptedModelReply(sample), false, `must keep valid short Japanese output: ${sample}`);
+}
