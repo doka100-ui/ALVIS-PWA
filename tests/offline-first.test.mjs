@@ -52,3 +52,8 @@ assert.match(app, /id="externalAiLearningList"/);
 assert.match(app, /function renderExternalAiResponses\(\)/);
 assert.match(app, /sourceType==="external_ai"/);
 assert.match(app, /今回は却下/);
+
+// Mixed-script repetition guard and safe retry fallback.
+assert.ok(app.includes('if(/(.{2,16})\\\\1{3,}/u.test(value))return true;'));
+assert.ok(app.includes('異常な文字列を検出しました。履歴を外して再生成しています'));
+assert.ok(app.includes('異常な回答出力を検出'));
