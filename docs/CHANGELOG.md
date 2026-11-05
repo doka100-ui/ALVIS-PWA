@@ -321,3 +321,9 @@
 - Service Workerのアプリシェルキャッシュを v32 に更新。
 - 暗号化データ、パスワード、バックアップ、同期データは変更していない。
 - iPad実機でのログイン再確認は未実施。
+
+
+## 2026-11-05 — WebLLM実行状態喪失後の復旧
+- `map async was not successful` / `Model not loaded before trying to complete` 等の致命的な実行状態エラーを検出したら、古いエンジン参照を無効化し、再ロードを案内する。
+- エラー後に壊れたエンジンを使い続ける連鎖を防止。会話/記憶/暗号化データ形式は変更なし。
+- Service Worker cache v33。
