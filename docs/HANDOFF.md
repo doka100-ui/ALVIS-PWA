@@ -550,3 +550,12 @@
 - 検証項目: health、認証、Origin制限、不正JSON、本文サイズ制限、質問長制限、OpenAI Responses + Gemini Interactionsの両応答、store:false、Geminiキーのヘッダー送信、片側プロバイダー失敗時の部分成功。
 - アプリmodule scriptとWorkerソースの構文解析もPASS。
 - 実Cloudflare Workerデプロイ・実API接続・iPad Safariでの動作は未確認。
+
+
+## ChatGPT無料連携の次工程（2026-11-05）
+- OpenAI公式Sign in with ChatGPTのオープンソース/ローカル実行向け方式を調査。ChatGPT Plus/Proの利用枠を、ユーザーの明示許可のもとAPIキーなしで使える方式がある。
+- Freeプランの利用資格は公式開発例で確認できず、Plus/Proが要件として記載されているため、Freeで使えるとは案内しない。
+- 現行ALVISはCloudflare Pages配信のSafari PWA。ChatGPTプラン用トークンをCloudflare Workerへ送る実装は行わない。OpenAIのローカル実行・トークン端末保護要件に合うランタイムが必要。
+- 次はiPad SafariだけでOAuthコールバック/トークンを端末内に安全保持できるか、公式SDKの対応環境を調べる。難しい場合はローカルアプリ/サービス方式の選択肢を比較する。実装前にユーザーへ追加料金・プラン条件を明確に説明する。
+- 現行Qwen3-4Bのオフライン経路は維持。ネットワーク断・ChatGPT利用不可時のローカルフォールバックを維持する。
+- 既存のOpenAI/Gemini APIゲートウェイは従量課金の別経路。ユーザーが明示承認するまで実デプロイ・APIキー設定は行わない。
