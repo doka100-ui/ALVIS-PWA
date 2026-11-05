@@ -314,3 +314,12 @@ The device diagnostic now checks `requestAdapter()` with no preference and with 
 
 ### WebLLM GPU limit compatibility test (2026-11-05)
 The device diagnostic now requests a high-performance adapter and attempts a temporary GPUDevice using the TVM WebGPU runtime's required limits and optional supported features. This distinguishes adapter acquisition from the stricter device creation required by WebLLM. The test destroys its temporary device immediately and does not load model weights.
+
+
+## 2026-11-05 — 推論コンテキスト制限と異常出力診断
+- `isFollowUpMessage()`は短文長ではなく明示的な応答表現で判定する。通常質問と短い作業応答を区別し、関連しない履歴・学びの混入を抑える。
+- 通常質問は最大6会話メッセージ/2,400文字、フォローアップは最大10メッセージ/4,200文字。個別メッセージ最大1,400文字。承認済み記憶は最大3件かつ2,200文字、承認済み学びは最大3件かつ1,200文字。
+- 初回/再試行の生成設定をtemperature 0.7、max_tokens 512に統一。最終ステータスへ生成時間、試行回数、prompt文字数、finish_reason、usage token数を出力。
+- 異常出力検出はキリル文字のみ、英数字12連続、句読点12連続、短いトークンの高頻度反復を検出する。
+- 推論時のコンテキスト選択のみ変更し、保存済み会話・記憶・暗号化形式・バックアップ・同期データは変更しない。
+- Service Worker cache: `alvis-cache-v44-integrated`。静的ロジックテスト12項目合格。実機のモデル推論安定性は未検証。
