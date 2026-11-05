@@ -384,3 +384,10 @@
 - WebLLM's TVM GPU initialization requests `navigator.gpu.requestAdapter({powerPreference: "high-performance"})`; the generic error is thrown when that request returns null.
 - Updated ALVIS device diagnostics to test default, high-performance, and low-power adapter requests separately, while retaining the default adapter device-creation check. This is diagnostic only; it does not change model initialization behavior.
 - Service Worker app cache bumped to v39. No model data, encrypted vault, backups, or conversation history changed.
+
+
+## 2026-11-05 WebLLM GPU limit compatibility diagnostic
+- All three adapter preference checks (default/high-performance/low-power) succeeded on the user's iPad Safari; generic device creation succeeded.
+- Added a separate high-performance GPU device test using the required limits/features requested by TVM WebGPU runtime: maxBufferSize, maxStorageBufferBindingSize, maxComputeWorkgroupStorageSize, maxStorageBuffersPerShaderStage, optional maxComputeInvocationsPerWorkgroup, and optional shader-f16/subgroups.
+- This is a diagnostic-only test. It does not change model loading or allocate model weights; the temporary GPU device is destroyed immediately.
+- App shell cache bumped to v40. Encrypted memory, conversations, model cache and backup format are unchanged.
