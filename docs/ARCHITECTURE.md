@@ -293,3 +293,6 @@ iPad / iPhone Safari
 ## 日本語回答の再生成
 - `isLikelyEnglishReply()` が英字主体かつ日本語文字がほぼない回答を検出し、入力が日本語を含む場合のみ、履歴を含めない日本語限定プロンプトで1回再生成する。
 - 初回回答が通常の日本語なら再生成を行わない。再生成が英語のままでも、空回答でない限り返答は保持する。
+
+## WebGPU diagnostics
+- Device diagnostics now test `navigator.gpu.requestAdapter()` and `adapter.requestDevice()` separately. The temporary diagnostic device is destroyed immediately. This distinguishes API exposure from actual adapter/device availability.
