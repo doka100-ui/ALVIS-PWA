@@ -60,6 +60,7 @@ textarea{min-height:90px;resize:vertical}
 <button data-page="memoryPage">長期記憶</button>
 <button data-page="historyPage">履歴</button>
 <button data-page="growthPage">成長計画</button>
+<button data-page="externalAiPage">外部AIの回答</button>
 <button data-page="aiConnectPage">AI連携</button>
 <button data-page="syncPage">クラウド同期</button>
 <button data-page="devicePage">端末診断</button>
@@ -190,6 +191,14 @@ textarea{min-height:90px;resize:vertical}
 <div class="panel"><h2>自律タスク</h2><div id="autonomyTaskList"></div></div>
 <div class="panel"><h2>学習メモ</h2><p class="small">AIの振り返りから作った学びは、承認するまで会話の知識として使いません。</p><div id="learningList"></div></div>
 <div class="panel"><h2>改善計画・振り返り</h2><div id="growthList"></div></div>
+</section>
+
+<section id="externalAiPage" class="hidden">
+<div class="panel">
+<h2>外部AIの回答・学習候補</h2>
+<p>チャットで「この質問文だけをオンラインAIにも送る」をONにして回答を取得すると、ここに外部AIごとの回答が保存されます。回答は未検証の参考情報です。内容を確認してから、ALVISの学びとして承認してください。</p>
+<div id="externalAiLearningList"></div>
+</div>
 </section>
 
 <section id="aiConnectPage" class="hidden">
@@ -741,7 +750,7 @@ function renderAutonomy(){
     }
     card.appendChild(actions);taskBox.appendChild(card);
   });
-  const learnings=Array.isArray(data.learnings)?data.learnings:[];
+  const learnings=(Array.isArray(data.learnings)?data.learnings:[]).filter(item=>item?.sourceType!=="external_ai");
   if(!learnings.length){const p=document.createElement("p");p.className="small";p.textContent="まだ学習メモはありません。";learningBox.appendChild(p);}
   learnings.forEach((learning,index)=>{
     const card=document.createElement("div");card.className="growth-item";
@@ -766,6 +775,49 @@ function renderAutonomy(){
       }
     }
     learningBox.appendChild(card);
+  });
+  renderExternalAiResponses();
+}
+
+function renderExternalAiResponses(){
+  const box=$("externalAiLearningList");
+  if(!box)return;
+  box.replaceChildren();
+  const entries=(Array.isArray(data.learnings)?data.learnings:[])
+    .map((learning,index)=>({learning,index}))
+    .filter(entry=>entry.learning?.sourceType==="external_ai")
+    .sort((a,b)=>String(b.learning.createdAt||"").localeCompare(String(a.learning.createdAt||"")));
+  if(!entries.length){
+    const empty=document.createElement("p");empty.className="small";
+    empty.textContent="まだ外部AIの回答はありません。AI連携の接続設定を完了し、チャットでオンラインAI利用をONにした質問を送ると、取得した回答がここに表示されます。";
+    box.appendChild(empty);return;
+  }
+  entries.forEach(({learning,index})=>{
+    const card=document.createElement("div");card.className="growth-item";
+    const label=document.createElement("span");label.className="growth-status";
+    label.textContent=learning.status==="approved"?"承認済み・未検証の参考情報":"未検証・承認待ち";
+    const provider=document.createElement("strong");
+    provider.textContent=(learning.sourceProvider||"外部AI")+(learning.sourceModel?" / "+learning.sourceModel:"");
+    const body=document.createElement("p");body.className="growth-copy";body.textContent=learning.text||"";
+    const source=document.createElement("p");source.className="small";
+    source.textContent="元の質問："+(learning.sourceQuestion||"記録なし")+" ／ 取得："+(learning.createdAt?new Date(learning.createdAt).toLocaleString("ja-JP"):"日時不明");
+    card.append(label,provider,body,source);
+    if(learning.status!=="approved"){
+      const approve=document.createElement("button");
+      approve.textContent="内容を確認して学びに承認";
+      approve.addEventListener("click",async()=>{
+        if(!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\\n事実の正しさが保証されるわけではありません。"))return;
+        learning.status="approved";learning.approvedAt=new Date().toISOString();
+        await saveLocal();renderAll();
+      });
+      const reject=document.createElement("button");reject.className="secondary";reject.textContent="今回は却下";
+      reject.addEventListener("click",async()=>{
+        if(!confirm("この外部AIの回答を学習候補から削除しますか？"))return;
+        data.learnings.splice(index,1);await saveLocal();renderAll();
+      });
+      card.append(approve,reject);
+    }
+    box.appendChild(card);
   });
 }
 
