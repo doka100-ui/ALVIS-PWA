@@ -522,3 +522,11 @@
 - iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
 - DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
 - 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
+
+
+## 2026-11-05 — Offline-first原則を回帰テスト化
+- 端末内Qwen3-4Bを主AIとし、オンラインAIは一回ごとの明示許可による任意拡張であることを確認する静的テストを追加。
+- オンライン送信は現在の質問文のみ、外部回答は未検証資料として扱い、通信失敗時もローカル推論へ進む構造を検査。
+- 10項目の静的構造チェックは10/10 PASS。Node.jsでのテストファイル実行およびSafari実機・機内モード確認とは区別する。
+- テスト: `tests/offline-first.test.mjs`。説明: `docs/OFFLINE_FIRST_TESTS.md`。
+- アプリ本体とService Workerは変更していないためキャッシュ更新なし。
