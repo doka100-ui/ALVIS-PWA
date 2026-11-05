@@ -113,8 +113,11 @@ export default {
 
     const declaredLength = Number(request.headers.get("Content-Length") || 0);
     if (declaredLength > 12000) return json({ error: "Request too large" }, 413, headers);
+    let rawBody;
+    try { rawBody = await request.text(); } catch { return json({ error: "Invalid request body" }, 400, headers); }
+    if (rawBody.length > 12000) return json({ error: "Request too large" }, 413, headers);
     let payload;
-    try { payload = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400, headers); }
+    try { payload = JSON.parse(rawBody); } catch { return json({ error: "Invalid JSON" }, 400, headers); }
     const question = typeof payload?.question === "string" ? payload.question.trim() : "";
     if (!question || question.length > 8000) return json({ error: "Question must be 1–8000 characters" }, 400, headers);
 
