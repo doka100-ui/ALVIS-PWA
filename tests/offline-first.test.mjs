@@ -79,6 +79,8 @@ assert.match(app, /Qwen3未使用・オフライン対応/);
 assert.match(app, /あなた自身の名前はALVIS（アルヴィス）/);
 assert.match(app, /【自然な対話】/);
 assert.match(app, /一人称は「私」/);
+assert.match(app, /自分を第三者の「ALVIS」として説明せず/);
+assert.match(app, /不自然な業務報告調を避ける/);
 assert.match(app, /ユーザーが気持ちや考えを話したとき/);
 assert.match(app, /過剰な同意・称賛/);
 assert.match(app, /実行できないことを実行したと主張しない/);
