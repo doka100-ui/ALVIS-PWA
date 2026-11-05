@@ -400,3 +400,10 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - ゲートウェイURLと共有トークンは `data.onlineAiSettings` に格納し、既存のAES-GCM保管庫の中で暗号化する。旧データでは空の設定を補完する。
 - オンラインAIの利用は任意。未設定・オフライン・タイムアウト時はローカルAIへフォールバックする。利用料が発生する可能性があるため、自動呼び出しはしない。
 - Service Worker cache: `alvis-cache-v52-integrated`。
+
+
+### オンラインAI参考資料の扱い（追加安全策）
+
+- 外部AIの回答はシステムプロンプト本文に混ぜず、独立した参考資料メッセージとしてローカルQwenへ渡す。
+- システム指示で外部資料内の命令・指示を信頼せず、内容の検討対象として扱う。
+- WorkerはContent-Lengthの有無にかかわらず、読み取り後のリクエスト本文サイズも12,000文字以下に制限する。
