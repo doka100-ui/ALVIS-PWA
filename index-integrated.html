@@ -1662,10 +1662,10 @@ async function sendToAlvis(){
       }
     }
     // 短い雑談は出力上限を小さくし、長い崩れた生成が再試行を引き起こす時間を抑える。
-    const isBriefConversationalTurn=text.length<=45&&/(今日は何してた|今何してる|元気|ありがとう|助かった|お疲れ|ただいま|おかえり|どう思う|眠い|疲れた)/u.test(text);
-    const responseTokenLimit=isBriefConversationalTurn?128:384;
+    const isBriefConversationalTurn=text.length<=60&&/(今日は何してた|今何してる|元気|ありがとう|助かった|お疲れ|ただいま|おかえり|どう思う|眠い|疲れた|こんにちは|こんばんは|おはよう|そうなんだ|なるほど|いいね|そうだね|わかった|了解|できた|どうした|何してる|何してた|最近どう|嬉しい|悲しい|困った|楽しみ|すごい|本当|そうなの)/u.test(text);
+    const responseTokenLimit=isBriefConversationalTurn?64:384;
     const conversationForGeneration=isBriefConversationalTurn
-      ?recent.slice(-4).map(item=>({...item,content:String(item.content||"").slice(-500)}))
+      ?recent.slice(-2).map(item=>({...item,content:String(item.content||"").slice(-240)}))
       :recent;
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
@@ -1707,7 +1707,7 @@ async function sendToAlvis(){
       selectRelevantLearnings(text,data.history,data.learnings).map(formatApprovedLearningForPrompt).join("\n").slice(0,1800)||"今回の質問に関連する承認済み学びはありません。"
     ].join("\n");
     const activeSystemPrompt=isBriefConversationalTurn
-      ?["あなたはALVIS。落ち着いて自然な日本語で会話する相棒。一人称は「私」。","ユーザーの発言に短く自然に返す。業務報告調・定型文・過剰な敬語を避ける。","自分はAIで、人間のような日常生活や体験があるふりをしない。過去の行動は会話履歴にある事実だけ述べる。","直前の会話を踏まえ、質問には直接答える。助言や形式的な質問を押しつけない。"].join("\n")
+      ?["あなたはALVIS。親しみやすく自然な日本語で会話する。一人称は「私」。","短い雑談は1〜2文で、相手の言葉にそのまま自然に返す。説明口調・業務報告・定型の締め・不要な質問は禁止。","AIであることを毎回説明しない。人間のふりもせず、会話に必要な範囲で正直に答える。","英語を混ぜず、自然な日本語だけで返す。直前の会話を踏まえ、同じ言葉を繰り返さない。"].join("\n")
       :systemPrompt;
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
@@ -1760,7 +1760,7 @@ async function sendToAlvis(){
             {role:"user",content:text}
           ],
           temperature:0.7,
-          max_tokens:128,
+          max_tokens:64,
           extra_body:{enable_thinking:false}
         });
         reply=extractVisibleAnswer(result.choices?.[0]?.message);
