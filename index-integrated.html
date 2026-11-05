@@ -1637,7 +1637,7 @@ function buildJapaneseLanguageGuidance(value){
   ].join("\n");
 }
 
-// 診断用であり、この初版では自動書き換えをしない。Quality signals are diagnostic only.
+// 診断結果に応じて一度だけ再生成し、失敗時の感情応答は安全な定型文へフォールバックする。
 function analyzeJapaneseOutputQuality(value){
   const text=String(value||"").trim();
   const allowedLatin=new Set(["ALVIS","AI","Qwen","WebGPU","URL","Wi-Fi","iPad","iPhone","OK","API","CPU","GPU","TTS"]);
@@ -1895,7 +1895,7 @@ async function sendToAlvis(){
         const repairResult=await aiEngine.chat.completions.create({
           messages:[
             {role:"system",content:"あなたは自然な日本語で話すALVISです。ユーザーの発言に対する返事を、会話として自然な日本語で1〜2文だけ返してください。英単語を混ぜないでください。意味の通らない否定や不自然な敬語を使わず、相手の気持ちを受け止めてください。説明や自己評価は不要です。"},
-            ...conversationForGeneration.slice(-2),
+            ...conversationForGeneration.slice(-2).filter((item,index,items)=>!(index===items.length-1&&item.role==="user")),
             {role:"user",content:"直前の回答を使わず、次の発言に自然な日本語で返答してください。\n"+text}
           ],
           temperature:0.5,
