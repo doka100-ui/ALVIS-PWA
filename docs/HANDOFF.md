@@ -568,3 +568,12 @@
 - iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
 - DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
 - 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
+
+
+## 2026-11-05 — Offline-first原則の回帰保護
+- ALVISの主AIは端末内Qwen3-4B、オンラインAIは明示許可時だけの任意拡張とする方針をコード検査で固定。
+- `tests/offline-first.test.mjs` と `docs/OFFLINE_FIRST_TESTS.md` を追加。
+- 静的構造チェック10項目を実施し10/10 PASS：オンライン初期OFF、Qwen主系統、明示チェックによる呼び出し、一回限りの許可、質問文だけの転送、外部回答の未信頼扱い、オンライン失敗後のローカル継続、フロントエンドにAPIキーなし、アプリシェルキャッシュ、非GET要求のキャッシュ回避。
+- これはソース構造の検査であり、Node.jsテストコマンド実行やSafari実機での機内モード再起動・モデル推論成功を意味しない。
+- アプリ本体・Service Worker・暗号化データ形式は変更なし。キャッシュ更新不要。
+- ChatGPT公式DevKitはローカルNode.jsランタイム向けであり、Safari PWAにそのまま導入できない。iPad対応は別ランタイム方式を調査し、Qwenオフライン基盤を崩さない。
