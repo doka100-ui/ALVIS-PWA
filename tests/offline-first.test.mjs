@@ -105,3 +105,12 @@ assert.equal((app.match(/<\\/script\\s*>/gi)||[]).length, 1, "integrated page ha
 const htmlEnd = app.toLowerCase().lastIndexOf("</html>");
 assert.ok(htmlEnd >= 0, "integrated page must close its HTML document");
 assert.equal(app.slice(htmlEnd + 7).trim(), "", "no JavaScript or source text may follow </html>");
+
+
+// TTS-only ALVIS pronunciation normalization; visible text and stored history stay unchanged.
+assert.match(a, /function normalizeAlvisSpeechText\(value\)/);
+assert.match(a, /replace\(\/ALVIS\/gi,"アルビス"\)/);
+assert.equal((a.match(/normalizeAlvisSpeechText\(String\(text\|\|""\)\.replace\(\/<\[\^>\]\*>\/g," "\)\)/g)||[]).length, 2,
+  "both standard and Kokoro TTS must normalize ALVIS pronunciation");
+assert.match(a, /new SpeechSynthesisUtterance\(clean\)/);
+assert.match(a, /kokoroTts\.speak\(clean,/);
