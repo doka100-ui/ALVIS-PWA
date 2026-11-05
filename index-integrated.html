@@ -1587,6 +1587,11 @@ const ALVIS_JAPANESE_LANGUAGE_PACK=Object.freeze({
     report:"報告には自然な相づちや次に必要な反応を返す。説明口調で言い直さない。",
     casual:"直前の話題と会話の温度を引き継ぎ、短く自然に返す。"
   }),
+  lexicon:Object.freeze({
+    particles:Object.freeze({"は":"話題・対比","が":"主語・焦点","を":"動作の対象","に":"時点・到達点・相手","で":"場所・手段"}),
+    connectors:Object.freeze({"でも":"逆接","だから":"理由から結論","それなら":"直前の条件を引き継ぐ","ちなみに":"関連する補足"}),
+    endings:Object.freeze({"です・ます":"丁寧な文体","だ・する":"常体","かな":"控えめな疑問","よ・ね":"伝達・共有のニュアンス"})
+  }),
   phraseExamples:Object.freeze({
     casual:["そうなんだ","なるほど","たしかにね"],
     empathy:["それは大変だったね","それはうれしいね","気になっていたんだね"],
@@ -1626,6 +1631,8 @@ function buildJapaneseLanguageGuidance(value){
     "発言分類："+analysis.intent+"／時制："+analysis.tense+"／文体："+analysis.register,
     guidance,
     "自然な表現例："+examples.join("・"),
+    "助詞の手掛かり："+Object.entries(ALVIS_JAPANESE_LANGUAGE_PACK.lexicon.particles).map(([word,meaning])=>word+"＝"+meaning).join("、"),
+    "接続表現："+Object.entries(ALVIS_JAPANESE_LANGUAGE_PACK.lexicon.connectors).map(([word,meaning])=>word+"＝"+meaning).join("、"),
     ALVIS_JAPANESE_LANGUAGE_PACK.grammar
   ].join("\n");
 }
