@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v49-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v50-integrated`。
 
 ## 4. データの流れ
 
@@ -364,3 +364,10 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 天気の未取得情報に関する表示ガード: 10ケース中10ケース PASS（予報断定の除外、確認不能文の保持、観光案内など非予報文の保持を確認）。
 - 会話履歴選択: 文字数超過した中間発言を飛ばして古い短文と最新質問を保持するケース、および最新質問を文字数予算内で保持するケースを確認。
 - Qwen3の実生成、iPad Safari、Service Worker更新後のオフライン再起動は未確認。
+
+
+### 承認済み学びの関連度フィルター（2026-11-05）
+
+- 短いフォローアップで直接関連する学びが見つからない場合、直近という理由だけで無関係な承認済み学びを追加しない。
+- 関連度スコアが閾値に達した学びだけを最大3件渡す。見つからない場合は「関連する学びなし」として扱い、直近会話の履歴は従来どおり別枠で渡す。
+- ユーザー承認済みの学びデータそのものは削除・変更しない。推論時の選択だけを変更。
