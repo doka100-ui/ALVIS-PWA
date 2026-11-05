@@ -526,3 +526,11 @@
 - ゲートウェイトークン生成後にコピーできるボタンを追加。
 - 外部AI参考資料は独立したユーザーメッセージとして、実改行付きでローカルAIに渡す。
 - Service Worker cache: `alvis-cache-v53-integrated`。
+
+
+### オンラインAIゲートウェイ検証結果（2026-11-05）
+
+- アプリmodule script / Worker source 構文解析: PASS。
+- Workerモックテスト: 8/8 PASS（health、認証、CORS、JSON、リクエストサイズ、質問長、2社並列、片方失敗時の部分成功）。
+- 実際のCloudflare WorkerデプロイとOpenAI/Gemini API接続はまだ行っていない。現段階ではコードとモック動作の検証まで。
+- 開発版Service Worker cache: `alvis-cache-v53-integrated`。
