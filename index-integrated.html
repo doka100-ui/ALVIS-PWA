@@ -1645,7 +1645,9 @@ function analyzeJapaneseOutputQuality(value){
   const suspiciousLatin=latinWords.filter(word=>!allowedLatin.has(word)&&!allowedLatin.has(word.toUpperCase()));
   const sentences=(text.match(/[^。！？!?]+[。！？!?]?/gu)||[]).map(part=>part.trim()).filter(Boolean);
   const repeatedSentence=sentences.some((sentence,index)=>sentences.indexOf(sentence)!==index);
-  return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence};
+  const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そうyeah","そう yeah"];
+  const suspiciousPhrases=awkwardPhrases.filter(phrase=>text.includes(phrase));
+  return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence,suspiciousPhrases,needsRepair:suspiciousLatin.length>0||repeatedSentence||suspiciousPhrases.length>0};
 }
 
 
@@ -1885,12 +1887,37 @@ async function sendToAlvis(){
           reply="ごめん、AIモデルが正常な文章を生成できなかったよ。モデルを終了してから読み込み直し、もう一度試してね。記憶や会話データはそのままだよ。";
         }
       }
+      // 日本語の混在・反復・不自然な定型句を検出した場合だけ、短い指示で一度だけ修復生成する。
+      let japaneseRepairAttempted=false;
+      if(reply && !modelOutputCorrupted && analyzeJapaneseOutputQuality(reply).needsRepair){
+        japaneseRepairAttempted=true;
+        setStatus("aiStatus","日本語の不自然な表現を検出しました。自然な会話文に整えています…");
+        const repairResult=await aiEngine.chat.completions.create({
+          messages:[
+            {role:"system",content:"あなたは自然な日本語で話すALVISです。ユーザーの発言に対する返事を、会話として自然な日本語で1〜2文だけ返してください。英単語を混ぜないでください。意味の通らない否定や不自然な敬語を使わず、相手の気持ちを受け止めてください。説明や自己評価は不要です。"},
+            ...conversationForGeneration.slice(-2),
+            {role:"user",content:"直前の回答を使わず、次の発言に自然な日本語で返答してください。\n"+text}
+          ],
+          temperature:0.5,
+          max_tokens:64,
+          extra_body:{enable_thinking:false}
+        });
+        const repaired=extractVisibleAnswer(repairResult.choices?.[0]?.message);
+        if(repaired && !isCorruptedModelReply(repaired) && !analyzeJapaneseOutputQuality(repaired).needsRepair){
+          reply=repaired;
+          result=repairResult;
+        }else if(analyzeJapaneseIntent(text).intent==="emotion"){
+          const tired=/疲れ|しんど|大変|忙し|つら/u.test(text);
+          reply=tired?"そっか、今日は大変だったんだね。無理せず、少しゆっくり休んでね。":"そうだったんだね。話してくれてありがとう。";
+          setStatus("aiStatus","日本語の不自然な表現を検出したため、端末内の自然な会話表現に切り替えました。");
+        }
+      }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
       const finalChoice=result?.choices?.[0]||{};
       const usage=result?.usage||{};
       const promptCharacters=activeSystemPrompt.length+conversationForGeneration.reduce((sum,item)=>sum+String(item.content||"").length,0);
       generationStatusDetails=(modelOutputCorrupted?"異常出力を検出":!reply?"空回答":"生成完了")
-        +" "+totalSeconds+"秒 / 試行"+generationAttempts+"回 / prompt約"+promptCharacters+"文字"
+        +" "+totalSeconds+"秒 / 試行"+generationAttempts+"回"+(japaneseRepairAttempted?"（日本語修復あり）":"")+" / prompt約"+promptCharacters+"文字"
         +" / finish:"+String(finalChoice.finish_reason||"不明")
         +" / tokens:"+String(usage.prompt_tokens??"?")+"+"+String(usage.completion_tokens??"?");
       if(!reply){
