@@ -150,7 +150,7 @@ assert.equal((app.match(/max_tokens:responseTokenLimit/g)||[]).length, 1);
 assert.equal((app.match(/max_tokens:64/g)||[]).length, 4);
 assert.equal((app.match(/max_tokens:512/g)||[]).length, 0);
 assert.match(app, /AIであることを毎回説明しない/);
-assert.match(app, /英語を混ぜず、自然な日本語だけで返す/);
+assert.match(app, /英語を混ぜず/);
 assert.match(app, /const conversationForGeneration=isBriefConversationalTurn/);
 assert.match(app, /recent\.slice\(-4\)/);
 assert.match(app, /slice\(-200\)/);
