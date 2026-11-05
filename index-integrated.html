@@ -1316,6 +1316,8 @@ function isCorruptedModelReply(reply){
   if(/[\u0400-\u04FF]{4,}/u.test(value) && !/[\u3040-\u30FF\u3400-\u9FFF]/u.test(value))return true;
   // 1文字や数字が長く連続するデコード崩壊（例: v777777...）を検出。
   if(/([A-Za-z0-9])\1{11,}/i.test(value))return true;
+  // 句読点・ドットだけが大量に続く空出力に近い崩壊を検出。
+  if(/(?:[.。．…·•]\s*){12,}/u.test(value))return true;
   // 同じ短い英単語・日本語断片が大量反復されるデコード崩壊を検出。
   const tokens=value.toLowerCase().match(/[a-z]{2,}|[\u3040-\u30ff\u3400-\u9fff]{2,}/g)||[];
   if(tokens.length>=8){
@@ -1323,7 +1325,7 @@ function isCorruptedModelReply(reply){
     for(const token of tokens)counts.set(token,(counts.get(token)||0)+1);
     const maxRepeat=Math.max(0,...counts.values());
     // 短い内部トークン（forKey等）が回答の大半を占める異常出力も検出する。
-    if(maxRepeat>=8 && maxRepeat/tokens.length>=0.7)return true;
+    if(maxRepeat>=6 && maxRepeat/tokens.length>=0.7)return true;
   }
   if(/(?:forKey[\s\u3000]*){3,}/i.test(value))return true;
   if(/([\u3400-\u9fff]{2,8})(?:[\s\u3000]*\1){2,}/u.test(value))return true;
