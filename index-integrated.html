@@ -1423,10 +1423,21 @@ async function sendToAlvis(){
     renderAll();
     setStatus("aiStatus",candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）" : "Qwen3-4B 接続中・準備完了");
   }catch(error){
-    const message="AI生成エラー: "+(error?.message||String(error));
+    const detail=String(error?.message||error||"不明なエラー");
+    const engineStateLost=/map async was not successful|model not loaded before trying to complete|device was lost|device lost|gpu.*lost|webgpu.*lost/i.test(detail);
+    let message="AI生成エラー: "+detail;
+    if(engineStateLost){
+      // WebLLM内部でモデル状態が失われた場合、古いengine参照を再利用しない。
+      const failedEngine=aiEngine;
+      aiEngine=null;
+      if(failedEngine){try{await failedEngine.unload();}catch(unloadError){}}
+      message+="\nQwen3-4Bの実行状態が失われたため、モデルを停止扱いにしました。「Qwen3-4Bを読み込む」を押して再起動してください。記憶庫や会話履歴はそのままです。";
+      $("loadAiModel").disabled=false;
+      $("unloadAiModel").disabled=true;
+    }
     data.history.push({role:"alvis",text:message,createdAt:new Date().toISOString()});
     try{await saveLocal();}catch(saveError){}
-    setStatus("aiStatus",message);
+    setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。Qwen3-4Bを再読み込みしてください。":message);
   }finally{
     $("sendChat").disabled=false;
     renderAll();
