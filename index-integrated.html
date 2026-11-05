@@ -1605,7 +1605,7 @@ function analyzeJapaneseIntent(value){
   else if(/疲れた|眠い|嬉しい|悲しい|不安|怖い|楽しみ|つらい|寂しい|腹が立つ/u.test(text))intent="emotion";
   else if(/[?？]|(?:ですか|ますか|教えて|何|なに|いつ|どこ|誰|だれ|どれ|どっち|なぜ|どうして)/u.test(text))intent="question";
   else if(/(?:して|作って|直して|調べて|確認して|お願い|やって|進めて|始めて)(?:ください|ほしい|ね|よ)?[。！!？?]*$/u.test(text))intent="request";
-  else if(/(?:と思う|気がする|好き|嫌い|いいね|すごい|なるほど)/u.test(text))intent="opinion";
+  else if(/(?:と思う|そう思う|気がする|好き|嫌い|いいね|すごい|なるほど)/u.test(text))intent="opinion";
   else if(/(?:できた|終わった|行ってきた|帰った|始めた|買った|食べた|今日は|今は|さっき)/u.test(text))intent="report";
   let tense="unspecified";
   if(/(?:だった|ました|たよ|たね|ていた|てた|終わった|できた)[。！!？?]*$/u.test(text))tense="past";
