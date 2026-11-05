@@ -559,3 +559,12 @@
 - 次はiPad SafariだけでOAuthコールバック/トークンを端末内に安全保持できるか、公式SDKの対応環境を調べる。難しい場合はローカルアプリ/サービス方式の選択肢を比較する。実装前にユーザーへ追加料金・プラン条件を明確に説明する。
 - 現行Qwen3-4Bのオフライン経路は維持。ネットワーク断・ChatGPT利用不可時のローカルフォールバックを維持する。
 - 既存のOpenAI/Gemini APIゲートウェイは従量課金の別経路。ユーザーが明示承認するまで実デプロイ・APIキー設定は行わない。
+
+
+## SDK・iPad対応の追加確認
+
+- OpenAI公式DevKitのREADMEでは、Sign in with ChatGPTの開発SDKはローカルNode.jsプロセス向け（@siwc/local）とされ、掲載されている実アプリ例はmacOS/Electron。ブラウザ単体で動くPWA向けSDKではない。
+- iPad Safari上のALVIS PWAへNode.jsローカルランタイムをそのまま組み込むことはできないため、現行iPad構成に直接追加できるとは判断しない。
+- iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
+- DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
+- 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
