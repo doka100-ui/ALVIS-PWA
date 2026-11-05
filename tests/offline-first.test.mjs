@@ -32,7 +32,7 @@ assert.ok(app.includes("聞かれたことに直接答え"));
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
 const jaEnd=app.indexOf("\n\nfunction isWeatherQuestion",jaStart);
 assert.ok(jaStart>=0&&jaEnd>jaStart,"Japanese language pack helpers must exist");
-const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,analyzeJapaneseOutputQuality};")();
+const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality};")();
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.version,"ja-core-1");
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.lexicon.particles["は"],"話題・対比");
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.lexicon.particles["を"],"動作の対象");
@@ -43,6 +43,22 @@ assert.equal(japanesePack.analyzeJapaneseIntent("ありがとう、助かった"
 assert.equal(japanesePack.analyzeJapaneseIntent("明日の天気は？").intent,"question");
 assert.equal(japanesePack.analyzeJapaneseIntent("どうすればいいか相談したい").intent,"consultation");
 assert.equal(japanesePack.analyzeJapaneseIntent("今日は疲れた").intent,"emotion");
+assert.equal(japanesePack.analyzeJapaneseIntent("今日は本当に大変ですね").intent,"emotion");
+assert.equal(japanesePack.analyzeJapaneseIntent("最近かなり忙しい").intent,"emotion");
+assert.equal(japanesePack.analyzeJapaneseIntent("今日は嬉しいことがあった").intent,"emotion");
+const variationHistory=[
+  {role:"user",text:"今日は疲れた"},
+  {role:"alvis",text:"そっか、今日は大変だったんだね。無理せず休んでね。"},
+  {role:"user",text:"ありがとう"}
+];
+const fatigueVariation=japanesePack.buildConversationVariationGuidance("今日は本当に大変ですね",variationHistory);
+assert.match(fatigueVariation,/疲労や大変さ/);
+assert.match(fatigueVariation,/直近のALVISの返答/);
+assert.match(fatigueVariation,/無理せず休んでね/);
+assert.match(japanesePack.buildConversationVariationGuidance("不安で眠れない",[]),/根拠なく『大丈夫』と断言しない/);
+assert.match(japanesePack.buildConversationVariationGuidance("今日は嬉しいことがあった",[]),/一緒に喜ぶ/);
+assert.match(japanesePack.buildConversationVariationGuidance("仕事で失敗して悔しい",[]),/不満や悔しさ/);
+
 assert.equal(japanesePack.analyzeJapaneseIntent("この文章を直して").intent,"request");
 assert.equal(japanesePack.analyzeJapaneseIntent("私はそう思う").intent,"opinion");
 assert.equal(japanesePack.analyzeJapaneseIntent("今日は仕事に行った").intent,"report");
