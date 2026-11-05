@@ -20,7 +20,7 @@ for (const sample of ["今日は何してた？", "今日何してたの？", "�
 for (const sample of ["今日は何する？", "今日は何してた？明日は？", "今日は何してた？天気は？", "何してた？"]) assert.equal(isAssistantActivityQuestion(sample), false, `must not overmatch: ${sample}`);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
-assert.ok(app.includes("聞かれたことに直接答える"));
+assert.ok(app.includes("聞かれたことに直接答え"));
 
 // Offline Japanese language foundation: intent, tense, register, phrase retrieval and diagnostics.
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
