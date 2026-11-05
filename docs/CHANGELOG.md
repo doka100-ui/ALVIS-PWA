@@ -544,3 +544,15 @@
 - 10項目のオフライン優先構造テストを追加し、GitHub Actionsで自動実行するワークフローを追加。
 - iPad Safariの完全オフライン受け入れ試験手順を `docs/OFFLINE_ACCEPTANCE.md` に追加。
 - この時点の静的検査は10/10 PASS。Actions実行・実機機内モード試験は未確認。
+
+
+## 2026-11-05 — 通常チャットのQwen3思考モード設定を統一
+
+- 対象: `development` ブランチの `index-integrated.html`。
+- 通常チャットの初回生成、空回答時の再試行、日本語再生成、異常出力時の再生成の4経路すべてに `extra_body: { enable_thinking: false }` を追加。
+- 自律改善・学習・タスク生成では既に同設定が使われていたが、通常チャットだけ設定が欠落していた不整合を修正。
+- 目的: Qwen3の思考タグ/思考モードの出力差を減らし、通常回答と再試行の生成条件を揃える。回答品質の改善は実機での確認が必要であり、修正だけで解消を断定しない。
+- `tests/offline-first.test.mjs` に4経路すべての設定を確認する回帰テストを追加。
+- Service Worker cache: `alvis-cache-v54-integrated`。
+- 暗号化、記憶データ形式、バックアップ、同期、オンラインAI送信範囲は変更なし。
+- 検証: GitHubソースの静的検査を実施。Node.jsテスト実行・GitHub Actions・iPad Safari実機生成は未確認。
