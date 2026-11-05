@@ -377,3 +377,10 @@
 - 異常トークン検出の日本語文字範囲とforKey反復判定、複数テキスト片の結合処理のエスケープも修正。
 - Service Worker app shell cacheの更新は未完了。次回iPadテストは `?v=38` を付けた開発URLで新しいHTMLを取得する。
 - 静的コード確認のみ。iPad実機テスト待ち。記憶庫・会話データ・暗号化形式は変更なし。
+
+
+## 2026-11-05 WebGPU adapter preference diagnostic
+- Qwen3-4B load failure persisted despite default `navigator.gpu.requestAdapter()` and `requestDevice()` succeeding.
+- WebLLM's TVM GPU initialization requests `navigator.gpu.requestAdapter({powerPreference: "high-performance"})`; the generic error is thrown when that request returns null.
+- Updated ALVIS device diagnostics to test default, high-performance, and low-power adapter requests separately, while retaining the default adapter device-creation check. This is diagnostic only; it does not change model initialization behavior.
+- Service Worker app cache bumped to v39. No model data, encrypted vault, backups, or conversation history changed.
