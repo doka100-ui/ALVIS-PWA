@@ -21,6 +21,34 @@ for (const sample of ["今日は何する？", "今日は何してた？明日�
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 assert.ok(app.includes("聞かれたことに直接答える"));
+
+// Offline Japanese language foundation: intent, tense, register, phrase retrieval and diagnostics.
+const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
+const jaEnd=app.indexOf("\n\nfunction isWeatherQuestion",jaStart);
+assert.ok(jaStart>=0&&jaEnd>jaStart,"Japanese language pack helpers must exist");
+const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,analyzeJapaneseOutputQuality};")();
+assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.version,"ja-core-1");
+assert.equal(japanesePack.analyzeJapaneseIntent("こんにちは").intent,"greeting");
+assert.equal(japanesePack.analyzeJapaneseIntent("ありがとう、助かった").intent,"gratitude");
+assert.equal(japanesePack.analyzeJapaneseIntent("明日の天気は？").intent,"question");
+assert.equal(japanesePack.analyzeJapaneseIntent("どうすればいいか相談したい").intent,"consultation");
+assert.equal(japanesePack.analyzeJapaneseIntent("今日は疲れた").intent,"emotion");
+assert.equal(japanesePack.analyzeJapaneseIntent("この文章を直して").intent,"request");
+assert.equal(japanesePack.analyzeJapaneseIntent("私はそう思う").intent,"opinion");
+assert.equal(japanesePack.analyzeJapaneseIntent("今日は仕事に行った").intent,"report");
+assert.equal(japanesePack.analyzeJapaneseIntent("昨日は楽しかった").tense,"past");
+assert.equal(japanesePack.analyzeJapaneseIntent("明日行く予定").tense,"future");
+assert.equal(japanesePack.analyzeJapaneseIntent("今は作業しています").register,"polite");
+assert.match(japanesePack.buildJapaneseLanguageGuidance("今日は疲れた"),/気持ちを表す言葉/);
+assert.match(japanesePack.buildJapaneseLanguageGuidance("明日の天気は？"),/質問の中心語/);
+assert.match(japanesePack.buildJapaneseLanguageGuidance("こんにちは"),/自然な表現例/);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("今日はmostly忙しかった").hasSuspiciousLatin,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("私はALVISです。").hasSuspiciousLatin,false);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("了解です。了解です。").repeatedSentence,true);
+assert.match(app,/buildJapaneseLanguageGuidance\(text\)/);
+assert.match(app,/content:activePromptWithJapanesePack/);
+assert.match(app,/【日本語言語パック/);
+assert.match(app,/診断用であり、この初版では自動書き換えをしない/);
 const onlineStart = app.indexOf("async function requestOnlineAiCollaboration");
 const onlineEnd = app.indexOf("\nasync function testOnlineAiGateway", onlineStart);
 assert.ok(onlineStart >= 0 && onlineEnd > onlineStart, "online request helper must exist");
