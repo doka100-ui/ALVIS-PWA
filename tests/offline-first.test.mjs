@@ -80,3 +80,19 @@ assert.match(app, /あなた自身の名前はALVIS（アルヴィス）/);
 assert.match(app, /const userIsAlvisNameQuestion=isAlvisNameQuestion\(text\)/);
 assert.match(app, /!userIsGreeting&&!userIsAlvisNameQuestion/);
 assert.match(app, /if\(userIsAlvisNameQuestion\)/);
+
+
+// ALVIS identity questions with natural wording must bypass Qwen.
+const nameHelperStart = app.indexOf("function isAlvisNameQuestion(");
+const nameHelperEnd = app.indexOf("\\n}\\n\\nasync function sendToAlvis", nameHelperStart);
+assert.ok(nameHelperStart >= 0 && nameHelperEnd > nameHelperStart, "name question helper must exist");
+const isAlvisNameQuestion = new Function(app.slice(nameHelperStart, nameHelperEnd + 2) + "; return isAlvisNameQuestion;")();
+for (const sample of ["名前は？", "名前は", "あなたの名前は？", "あなたの名前は何ですか？", "ALVISの名前は？", "名前を教えて", "あなたは誰？"]) {
+  assert.equal(isAlvisNameQuestion(sample), true, `must answer name question instantly: ${sample}`);
+}
+for (const sample of ["私の名前は？", "今日の天気は？", "富士山の高さは？"]) {
+  assert.equal(isAlvisNameQuestion(sample), false, `must not misclassify unrelated question: ${sample}`);
+}
+assert.match(app, /<h2>ALVIS ログイン<\\/h2>/);
+assert.match(app, /placeholder="パスワード"/);
+assert.doesNotMatch(app, /記憶を暗号化するパスワードを入力してね|パスワードは忘れないように保管してね/);
