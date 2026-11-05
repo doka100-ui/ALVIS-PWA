@@ -534,3 +534,11 @@
 - Workerモックテスト: 8/8 PASS（health、認証、CORS、JSON、リクエストサイズ、質問長、2社並列、片方失敗時の部分成功）。
 - 実際のCloudflare WorkerデプロイとOpenAI/Gemini API接続はまだ行っていない。現段階ではコードとモック動作の検証まで。
 - 開発版Service Worker cache: `alvis-cache-v53-integrated`。
+
+
+### 2026-11-05 — オンラインAI API方式の更新
+
+- OpenAIはResponses API、GeminiはInteractions APIを使用するようWorkerを更新。
+- 両方のリクエストに `store:false` を設定。GeminiキーをURLからHTTPヘッダーへ移動。
+- 公式仕様確認: OpenAIは新規プロジェクトにResponses APIを推奨。GoogleはInteractions APIを2026年6月以降の新規開発向け標準として案内。
+- 実API接続は未実施。模擬レスポンスを使ったWorkerテストを再実行する。
