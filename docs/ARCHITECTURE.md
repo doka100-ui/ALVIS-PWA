@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v50-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v51-integrated`。
 
 ## 4. データの流れ
 
@@ -371,3 +371,11 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 短いフォローアップで直接関連する学びが見つからない場合、直近という理由だけで無関係な承認済み学びを追加しない。
 - 関連度スコアが閾値に達した学びだけを最大3件渡す。見つからない場合は「関連する学びなし」として扱い、直近会話の履歴は従来どおり別枠で渡す。
 - ユーザー承認済みの学びデータそのものは削除・変更しない。推論時の選択だけを変更。
+
+
+### 記憶検索の現在質問優先（2026-11-05）
+
+- 長期記憶・承認済み学びは、現在の質問に直接関連する候補だけを選択する。
+- 直近会話の文脈は、直接関連した候補の順位を補助する場合に限り加点する。文脈だけで別テーマの記憶・学びが選ばれることを防止。
+- 関連度閾値未満の承認済み学びは、フォローアップでも追加しない。
+- これらは推論時の検索順位・選択のみ。保存済み記憶・学びデータは変更しない。
