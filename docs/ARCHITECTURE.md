@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v51-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v52-integrated`。
 
 ## 4. データの流れ
 
@@ -388,3 +388,15 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 「ちなみに、オフラインで動かしたい」でALVIS開発の記憶だけを取得するケース: PASS。
 - 天気の独立質問で食べ物・開発・旅行の記憶を取得しないケース: PASS。
 - 合計4ケース全件合格。関数単体の検証であり、Qwen実生成・Safari実機確認ではない。
+
+
+## オンラインAI協力ゲートウェイ（2026-11-05）
+
+- ALVISは引き続き端末内Qwen3-4Bを基本AIとし、オンラインAIはチャットごとの明示チェック時だけ利用する。
+- ブラウザから外部AIへ送るデータは現在の質問文のみ。会話履歴、長期記憶、暗号化保管庫は送信しない。
+- Cloudflare Workerを中継点とし、OpenAIとGeminiのAPIキーはWorker Secretsに保存。ALVISフロントエンドにはプロバイダーAPIキーを保持しない。
+- Workerの回答は未検証の参考意見として端末内Qwenへ渡し、Qwenが比較・統合する。片方のプロバイダーが失敗しても他方の成功結果を返す。
+- Workerのソースは `workers/online-ai-gateway.js`。デプロイ・Secrets設定手順は `docs/ONLINE_AI_GATEWAY.md`。
+- ゲートウェイURLと共有トークンは `data.onlineAiSettings` に格納し、既存のAES-GCM保管庫の中で暗号化する。旧データでは空の設定を補完する。
+- オンラインAIの利用は任意。未設定・オフライン・タイムアウト時はローカルAIへフォールバックする。利用料が発生する可能性があるため、自動呼び出しはしない。
+- Service Worker cache: `alvis-cache-v52-integrated`。
