@@ -1620,12 +1620,19 @@ function analyzeJapaneseIntent(value){
   return {intent,tense,register};
 }
 
-function buildJapaneseLanguageGuidance(value){
+function buildJapaneseLanguageGuidance(value,compact=false){
   const analysis=analyzeJapaneseIntent(value);
   const guidance=ALVIS_JAPANESE_LANGUAGE_PACK.intentGuidance[analysis.intent];
   const examples=analysis.intent==="emotion"?ALVIS_JAPANESE_LANGUAGE_PACK.phraseExamples.empathy
     :analysis.intent==="request"?ALVIS_JAPANESE_LANGUAGE_PACK.phraseExamples.acknowledgement
     :ALVIS_JAPANESE_LANGUAGE_PACK.phraseExamples.casual;
+  if(compact){
+    return [
+      "【日本語会話："+analysis.intent+"】",
+      guidance,
+      "相手の発言の肯定・否定、質問、引用を取り違えず、直前の会話と意味がつながる返答にする。自然な表現例："+examples.slice(0,2).join("・")
+    ].join("\n");
+  }
   return [
     "【日本語言語パック "+ALVIS_JAPANESE_LANGUAGE_PACK.version+"】",
     "発言分類："+analysis.intent+"／時制："+analysis.tense+"／文体："+analysis.register,
@@ -1743,10 +1750,11 @@ async function sendToAlvis(){
       }
     }
     // 短い雑談は出力上限を小さくし、長い崩れた生成が再試行を引き起こす時間を抑える。
-    const isBriefConversationalTurn=text.length<=60&&/(今日は何してた|今何してる|元気|ありがとう|助かった|お疲れ|ただいま|おかえり|どう思う|眠い|疲れた|こんにちは|こんばんは|おはよう|そうなんだ|なるほど|いいね|そうだね|わかった|了解|できた|どうした|何してる|何してた|最近どう|嬉しい|悲しい|困った|楽しみ|すごい|本当|そうなの)/u.test(text);
-    const responseTokenLimit=isBriefConversationalTurn?64:384;
+    const conversationalMarkers=/(?:ですね|ですよ|ですか|でした|だよね|だよ|かな|かも|なんだ|なの|だね|だな|だった|てる|てた|お疲れ|ありがとう|助かった|ただいま|おかえり|元気|眠い|疲れた|嬉しい|悲しい|困った|楽しみ|すごい|ほんと|本当|そうなんだ|なるほど|いいね|わかった|了解|どうした|何してる|何してた)/u.test(text);
+    const isBriefConversationalTurn=text.length<=180&&(conversationalMarkers||/^(?:はい|うん|そう|いや|でも|それで|じゃあ|なるほど|たしかに|ありがとう|了解|わかった)[。！!？?、\s　]*$/u.test(text));
+    const responseTokenLimit=isBriefConversationalTurn?96:384;
     const conversationForGeneration=isBriefConversationalTurn
-      ?recent.slice(-2).map(item=>({...item,content:String(item.content||"").slice(-240)}))
+      ?recent.slice(-4).map(item=>({...item,content:String(item.content||"").slice(-200)}))
       :recent;
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
@@ -1788,9 +1796,9 @@ async function sendToAlvis(){
       selectRelevantLearnings(text,data.history,data.learnings).map(formatApprovedLearningForPrompt).join("\n").slice(0,1800)||"今回の質問に関連する承認済み学びはありません。"
     ].join("\n");
     const activeSystemPrompt=isBriefConversationalTurn
-      ?["あなたはALVIS。親しみやすく自然な日本語で会話する。一人称は「私」。","短い雑談は1〜2文で、質問文の中心語と時制を取り違えず、聞かれたことに直接答える。説明口調・業務報告・定型の締め・不要な質問は禁止。","AIであることを毎回説明しない。人間のふりもせず、会話に必要な範囲で正直に答える。","英語を混ぜず、自然な日本語だけで返す。直前の会話を踏まえ、同じ言葉を繰り返さない。"].join("\n")
+      ?["あなたはALVIS。親しみやすく自然な日本語で会話する。一人称は「私」。","直前の会話を読んでから返答する。ユーザーの発言が直前の私の返事への反応なら、そのつながりを保つ。引用・確認・冗談・反語を本人の主張と混同しない。","肯定と否定、誰が何をしたか、誰に向けた言葉かを確認する。ユーザーが言っていない経験・感情・意見を勝手に補わない。","短い雑談は1〜2文。聞かれたことに直接答え、共感は短く自然に伝える。説明口調・業務報告・定型の締め・不要な質問は禁止。","AIであることを毎回説明しない。人間のふりもせず、会話に必要な範囲で正直に答える。英語を混ぜず、同じ意味を繰り返さない。"].join("\n")
       :systemPrompt;
-    const activePromptWithJapanesePack=activeSystemPrompt+"\n\n"+buildJapaneseLanguageGuidance(text);
+    const activePromptWithJapanesePack=activeSystemPrompt+"\n\n"+buildJapaneseLanguageGuidance(text,isBriefConversationalTurn);
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
     let reply;
