@@ -585,3 +585,10 @@
 - Help Centerの商用アプリ対象はGo/Plus/Proだが、公式オープンソースDevKitの利用例はPlus/Pro。ALVISのOSS連携ではGo/Freeを保証しない。
 - 公式DevKitはローカルNode.js SDK。サンプルはmacOS 14+ / Node.js 22.12+ / Xcode CLTのmacOS/Electron。Noncommercial License v1.0。Safari PWA/iPadの直接対応は未確認。
 - 今すぐユーザーのログイン・パスワード・トークンは求めない。次の技術調査はiPad単独のローカル実行可否と、必要ならMacコンパニオン方式。どちらもQwenオフラインを維持する。
+
+
+## 2026-11-05 — オフライン回帰チェックと実機受け入れ試験
+- `tests/offline-first.test.mjs` を追加し、GitHub Actions `.github/workflows/offline-first.yml` でdevelopmentブランチへの関連変更時にNode.js 22で自動実行する設定を追加。
+- ソース構造を確認する10項目は10/10 PASS（この会話内の検査）。GitHub Actionsの実行結果はまだ未確認。
+- `docs/OFFLINE_ACCEPTANCE.md` にiPad Safariでの完全オフライン再起動・Qwen再ロード・記憶復号・音声・保存・オンライン失敗時のローカル継続の実機試験手順を追加。
+- 機内モードでの再起動・推論は未確認。完全オフライン対応済みとはまだ扱わない。
