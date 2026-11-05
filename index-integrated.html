@@ -1121,7 +1121,7 @@ function generateMemoryCandidates(userMessage){
 function isLikelyPastedCorruption(value){
   const text=String(value||"").trim();
   if(text.length<160)return false;
-  const compact=text.replace(/[\\s\\u3000]/g,"");
+  const compact=text.replace(/[\s\u3000]/g,"");
   if(compact.length<160)return false;
   const counts=new Map();
   for(const char of compact)counts.set(char,(counts.get(char)||0)+1);
@@ -1133,7 +1133,7 @@ function isLikelyPastedCorruption(value){
 function isUsableConversationTurn(item){
   if(!item||(item.role!=="user"&&item.role!=="alvis"))return false;
   const value=String(item.text||"").trim();
-  if(!value||/^[\\s。、。，．.!！?？…・]+$/u.test(value))return false;
+  if(!value||/^[\s。、。，．.!！?？…・]+$/u.test(value))return false;
   if(item.role==="user"&&isLikelyPastedCorruption(value))return false;
   if(item.role==="alvis"&&/^(回答を生成できませんでした|回答本文を取得できませんでした|ごめん、回答の生成中に表示用の内部文字列)/.test(value))return false;
   if(item.role==="alvis"&&isCorruptedModelReply(value))return false;
@@ -1257,12 +1257,14 @@ function getJapanDateTime(){
   };
 }
 function isDateQuestion(text){
-  const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
-  return /(?:今日|きょう|本日).*(?:何年|何月|何日|日付|西暦)|(?:現在|今日|本日)の日付|西暦.*(?:何年|何月|何日)/i.test(value);
+  const value=String(text||"").normalize("NFKC").replace(/[\s　]/g,"");
+  // 複数の話題を含む発言はモデルへ渡し、日付だけの固定応答で他の質問を落とさない。
+  return /^(?:(?:今日|きょう|本日)(?:の日付|は何年何月何日|は何年|は何月|は何日|何日|何月何日)|(?:現在|今日|本日)の日付|西暦は?何年)(?:は)?(?:ですか|でしょうか|を教えて|教えて)?[?？。!！]*$/i.test(value);
 }
 function isTimeQuestion(text){
-  const value=String(text||"").normalize("NFKC").replace(/[\\s　]/g,"");
-  return /(?:今|いま|現在|ただいま).*(?:何時|時刻)|(?:何時|時刻).*(?:ですか|でしょうか|教えて|知りたい|現在|今)|今何時/i.test(value);
+  const value=String(text||"").normalize("NFKC").replace(/[\s　]/g,"");
+  // 「今何時？それと…」のような複数意図は固定応答で処理しない。
+  return /^(?:(?:今|いま|現在|ただいま)(?:の時間|の時刻|は何時|何時|は何時ですか)|現在時刻|何時)(?:ですか|でしょうか|を教えて|教えて|知りたい)?[?？。!！]*$/i.test(value);
 }
 const COUNTRY_TIME_ZONES=[
   {names:["アメリカ","米国","USA","US","アメリカ合衆国"],zones:[["東部（ニューヨーク）","America/New_York"],["中部（シカゴ）","America/Chicago"],["山岳部（デンバー）","America/Denver"],["太平洋（ロサンゼルス）","America/Los_Angeles"]]},
@@ -1299,11 +1301,19 @@ const COUNTRY_TIME_ZONES=[
   {names:["日本"],zones:[["日本","Asia/Tokyo"]]}
 ];
 function findCountryTimeEntry(text){
-  const value=String(text||"").normalize("NFKC").replace(/[\\s　？?！!。、]/g,"").toUpperCase();
+  const value=String(text||"").normalize("NFKC").replace(/[\s　？?！!。、]/g,"").toUpperCase();
   return COUNTRY_TIME_ZONES.find(entry=>entry.names.some(name=>value===name.normalize("NFKC").toUpperCase()||value.includes(name.normalize("NFKC").toUpperCase())));
 }
 function isCountryTimeFollowup(text,history){
-  if(!findCountryTimeEntry(text))return false;
+  const entry=findCountryTimeEntry(text);
+  if(!entry)return false;
+  const value=String(text||"").normalize("NFKC").replace(/[\s　？?！!。、]/g,"").toUpperCase();
+  // 国名だけ、または国の時刻を尋ねる短い追加発言だけを固定応答にする。
+  const simpleCountryPrompt=entry.names.some(name=>{
+    const country=name.normalize("NFKC").toUpperCase();
+    return [country,country+"は",country+"の時間",country+"の時刻",country+"は何時","今"+country+"は何時"].includes(value);
+  });
+  if(!simpleCountryPrompt)return false;
   return (history||[]).filter(item=>item.role==="user").slice(-1).some(item=>isTimeQuestion(item.text));
 }
 function getCountryCurrentTimeReply(text){
