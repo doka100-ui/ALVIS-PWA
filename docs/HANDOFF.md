@@ -444,3 +444,9 @@
 - `buildConversationMessages()` の通常履歴上限を8メッセージ/約3,200文字へ拡張。フォローアップは10メッセージ/約4,200文字。
 - Service Worker `alvis-cache-v45-integrated`。
 - 実機未確認。次回まとめてiPadで複数質問・文脈維持を確認する。
+
+
+## 2026-11-05 追記：文脈を引き継ぐ追加質問
+- `isFollowUpMessage()` に「じゃあ」「それなら」「ちなみに」「あと」「では」「なら」を追加。
+- システムプロンプトで追加質問時の場所・日時・対象の引き継ぎと、明確な話題転換の優先を明記。
+- Service Worker "alvis-cache-v46-integrated"。iPad実機テストは複数質問機能とまとめて実施。
