@@ -113,9 +113,9 @@ assert.equal(app.slice(htmlEnd + 7).trim(), "", "no JavaScript or source text ma
 
 
 // TTS-only ALVIS pronunciation normalization; visible text and stored history stay unchanged.
-assert.match(a, /function normalizeAlvisSpeechText\(value\)/);
-assert.match(a, /replace\(\/ALVIS\/gi,"アルビス"\)/);
-assert.equal((a.match(/normalizeAlvisSpeechText\(String\(text\|\|""\)\.replace\(\/<\[\^>\]\*>\/g," "\)\)/g)||[]).length, 2,
+assert.match(app, /function normalizeAlvisSpeechText\(value\)/);
+assert.match(app, /replace\(\/ALVIS\/gi,"アルビス"\)/);
+assert.equal((app.match(/normalizeAlvisSpeechText\(String\(text\|\|""\)\.replace\(\/<\[\^>\]\*>\/g," "\)\)/g)||[]).length, 2,
   "both standard and Kokoro TTS must normalize ALVIS pronunciation");
-assert.match(a, /new SpeechSynthesisUtterance\(clean\)/);
-assert.match(a, /kokoroTts\.speak\(clean,/);
+assert.match(app, /new SpeechSynthesisUtterance\(clean\)/);
+assert.match(app, /kokoroTts\.speak\(clean,/);
