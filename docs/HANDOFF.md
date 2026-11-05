@@ -391,3 +391,12 @@
 - Added a separate high-performance GPU device test using the required limits/features requested by TVM WebGPU runtime: maxBufferSize, maxStorageBufferBindingSize, maxComputeWorkgroupStorageSize, maxStorageBuffersPerShaderStage, optional maxComputeInvocationsPerWorkgroup, and optional shader-f16/subgroups.
 - This is a diagnostic-only test. It does not change model loading or allocate model weights; the temporary GPU device is destroyed immediately.
 - App shell cache bumped to v40. Encrypted memory, conversations, model cache and backup format are unchanged.
+
+
+## 2026-11-05 — Qwen生成不安定の切り分け（iPad優先）
+- GPU診断ではWebLLM相当のGPUデバイス作成が成功し、ユーザー実機でQwen3-4Bの読み込みも成功した。GPUアダプター取得だけを原因とする仮説は弱くなった。
+- 本体の `sendToAlvis()` は空回答・英語主体・異常反復に対して同一エンジンへ複数回再生成を行う一方、各試行の `finish_reason` と `usage` を記録していない。このため、これまでの試験では停止理由・出力トークン数を比較できていなかった。
+- `ai-test.html` に独立生成の診断表示を追加。モデルID、生成時間、finish_reason、入力/出力/合計token数、回答文字数を表示する。会話履歴・長期記憶・本体の再試行ロジックを使わない。
+- 次の切り分けは、同じQwen3-4Bの単体テスト結果と本体の結果を比較すること。単体も異常ならモデル資材/WebLLM/モデル実行側、本体だけ異常なら本体のプロンプト・履歴構築側を優先調査する。
+- 開発版URL: https://development.alvis-pwa.pages.dev/ai-test.html
+- 未確認: iPad Safariでの単体生成と診断値。これは原因切り分け用であり、Qwenの品質修正そのものではない。
