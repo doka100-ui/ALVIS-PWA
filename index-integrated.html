@@ -1150,7 +1150,8 @@ function buildConversationMessages(history,currentText){
   // 空回答・異常出力を除外し、通常質問へ古い会話を過剰に混ぜない。
   const turns=(Array.isArray(history)?history:[]).filter(isUsableConversationTurn);
   const followUp=isFollowUpMessage(currentText);
-  const maxMessages=followUp?10:6, charBudget=followUp?4200:2400;
+  // 通常の複数質問でも直前の話題を保持できるよう、直近8発言までを短く参照する。
+  const maxMessages=followUp?10:8, charBudget=followUp?4200:3200;
   const selected=[];let used=0;
   for(let i=turns.length-1;i>=0&&selected.length<maxMessages;i--){
     const item=turns[i],content=String(item.text||"").slice(0,1400);
@@ -1375,6 +1376,9 @@ async function sendToAlvis(){
       "【現在日時・日本時間】"+japanDateTime.date+" "+japanDateTime.time,
       "現在の日付や時刻を尋ねられたら、上記の日本時間を最優先し、モデルの学習知識から推測しない。",
       "最優先：直近のユーザー発言の意図に沿って返答し、質問には答えを先に示す。",
+      "【複数の話題・質問】1回の発言に質問や依頼が複数含まれる場合、最大3件程度の独立した意図をそれぞれ認識し、重要なものを落とさず一つの自然な返答にまとめる。最初の雑談だけに答えて後半の質問を無視しない。逆に、複数の質問を無理に一つへ混ぜない。",
+      "「元気？明日東京に行くけど天気は？」のような発言では、まず挨拶・雑談に自然に返し、続けて東京の明日の天気について答える。最新情報が必要なのに取得手段がない場合は、天気を推測・捏造せず、確認できないことを短く伝える。",
+      "一つの発言に複数の質問があるときは、回答漏れがないか返答前に確認する。必要なら短い文を分けて、会話らしい順序で答える。",
       "挨拶は会話の最初、またはユーザーが挨拶したときだけ短く返す。会話の途中で挨拶を繰り返さない。",
       "ユーザーがすでに伝えた好みや事実を、毎回そのまま言い直さない。必要な場面で自然に活用する。",
       "返答は簡潔にする。雑談は原則1〜3文、説明が必要な場合だけ詳しくする。",
