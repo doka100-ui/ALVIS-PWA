@@ -1118,8 +1118,17 @@ function generateMemoryCandidates(userMessage){
   return 1;
 }
 
+function isUsableConversationTurn(item){
+  if(!item||(item.role!=="user"&&item.role!=="alvis"))return false;
+  const value=String(item.text||"").trim();
+  if(!value||/^[\\s。、。，．.!！?？…・]+$/u.test(value))return false;
+  if(item.role==="alvis"&&/^(回答を生成できませんでした|回答本文を取得できませんでした|ごめん、回答の生成中に表示用の内部文字列)/.test(value))return false;
+  if(item.role==="alvis"&&isCorruptedModelReply(value))return false;
+  return true;
+}
 function buildConversationMessages(history,currentText){
-  const turns=(Array.isArray(history)?history:[]).filter(item=>(item.role==="user"||item.role==="alvis")&&!(item.role==="alvis"&&isCorruptedModelReply(item.text)));
+  // 空回答・句読点だけの応答・生成失敗メッセージを次回のプロンプト履歴へ混ぜない。
+  const turns=(Array.isArray(history)?history:[]).filter(isUsableConversationTurn);
   const followUp=/^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ＯＫ|ありがとう|次は|やろう)/i.test(String(currentText||"").trim())||String(currentText||"").trim().length<=18;
   const maxMessages=followUp?16:12, charBudget=followUp?7200:6000;
   const selected=[];let used=0;
