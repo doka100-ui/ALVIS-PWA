@@ -43,3 +43,12 @@ for (const [name, passed] of checks) {
   console.log("PASS", name);
 }
 console.log(`\n${checks.length}/${checks.length} offline-first policy checks passed.`);
+
+
+// Dedicated external AI answer review UI
+assert.match(html, /data-page="externalAiPage">外部AIの回答/);
+assert.match(html, /id="externalAiPage"/);
+assert.match(html, /id="externalAiLearningList"/);
+assert.match(html, /function renderExternalAiResponses\(\)/);
+assert.match(html, /sourceType==="external_ai"/);
+assert.match(html, /今回は却下/);
