@@ -97,3 +97,11 @@ assert.ok(app.includes('<h2>ALVIS ログイン</h2>'));
 assert.ok(app.includes('placeholder="パスワード"'));
 assert.ok(!app.includes("記憶を暗号化するパスワードを入力してね"));
 assert.ok(!app.includes("パスワードは忘れないように保管してね"));
+
+
+// The integrated page must not contain source text after the HTML document.
+assert.equal((app.match(/<script\\b/gi)||[]).length, 1, "integrated page has one module script");
+assert.equal((app.match(/<\\/script\\s*>/gi)||[]).length, 1, "integrated page has one closing script tag");
+const htmlEnd = app.toLowerCase().lastIndexOf("</html>");
+assert.ok(htmlEnd >= 0, "integrated page must close its HTML document");
+assert.equal(app.slice(htmlEnd + 7).trim(), "", "no JavaScript or source text may follow </html>");
