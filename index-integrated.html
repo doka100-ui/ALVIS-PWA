@@ -1775,7 +1775,7 @@ async function sendToAlvis(){
             {role:"user",content:text}
           ],
           temperature:0.7,
-          max_tokens:128,
+          max_tokens:64,
           extra_body:{enable_thinking:false}
         });
         const japaneseRetry=extractVisibleAnswer(result.choices?.[0]?.message);
@@ -1791,7 +1791,7 @@ async function sendToAlvis(){
             {role:"user",content:text}
           ],
           temperature:0.7,
-          max_tokens:128,
+          max_tokens:64,
           extra_body:{enable_thinking:false}
         });
         const recovered=extractVisibleAnswer(result.choices?.[0]?.message);
