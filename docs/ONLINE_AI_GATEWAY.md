@@ -18,9 +18,9 @@ WorkerのSettings → Variables and Secretsで登録する。
 | 名前 | 種類 | 内容 |
 |---|---|---|
 | `ALVIS_GATEWAY_TOKEN` | Secret | ALVIS画面で生成する32バイト（64桁16進数）のトークン |
-| `OPENAI_API_KEY` | Secret | OpenAI APIキー（任意） |
+| `OPENAI_API_KEY` | Secret | OpenAI APIキー（任意、Responses APIを使用） |
 | `OPENAI_MODEL` | Variable | 利用可能なChat Completions対応モデルID |
-| `GEMINI_API_KEY` | Secret | Gemini APIキー（任意） |
+| `GEMINI_API_KEY` | Secret | Gemini APIキー（任意、Interactions APIを使用） |
 | `GEMINI_MODEL` | Variable | 利用可能なGeminiモデルID |
 
 少なくとも1社のAPIキーとモデルIDが必要です。2社を設定すると2つの回答を並列取得します。APIキーはWorker Secretsにのみ保存し、ALVISの画面やGitHubへ入力しないでください。モデルIDは各サービスのアカウントで利用可能なものを指定してください。
@@ -52,3 +52,11 @@ WorkerのSettings → Variables and Secretsで登録する。
 ## 現時点の制約
 
 このリポジトリへの追加だけではWorkerはデプロイされません。CloudflareへのデプロイとAPIキー設定後に初めてオンラインAI連携が有効になります。オフラインQwen3-4B・既存の記憶・バックアップ・同期機能はこのゲートウェイがなくても動作します。
+
+
+## API方式とデータ保存
+
+- OpenAIは新規開発向けのResponses API（`POST /v1/responses`）を使用します。
+- Geminiは新規開発向けのInteractions API（`POST /v1beta/interactions`）を使用します。
+- 両方とも `store: false` を指定し、API側の会話状態保存を要求しません。API事業者側の処理・不正利用監視等の取り扱いは各社の規約・プライバシー説明を確認してください。
+- Gemini APIのキーはURLクエリではなく `x-goog-api-key` ヘッダーで送ります。
