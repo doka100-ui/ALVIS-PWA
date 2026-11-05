@@ -1461,6 +1461,8 @@ function isLikelyEnglishReply(reply){
 function isCorruptedModelReply(reply){
   const value=String(reply||"").trim();
   if(!value)return true;
+  // Qwen3の制御タグ断片や、英語の内部メタデータだけが回答として漏れた場合は表示しない。
+  if(/<\/?think>|\bQueryable\b/i.test(value))return true;
   if((value.match(/ViewGroup/gi)||[]).length>=2)return true;
   // 日本語の質問に対してキリル文字だけの断片が混入する異常出力を検出。
   if(/[\u0400-\u04FF]{4,}/u.test(value) && !/[\u3040-\u30FF\u3400-\u9FFF]/u.test(value))return true;
@@ -1595,7 +1597,7 @@ async function sendToAlvis(){
         const raw=Array.isArray(message?.content)
           ? message.content.map(part=>typeof part==="string"?part:(part?.text||"")).join("\n")
           : String(message?.content||"");
-        return raw.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
+        return raw.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").replace(/<\/?think>/gi,"").trim();
       };
       // 単体生成テストで正常だった標準設定に合わせ、追加サンプリング指定の影響を切り分ける。
       let generationAttempts=1;
