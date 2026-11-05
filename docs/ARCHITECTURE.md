@@ -449,3 +449,12 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 既存のQwen3-4Bオフライン動作を最優先し、ネットワーク断・認証失敗・利用上限到達時はローカルAIへ戻す。自動課金につながるOpenAI APIキー経路は無料連携の代替として扱わない。
 - 現行Cloudflare WorkerゲートウェイはOpenAI/Gemini APIキーを使う別方式であり、API料金が発生し得る。ユーザーが明示的に有料利用を選ぶまではデプロイ・課金設定をしない。
 - 公式資料: https://developers.openai.com/siwc/quickstart 、https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt 、https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites
+
+
+## SDK・iPad対応の追加確認
+
+- OpenAI公式DevKitのREADMEでは、Sign in with ChatGPTの開発SDKはローカルNode.jsプロセス向け（@siwc/local）とされ、掲載されている実アプリ例はmacOS/Electron。ブラウザ単体で動くPWA向けSDKではない。
+- iPad Safari上のALVIS PWAへNode.jsローカルランタイムをそのまま組み込むことはできないため、現行iPad構成に直接追加できるとは判断しない。
+- iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
+- DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
+- 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
