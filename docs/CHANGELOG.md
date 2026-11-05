@@ -556,3 +556,11 @@
 - Service Worker cache: `alvis-cache-v54-integrated`。
 - 暗号化、記憶データ形式、バックアップ、同期、オンラインAI送信範囲は変更なし。
 - 検証: GitHubソースの静的検査を実施。Node.jsテスト実行・GitHub Actions・iPad Safari実機生成は未確認。
+
+
+## 2026-11-05 — Qwen3異常断片の表示防止
+- `extractVisibleAnswer()`で単独・孤立した`<think>`/`</think>`タグも除去。
+- `isCorruptedModelReply()`で`Queryable`等の内部メタデータ断片と、残存思考タグを異常出力として検出し、通常回答として保存・表示しない。
+- Service Worker cacheをv55へ更新。
+- GPUの`map async was not successful`はWebGPU実行状態の喪失として既存の停止処理へ分類されることを再確認。自動再ロードはiPadのGPUメモリ不足を悪化させる可能性があるため、この変更では無理に再起動せず安全停止を維持。
+- 検証対象は静的回帰チェック。Qwen再生成・WebGPU実機の安定性は未確認。
