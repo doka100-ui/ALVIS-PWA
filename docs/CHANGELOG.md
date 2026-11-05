@@ -490,3 +490,10 @@
 - アプリ/Worker構文解析 PASS。
 - Workerのhealth、認証拒否、Origin制限、入力検証、2社並列・部分成功を含む8ケースのモックテストが全件PASS。
 - 実Cloudflareデプロイ・実API接続・iPad Safari確認は未実施。
+
+
+## 2026-11-05 — OpenAI/Gemini接続を現行APIへ更新
+
+- OpenAI Chat CompletionsからResponses APIへ移行。
+- Gemini generateContentからInteractions APIへ移行。
+- 両方のAPIに `store:false` を指定。Gemini APIキーをURLクエリではなくHTTPヘッダーで送信。
