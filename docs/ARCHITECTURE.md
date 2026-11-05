@@ -310,3 +310,7 @@ iPad / iPhone Safari
 
 ### WebGPU adapter preference diagnostics (2026-11-05)
 The device diagnostic now checks `requestAdapter()` with no preference and with `high-performance` / `low-power` preferences. WebLLM's TVM runtime requests `high-performance`; a successful default adapter check alone does not prove that WebLLM can obtain its requested adapter. This diagnostic does not patch or override the WebGPU API.
+
+
+### WebLLM GPU limit compatibility test (2026-11-05)
+The device diagnostic now requests a high-performance adapter and attempts a temporary GPUDevice using the TVM WebGPU runtime's required limits and optional supported features. This distinguishes adapter acquisition from the stricter device creation required by WebLLM. The test destroys its temporary device immediately and does not load model weights.
