@@ -1426,8 +1426,6 @@ async function sendToAlvis(){
       if(!reply){
         setStatus("aiStatus","回答本文が空でした。短い質問で再試行しています…");
         generationAttempts++;
-        generationAttempts++;
-        generationAttempts++;
         result=await aiEngine.chat.completions.create({
           messages:[
             {role:"system",content:"あなたはALVISです。日本語で、質問に直接答えてください。思考過程やタグは出力せず、回答本文だけを簡潔に返してください。"},
@@ -1441,6 +1439,7 @@ async function sendToAlvis(){
       // 日本語の質問に対して英語主体の回答が返った場合だけ、日本語指定で一度再生成する。
       if(reply && isLikelyEnglishReply(reply) && /[\u3040-\u30ff\u3400-\u9fff]/.test(text)){
         setStatus("aiStatus","英語の回答を検出しました。日本語で再生成しています…");
+        generationAttempts++;
         result=await aiEngine.chat.completions.create({
           messages:[
             {role:"system",content:"あなたは日本語で回答するALVISです。必ず自然な日本語だけで回答してください。英語の文章は禁止です。専門用語も日本語で説明し、質問に直接、簡潔に答えてください。思考過程や前置きは出力しないでください。"},
@@ -1455,6 +1454,7 @@ async function sendToAlvis(){
       // forKey等の内部トークン反復や文字列崩壊を検出したら、履歴を外して一度だけ再生成する。
       if(reply && isCorruptedModelReply(reply)){
         setStatus("aiStatus","異常な文字列を検出しました。履歴を外して再生成しています…");
+        generationAttempts++;
         result=await aiEngine.chat.completions.create({
           messages:[
             {role:"system",content:"あなたはALVISです。質問に対する自然で正確な日本語の回答だけを返してください。英語の内部トークン、プログラム用語の反復、文字化け、思考過程は出力しないでください。簡潔に回答してください。"},
