@@ -468,3 +468,14 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - オンラインAIが未設定・通信失敗・タイムアウトの場合も、端末内Qwenの回答生成を続ける。ネット接続を通常会話の前提にしない。
 - APIキーはブラウザへ置かず、課金可能なAPI経路はユーザーが明示的に選択するまで利用しない。
 - 回帰チェック `tests/offline-first.test.mjs` を追加。実行方法は `docs/OFFLINE_FIRST_TESTS.md`。静的構造チェック10項目を実施し10/10 PASS。Safari実機の機内モード再起動やモデルキャッシュの完全性を証明するテストではない。
+
+
+
+## 2026-11-05 — ChatGPTアカウント連携の最新条件
+
+- ChatGPT本人確認ログインとChatGPTプラン利用は別権限。本人確認だけではAI推論枠は使えない。
+- プラン利用はChatGPTの既存Work/Codex等の利用枠を消費し、ChatGPT Settings > Usageで接続アプリごとの週間上限を設定できる。会話履歴・メモリへのアクセス権は付与されない。
+- 商用アプリ向けHelp CenterにはGo/Plus/Pro、OpenAI公式オープンソースDevKitの説明にはPlus/Proと記載があるため、ALVISのOSS DevKit経路ではGo/Free利用を保証しない。
+- 公式DevKitはローカルNode.js SDK。公式サンプルはmacOS 14+ / Node.js 22.12+ / Xcode Command Line ToolsのmacOS/Electronアプリであり、iPad Safari PWAへの直接組み込みは不可と判断。iPadネイティブ対応も未確認。
+- DevKitのOpenAI作成コード・文書はNoncommercial License v1.0。商用化/再配布時はライセンス再確認が必要。
+- 現段階ではALVISへのログインUIやトークン保存を実装しない。iPadでのローカル実行環境を確認するか、ユーザー管理下のMacコンパニオン方式を別途評価する。いずれもQwenの完全オフライン動作を必須条件とする。
