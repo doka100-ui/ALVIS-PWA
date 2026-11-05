@@ -275,3 +275,8 @@ iPad / iPhone Safari
 - Service Workerのアプリシェルキャッシュを v32 に更新。
 - 暗号化データ、パスワード、バックアップ、同期データは変更していない。
 - iPad実機でのログイン再確認は未実施。
+
+
+## WebLLM実行状態エラーからの復旧（2026-11-05）
+
+`sendToAlvis()` は `map async was not successful`、`Model not loaded before trying to complete`、GPUデバイス喪失に該当するエラーを検出する。該当時は現行engine参照を無効化し、可能ならunloadを試行する。UIからモデル再ロードを行うまで以降の推論に古いengineを再利用しない。会話履歴にはエラー内容と再ロード案内を残す。保管庫・暗号化・記憶・バックアップ・同期データ構造は変更しない。
