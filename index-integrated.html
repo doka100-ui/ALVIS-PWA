@@ -1755,24 +1755,31 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     lines.push("ブラウザ："+(navigator.userAgentData?.brands?.map(item=>item.brand+" "+item.version).join(", ")||navigator.userAgent));
     lines.push("WebGPU："+yesNo(!!navigator.gpu));
     if(navigator.gpu){
-      try{
-        const adapter=await navigator.gpu.requestAdapter();
-        lines.push("GPUアダプター取得："+(adapter?"成功":"失敗（ブラウザからGPUが返されませんでした）"));
-        if(adapter){
-          const info=adapter.info||{};
-          const adapterName=[info.vendor,info.architecture,info.device].filter(Boolean).join(" / ");
-          lines.push("GPU情報："+(adapterName||"詳細はSafariから非公開"));
-          lines.push("GPU最大バッファ："+(adapter.limits?.maxBufferSize?Math.round(adapter.limits.maxBufferSize/1024/1024)+" MB":"取得不可"));
-          try{
-            const device=await adapter.requestDevice();
-            lines.push("GPUデバイス作成：成功");
-            device.destroy();
-          }catch(deviceError){
-            lines.push("GPUデバイス作成：失敗（"+(deviceError?.message||String(deviceError))+"）");
+      let defaultAdapter=null;
+      for(const preference of ["default","high-performance","low-power"]){
+        try{
+          const adapter=await navigator.gpu.requestAdapter(preference==="default"?undefined:{powerPreference:preference});
+          lines.push("GPUアダプター（"+preference+"指定）："+(adapter?"取得成功":"取得失敗・null"));
+          if(preference==="default")defaultAdapter=adapter;
+          if(preference==="high-performance"&&adapter){
+            lines.push("高性能指定GPU最大バッファ："+(adapter.limits?.maxBufferSize?Math.round(adapter.limits.maxBufferSize/1024/1024)+" MB":"取得不可"));
           }
+        }catch(adapterError){
+          lines.push("GPUアダプター（"+preference+"指定）：エラー（"+(adapterError?.message||String(adapterError))+"）");
         }
-      }catch(adapterError){
-        lines.push("GPUアダプター取得：エラー（"+(adapterError?.message||String(adapterError))+"）");
+      }
+      if(defaultAdapter){
+        const info=defaultAdapter.info||{};
+        const adapterName=[info.vendor,info.architecture,info.device].filter(Boolean).join(" / ");
+        lines.push("標準GPU情報："+(adapterName||"詳細はSafariから非公開"));
+        lines.push("標準GPU最大バッファ："+(defaultAdapter.limits?.maxBufferSize?Math.round(defaultAdapter.limits.maxBufferSize/1024/1024)+" MB":"取得不可"));
+        try{
+          const device=await defaultAdapter.requestDevice();
+          lines.push("標準GPUデバイス作成：成功");
+          device.destroy();
+        }catch(deviceError){
+          lines.push("標準GPUデバイス作成：失敗（"+(deviceError?.message||String(deviceError))+"）");
+        }
       }
     }
     lines.push("標準音声読み上げ："+yesNo(!!window.speechSynthesis));
