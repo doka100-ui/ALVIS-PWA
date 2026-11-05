@@ -1,0 +1,33 @@
+name: Offline-first regression checks
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - "index-integrated.html"
+      - "service-worker.js"
+      - "tests/offline-first.test.mjs"
+      - ".github/workflows/offline-first.yml"
+  pull_request:
+    branches: [development]
+    paths:
+      - "index-integrated.html"
+      - "service-worker.js"
+      - "tests/offline-first.test.mjs"
+      - ".github/workflows/offline-first.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-first:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run offline-first regression tests
+        run: node tests/offline-first.test.mjs
