@@ -437,3 +437,15 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - health応答、Bearer認証、許可外Origin拒否、不正JSON拒否、本文サイズ上限、質問文字数上限、Responses/Interactions両プロバイダーの応答、両APIの `store:false`、Gemini APIキーのHTTPヘッダー送信、片方失敗時の部分成功を検証。
 - モックテスト: 10/10 PASS。
 - 実APIキー・実Cloudflare Worker・iPad Safariによるオンライン接続は未実施。
+
+
+## ChatGPTプラン連携の調査結果（2026-11-05）
+
+- OpenAI公式のSign in with ChatGPT / ChatGPT plan usageは実在し、対応するオープンソースアプリ・ローカル実行アプリで、ユーザーが許可した場合にChatGPTプランの利用枠を使える。APIキーや別途API課金は不要だが、利用量はユーザー自身のChatGPTプラン上限を消費する。
+- OpenAI公式の開発例が示す利用資格はChatGPT PlusまたはPro。FreeプランでChatGPTプラン利用が可能とは確認できない。Freeプランで無料GPT推論を利用できるとは扱わない。
+- 公式ガイドはローカルランタイムでの実行を前提にし、トークンはユーザー端末内で保護する。リモートホスト型アプリはパートナー承認等の別条件がある。
+- 現行ALVISはCloudflare Pagesで配信するSafari向けPWAであり、ChatGPTプラン用OAuthトークンを共有Cloudflare Workerへ送る設計にはしない。現行PWAへそのまま組み込むのは保留。
+- 将来の候補は、iPad/PC上でユーザーが管理するローカルランタイム（ネイティブ/ローカルサービス）を用意し、公式のSign in with ChatGPT手順・SDKに沿って認証、端末内トークン保護、明示的な利用許可、使用量上限表示、失効/切断を実装すること。ブラウザだけでの実現可否は別途検証する。
+- 既存のQwen3-4Bオフライン動作を最優先し、ネットワーク断・認証失敗・利用上限到達時はローカルAIへ戻す。自動課金につながるOpenAI APIキー経路は無料連携の代替として扱わない。
+- 現行Cloudflare WorkerゲートウェイはOpenAI/Gemini APIキーを使う別方式であり、API料金が発生し得る。ユーザーが明示的に有料利用を選ぶまではデプロイ・課金設定をしない。
+- 公式資料: https://developers.openai.com/siwc/quickstart 、https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt 、https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites
