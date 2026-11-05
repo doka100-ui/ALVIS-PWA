@@ -46,9 +46,9 @@ console.log(`\n${checks.length}/${checks.length} offline-first policy checks pas
 
 
 // Dedicated external AI answer review UI
-assert.match(html, /data-page="externalAiPage">外部AIの回答/);
-assert.match(html, /id="externalAiPage"/);
-assert.match(html, /id="externalAiLearningList"/);
-assert.match(html, /function renderExternalAiResponses\(\)/);
-assert.match(html, /sourceType==="external_ai"/);
-assert.match(html, /今回は却下/);
+assert.match(app, /data-page="externalAiPage">外部AIの回答/);
+assert.match(app, /id="externalAiPage"/);
+assert.match(app, /id="externalAiLearningList"/);
+assert.match(app, /function renderExternalAiResponses\(\)/);
+assert.match(app, /sourceType==="external_ai"/);
+assert.match(app, /今回は却下/);
