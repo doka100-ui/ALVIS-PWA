@@ -1126,14 +1126,20 @@ function isUsableConversationTurn(item){
   if(item.role==="alvis"&&isCorruptedModelReply(value))return false;
   return true;
 }
+function isFollowUpMessage(text){
+  const value=String(text||"").normalize("NFKC").trim();
+  // 短いという理由だけで質問をフォローアップ扱いしない。
+  return /^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ありがとう|次は|やろう|お願い|お願いします|続けて|そのまま|同じ|どれ|どっち|どうして|なぜ)/i.test(value)
+    || /^[0-9]+(?:です|だよ|番)?[。.!！?？\\s]*$/i.test(value);
+}
 function buildConversationMessages(history,currentText){
-  // 空回答・句読点だけの応答・生成失敗メッセージを次回のプロンプト履歴へ混ぜない。
+  // 空回答・異常出力を除外し、通常質問へ古い会話を過剰に混ぜない。
   const turns=(Array.isArray(history)?history:[]).filter(isUsableConversationTurn);
-  const followUp=/^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ＯＫ|ありがとう|次は|やろう)/i.test(String(currentText||"").trim())||String(currentText||"").trim().length<=18;
-  const maxMessages=followUp?16:12, charBudget=followUp?7200:6000;
+  const followUp=isFollowUpMessage(currentText);
+  const maxMessages=followUp?10:6, charBudget=followUp?4200:2400;
   const selected=[];let used=0;
   for(let i=turns.length-1;i>=0&&selected.length<maxMessages;i--){
-    const item=turns[i],content=String(item.text||"").slice(0,2400);
+    const item=turns[i],content=String(item.text||"").slice(0,1400);
     if(selected.length>0&&used+content.length>charBudget)break;
     selected.unshift({role:item.role==="user"?"user":"assistant",content});used+=content.length;
   }
@@ -1142,7 +1148,7 @@ function buildConversationMessages(history,currentText){
 
 function buildContextualQuery(query, history){
   const current=String(query||"").trim();
-  const followUp=/^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ＯＫ|ありがとう|次は|やろう|どれ|どっち|どうして|なぜ)/i.test(current)||current.length<=18;
+  const followUp=isFollowUpMessage(current);
   if(!followUp)return {text:current,usedContext:false,context:""};
   const turns=(Array.isArray(history)?history:[])
     .filter(item=>item.role==="user"||item.role==="alvis")
@@ -1211,15 +1217,15 @@ function selectRelevantMemories(query, memories, history){
       ranked.push({text:value,score,index,timestamp:Number.isFinite(timestamp)?timestamp:0});
     }
   });
-  return ranked.sort((a,b)=>b.score-a.score||b.timestamp-a.timestamp||a.index-b.index).slice(0,5);
+  return ranked.sort((a,b)=>b.score-a.score||b.timestamp-a.timestamp||a.index-b.index).slice(0,3);
 }
 
 function selectRelevantLearnings(query, history, learnings){
   const context=buildContextualQuery(query,history);
   const approved=(Array.isArray(learnings)?learnings:[]).filter(item=>item.status==="approved"&&String(item.text||"").trim());
   const ranked=approved.map((item,index)=>({text:String(item.text),score:scoreContextMatch(query,item.text)+(context.usedContext?scoreContextMatch(context.text,item.text)*0.4:0),index,createdAt:item.approvedAt||item.createdAt||""}));
-  const relevant=ranked.filter(item=>item.score>=1.6).sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,5);
-  // 短いフォローアップで関連語が少ない場合だけ、直近の承認済み学びを補助として最大2件使う。
+  const relevant=ranked.filter(item=>item.score>=1.6).sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,3);
+  // 文脈が明確な短いフォローアップでのみ、直近の承認済み学びを補助として最大2件使う。
   if(!relevant.length&&context.usedContext)return ranked.slice(-2).reverse();
   return relevant;
 }
@@ -1345,9 +1351,8 @@ async function sendToAlvis(){
     await saveLocal();
     setStatus("aiStatus","ALVISが考えています…");
     const relevantMemories=selectRelevantMemories(text,data.memories,data.history);
-    const memoryText=relevantMemories.map(item=>item.text).join("\n").slice(0,5000);
-    // AIへ渡す履歴は直近12メッセージ（約6往復）に限定。
-    // 保存済みの全履歴は削除せず、そのまま保持する。
+    const memoryText=relevantMemories.map(item=>item.text).join("\n").slice(0,2200);
+    // 保存済みの全履歴は保持し、推論時だけ直近の関連会話に絞る。
     const recent=buildConversationMessages(data.history,text);
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
@@ -1372,7 +1377,7 @@ async function sendToAlvis(){
       memoryText||"まだ登録されていません。",
       "",
       "【ALVISがユーザー承認済みの作業から得た学び】",
-      selectRelevantLearnings(text,data.history,data.learnings).map(item=>item.text).join("\n")||"今回の質問に関連する承認済み学びはありません。"
+      selectRelevantLearnings(text,data.history,data.learnings).map(item=>item.text).join("\n").slice(0,1200)||"今回の質問に関連する承認済み学びはありません。"
     ].join("\n");
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
