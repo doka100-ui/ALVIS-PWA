@@ -25,7 +25,9 @@ const checks = [
   ["offline app shell is cached", /"\.\/index-integrated\.html"/.test(sw) && /caches\.open\(CACHE_NAME\)/.test(sw)],
   ["online API requests are not cached by the service worker", /if\s*\(request\.method\s*!==\s*"GET"\)\s*return/.test(sw)],
   ["all four main chat generation attempts disable Qwen3 thinking mode", (()=>{const calls=[...send.matchAll(/aiEngine\.chat\.completions\.create\(\{([\s\S]*?)\}\);/g)];return calls.length===4&&calls.every(([,body])=>/extra_body\s*:\s*\{\s*enable_thinking\s*:\s*false\s*\}/.test(body));})()],
-  ["main chat retries retain the same deterministic Qwen3 mode", (send.match(/extra_body:\s*\{enable_thinking:false\}/g)||[]).length===4]
+  ["main chat retries retain the same deterministic Qwen3 mode", (send.match(/extra_body:\s*\{enable_thinking:false\}/g)||[]).length===4],
+  ["orphan Qwen3 thinking tags are stripped from visible answers", /replace\(\/<\\\/?think>\/gi,""\)/.test(send)],
+  ["Queryable and leaked thinking tags are rejected as corrupted output", /if\(\/<\\\/?think>\|\\bQueryable\\b\/i\.test\(value\)\)return true/.test(app)]
 ];
 
 for (const [name, passed] of checks) {
