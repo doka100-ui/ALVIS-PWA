@@ -423,3 +423,10 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - Workerハンドラーをモック環境で検証: health応答、未認証拒否、許可外Origin拒否、不正JSON拒否、本文サイズ上限、質問文字数上限、2プロバイダー並列成功、片方失敗時の部分成功を確認。
 - Worker模擬テスト: 8/8 PASS。
 - 実際のCloudflareデプロイ、実APIキーを使った接続、実機Safariでの送受信は未実施。
+
+
+### プロバイダーAPIの現行仕様への追従（2026-11-05）
+
+- OpenAI接続をResponses APIへ、Gemini接続をInteractions APIへ変更。Google公式は2026年6月以降Interactions APIを新規開発向け標準として案内し、OpenAIも新規プロジェクトにResponses APIを推奨している。
+- 両APIで `store:false` を明示し、会話状態の保存を要求しない。
+- Gemini APIキーはクエリ文字列から外し、`x-goog-api-key` HTTPヘッダーへ移動。
