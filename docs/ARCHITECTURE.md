@@ -414,3 +414,12 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - ゲートウェイトークンをALVIS内で生成し、クリップボードへコピーする操作を追加。
 - 参考資料メッセージの区切りを実改行として渡す。
 - Service Worker cache: `alvis-cache-v53-integrated`。
+
+
+### オンラインAIゲートウェイの静的・模擬検証（2026-11-05）
+
+- ALVIS module script構文解析: PASS。
+- Workerソース構文解析: PASS。
+- Workerハンドラーをモック環境で検証: health応答、未認証拒否、許可外Origin拒否、不正JSON拒否、本文サイズ上限、質問文字数上限、2プロバイダー並列成功、片方失敗時の部分成功を確認。
+- Worker模擬テスト: 8/8 PASS。
+- 実際のCloudflareデプロイ、実APIキーを使った接続、実機Safariでの送受信は未実施。
