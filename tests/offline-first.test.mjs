@@ -18,6 +18,12 @@ assert.ok(activityMatch, "assistant activity question classifier must be explici
 const isAssistantActivityQuestion = new Function("text", `return ${activityMatch[1]}.test(text);`);
 for (const sample of ["今日は何してた？", "今日何してたの？", "今何してる？", "今は何をしている？"]) assert.equal(isAssistantActivityQuestion(sample), true, `must fast-path assistant activity question: ${sample}`);
 for (const sample of ["今日は何する？", "今日は何してた？明日は？", "今日は何してた？天気は？", "何してた？"]) assert.equal(isAssistantActivityQuestion(sample), false, `must not overmatch: ${sample}`);
+const conversationalMatch=send.match(/const conversationalMarkers=(\/[^;]+\/u)\.test\(text\);/);
+assert.ok(conversationalMatch,"conversational marker classifier must be explicit");
+const hasConversationalMarkers=new Function("text",`return ${conversationalMatch[1]}.test(text);`);
+for(const sample of ["ほんとですね。そんなに頑張ってないんですか？","私も今日も大変でしたけど、そんなくらいでいいかなって思ってました。","そっか、今日は疲れたよ"]) assert.equal(hasConversationalMarkers(sample),true,`must recognize natural conversational wording: ${sample}`);
+for(const sample of ["富士山の高さは3776メートルです。","JavaScriptの配列を説明してください。"]) assert.equal(hasConversationalMarkers(sample),false,`must not overclassify explanatory questions: ${sample}`);
+assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 assert.ok(app.includes("聞かれたことに直接答え"));
