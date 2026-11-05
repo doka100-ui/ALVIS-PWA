@@ -400,3 +400,12 @@
 - 次の切り分けは、同じQwen3-4Bの単体テスト結果と本体の結果を比較すること。単体も異常ならモデル資材/WebLLM/モデル実行側、本体だけ異常なら本体のプロンプト・履歴構築側を優先調査する。
 - 開発版URL: https://development.alvis-pwa.pages.dev/ai-test.html
 - 未確認: iPad Safariでの単体生成と診断値。これは原因切り分け用であり、Qwenの品質修正そのものではない。
+
+
+## 2026-11-05 — Qwen本体生成設定の基準統一
+- ユーザーの単体生成結果：Qwen3-4B-q4f16_1-MLC、22.42秒、finish_reason=stop、入力49 / 出力233 / 合計282 tokens、回答875文字。単体画面では正常な日本語回答を確認。
+- `ai-test.html`の初回生成設定はtemperature 0.7 / max_tokens 512のみ。一方、本体`sendToAlvis()`はtemperature 0.6、top_p 0.95、repetition_penalty 1.05、max_tokens 384、extra_body.enable_thinking:falseを指定していた。
+- 本体初回生成を単体テストと同じtemperature/max_tokensへ合わせ、追加指定を除去。再試行側もenable_thinking:falseを除去。履歴・長期記憶・暗号化データの構造は変更していない。
+- Service Worker cache: `alvis-cache-v41-integrated`。
+- 次の実機確認は一度だけでよい。開発版を再読み込みして、通常の質問を一つ送る。生成が正常ならこの差分を維持し、異常なら本体プロンプト/履歴の次の差分をコード側で調査する。繰り返しの単体テストは不要。
+- 未確認：iPad Safariでの本体生成結果。コード更新・キャッシュ更新は開発ブランチへ反映済み。
