@@ -66,6 +66,10 @@ assert.equal(japanesePack.analyzeJapaneseOutputQuality("私はALVISです。").h
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("了解です。了解です。").repeatedSentence,true);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("そう yeah、今日も大変だったね。").needsRepair,true);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("そんなに頑張ってなんていませんよ").needsRepair,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("そんなに頑張ってないんですか？").needsRepair,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("そんなに頑張っていないんですか？").needsRepair,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("頑張ってないんですか？").needsRepair,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("そっか、今日は疲れたんだね。無理せず休んでね。").needsRepair,false);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("そっか、今日は大変だったんだね。").needsRepair,false);
 assert.match(app,/buildJapaneseLanguageGuidance\(text,isBriefConversationalTurn\)/);
 assert.match(app,/analyzeJapaneseOutputQuality\(reply\)\.needsRepair/);
