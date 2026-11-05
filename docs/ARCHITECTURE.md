@@ -491,3 +491,9 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 ## 2026-11-05 — Qwen3通常チャット生成設定
 
 通常チャットの初回生成と3種類の再試行は、すべて `extra_body: { enable_thinking: false }` を指定する。改善計画・学習・自律タスク生成と同じ設定に統一し、通常チャットだけ思考モード指定が抜ける不整合を防ぐ。Qwen3の出力品質やiPad Safariでの安定性は実機検証が必要。
+
+
+## Qwen3出力の制御タグ・内部断片ガード（2026-11-05）
+- 可視回答の抽出時に孤立した思考タグを除去する。
+- `Queryable`などの内部メタデータ断片が単独回答として漏れた場合は異常出力扱いにする。
+- WebGPUのmapAsync失敗はGPUデバイス/バッファ状態が不安定な可能性がある。端末のメモリ状態を確認せず同一4Bモデルを自動再ロードすることは避け、安全停止後にユーザーが明示的に再読み込みする。
