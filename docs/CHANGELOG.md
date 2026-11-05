@@ -644,3 +644,8 @@
 - GitHub Actions / Node.js 22の `tests/offline-first.test.mjs` が最終的に成功。
 - 実行時に見つかった既存テストの正規表現構文エラーとソース変数名の誤りも修正。
 - Qwen実生成・iPad Safariの実機品質確認は別途必要。
+
+## 2026-11-05 — Qwen応答時間の短縮
+- 実機で75.5秒・2回試行の報告。通常チャットの最大生成量を512から384 tokensへ、短い日常会話は128 tokensへ制限。
+- 長い異常出力が再試行につながる場合の待ち時間を抑える狙い。回答内容が途中で切れる場合はfinish reasonと実機時間を確認して再調整する。
+- Service Worker cache v67。Node回帰テストは次のCIで確認。iPad実機の短縮効果は未確認。
