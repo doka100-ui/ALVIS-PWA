@@ -327,3 +327,9 @@
 - `map async was not successful` / `Model not loaded before trying to complete` 等の致命的な実行状態エラーを検出したら、古いエンジン参照を無効化し、再ロードを案内する。
 - エラー後に壊れたエンジンを使い続ける連鎖を防止。会話/記憶/暗号化データ形式は変更なし。
 - Service Worker cache v33。
+
+
+## 2026-11-05 — Qwen反復出力ガード
+- 短い英単語や日本語断片の極端な反復を検出し、異常回答を安全な案内文へ置換。
+- temperature 0.35、frequency_penalty 0.5、presence_penalty 0.2を通常生成に設定。
+- Service Worker cache v34。実機確認は未実施。
