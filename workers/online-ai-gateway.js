@@ -38,46 +38,52 @@ function constantTimeEqual(a, b) {
 async function callOpenAI(question, env) {
   const base = String(env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
   const model = String(env.OPENAI_MODEL || "");
-  const response = await fetch(base + "/chat/completions", {
+  const response = await fetch(base + "/responses", {
     method: "POST",
     headers: { "Authorization": "Bearer " + env.OPENAI_API_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({
       model,
-      messages: [
-        { role: "system", content: "あなたは独立した論理分析担当AIです。質問に直接答え、重要な根拠・前提・不確実性を簡潔に示してください。指示が曖昧なら仮定を明示してください。" },
-        { role: "user", content: question }
-      ],
-      temperature: 0.3,
-      max_tokens: 700
+      instructions: "あなたは独立した論理分析担当AIです。質問に直接答え、重要な根拠・前提・不確実性を簡潔に示してください。指示が曖昧なら仮定を明示してください。",
+      input: question,
+      store: false,
+      max_output_tokens: 700
     }),
     signal: AbortSignal.timeout(24000)
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error("OpenAI upstream HTTP " + response.status);
-  const text = body.choices?.[0]?.message?.content;
-  if (typeof text !== "string" || !text.trim()) throw new Error("OpenAI returned an empty response");
+  const text = (body.output || [])
+    .filter(item => item.type === "message")
+    .flatMap(item => item.content || [])
+    .filter(part => part.type === "output_text" && typeof part.text === "string")
+    .map(part => part.text)
+    .join("\n").trim() || String(body.output_text || "").trim();
+  if (!text) throw new Error("OpenAI returned an empty response");
   return { provider: "OpenAI", model, text: text.slice(0, 5000) };
 }
 
 async function callGemini(question, env) {
   const model = String(env.GEMINI_MODEL || "");
-  const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" +
-    encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(env.GEMINI_API_KEY);
-  const response = await fetch(endpoint, {
+  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "x-goog-api-key": env.GEMINI_API_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: "あなたは独立した批判的検証担当AIです。質問を別の視点から検討し、見落とし・反例・誤りやすい前提・不確実性を簡潔に示してください。確信がない場合は明示してください。" }]
-      },
-      contents: [{ role: "user", parts: [{ text: question }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 700 }
+      model,
+      system_instruction: "あなたは独立した批判的検証担当AIです。質問を別の視点から検討し、見落とし・反例・誤りやすい前提・不確実性を簡潔に示してください。確信がない場合は明示してください。",
+      input: question,
+      store: false,
+      generation_config: { thinking_level: "low", max_output_tokens: 700 }
     }),
     signal: AbortSignal.timeout(24000)
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error("Gemini upstream HTTP " + response.status);
-  const text = (body.candidates?.[0]?.content?.parts || []).map(part => part.text || "").join("\n").trim();
+  const text = (body.steps || [])
+    .filter(step => step.type === "model_output")
+    .flatMap(step => step.content || [])
+    .filter(part => part.type === "text" && typeof part.text === "string")
+    .map(part => part.text)
+    .join("\n").trim();
   if (!text) throw new Error("Gemini returned an empty response");
   return { provider: "Gemini", model, text: text.slice(0, 5000) };
 }
