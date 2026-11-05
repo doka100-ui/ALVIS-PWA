@@ -155,7 +155,7 @@ assert.match(app, /const conversationForGeneration=isBriefConversationalTurn/);
 assert.match(app, /recent\.slice\(-4\)/);
 assert.match(app, /slice\(-200\)/);
 assert.match(app, /const activeSystemPrompt=isBriefConversationalTurn/);
-assert.match(app, /content:activeSystemPrompt/);
+assert.match(app, /content:activePromptWithJapanesePack/);
 assert.match(app, /join\("\\n"\)/);
 assert.match(app, /const userIsAlvisNameQuestion=isAlvisNameQuestion\(text\)/);
 assert.match(app, /!userIsGreeting&&!userIsAlvisNameQuestion/);
