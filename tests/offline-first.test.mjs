@@ -61,7 +61,7 @@ assert.equal(japanesePack.analyzeJapaneseOutputQuality("了解です。了解で
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("そう yeah、今日も大変だったね。").needsRepair,true);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("そんなに頑張ってなんていませんよ").needsRepair,true);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("そっか、今日は大変だったんだね。").needsRepair,false);
-assert.match(app,/buildJapaneseLanguageGuidance\(text\)/);
+assert.match(app,/buildJapaneseLanguageGuidance\(text,isBriefConversationalTurn\)/);
 assert.match(app,/analyzeJapaneseOutputQuality\(reply\)\.needsRepair/);
 assert.match(app,/自然な日本語で1〜2文だけ返してください/);
 assert.match(app,/端末内の自然な会話表現に切り替えました/);
