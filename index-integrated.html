@@ -1288,8 +1288,16 @@ function getCountryCurrentTimeReply(text){
 }
 function isCorruptedModelReply(reply){
   const value=String(reply||"").trim();
+  if(!value)return true;
   if((value.match(/ViewGroup/gi)||[]).length>=2)return true;
-  // Qwenが短い中国語フレーズ等を延々と反復した異常出力を検出する。
+  // 同じ短い英単語・日本語断片が大量反復されるデコード崩壊を検出。
+  const tokens=value.toLowerCase().match(/[a-z]{2,}|[\u3040-\u30ff\u3400-\u9fff]{2,}/g)||[];
+  if(tokens.length>=24){
+    const counts=new Map();
+    for(const token of tokens)counts.set(token,(counts.get(token)||0)+1);
+    const maxRepeat=Math.max(0,...counts.values());
+    if(maxRepeat>=20 && maxRepeat/tokens.length>=0.55)return true;
+  }
   if(/([\u3400-\u9fff]{2,8})(?:[\s\u3000]*\1){2,}/u.test(value))return true;
   return false;
 }
@@ -1377,7 +1385,9 @@ async function sendToAlvis(){
       };
       let result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
-        temperature:0.45,
+        temperature:0.35,
+        frequency_penalty:0.5,
+        presence_penalty:0.2,
         max_tokens:384,
         extra_body:{enable_thinking:false}
       });
