@@ -46,11 +46,10 @@ textarea{min-height:90px;resize:vertical}
 </header>
 
 <section id="lockPanel" class="panel" style="margin:16px">
-<h2>ALVISの記憶庫</h2>
-<p id="lockDescription">記憶を暗号化するパスワードを入力してね。</p>
-<input id="password" type="password" autocomplete="current-password" placeholder="パスワード（8文字以上）">
-<button id="unlockButton">記憶庫を作成・解除</button>
-<div id="lockStatus" class="small">パスワードは忘れないように保管してね。</div>
+<h2>ALVIS ログイン</h2>
+<input id="password" type="password" autocomplete="current-password" placeholder="パスワード">
+<button id="unlockButton">ログイン／記憶庫を作成</button>
+<div id="lockStatus" class="small" aria-live="polite"></div>
 </section>
 
 <div id="appPanel" class="hidden">
@@ -1605,8 +1604,8 @@ function queueExternalAiLearningCandidates(question, opinions){
 }
 
 function isAlvisNameQuestion(value){
-  const text=String(value||"").trim();
-  return /^(?:(?:あなた|君|きみ|ALVIS|アルヴィス)(?:の)?名前は(?:何|なに|なん|誰|だれ)?(?:ですか)?[?？。！!]?|名前は(?:何|なに|なん)(?:ですか)?[?？。！!]?)$/iu.test(text);
+  const text=String(value||"").replace(/[ \\t\\r\\n　]+/g,"").replace(/[?？。！!、,]/g,"");
+  return /^(?:(?:(?:あなた|君|きみ|ALVIS|アルヴィス)(?:の)?名前(?:は)?(?:何|なに|なん|誰|だれ)?(?:ですか)?|名前(?:は)?(?:何|なに|なん|誰|だれ)?(?:ですか)?|(?:あなた|君|きみ|ALVIS|アルヴィス)(?:は)?(?:誰|だれ|何者)(?:ですか)?|名前を教えて(?:ください)?|(?:あなた|君|きみ|ALVIS|アルヴィス)の名前を教えて(?:ください)?))$/iu.test(text);
 }
 
 async function sendToAlvis(){
