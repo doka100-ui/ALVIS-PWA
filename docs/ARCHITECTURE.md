@@ -509,3 +509,7 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - この機能は知識候補の収集と検索利用であり、Qwenモデル重みの更新・ファインチューニングではない。基盤モデルの追加学習は別工程。
 - 実機確認・実API通信は未実施。Service Worker cacheは alvis-cache-v56-integrated。
 
+
+
+### 外部AI回答の確認UI（2026-11-05）
+外部AIから取得した回答は data.learnings 内の external_ai レコードとして暗号化保管庫に保存し、専用の「外部AIの回答」ページで出典・モデル・元質問・取得日時とともに表示する。未承認候補は個別に承認または却下できる。承認前は通常の知識検索へ渡さず、承認後も未検証の参考情報として扱う。通常の成長計画の学習メモとは表示を分離する。
