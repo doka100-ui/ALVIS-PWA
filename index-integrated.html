@@ -1652,7 +1652,7 @@ function analyzeJapaneseOutputQuality(value){
   const suspiciousLatin=latinWords.filter(word=>!allowedLatin.has(word)&&!allowedLatin.has(word.toUpperCase()));
   const sentences=(text.match(/[^。！？!?]+[。！？!?]?/gu)||[]).map(part=>part.trim()).filter(Boolean);
   const repeatedSentence=sentences.some((sentence,index)=>sentences.indexOf(sentence)!==index);
-  const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そうyeah","そう yeah"];
+  const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そんなに頑張ってない","そんなに頑張っていない","頑張ってないんですか","頑張っていないんですか","そうyeah","そう yeah"];
   const suspiciousPhrases=awkwardPhrases.filter(phrase=>text.includes(phrase));
   return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence,suspiciousPhrases,needsRepair:suspiciousLatin.length>0||repeatedSentence||suspiciousPhrases.length>0};
 }
