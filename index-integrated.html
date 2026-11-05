@@ -1366,7 +1366,7 @@ function isWeatherQuestion(value){
 function suppressUnsupportedWeatherClaims(reply, request){
   if(!isWeatherQuestion(request))return String(reply||"");
   const parts=String(reply||"").match(/[^。！？!?]+[。！？!?]?/gu)||[String(reply||"")];
-  const forecastClaimPattern=/晴れ|雨|曇り|雪|風速|(?:最高|最低)?気温.{0,8}\\d|降水確率.{0,8}\\d|(?:晴れ|雨|曇り|雪).{0,5}予報|予報.{0,5}(?:晴れ|雨|曇り|雪)/u;
+  const forecastClaimPattern=/晴れ|雨|曇り|雪|風速|(?:最高|最低)?気温.{0,8}\d|降水確率.{0,8}\d|(?:晴れ|雨|曇り|雪).{0,5}予報|予報.{0,5}(?:晴れ|雨|曇り|雪)/u;
   const retained=parts.filter(part=>!forecastClaimPattern.test(part)).join("").trim();
   if(retained===String(reply||"").trim())return String(reply||"");
   const notice="天気予報は今取得できていないため、晴れ・雨や気温は断定できないよ。出発前に最新の予報を確認してね。";
