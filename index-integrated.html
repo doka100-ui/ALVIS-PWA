@@ -806,7 +806,7 @@ function renderExternalAiResponses(){
       const approve=document.createElement("button");
       approve.textContent="内容を確認して学びに承認";
       approve.addEventListener("click",async()=>{
-        if(!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\\n事実の正しさが保証されるわけではありません。"))return;
+        if(!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\n事実の正しさが保証されるわけではありません。"))return;
         learning.status="approved";learning.approvedAt=new Date().toISOString();
         await saveLocal();renderAll();
       });
