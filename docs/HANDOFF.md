@@ -577,3 +577,11 @@
 - これはソース構造の検査であり、Node.jsテストコマンド実行やSafari実機での機内モード再起動・モデル推論成功を意味しない。
 - アプリ本体・Service Worker・暗号化データ形式は変更なし。キャッシュ更新不要。
 - ChatGPT公式DevKitはローカルNode.jsランタイム向けであり、Safari PWAにそのまま導入できない。iPad対応は別ランタイム方式を調査し、Qwenオフライン基盤を崩さない。
+
+
+
+## 2026-11-05 — ChatGPT連携の公式条件を再確認
+- 本人確認ログインとプラン利用は別許可。プラン利用は既存ChatGPT Work/Codex枠を消費し、Usageでアプリごとの週間上限を設定可能。ChatGPT会話/メモリは共有されない。
+- Help Centerの商用アプリ対象はGo/Plus/Proだが、公式オープンソースDevKitの利用例はPlus/Pro。ALVISのOSS連携ではGo/Freeを保証しない。
+- 公式DevKitはローカルNode.js SDK。サンプルはmacOS 14+ / Node.js 22.12+ / Xcode CLTのmacOS/Electron。Noncommercial License v1.0。Safari PWA/iPadの直接対応は未確認。
+- 今すぐユーザーのログイン・パスワード・トークンは求めない。次の技術調査はiPad単独のローカル実行可否と、必要ならMacコンパニオン方式。どちらもQwenオフラインを維持する。
