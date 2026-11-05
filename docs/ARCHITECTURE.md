@@ -479,3 +479,10 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 公式DevKitはローカルNode.js SDK。公式サンプルはmacOS 14+ / Node.js 22.12+ / Xcode Command Line ToolsのmacOS/Electronアプリであり、iPad Safari PWAへの直接組み込みは不可と判断。iPadネイティブ対応も未確認。
 - DevKitのOpenAI作成コード・文書はNoncommercial License v1.0。商用化/再配布時はライセンス再確認が必要。
 - 現段階ではALVISへのログインUIやトークン保存を実装しない。iPadでのローカル実行環境を確認するか、ユーザー管理下のMacコンパニオン方式を別途評価する。いずれもQwenの完全オフライン動作を必須条件とする。
+
+
+## 2026-11-05 — オフライン品質ゲート
+
+- `tests/offline-first.test.mjs` により、ローカルQwen主系統、オンライン明示許可、質問文のみの送信、通信失敗時のローカル継続、アプリシェルキャッシュ等を静的検査する。
+- `.github/workflows/offline-first.yml` がdevelopmentブランチの関連変更時にNode.js 22で回帰テストを実行する。
+- `docs/OFFLINE_ACCEPTANCE.md` はiPad Safariでの実機・機内モード確認の手順書。静的検査と実機受け入れ試験は別の品質ゲートとして扱う。
