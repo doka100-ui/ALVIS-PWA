@@ -354,3 +354,8 @@
 - 配布元モデル設定に合わせてtemperature 0.6 / top_p 0.95を採用し、frequency/presence penaltyを外し、軽いrepetition_penalty 1.05を追加。
 - 異常出力検出の文字範囲とforKey反復判定、テキスト抽出時の結合処理を修正。
 - Service Worker cache versionは未更新。iPadでは `?v=38` を付けて新しいHTMLを取得する必要あり。実機テスト未実施。
+
+
+## 2026-11-05
+- Added separate WebGPU adapter diagnostics for default, high-performance, and low-power `powerPreference` values to isolate Safari/WebLLM GPU selection mismatch.
+- Bumped integrated app shell cache to `alvis-cache-v39-integrated`.
