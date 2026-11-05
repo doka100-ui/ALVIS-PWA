@@ -1130,7 +1130,7 @@ function isFollowUpMessage(text){
   const value=String(text||"").normalize("NFKC").trim();
   // 短いという理由だけで質問をフォローアップ扱いしない。
   return /^(それ|これ|あれ|さっき|前の|続き|その|この|できた|出来た|大丈夫|違う|そう|はい|いいえ|ok|ありがとう|次は|やろう|お願い|お願いします|続けて|そのまま|同じ|どれ|どっち|どうして|なぜ)/i.test(value)
-    || /^[0-9]+(?:です|だよ|番)?[。.!！?？\\s]*$/i.test(value);
+    || /^[0-9]+(?:です|だよ|番)?[。.!！?？\s]*$/i.test(value);
 }
 function buildConversationMessages(history,currentText){
   // 空回答・異常出力を除外し、通常質問へ古い会話を過剰に混ぜない。
