@@ -60,3 +60,12 @@ WorkerのSettings → Variables and Secretsで登録する。
 - Geminiは新規開発向けのInteractions API（`POST /v1beta/interactions`）を使用します。
 - 両方とも `store: false` を指定し、API側の会話状態保存を要求しません。API事業者側の処理・不正利用監視等の取り扱いは各社の規約・プライバシー説明を確認してください。
 - Gemini APIのキーはURLクエリではなく `x-goog-api-key` ヘッダーで送ります。
+
+
+## ChatGPTプラン連携との違い（重要）
+
+このガイドのWorkerはOpenAI APIキー/Gemini APIキーを使う従量課金方式です。ChatGPTの月額プランに含まれる利用枠を使うSign in with ChatGPTとは別物です。APIキー方式ではChatGPTサブスクリプションの利用枠は消費されません。
+
+OpenAI公式には、対応するオープンソース/ローカル実行アプリがユーザーの明示許可を得てChatGPTプランの利用枠を使う仕組みがあります。公式の開発例はChatGPT PlusまたはProを要件としており、Freeプランで利用できるとは確認できません。現行ALVISはCloudflare Pages配信のSafari PWAなので、この認証トークンを共有Workerへ送信する実装は行いません。詳細は docs/ARCHITECTURE.md の「ChatGPTプラン連携の調査結果」を参照してください。
+
+無料のChatGPTプラン連携を試す場合は、利用資格とローカルランタイムの条件を満たすことを確認してから別途実装します。このWorkerをデプロイするとAPI料金が発生する可能性があるため、無料連携のためだけにデプロイしないでください。
