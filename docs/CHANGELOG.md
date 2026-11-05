@@ -359,3 +359,8 @@
 ## 2026-11-05
 - Added separate WebGPU adapter diagnostics for default, high-performance, and low-power `powerPreference` values to isolate Safari/WebLLM GPU selection mismatch.
 - Bumped integrated app shell cache to `alvis-cache-v39-integrated`.
+
+
+## 2026-11-05
+- Added WebLLM/TVM-equivalent WebGPU device creation diagnostics, checking the runtime's required GPU limits and optional features.
+- Bumped app shell cache to `alvis-cache-v40-integrated`.
