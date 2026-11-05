@@ -280,3 +280,8 @@ iPad / iPhone Safari
 ## WebLLM実行状態エラーからの復旧（2026-11-05）
 
 `sendToAlvis()` は `map async was not successful`、`Model not loaded before trying to complete`、GPUデバイス喪失に該当するエラーを検出する。該当時は現行engine参照を無効化し、可能ならunloadを試行する。UIからモデル再ロードを行うまで以降の推論に古いengineを再利用しない。会話履歴にはエラー内容と再ロード案内を残す。保管庫・暗号化・記憶・バックアップ・同期データ構造は変更しない。
+
+
+## Qwen反復出力の保護（2026-11-05）
+
+通常生成ではtemperature 0.35、frequency_penalty 0.5、presence_penalty 0.2を使用する。回答後に英単語・日本語断片の同一トークンが大量反復されていないか検査し、異常出力をそのまま会話履歴へ採用せず安全な案内文に置換する。これは異常出力の封じ込めであり、モデル重みやWebGPU実行基盤の根本修正を意味しない。
