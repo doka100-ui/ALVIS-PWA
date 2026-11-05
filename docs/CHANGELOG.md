@@ -497,3 +497,10 @@
 - OpenAI Chat CompletionsからResponses APIへ移行。
 - Gemini generateContentからInteractions APIへ移行。
 - 両方のAPIに `store:false` を指定。Gemini APIキーをURLクエリではなくHTTPヘッダーで送信。
+
+
+### 現行API移行後の検証結果
+
+- OpenAI Responses API / Gemini Interactions APIへ移行後、Workerのモックテスト10/10 PASS。
+- 認証、CORS、入力検証、両社応答、保存無効化、片側失敗時の継続を確認。
+- 実サービス接続と実機確認は未実施。
