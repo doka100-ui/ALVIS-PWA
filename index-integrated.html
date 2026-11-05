@@ -1229,7 +1229,9 @@ function selectRelevantMemories(query, memories, history){
     groups.forEach(group=>{
       if(group.pattern.test(query)&&group.terms.some(term=>normalize(value).includes(normalize(term))))topicBoost=Math.max(topicBoost,1.4);
     });
-    const score=Math.max(direct,contextual)+topicBoost;
+    // 会話文脈は現在の質問に直接関連する記憶の順位付けだけを補助する。
+    // 文脈だけで無関係な記憶が候補へ浮上するのを防ぐ。
+    const score=direct+(direct>0?contextual:0)+topicBoost;
     if(score>=1.6){
       const timestamp=Date.parse(item?.updatedAt||item?.createdAt||"");
       ranked.push({text:value,score,index,timestamp:Number.isFinite(timestamp)?timestamp:0});
@@ -1241,7 +1243,11 @@ function selectRelevantMemories(query, memories, history){
 function selectRelevantLearnings(query, history, learnings){
   const context=buildContextualQuery(query,history);
   const approved=(Array.isArray(learnings)?learnings:[]).filter(item=>item.status==="approved"&&String(item.text||"").trim());
-  const ranked=approved.map((item,index)=>({text:String(item.text),score:scoreContextMatch(query,item.text)+(context.usedContext?scoreContextMatch(context.text,item.text)*0.4:0),index,createdAt:item.approvedAt||item.createdAt||""}));
+  const ranked=approved.map((item,index)=>{
+    const direct=scoreContextMatch(query,item.text);
+    const contextual=direct>0&&context.usedContext?scoreContextMatch(context.text,item.text)*0.2:0;
+    return {text:String(item.text),score:direct+contextual,index,createdAt:item.approvedAt||item.createdAt||""};
+  });
   const relevant=ranked.filter(item=>item.score>=1.6).sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,3);
   // フォローアップでも、質問または直近の会話と関連度が基準に届かない学びは混ぜない。
   // 文脈が曖昧な場合は学びを渡さず、会話履歴だけで参照先を判断させる。
