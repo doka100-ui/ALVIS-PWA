@@ -530,3 +530,11 @@
 - 10項目の静的構造チェックは10/10 PASS。Node.jsでのテストファイル実行およびSafari実機・機内モード確認とは区別する。
 - テスト: `tests/offline-first.test.mjs`。説明: `docs/OFFLINE_FIRST_TESTS.md`。
 - アプリ本体とService Workerは変更していないためキャッシュ更新なし。
+
+
+
+## 2026-11-05 — ChatGPTプラン連携の資格・SDK条件を更新
+- 本人確認ログインとプラン利用は別権限であること、利用量は既存Work/Codex枠を消費すること、Usageでアプリごとの週間上限を設定できることを追記。
+- 商用アプリのGo/Plus/Proと、OSS DevKitのPlus/Proを区別。Free/GoのOSS利用を保証しない。
+- DevKitはローカルNode.js SDKで、macOS/ElectronサンプルとNoncommercial License v1.0を確認。iPad Safari PWAへ直接組み込む実装は保留。
+- 公式資料に基づき、ユーザーのログイン情報を要求する前にローカルランタイム方式を確定する。
