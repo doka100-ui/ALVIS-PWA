@@ -458,3 +458,13 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
 - DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
 - 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
+
+
+## Offline-firstを最上位原則として固定（2026-11-05）
+
+- ALVISの主AIは端末内Qwen3-4B。オンラインAIは追加機能であり、主AI・記憶・音声機能を置き換えない。
+- オンラインAIはチャットごとの明示的な一回限りの許可がある場合だけ呼び出す。初期状態はOFFで、許可は送信直後に解除する。
+- オンラインに送るデータは現在の質問文のみ。履歴・長期記憶・暗号化保管庫は転送しない。
+- オンラインAIが未設定・通信失敗・タイムアウトの場合も、端末内Qwenの回答生成を続ける。ネット接続を通常会話の前提にしない。
+- APIキーはブラウザへ置かず、課金可能なAPI経路はユーザーが明示的に選択するまで利用しない。
+- 回帰チェック `tests/offline-first.test.mjs` を追加。実行方法は `docs/OFFLINE_FIRST_TESTS.md`。静的構造チェック10項目を実施し10/10 PASS。Safari実機の機内モード再起動やモデルキャッシュの完全性を証明するテストではない。
