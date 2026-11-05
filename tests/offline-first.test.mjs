@@ -23,7 +23,7 @@ const checks = [
   ["online failure is caught and local generation continues", /catch\(error\)\s*\{\s*setStatus\("aiStatus","オンラインAIは利用できません[\s\S]*?\n    \}/.test(send) && /aiEngine\.chat\.completions\.create/.test(send)],
   ["API secrets are not embedded in the browser app", !/sk-[A-Za-z0-9]{20,}/.test(app) && !/AIza[A-Za-z0-9_-]{30,}/.test(app)],
   ["offline app shell is cached", /"\.\/index-integrated\.html"/.test(sw) && /caches\.open\(CACHE_NAME\)/.test(sw)],
-  ["online API requests are not cached by the service worker", /if\(request\.method !== "GET"\) return/.test(sw)]
+  ["online API requests are not cached by the service worker", /if\s*\(request\.method\s*!==\s*"GET"\)\s*return/.test(sw)]
 ];
 
 for (const [name, passed] of checks) {
