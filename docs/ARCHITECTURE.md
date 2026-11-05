@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v48-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v49-integrated`。
 
 ## 4. データの流れ
 
@@ -356,3 +356,11 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 日本語質問に対して再試行後も英語主体の出力が残る場合は、英語のまま表示せず日本語の再質問案内へ置き換える。
 - これらは表示・推論時のガードであり、外部の天気情報を取得する機能ではない。天気の最新情報提供には別途データ取得手段が必要。
 - 保存データ、暗号化、バックアップ、同期APIは変更しない。
+
+
+### 検証結果（2026-11-05 追加分）
+
+- アプリのmodule script構文解析: PASS（AsyncFunctionによる構文解析。コード実行やブラウザ動作の確認ではない）。
+- 天気の未取得情報に関する表示ガード: 10ケース中10ケース PASS（予報断定の除外、確認不能文の保持、観光案内など非予報文の保持を確認）。
+- 会話履歴選択: 文字数超過した中間発言を飛ばして古い短文と最新質問を保持するケース、および最新質問を文字数予算内で保持するケースを確認。
+- Qwen3の実生成、iPad Safari、Service Worker更新後のオフライン再起動は未確認。
