@@ -518,4 +518,11 @@
 - 外部AI回答はシステムプロンプトに埋め込まず、独立した未検証資料メッセージとして渡す。資料内の命令に従わないよう指示。
 - Workerファイル: `workers/online-ai-gateway.js`。設定手順: `docs/ONLINE_AI_GATEWAY.md`。
 - 構文解析: アプリmodule script PASS、Worker source PASS。実際のCloudflareデプロイ・API接続・iPad Safariは未実施。
-- Cache: `alvis-cache-v52-integrated`。
+- Cache: `alvis-cache-v53-integrated`。
+
+
+### オンラインAI連携UIの追加仕上げ（2026-11-05）
+
+- ゲートウェイトークン生成後にコピーできるボタンを追加。
+- 外部AI参考資料は独立したユーザーメッセージとして、実改行付きでローカルAIに渡す。
+- Service Worker cache: `alvis-cache-v53-integrated`。
