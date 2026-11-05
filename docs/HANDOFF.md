@@ -369,3 +369,11 @@
 - `forKey`等の短い英字トークンが回答の大半を占める異常出力を検出するよう閾値を改善（8回以上、トークン全体の70%以上）。
 - 異常出力を検出した場合、会話履歴を外した短い日本語プロンプトで1回だけ再生成する。再生成も異常なら異常文字列を会話に保存せず、モデル再起動を案内する。
 - Service Worker app shell cache v37。iPad実機確認待ち。
+
+
+## 2026-11-05 — Qwen日本語判定と生成設定の修正
+- 日本語回答の再生成条件に使う文字範囲の正規表現を修正。以前はエスケープが過剰で、日本語質問の判定が正しく働かない可能性があった。
+- Qwen3-4Bの配布元 `mlc-chat-config.json` の標準値（temperature 0.6 / top_p 0.95 / frequency_penalty 0 / presence_penalty 0 / repetition_penalty 1.0）を確認し、過剰なfrequency/presence penaltyを外した。通常生成temperature 0.6、top_p 0.95、軽いrepetition_penalty 1.05を指定。
+- 異常トークン検出の日本語文字範囲とforKey反復判定、複数テキスト片の結合処理のエスケープも修正。
+- Service Worker app shell cacheの更新は未完了。次回iPadテストは `?v=38` を付けた開発URLで新しいHTMLを取得する。
+- 静的コード確認のみ。iPad実機テスト待ち。記憶庫・会話データ・暗号化形式は変更なし。
