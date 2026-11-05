@@ -364,3 +364,11 @@
 ## 2026-11-05
 - Added WebLLM/TVM-equivalent WebGPU device creation diagnostics, checking the runtime's required GPU limits and optional features.
 - Bumped app shell cache to `alvis-cache-v40-integrated`.
+
+
+## 2026-11-05 — Qwen単体生成の診断情報を追加
+- 既存の独立テスト画面 `ai-test.html` に、生成時間・finish_reason・prompt/completion/total token数・回答文字数を表示する処理を追加。
+- 本体の会話履歴・長期記憶・追加再生成ロジックを通さず、同じWebLLM 0.2.87 / Qwen3-4Bを最小プロンプトで比較するための診断。
+- 失敗時はエラー詳細を診断欄にも表示。入力文や個人情報は診断情報へ複製しない。
+- 開発ブランチのみ。既存の保管庫・記憶・会話履歴・暗号化・同期・モデルキャッシュは変更なし。
+- 静的な差分確認のみ。iPad Safariでの単体生成とメタデータ表示は未確認。
