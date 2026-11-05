@@ -1615,11 +1615,12 @@ async function sendToAlvis(){
   if(!text)return;
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
   const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\s]*$/i.test(text);
+  const userIsAlvisNameQuestion=isAlvisNameQuestion(text);
   const japanDateTime=getJapanDateTime();
   const userIsDateQuestion=isDateQuestion(text);
   const userIsTimeQuestion=isTimeQuestion(text);
   const userIsCountryTimeFollowup=isCountryTimeFollowup(text,data.history);
-  if(!aiEngine&&!userIsDateQuestion&&!userIsTimeQuestion&&!userIsCountryTimeFollowup&&!userIsGreeting){
+  if(!aiEngine&&!userIsDateQuestion&&!userIsTimeQuestion&&!userIsCountryTimeFollowup&&!userIsGreeting&&!userIsAlvisNameQuestion){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
   }
@@ -1630,7 +1631,7 @@ async function sendToAlvis(){
   try{
     await saveLocal();
     // ALVIS自身の固定情報は推論モデルを呼ばず、端末内で即答する。
-    if(isAlvisNameQuestion(text)){
+    if(userIsAlvisNameQuestion){
       const instantReply="私はALVISです。";
       data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
       await saveLocal();
