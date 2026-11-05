@@ -299,3 +299,10 @@ iPad / iPhone Safari
 
 ## Corrupted short-token output handling
 - Detect short repeated internal tokens (e.g. `forKey`) at >=8 repetitions and >=70% of tokenized output. Retry once without conversation history; if still corrupted, store only a safe recovery message and advise engine restart.
+
+
+## Qwen日本語判定・生成設定の修正（2026-11-05）
+- 日本語質問判定の文字範囲を正しいUnicode正規表現に修正し、英語主体の回答に対する日本語再生成経路を有効化。
+- Qwen3-4B MLC配布元設定を基準に、temperature 0.6 / top_p 0.95を使用。frequency_penaltyとpresence_penaltyは指定せず既定値0に戻し、repetition_penalty 1.05で軽い反復抑制を追加。
+- 異常トークン検出のUnicode範囲・forKey判定と、配列形式の本文結合を修正。
+- 端末内データ形式、暗号化、記憶、バックアップ、同期は変更しない。Service Worker cacheは未更新のため、テスト時はURLにクエリ `?v=38` を付けて新しいHTMLを取得する。
