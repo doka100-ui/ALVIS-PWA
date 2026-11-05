@@ -70,3 +70,13 @@ for (const sample of ["黻", "'\n'\n'\n'\n'\n'", "乘坐乘坐prisepriseprisepri
 for (const sample of ["私はALVISです。", "はい。", "OKです。"]) {
   assert.equal(isCorruptedModelReply(sample), false, `must keep valid short Japanese output: ${sample}`);
 }
+
+
+// ALVIS identity is a fixed local fact and its name question bypasses Qwen inference.
+assert.match(app, /function isAlvisNameQuestion\(value\)/);
+assert.match(app, /const instantReply="私はALVISです。"/);
+assert.match(app, /Qwen3未使用・オフライン対応/);
+assert.match(app, /あなた自身の名前はALVIS（アルヴィス）/);
+const nameFastPath = app.indexOf('if(isAlvisNameQuestion(text)){');
+const modelGuard = app.indexOf('if(!aiEngine&&!userIsDateQuestion', app.indexOf('async function sendToAlvis()'));
+assert.ok(nameFastPath > 0 && nameFastPath < modelGuard, "name question must be handled before model-required guard");
