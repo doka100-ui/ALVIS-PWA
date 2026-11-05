@@ -1118,10 +1118,23 @@ function generateMemoryCandidates(userMessage){
   return 1;
 }
 
+function isLikelyPastedCorruption(value){
+  const text=String(value||"").trim();
+  if(text.length<160)return false;
+  const compact=text.replace(/[\\s\\u3000]/g,"");
+  if(compact.length<160)return false;
+  const counts=new Map();
+  for(const char of compact)counts.set(char,(counts.get(char)||0)+1);
+  const dominant=Math.max(...counts.values())/compact.length;
+  // 長文の大半が同じ数字・記号などで占められる貼り付け事故は、
+  // 保存履歴を消さず、モデルへ渡す会話文脈からだけ除外する。
+  return dominant>=0.55&&counts.size<=12;
+}
 function isUsableConversationTurn(item){
   if(!item||(item.role!=="user"&&item.role!=="alvis"))return false;
   const value=String(item.text||"").trim();
   if(!value||/^[\\s。、。，．.!！?？…・]+$/u.test(value))return false;
+  if(item.role==="user"&&isLikelyPastedCorruption(value))return false;
   if(item.role==="alvis"&&/^(回答を生成できませんでした|回答本文を取得できませんでした|ごめん、回答の生成中に表示用の内部文字列)/.test(value))return false;
   if(item.role==="alvis"&&isCorruptedModelReply(value))return false;
   return true;
