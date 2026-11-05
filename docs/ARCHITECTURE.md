@@ -306,3 +306,7 @@ iPad / iPhone Safari
 - Qwen3-4B MLC配布元設定を基準に、temperature 0.6 / top_p 0.95を使用。frequency_penaltyとpresence_penaltyは指定せず既定値0に戻し、repetition_penalty 1.05で軽い反復抑制を追加。
 - 異常トークン検出のUnicode範囲・forKey判定と、配列形式の本文結合を修正。
 - 端末内データ形式、暗号化、記憶、バックアップ、同期は変更しない。Service Worker cacheは未更新のため、テスト時はURLにクエリ `?v=38` を付けて新しいHTMLを取得する。
+
+
+### WebGPU adapter preference diagnostics (2026-11-05)
+The device diagnostic now checks `requestAdapter()` with no preference and with `high-performance` / `low-power` preferences. WebLLM's TVM runtime requests `high-performance`; a successful default adapter check alone does not prove that WebLLM can obtain its requested adapter. This diagnostic does not patch or override the WebGPU API.
