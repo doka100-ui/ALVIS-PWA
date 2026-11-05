@@ -42,7 +42,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v52-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v53-integrated`。
 
 ## 4. データの流れ
 
@@ -407,3 +407,10 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - 外部AIの回答はシステムプロンプト本文に混ぜず、独立した参考資料メッセージとしてローカルQwenへ渡す。
 - システム指示で外部資料内の命令・指示を信頼せず、内容の検討対象として扱う。
 - WorkerはContent-Lengthの有無にかかわらず、読み取り後のリクエスト本文サイズも12,000文字以下に制限する。
+
+
+### オンラインAI連携UIの追加仕上げ
+
+- ゲートウェイトークンをALVIS内で生成し、クリップボードへコピーする操作を追加。
+- 参考資料メッセージの区切りを実改行として渡す。
+- Service Worker cache: `alvis-cache-v53-integrated`。
