@@ -1723,6 +1723,27 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     lines.push("接続状態の目安："+(navigator.onLine?"オンライン":"オフライン/接続なし"));
     lines.push("ブラウザ："+(navigator.userAgentData?.brands?.map(item=>item.brand+" "+item.version).join(", ")||navigator.userAgent));
     lines.push("WebGPU："+yesNo(!!navigator.gpu));
+    if(navigator.gpu){
+      try{
+        const adapter=await navigator.gpu.requestAdapter();
+        lines.push("GPUアダプター取得："+(adapter?"成功":"失敗（ブラウザからGPUが返されませんでした）"));
+        if(adapter){
+          const info=adapter.info||{};
+          const adapterName=[info.vendor,info.architecture,info.device].filter(Boolean).join(" / ");
+          lines.push("GPU情報："+(adapterName||"詳細はSafariから非公開"));
+          lines.push("GPU最大バッファ："+(adapter.limits?.maxBufferSize?Math.round(adapter.limits.maxBufferSize/1024/1024)+" MB":"取得不可"));
+          try{
+            const device=await adapter.requestDevice();
+            lines.push("GPUデバイス作成：成功");
+            device.destroy();
+          }catch(deviceError){
+            lines.push("GPUデバイス作成：失敗（"+(deviceError?.message||String(deviceError))+"）");
+          }
+        }
+      }catch(adapterError){
+        lines.push("GPUアダプター取得：エラー（"+(adapterError?.message||String(adapterError))+"）");
+      }
+    }
     lines.push("標準音声読み上げ："+yesNo(!!window.speechSynthesis));
     lines.push("Service Worker："+yesNo("serviceWorker" in navigator));
     if("serviceWorker" in navigator){
