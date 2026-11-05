@@ -29,7 +29,7 @@ const checks = [
   ["orphan Qwen3 thinking tags are stripped from visible answers", send.includes('replace(/<\\/?think>/gi,"")')],
   ["Queryable and leaked thinking tags are rejected as corrupted output", app.includes("if(/<\\/?think>|\\bQueryable\\b/i.test(value))return true")],
   ["external AI answers are stored only as pending learning candidates", /function queueExternalAiLearningCandidates/.test(app) && /sourceType:"external_ai",sourceProvider:provider/.test(app) && /status:"pending"/.test(app)],
-  ["external learning candidates are created only after an explicitly enabled online request", /if\\(useOnlineForThisTurn\\)\\s*\\{[\\s\\S]*?queueExternalAiLearningCandidates\\(text,opinions\\)/.test(send)],
+  ["external learning candidates are created only after an explicitly enabled online request", /if\(useOnlineForThisTurn\)\s*\{[\s\S]*?queueExternalAiLearningCandidates\(text,opinions\)/.test(send)],
   ["external learning approval warns that facts are not guaranteed", /内容を確認して学びに承認/.test(app) && /事実の正しさが保証されるわけではありません/.test(app)],
   ["approved external learning retains provider and question provenance", /外部AI参考情報・ユーザー承認済み/.test(app) && /sourceQuestion/.test(app)],
   ["approved external content is still treated as untrusted reference material", /外部AI由来でユーザーが承認した学習メモ/.test(app)]
