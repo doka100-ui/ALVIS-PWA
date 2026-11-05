@@ -1264,7 +1264,7 @@ function isDateQuestion(text){
 function isTimeQuestion(text){
   const value=String(text||"").normalize("NFKC").replace(/[\s　]/g,"");
   // 「今何時？それと…」のような複数意図は固定応答で処理しない。
-  return /^(?:(?:今|いま|現在|ただいま)(?:の時間|の時刻|は何時|何時|は何時ですか)|現在時刻|何時)(?:ですか|でしょうか|を教えて|教えて|知りたい)?[?？。!！]*$/i.test(value);
+  return /^(?:(?:今|いま|現在|ただいま)(?:(?:の時間|の時刻)(?:は)?(?:何時)?|は何時|何時)|現在(?:の)?時刻(?:は)?|何時)(?:ですか|でしょうか|を教えて|教えて|知りたい)?[?？。!！]*$/i.test(value);
 }
 const COUNTRY_TIME_ZONES=[
   {names:["アメリカ","米国","USA","US","アメリカ合衆国"],zones:[["東部（ニューヨーク）","America/New_York"],["中部（シカゴ）","America/Chicago"],["山岳部（デンバー）","America/Denver"],["太平洋（ロサンゼルス）","America/Los_Angeles"]]},
