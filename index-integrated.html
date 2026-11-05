@@ -1617,7 +1617,7 @@ async function sendToAlvis(){
   const text=input.value.trim();
   if(!text)return;
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
-  const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)[！!。\s]*$/i.test(text);
+  const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)(?:[、,\s　]*(?:ALVIS|アルヴィス|アルビス))?[！!。…\s　]*$/iu.test(text);
   const userIsAlvisNameQuestion=isAlvisNameQuestion(text);
   const japanDateTime=getJapanDateTime();
   const userIsDateQuestion=isDateQuestion(text);
