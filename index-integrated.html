@@ -1630,7 +1630,7 @@ function buildJapaneseLanguageGuidance(value){
   ].join("\n");
 }
 
-// Quality signals are diagnostic only in this first version; uncertain text is never auto-rewritten.
+// 診断用であり、この初版では自動書き換えをしない。Quality signals are diagnostic only.
 function analyzeJapaneseOutputQuality(value){
   const text=String(value||"").trim();
   const allowedLatin=new Set(["ALVIS","AI","Qwen","WebGPU","URL","Wi-Fi","iPad","iPhone","OK","API","CPU","GPU","TTS"]);
