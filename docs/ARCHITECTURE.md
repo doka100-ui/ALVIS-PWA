@@ -486,3 +486,8 @@ The device diagnostic now requests a high-performance adapter and attempts a tem
 - `tests/offline-first.test.mjs` により、ローカルQwen主系統、オンライン明示許可、質問文のみの送信、通信失敗時のローカル継続、アプリシェルキャッシュ等を静的検査する。
 - `.github/workflows/offline-first.yml` がdevelopmentブランチの関連変更時にNode.js 22で回帰テストを実行する。
 - `docs/OFFLINE_ACCEPTANCE.md` はiPad Safariでの実機・機内モード確認の手順書。静的検査と実機受け入れ試験は別の品質ゲートとして扱う。
+
+
+## 2026-11-05 — Qwen3通常チャット生成設定
+
+通常チャットの初回生成と3種類の再試行は、すべて `extra_body: { enable_thinking: false }` を指定する。改善計画・学習・自律タスク生成と同じ設定に統一し、通常チャットだけ思考モード指定が抜ける不整合を防ぐ。Qwen3の出力品質やiPad Safariでの安定性は実機検証が必要。
