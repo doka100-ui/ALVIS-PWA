@@ -49,7 +49,13 @@ assert.match(japanesePack.buildJapaneseLanguageGuidance("こんにちは"),/自�
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("今日はmostly忙しかった").hasSuspiciousLatin,true);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("私はALVISです。").hasSuspiciousLatin,false);
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("了解です。了解です。").repeatedSentence,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("そう yeah、今日も大変だったね。").needsRepair,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("そんなに頑張ってなんていませんよ").needsRepair,true);
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("そっか、今日は大変だったんだね。").needsRepair,false);
 assert.match(app,/buildJapaneseLanguageGuidance\(text\)/);
+assert.match(app,/analyzeJapaneseOutputQuality\(reply\)\.needsRepair/);
+assert.match(app,/自然な日本語で1〜2文だけ返してください/);
+assert.match(app,/端末内の自然な会話表現に切り替えました/);
 assert.match(app,/content:activePromptWithJapanesePack/);
 assert.match(app,/【日本語言語パック/);
 assert.match(app,/診断用であり、この初版では自動書き換えをしない/);
@@ -69,8 +75,8 @@ const checks = [
   ["API secrets are not embedded in the browser app", !/sk-[A-Za-z0-9]{20,}/.test(app) && !/AIza[A-Za-z0-9_-]{30,}/.test(app)],
   ["offline app shell is cached", /"\.\/index-integrated\.html"/.test(sw) && /caches\.open\(CACHE_NAME\)/.test(sw)],
   ["online API requests are not cached by the service worker", /if\s*\(request\.method\s*!==\s*"GET"\)\s*return/.test(sw)],
-  ["all four main chat generation attempts disable Qwen3 thinking mode", (()=>{const calls=[...send.matchAll(/aiEngine\.chat\.completions\.create\(\{([\s\S]*?)\}\);/g)];return calls.length===4&&calls.every(([,body])=>/extra_body\s*:\s*\{\s*enable_thinking\s*:\s*false\s*\}/.test(body));})()],
-  ["main chat retries retain the same deterministic Qwen3 mode", (send.match(/extra_body:\s*\{enable_thinking:false\}/g)||[]).length===4],
+  ["all four main chat generation attempts disable Qwen3 thinking mode", (()=>{const calls=[...send.matchAll(/aiEngine\.chat\.completions\.create\(\{([\s\S]*?)\}\);/g)];return calls.length===5&&calls.every(([,body])=>/extra_body\s*:\s*\{\s*enable_thinking\s*:\s*false\s*\}/.test(body));})()],
+  ["main chat retries retain the same deterministic Qwen3 mode", (send.match(/extra_body:\s*\{enable_thinking:false\}/g)||[]).length===5],
   ["orphan Qwen3 thinking tags are stripped from visible answers", send.includes('replace(/<\\/?think>/gi,"")')],
   ["Queryable and leaked thinking tags are rejected as corrupted output", app.includes("if(/<\\/?think>|\\bQueryable\\b/i.test(value))return true")],
   ["external AI answers are stored only as pending learning candidates", /function queueExternalAiLearningCandidates/.test(app) && /sourceType:"external_ai",sourceProvider:provider/.test(app) && /status:"pending"/.test(app)],
