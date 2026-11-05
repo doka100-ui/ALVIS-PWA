@@ -335,3 +335,11 @@
 - Service Workerのアプリシェルキャッシュを v32 に更新。
 - 暗号化データ、パスワード、バックアップ、同期データは変更していない。
 - iPad実機でのログイン再確認は未実施。
+
+
+## 2026-11-05 — WebLLM実行状態喪失後の復旧
+- `sendToAlvis()` が `map async was not successful` または `Model not loaded before trying to complete` 等を受けた場合、失敗したWebLLMエンジン参照を無効化し、可能な範囲でunloadを試みる。
+- 次の送信で壊れたエンジンを再利用せず、ユーザーが「Qwen3-4Bを読み込む」で再起動できる状態へ戻す。
+- 会話履歴にはエラーと復旧手順を残す。暗号化保管庫、記憶、バックアップ、同期形式は変更しない。
+- Service Worker app shell cacheをv33へ更新。モデル重みキャッシュは削除しない。
+- 静的コード確認のみ。iPad Safariでの実機確認はユーザー待ち。
