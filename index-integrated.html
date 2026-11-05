@@ -269,6 +269,8 @@ let alvisServiceWorkerReady = Promise.resolve(false);
 
 const $ = id => document.getElementById(id);
 
+// ログイン操作は他の初期化処理より先に登録し、後続処理の例外で無反応にならないようにする。
+
 function setStatus(id,value){
   $(id).textContent = typeof value === "string" ? value : JSON.stringify(value,null,2);
 }
