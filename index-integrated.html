@@ -1243,8 +1243,8 @@ function selectRelevantLearnings(query, history, learnings){
   const approved=(Array.isArray(learnings)?learnings:[]).filter(item=>item.status==="approved"&&String(item.text||"").trim());
   const ranked=approved.map((item,index)=>({text:String(item.text),score:scoreContextMatch(query,item.text)+(context.usedContext?scoreContextMatch(context.text,item.text)*0.4:0),index,createdAt:item.approvedAt||item.createdAt||""}));
   const relevant=ranked.filter(item=>item.score>=1.6).sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,3);
-  // 文脈が明確な短いフォローアップでのみ、直近の承認済み学びを補助として最大2件使う。
-  if(!relevant.length&&context.usedContext)return ranked.slice(-2).reverse();
+  // フォローアップでも、質問または直近の会話と関連度が基準に届かない学びは混ぜない。
+  // 文脈が曖昧な場合は学びを渡さず、会話履歴だけで参照先を判断させる。
   return relevant;
 }
 
