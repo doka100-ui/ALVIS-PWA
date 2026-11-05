@@ -1385,6 +1385,7 @@ async function sendToAlvis(){
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
     let reply;
+    let generationStatusDetails="";
     if(userIsGreeting){
       const greeting=text.replace(/[！!。\s]+$/g,"");
       reply=({
@@ -1414,6 +1415,7 @@ async function sendToAlvis(){
         return raw.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
       };
       // 単体生成テストで正常だった標準設定に合わせ、追加サンプリング指定の影響を切り分ける。
+      let generationAttempts=1;
       let result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
         temperature:0.7,
@@ -1423,15 +1425,16 @@ async function sendToAlvis(){
       // Qwen3が思考タグだけを返して回答本文が空になった場合、履歴を外した短い入力で一度だけ再試行する。
       if(!reply){
         setStatus("aiStatus","回答本文が空でした。短い質問で再試行しています…");
+        generationAttempts++;
+        generationAttempts++;
+        generationAttempts++;
         result=await aiEngine.chat.completions.create({
           messages:[
             {role:"system",content:"あなたはALVISです。日本語で、質問に直接答えてください。思考過程やタグは出力せず、回答本文だけを簡潔に返してください。"},
             {role:"user",content:text}
           ],
-          temperature:0.3,
-          top_p:0.95,
-          repetition_penalty:1.05,
-          max_tokens:384
+          temperature:0.7,
+          max_tokens:512
         });
         reply=extractVisibleAnswer(result.choices?.[0]?.message);
       }
@@ -1443,10 +1446,8 @@ async function sendToAlvis(){
             {role:"system",content:"あなたは日本語で回答するALVISです。必ず自然な日本語だけで回答してください。英語の文章は禁止です。専門用語も日本語で説明し、質問に直接、簡潔に答えてください。思考過程や前置きは出力しないでください。"},
             {role:"user",content:text}
           ],
-          temperature:0.2,
-          top_p:0.95,
-          repetition_penalty:1.05,
-          max_tokens:384
+          temperature:0.7,
+          max_tokens:512
         });
         const japaneseRetry=extractVisibleAnswer(result.choices?.[0]?.message);
         if(japaneseRetry)reply=japaneseRetry;
@@ -1459,10 +1460,8 @@ async function sendToAlvis(){
             {role:"system",content:"あなたはALVISです。質問に対する自然で正確な日本語の回答だけを返してください。英語の内部トークン、プログラム用語の反復、文字化け、思考過程は出力しないでください。簡潔に回答してください。"},
             {role:"user",content:text}
           ],
-          temperature:0.2,
-          top_p:0.95,
-          repetition_penalty:1.05,
-          max_tokens:256
+          temperature:0.7,
+          max_tokens:512
         });
         const recovered=extractVisibleAnswer(result.choices?.[0]?.message);
         if(recovered && !isCorruptedModelReply(recovered)){
@@ -1473,6 +1472,13 @@ async function sendToAlvis(){
         }
       }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
+      const finalChoice=result?.choices?.[0]||{};
+      const usage=result?.usage||{};
+      const promptCharacters=systemPrompt.length+recent.reduce((sum,item)=>sum+String(item.content||"").length,0);
+      generationStatusDetails=(modelOutputCorrupted?"異常出力を検出":!reply?"空回答":"生成完了")
+        +" "+totalSeconds+"秒 / 試行"+generationAttempts+"回 / prompt約"+promptCharacters+"文字"
+        +" / finish:"+String(finalChoice.finish_reason||"不明")
+        +" / tokens:"+String(usage.prompt_tokens??"?")+"+"+String(usage.completion_tokens??"?");
       if(!reply){
         reply="回答本文を取得できませんでした。モデルが空の回答を返したため、もう一度試してください。";
         setStatus("aiStatus","Qwen3-4Bは応答しましたが回答本文が空でした（再試行後も空）。");
@@ -1499,7 +1505,9 @@ async function sendToAlvis(){
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
     renderAll();
-    setStatus("aiStatus",candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）" : "Qwen3-4B 接続中・準備完了");
+    setStatus("aiStatus",generationStatusDetails
+      ? "Qwen3-4B "+generationStatusDetails+(candidateCount?" / 記憶候補 "+candidateCount+"件":"")
+      : candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）" : "Qwen3-4B 接続中・準備完了");
   }catch(error){
     const detail=String(error?.message||error||"不明なエラー");
     const engineStateLost=/map async was not successful|model not loaded before trying to complete|device was lost|device lost|gpu.*lost|webgpu.*lost/i.test(detail);
