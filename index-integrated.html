@@ -1572,6 +1572,76 @@ function isCorruptedModelReply(reply){
 }
 
 
+// ALVIS Japanese Language Pack: compact, offline-first lexical and conversation guidance.
+// It is a small local knowledge layer, not a replacement tokenizer or model fine-tuning.
+const ALVIS_JAPANESE_LANGUAGE_PACK=Object.freeze({
+  version:"ja-core-1",
+  intentGuidance:Object.freeze({
+    greeting:"挨拶には同じ温度感で短く返す。挨拶のあとに質問があれば、その質問にも答える。",
+    gratitude:"感謝には短く自然に応じる。大げさに褒めたり、会話を無理に引き延ばしたりしない。",
+    question:"質問の中心語・対象・時制を確認し、答えを先に示す。必要なら理由や補足を続ける。",
+    consultation:"困りごとの背景と希望を読み取り、まず状況を整理する。選択肢は現実的なものに絞る。",
+    emotion:"気持ちを表す言葉を見落とさず、まず自然に受け止める。求められていない助言や診断を急がない。",
+    request:"依頼された作業と条件を取り違えず、できることから進める。実行していない作業を完了したと言わない。",
+    opinion:"意見や感想として受け取り、必要なら理由を添えて自分の見解を伝える。反射的に同意しない。",
+    report:"報告には自然な相づちや次に必要な反応を返す。説明口調で言い直さない。",
+    casual:"直前の話題と会話の温度を引き継ぎ、短く自然に返す。"
+  }),
+  phraseExamples:Object.freeze({
+    casual:["そうなんだ","なるほど","たしかにね"],
+    empathy:["それは大変だったね","それはうれしいね","気になっていたんだね"],
+    acknowledgement:["わかったよ","了解","確認するね"],
+    transition:["それなら","ちなみに","続けて言うと"]
+  }),
+  grammar:"助詞（は・が・を・に・で）と主語・目的語の関係を崩さない。過去・現在・未来、肯定・否定、疑問の形を取り違えない。文末は相手との距離感に合わせ、同じ語尾を続けない。"
+});
+
+function analyzeJapaneseIntent(value){
+  const text=String(value||"").normalize("NFKC").trim();
+  let intent="casual";
+  if(/^(こんにちは|おはよう|こんばんは|やあ|はじめまして)/u.test(text))intent="greeting";
+  else if(/ありがとう|助かった|感謝して/u.test(text))intent="gratitude";
+  else if(/どうしたら|どうすれば|相談|困って|迷って|悩んで|おすすめ|選ぶべき/u.test(text))intent="consultation";
+  else if(/疲れた|眠い|嬉しい|悲しい|不安|怖い|楽しみ|つらい|寂しい|腹が立つ/u.test(text))intent="emotion";
+  else if(/[?？]|(?:ですか|ますか|教えて|何|なに|いつ|どこ|誰|だれ|どれ|どっち|なぜ|どうして)/u.test(text))intent="question";
+  else if(/(?:して|作って|直して|調べて|確認して|お願い|やって|進めて|始めて)(?:ください|ほしい|ね|よ)?[。！!？?]*$/u.test(text))intent="request";
+  else if(/(?:と思う|気がする|好き|嫌い|いいね|すごい|なるほど)/u.test(text))intent="opinion";
+  else if(/(?:できた|終わった|行ってきた|帰った|始めた|買った|食べた|今日は|今は|さっき)/u.test(text))intent="report";
+  let tense="unspecified";
+  if(/(?:だった|ました|たよ|たね|ていた|てた|終わった|できた)[。！!？?]*$/u.test(text))tense="past";
+  else if(/(?:明日|これから|今度|予定|つもり|する？|しますか)/u.test(text))tense="future";
+  else if(/(?:今|現在|いつも|している|してる|です|ます)/u.test(text))tense="present";
+  const register=/(?:です|ます|ください|でしょう|ございます)[。！!？?]*$/u.test(text)?"polite":"casual";
+  return {intent,tense,register};
+}
+
+function buildJapaneseLanguageGuidance(value){
+  const analysis=analyzeJapaneseIntent(value);
+  const guidance=ALVIS_JAPANESE_LANGUAGE_PACK.intentGuidance[analysis.intent];
+  const examples=analysis.intent==="emotion"?ALVIS_JAPANESE_LANGUAGE_PACK.phraseExamples.empathy
+    :analysis.intent==="request"?ALVIS_JAPANESE_LANGUAGE_PACK.phraseExamples.acknowledgement
+    :ALVIS_JAPANESE_LANGUAGE_PACK.phraseExamples.casual;
+  return [
+    "【日本語言語パック "+ALVIS_JAPANESE_LANGUAGE_PACK.version+"】",
+    "発言分類："+analysis.intent+"／時制："+analysis.tense+"／文体："+analysis.register,
+    guidance,
+    "自然な表現例："+examples.join("・"),
+    ALVIS_JAPANESE_LANGUAGE_PACK.grammar
+  ].join("\n");
+}
+
+// Quality signals are diagnostic only in this first version; uncertain text is never auto-rewritten.
+function analyzeJapaneseOutputQuality(value){
+  const text=String(value||"").trim();
+  const allowedLatin=new Set(["ALVIS","AI","Qwen","WebGPU","URL","Wi-Fi","iPad","iPhone","OK","API","CPU","GPU","TTS"]);
+  const latinWords=text.match(/[A-Za-z][A-Za-z'-]{3,}/g)||[];
+  const suspiciousLatin=latinWords.filter(word=>!allowedLatin.has(word)&&!allowedLatin.has(word.toUpperCase()));
+  const sentences=(text.match(/[^。！？!?]+[。！？!?]?/gu)||[]).map(part=>part.trim()).filter(Boolean);
+  const repeatedSentence=sentences.some((sentence,index)=>sentences.indexOf(sentence)!==index);
+  return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence};
+}
+
+
 function isWeatherQuestion(value){
   return /天気|天候|気温|降水確率|傘は必要|雨は降|雪は降/u.test(String(value||""));
 }
