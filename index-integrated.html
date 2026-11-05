@@ -1307,12 +1307,14 @@ function isCorruptedModelReply(reply){
   if((value.match(/ViewGroup/gi)||[]).length>=2)return true;
   // 同じ短い英単語・日本語断片が大量反復されるデコード崩壊を検出。
   const tokens=value.toLowerCase().match(/[a-z]{2,}|[\u3040-\u30ff\u3400-\u9fff]{2,}/g)||[];
-  if(tokens.length>=24){
+  if(tokens.length>=8){
     const counts=new Map();
     for(const token of tokens)counts.set(token,(counts.get(token)||0)+1);
     const maxRepeat=Math.max(0,...counts.values());
-    if(maxRepeat>=20 && maxRepeat/tokens.length>=0.55)return true;
+    // 短い内部トークン（forKey等）が回答の大半を占める異常出力も検出する。
+    if(maxRepeat>=8 && maxRepeat/tokens.length>=0.7)return true;
   }
+  if(/(?:forKey[\\s\\u3000]*){3,}/i.test(value))return true;
   if(/([\u3400-\u9fff]{2,8})(?:[\s\u3000]*\1){2,}/u.test(value))return true;
   return false;
 }
@@ -1392,6 +1394,7 @@ async function sendToAlvis(){
       setStatus("aiStatus","アメリカの各時間帯を端末で取得しました。");
     }else{
       const startedAt=performance.now();
+      let modelOutputCorrupted=false;
       const extractVisibleAnswer=message=>{
         const raw=Array.isArray(message?.content)
           ? message.content.map(part=>typeof part==="string"?part:(part?.text||"")).join("\\n")
@@ -1436,10 +1439,32 @@ async function sendToAlvis(){
         const japaneseRetry=extractVisibleAnswer(result.choices?.[0]?.message);
         if(japaneseRetry)reply=japaneseRetry;
       }
+      // forKey等の内部トークン反復や文字列崩壊を検出したら、履歴を外して一度だけ再生成する。
+      if(reply && isCorruptedModelReply(reply)){
+        setStatus("aiStatus","異常な文字列を検出しました。履歴を外して再生成しています…");
+        result=await aiEngine.chat.completions.create({
+          messages:[
+            {role:"system",content:"あなたはALVISです。質問に対する自然で正確な日本語の回答だけを返してください。英語の内部トークン、プログラム用語の反復、文字化け、思考過程は出力しないでください。簡潔に回答してください。"},
+            {role:"user",content:text}
+          ],
+          temperature:0.2,
+          max_tokens:256,
+          extra_body:{enable_thinking:false}
+        });
+        const recovered=extractVisibleAnswer(result.choices?.[0]?.message);
+        if(recovered && !isCorruptedModelReply(recovered)){
+          reply=recovered;
+        }else{
+          modelOutputCorrupted=true;
+          reply="ごめん、AIモデルが正常な文章を生成できなかったよ。モデルを終了してから読み込み直し、もう一度試してね。記憶や会話データはそのままだよ。";
+        }
+      }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
       if(!reply){
         reply="回答本文を取得できませんでした。モデルが空の回答を返したため、もう一度試してください。";
         setStatus("aiStatus","Qwen3-4Bは応答しましたが回答本文が空でした（再試行後も空）。");
+      }else if(modelOutputCorrupted){
+        setStatus("aiStatus","Qwen3-4Bが異常な出力を繰り返しました。モデルの再起動が必要です。");
       }else{
         setStatus("aiStatus","Qwen3-4B 接続中・生成完了 "+totalSeconds+"秒");
       }
