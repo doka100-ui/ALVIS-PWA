@@ -538,3 +538,9 @@
 - 商用アプリのGo/Plus/Proと、OSS DevKitのPlus/Proを区別。Free/GoのOSS利用を保証しない。
 - DevKitはローカルNode.js SDKで、macOS/ElectronサンプルとNoncommercial License v1.0を確認。iPad Safari PWAへ直接組み込む実装は保留。
 - 公式資料に基づき、ユーザーのログイン情報を要求する前にローカルランタイム方式を確定する。
+
+
+## 2026-11-05 — オフライン品質ゲートを追加
+- 10項目のオフライン優先構造テストを追加し、GitHub Actionsで自動実行するワークフローを追加。
+- iPad Safariの完全オフライン受け入れ試験手順を `docs/OFFLINE_ACCEPTANCE.md` に追加。
+- この時点の静的検査は10/10 PASS。Actions実行・実機機内モード試験は未確認。
