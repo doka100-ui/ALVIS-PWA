@@ -681,3 +681,9 @@
 - 会話履歴の長さ、Qwen設定、外部送信範囲、保存データ形式は変更なし。オフラインQwenのまま動作する。
 - Service Worker cacheをv66へ更新。
 - 回帰テストに自然な対話ルールの存在確認を追加。Qwen実生成・iPad Safari実機での会話品質は未確認。
+
+### 自然な対話方針の回帰テスト結果（2026-11-05）
+- GitHub Actions `Offline-first regression checks` run #52: SUCCESS。
+- Node.js 22で `tests/offline-first.test.mjs` を実行し、オフライン優先・Qwen推論設定・異常出力検出・名前即答・HTML構造・標準/Kokoroの読み上げ正規化・今回追加した自然な対話ルールのアサーションを通過。
+- テスト実行中に既存テストの正規表現構文と変数名の不整合を発見・修正してから再実行し、最終成功を確認。
+- Qwen3-4Bの実際の会話品質、iPad Safariでのキャッシュ更新・実機動作は未確認。
