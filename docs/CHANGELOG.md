@@ -639,3 +639,8 @@
 - 履歴量や推論設定、オフライン動作、暗号化データ形式は変更なし。
 - Service Worker cache: `alvis-cache-v66-integrated`。
 - コード・回帰テストの更新のみ。実際のQwen応答品質はiPad Safariで確認が必要。
+
+### 自然な対話ルールの回帰検査
+- GitHub Actions / Node.js 22の `tests/offline-first.test.mjs` が最終的に成功。
+- 実行時に見つかった既存テストの正規表現構文エラーとソース変数名の誤りも修正。
+- Qwen実生成・iPad Safariの実機品質確認は別途必要。
