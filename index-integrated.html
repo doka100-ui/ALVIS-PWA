@@ -1389,8 +1389,8 @@ function selectRelevantLearnings(query, history, learnings){
 
 function formatApprovedLearningForPrompt(item){
   const text=String(item?.text||"").trim();
-  if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\\n"+text;
-  return "【ALVISの学び】\\n"+text;
+  if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\n"+text;
+  return "【ALVISの学び】\n"+text;
 }
 
 function getJapanDateTime(){
@@ -1611,7 +1611,7 @@ async function sendToAlvis(){
       memoryText||"まだ登録されていません。",
       "",
       "【ALVISがユーザー承認済みの作業から得た学び】",
-      selectRelevantLearnings(text,data.history,data.learnings).map(formatApprovedLearningForPrompt).join("\\n").slice(0,1800)||"今回の質問に関連する承認済み学びはありません。"
+      selectRelevantLearnings(text,data.history,data.learnings).map(formatApprovedLearningForPrompt).join("\n").slice(0,1800)||"今回の質問に関連する承認済み学びはありません。"
     ].join("\n");
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
