@@ -296,3 +296,6 @@ iPad / iPhone Safari
 
 ## WebGPU diagnostics
 - Device diagnostics now test `navigator.gpu.requestAdapter()` and `adapter.requestDevice()` separately. The temporary diagnostic device is destroyed immediately. This distinguishes API exposure from actual adapter/device availability.
+
+## Corrupted short-token output handling
+- Detect short repeated internal tokens (e.g. `forKey`) at >=8 repetitions and >=70% of tokenized output. Retry once without conversation history; if still corrupted, store only a safe recovery message and advise engine restart.
