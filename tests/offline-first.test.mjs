@@ -138,7 +138,7 @@ assert.match(app, /実行できないことを実行したと主張しない/);
 assert.match(app, /const isBriefConversationalTurn=text\.length<=60/);
 assert.match(app, /const responseTokenLimit=isBriefConversationalTurn\?64:384/);
 assert.equal((app.match(/max_tokens:responseTokenLimit/g)||[]).length, 1);
-assert.equal((app.match(/max_tokens:64/g)||[]).length, 3);
+assert.equal((app.match(/max_tokens:64/g)||[]).length, 4);
 assert.equal((app.match(/max_tokens:512/g)||[]).length, 0);
 assert.match(app, /AIであることを毎回説明しない/);
 assert.match(app, /英語を混ぜず、自然な日本語だけで返す/);
