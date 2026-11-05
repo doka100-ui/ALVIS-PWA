@@ -869,6 +869,10 @@ let kokoroTts=null;
 let kokoroLoading=false;
 let kokoroAudio=null;
 let kokoroObjectUrl=null;
+// 読み上げ時だけ ALVIS の英字読みを日本語名に置き換える（画面表示・保存内容は変更しない）
+function normalizeAlvisSpeechText(value){
+  return String(value||"").replace(/ALVIS/gi,"アルビス");
+}
 function loadSpeechVoices(){
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザは音声読み上げに対応していません。");return;}
   availableSpeechVoices=window.speechSynthesis.getVoices();
@@ -904,7 +908,7 @@ async function prepareKokoroTTS(){
   }finally{kokoroLoading=false;if(button)button.disabled=false;}
 }
 async function speakKokoro(text){
-  const clean=String(text||"").replace(/<[^>]*>/g," ").trim();if(!clean)return;
+  const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();if(!clean)return;
   if(!kokoroTts){setStatus("voiceStatus","先に「Kokoroを準備・モデルを取得」を押してください。");return;}
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
@@ -940,7 +944,7 @@ function speakAlvis(text){
   const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザでは音声読み上げを利用できません。");return;}
-  const clean=String(text||"").replace(/<[^>]*>/g," ").trim();
+  const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();
   if(!clean)return;
   window.speechSynthesis.cancel();
   const utterance=new SpeechSynthesisUtterance(clean);
