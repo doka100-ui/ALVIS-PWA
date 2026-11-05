@@ -39,3 +39,14 @@
 - iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
 - DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
 - 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
+
+## 2026-11-05 追加確認：ログイン権限・利用資格・SDKライセンス
+
+- Sign in with ChatGPTの「本人確認ログイン」と「ChatGPTプラン利用」は別々の許可。本人確認ログインだけではChatGPTの推論枠を使えない。
+- OpenAI Help Centerの最新説明では、参加する商用アプリでプラン利用を許可できる対象としてGo / Plus / Proが記載されている。一方、OpenAI公式オープンソースDevKit/開発者向けガイドのプラン利用例・対象説明はPlus / Pro。したがってALVISがオープンソースDevKit方式を使う場合、Go/Freeで利用できるとは現時点で扱わない。実際の認可画面・対象資格で最終確認する。
+- プラン利用を許可しても、アプリにChatGPTの会話履歴やメモリが渡るわけではない。別途アプリが要求する権限は個別に確認する。
+- 接続アプリの利用量はChatGPTプランに含まれるWork/Codex等の利用枠を消費する。ChatGPTの Settings > Usage でアプリごとの週間上限を設定でき、Settings > Security and login > Sign in with ChatGPT から接続を解除できる。接続アプリ独自の料金がある場合は別。
+- OpenAI公式DevKitはユーザー自身のマシン上で動くオープンソースアプリ向けのローカルNode.js SDK。公式サンプルPaste PerfectはmacOS 14以降、Node.js 22.12以降、Xcode Command Line Toolsを要求するmacOS/Electronアプリ。DevKitのOpenAI作成コード・文書はNoncommercial License v1.0。商用化や再配布の前にはライセンス条件を再確認する。
+- 現行ALVISはSafari PWAであり、上記のNode.jsプロセスを直接ホストできない。iPad Safari向けの公式対応も確認できていない。今すぐログイン・トークン入力をユーザーへ求める段階ではない。
+- 将来の候補は、(A) iPadで公式要件を満たすローカル実行環境が確認できた場合に統合、(B) Mac等のユーザー管理下のコンパニオンアプリを別途作り、iPad PWAとはローカルネットワーク上で限定連携する方式。Bは端末が起動している必要があり、iPad単独動作ではない。どちらもQwenオフライン基盤を置き換えない。
+- 公式最新資料: https://learn.chatgpt.com/docs/sign-in-with-chatgpt 、https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites 、https://developers.openai.com/siwc/quickstart 、https://github.com/openai/sign-in-with-chatgpt-devkit
