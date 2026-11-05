@@ -1373,7 +1373,7 @@ async function sendToAlvis(){
         const raw=Array.isArray(message?.content)
           ? message.content.map(part=>typeof part==="string"?part:(part?.text||"")).join("\\n")
           : String(message?.content||"");
-        return raw.replace(/<think>[\\s\\S]*?<\\/think>/gi,"").replace(/^\\s*<think>[\\s\\S]*$/i,"").trim();
+        return raw.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
       };
       let result=await aiEngine.chat.completions.create({
         messages:[{role:"system",content:systemPrompt},...recent],
