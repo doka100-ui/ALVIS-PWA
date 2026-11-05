@@ -542,3 +542,11 @@
 - 両方のリクエストに `store:false` を設定。GeminiキーをURLからHTTPヘッダーへ移動。
 - 公式仕様確認: OpenAIは新規プロジェクトにResponses APIを推奨。GoogleはInteractions APIを2026年6月以降の新規開発向け標準として案内。
 - 実API接続は未実施。模擬レスポンスを使ったWorkerテストを再実行する。
+
+
+### 現行API移行後の検証（2026-11-05）
+
+- Workerモックテスト10/10 PASS。
+- 検証項目: health、認証、Origin制限、不正JSON、本文サイズ制限、質問長制限、OpenAI Responses + Gemini Interactionsの両応答、store:false、Geminiキーのヘッダー送信、片側プロバイダー失敗時の部分成功。
+- アプリmodule scriptとWorkerソースの構文解析もPASS。
+- 実Cloudflare Workerデプロイ・実API接続・iPad Safariでの動作は未確認。
