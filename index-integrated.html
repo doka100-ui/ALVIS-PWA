@@ -256,7 +256,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
 <div class="hud-side hud-side-left">
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
-<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="Qwen3-4Bを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">Qwen3-4B 未起動</span></button>
+<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button>
 <div class="hud-readout"><span>INFERENCE</span><b>LOCAL / WEBGPU</b></div>
 <div class="hud-readout hud-thinking-readout" id="hudThinkingReadout" data-state="idle"><span>PROCESS</span><b id="hudThinkingState">STANDBY</b></div>
 <div class="hud-readout"><span>RESPONSE TIME</span><b id="hudResponseTime">--.- s</b></div>
@@ -308,7 +308,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <div style="display:flex;align-items:center;gap:10px;margin:4px 0 8px"><span class="small">低め</span><input id="kokoroRate" type="range" min="0.96" max="1.10" step="0.02" value="0.98" style="flex:1"><span class="small">高め</span><strong id="kokoroRateValue" class="small">標準</strong></div>
 <p class="small">再生速度を少し変える調整です。高めにすると声も少し高くなり、低めにすると少し低くなります。</p>
 <div class="actions"><button id="previewKokoroTuned" class="secondary" type="button">今の設定で試聴</button></div>
-<p class="small">4種類を同じ文章で比較できます。ボタンを押すと、その声を選択・保存して試聴します。iPadのメモリ競合を避けるため、Qwen3-4Bを使用中の場合は先に「モデルを終了」してください。</p>
+<p class="small">4種類を同じ文章で比較できます。ボタンを押すと、その声を選択・保存して試聴します。メモリ競合を避けるため、ローカルAIモデルを使用中の場合は先に「モデルを終了」してください。</p>
 <div class="actions" id="kokoroVoiceSamples">
 <button type="button" class="secondary" data-kokoro-voice="jf_alpha">Alphaを試聴</button>
 <button type="button" class="secondary" data-kokoro-voice="jf_gongitsune">Gongitsuneを試聴</button>
@@ -330,7 +330,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <button id="sendChat" disabled>送信</button>
 <label class="inline-option"><input id="useOnlineAi" type="checkbox"> この質問文だけをオンラインAIにも送り、複数の意見を集める</label>
 <p class="small">チェックした1回だけ外部AIを利用します。送信するのは今の質問文だけで、会話履歴・長期記憶は送信しません。未設定・通信失敗時は端末内AIだけで回答します。</p>
-<p class="small">Qwen3-4Bは端末内で推論します。承認済み長期記憶の内容を会話時にAIへ渡します。</p>
+<p class="small">選択したQwen3モデルは端末内で推論します。承認済み長期記憶の内容を会話時にAIへ渡します。</p>
 </div>
 </section>
 
@@ -429,7 +429,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <section id="aiConnectPage" class="hidden">
 <div class="panel">
 <h2>オンラインAI連携</h2>
-<p>ネット接続時に複数のAIへ質問を送り、端末内のQwen3-4Bが意見を比較・統合するための接続設定です。ここを設定しなくても、今までどおりオフラインAIは使えます。</p>
+<p>ネット接続時に複数のAIへ質問を送り、端末内のQwen3モデルが意見を比較・統合するための接続設定です。ここを設定しなくても、今までどおりオフラインAIは使えます。</p>
 <label for="onlineAiGatewayUrl" class="small">ALVIS AIゲートウェイURL（HTTPS）</label>
 <input id="onlineAiGatewayUrl" type="url" inputmode="url" placeholder="https://your-worker.workers.dev">
 <label for="onlineAiGatewayToken" class="small">ゲートウェイトークン</label>
@@ -630,7 +630,7 @@ function updateHudAiStatus(value=""){
 }
 function setStatus(id,value){
   const rawOutput=typeof value === "string" ? value : JSON.stringify(value,null,2);
-  const output=id==="aiStatus"?rawOutput.replaceAll("Qwen3-4B",ALVIS_MODEL_LABEL):rawOutput;
+  const output=rawOutput.replaceAll("Qwen3-4B",ALVIS_MODEL_LABEL);
   $(id).textContent=output;
   if(id==="aiStatus")updateHudAiStatus(output);
 }
