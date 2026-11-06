@@ -1541,11 +1541,11 @@ function formatApprovedLearningForPrompt(item,citationNumber=null){
 
 function extractApprovedResearchCitations(value,sources){
   const cited=[];
-  const text=String(value||"").replace(/\\[出典(\\d+)\\]/gu,(marker,digits)=>{
+  const text=String(value||"").replace(/\[出典(\d+)\]/gu,(marker,digits)=>{
     const source=(Array.isArray(sources)?sources:[])[Number(digits)-1];
     if(source&&!cited.some(item=>item.url===source.url))cited.push(source);
     return "";
-  }).replace(/[ \\t]{2,}/gu," ").replace(/\\s+([。、「」])/gu,"$1").trim();
+  }).replace(/[ \t]{2,}/gu," ").replace(/\s+([。、「」])/gu,"$1").trim();
   return {text,sources:cited};
 }
 
