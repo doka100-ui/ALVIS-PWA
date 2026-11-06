@@ -343,8 +343,8 @@ for (const sample of ["名前は？", "名前は", "あなたの名前は？", "
 for (const sample of ["私の名前は？", "今日の天気は？", "富士山の高さは？"]) {
   assert.equal(isAlvisNameQuestion(sample), false, `must not misclassify unrelated question: ${sample}`);
 }
-assert.ok(app.includes('<h2>ALVIS ログイン</h2>'));
-assert.ok(app.includes('placeholder="パスワード"'));
+assert.ok(app.includes('<h2>SECURE ACCESS</h2>'));
+assert.ok(app.includes('placeholder="パスワードを入力"'));
 assert.ok(!app.includes("記憶を暗号化するパスワードを入力してね"));
 assert.ok(!app.includes("パスワードは忘れないように保管してね"));
 
