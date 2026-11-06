@@ -522,7 +522,7 @@ assert.match(app,/hudAiPercent/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-interface-item"/);
 assert.match(app,/v109: spatial hologram control room/);
-assert.match(app,/rgba?\(/);
+assert.match(app,/#(?:[0-9a-fA-F]{3,8})\b/);
 assert.match(sw,/const CACHE_NAME = "alvis-cache-v120-integrated"/);
 
 // A single user turn must own the conversation pipeline until its finally block.
