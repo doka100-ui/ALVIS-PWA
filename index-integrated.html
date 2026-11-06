@@ -171,6 +171,32 @@ textarea{min-height:90px;resize:vertical}
 @media(max-width:430px){.jarvis-stage{min-height:255px;grid-template-columns:76px minmax(120px,1fr) 76px;gap:3px;padding:14px 4px 30px}.hud-side{padding:7px 4px}.hud-panel-heading{font-size:6px}.hud-interface-item em{display:none}.hud-interface-item>span{flex-basis:15px;height:15px;font-size:8px}.hud-interface-item{gap:2px}.hud-readout b{font-size:6px}.hud-center{min-height:205px}.hud-core{min-width:118px}.hud-caption{letter-spacing:.02em}}
 @media(prefers-reduced-motion:reduce){.hud-orbit-a,.hud-orbit-b,.hud-core:before{animation:none}}
 
+
+/* v113: live inference telemetry and dedicated ALVIS vault entrance. */
+.hud-thinking-readout{position:relative;overflow:hidden}
+.hud-thinking-readout b{display:flex;align-items:center;gap:6px}
+.hud-thinking-readout[data-state="thinking"] b{color:#a5f3fc;text-shadow:0 0 9px #22d3ee99}
+.hud-thinking-readout[data-state="thinking"] b:before{content:"";width:6px;height:6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 10px #22d3ee;animation:alvisThinkingPulse 1s ease-in-out infinite}
+@keyframes alvisThinkingPulse{50%{opacity:.25;transform:scale(.65)}}
+#hudResponseTime{font-variant-numeric:tabular-nums}
+#lockPanel{position:relative;isolation:isolate;overflow:hidden;max-width:520px;margin:clamp(28px,8vh,90px) auto!important;padding:clamp(22px,5vw,38px)!important;border:1px solid #38bdf866!important;border-radius:20px!important;background:radial-gradient(ellipse at 50% 0%,#07598566,transparent 52%),linear-gradient(155deg,#0b1d35f2,#030914f7 72%)!important;box-shadow:0 0 34px #0284c733,inset 0 1px #dff8ff20!important}
+#lockPanel:before{content:"";position:absolute;z-index:-1;inset:10px;border:1px solid #38bdf822;border-radius:14px;pointer-events:none}
+#lockPanel .login-emblem{width:112px;height:112px;margin:0 auto 18px;display:grid;place-items:center;position:relative;border:1px solid #67e8f988;border-radius:50%;background:radial-gradient(circle,#0e749055 0%,#06172c 65%);box-shadow:0 0 24px #0ea5e955,inset 0 0 22px #38bdf844}
+#lockPanel .login-emblem:before,#lockPanel .login-emblem:after{content:"";position:absolute;inset:-8px;border:1px solid #38bdf866;border-radius:50%;transform:rotateX(68deg)}
+#lockPanel .login-emblem:after{inset:-14px;transform:rotateY(68deg);border-color:#22d3ee55}
+#lockPanel .login-emblem span{font-size:24px;letter-spacing:.2em;padding-left:.2em;color:#e0fbff;text-shadow:0 0 12px #38bdf8,0 0 26px #0ea5e9}
+#lockPanel .login-kicker{text-align:center;color:#7dd3fc;font-size:9px;letter-spacing:.28em;margin-bottom:8px}
+#lockPanel h2{text-align:center;margin:0 0 7px;color:#e6faff;font-size:22px;letter-spacing:.12em}
+#lockPanel .login-subtitle{text-align:center;color:#8dbbd5;font-size:11px;letter-spacing:.12em;margin:0 0 25px}
+#lockPanel label{display:block;margin:0 0 7px;color:#9bdcf2;font-size:10px;letter-spacing:.16em}
+#lockPanel input{box-sizing:border-box;width:100%;padding:14px 15px;border:1px solid #38bdf866;border-radius:10px;background:#020b18;color:#effaff;outline:none;box-shadow:inset 0 0 16px #0c4a6e33}
+#lockPanel input:focus{border-color:#67e8f9;box-shadow:0 0 0 2px #22d3ee22,0 0 18px #0ea5e933}
+#lockPanel #unlockButton{width:100%;margin-top:13px;padding:14px;border:1px solid #67e8f9;border-radius:10px;background:linear-gradient(110deg,#075985,#0e7490 55%,#164e63);color:#effcff;font-weight:700;letter-spacing:.12em;box-shadow:0 0 20px #0891b244,inset 0 1px #dff8ff33}
+#lockPanel #unlockButton:active{transform:translateY(1px)}
+#lockPanel #lockStatus{min-height:18px;margin-top:12px;text-align:center;color:#9bdcf2}
+#lockPanel .login-security{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:20px;padding-top:14px;border-top:1px solid #38bdf833;color:#78a9c4;font-size:8px;letter-spacing:.13em}
+@media(prefers-reduced-motion:reduce){.hud-thinking-readout[data-state="thinking"] b:before{animation:none}}
+
 </style>
 </head>
 <body>
@@ -179,11 +205,16 @@ textarea{min-height:90px;resize:vertical}
 <div class="status" id="status">● 起動しています</div>
 </header>
 
-<section id="lockPanel" class="panel" style="margin:16px">
-<h2>ALVIS ログイン</h2>
-<input id="password" type="password" autocomplete="current-password" placeholder="パスワード">
-<button id="unlockButton">ログイン／記憶庫を作成</button>
+<section id="lockPanel" class="panel">
+<div class="login-emblem" aria-hidden="true"><span>ALVIS</span></div>
+<div class="login-kicker">PERSONAL AI SYSTEM</div>
+<h2>SECURE ACCESS</h2>
+<p class="login-subtitle">あなた専用のAIシステムへ接続</p>
+<label for="password">ACCESS PASSWORD</label>
+<input id="password" type="password" autocomplete="current-password" placeholder="パスワードを入力">
+<button id="unlockButton">認証して接続</button>
 <div id="lockStatus" class="small" aria-live="polite"></div>
+<div class="login-security"><span>◈ AES-256 ENCRYPTED</span><span>◉ LOCAL FIRST</span><span>⌁ PRIVATE VAULT</span></div>
 </section>
 
 <div id="appPanel" class="hidden">
@@ -212,6 +243,8 @@ textarea{min-height:90px;resize:vertical}
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
 <button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="Qwen3-4Bを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">Qwen3-4B 未起動</span></button>
 <div class="hud-readout"><span>INFERENCE</span><b>LOCAL / WEBGPU</b></div>
+<div class="hud-readout hud-thinking-readout" id="hudThinkingReadout" data-state="idle"><span>PROCESS</span><b id="hudThinkingState">STANDBY</b></div>
+<div class="hud-readout"><span>RESPONSE TIME</span><b id="hudResponseTime">--.- s</b></div>
 <div class="hud-readout"><span>DATA VAULT</span><b>ENCRYPTED</b></div>
 <div class="hud-side-foot"><span class="hud-status-dot"></span> OFFLINE FIRST</div>
 </div>
@@ -494,6 +527,7 @@ let aiEngine = null;
 let aiLoading = false;
 let aiLoadProgress = 0;
 let alvisResponseInProgress = false;
+let alvisResponseStartedAt = 0;
 
 // 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
@@ -523,6 +557,13 @@ const $ = id => document.getElementById(id);
 
 // ログイン操作は他の初期化処理より先に登録し、後続処理の例外で無反応にならないようにする。
 
+function updateHudConversationState(state="idle",elapsedSeconds=null){
+  const panel=$("hudThinkingReadout"),label=$("hudThinkingState"),time=$("hudResponseTime");
+  if(panel){panel.dataset.state=state;}
+  if(label){label.textContent=state==="thinking"?"THINKING":state==="ready"?"READY":"STANDBY";}
+  if(time&&Number.isFinite(elapsedSeconds)&&elapsedSeconds>=0){time.textContent=elapsedSeconds.toFixed(1)+" s";}
+  else if(time&&state==="idle"){time.textContent="--.- s";}
+}
 function updateHudAiStatus(value=""){
   const stateNode=$("hudAiState");
   if(!stateNode)return;
@@ -2228,6 +2269,8 @@ async function sendToAlvis(){
     return;
   }
   alvisResponseInProgress=true;
+  alvisResponseStartedAt=performance.now();
+  updateHudConversationState("thinking");
   $("sendChat").disabled=true;
   input.value="";
   data.history.push({role:"user",text,createdAt:new Date().toISOString()});
@@ -2503,6 +2546,9 @@ async function sendToAlvis(){
     try{await saveLocal();}catch(saveError){}
     setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。Qwen3-4Bを再読み込みしてください。":message);
   }finally{
+    const elapsed=alvisResponseStartedAt?Math.max(0,(performance.now()-alvisResponseStartedAt)/1000):0;
+    updateHudConversationState("ready",elapsed);
+    alvisResponseStartedAt=0;
     alvisResponseInProgress=false;
     $("sendChat").disabled=false;
     renderAll();
