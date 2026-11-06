@@ -1130,3 +1130,8 @@
 ## v136 — 後付けの背景ぼかしを除去
 - Git履歴で追加時期を確認したdisplay-dock/hud-side等のbackdrop blurとfilter blurをCSSから除去。半透明のガラス色は保持。
 - Service Worker cache v136。実機確認待ち。
+
+
+## v137 — 参考画像に合わせたホログラム構図
+- 地球と周回軌道を上方へ移動し、球体を上部投影装置に近づけた。ALVIS文字は球体中央、下部投影台は従来位置で静止。
+- 中央の縦光柱を上部プロジェクターから下部台まで強調。Service Worker cache v137。
