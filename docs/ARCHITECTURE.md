@@ -1,3 +1,6 @@
+## モデル状態表示
+- モデル選択は端末プロファイルから行い、ステータス表示は選択中のモデルラベルを共通利用する。端末により異なるモデル名が表示されても、人格・記憶・履歴は共通。
+
 ## 端末別ローカルAIプロファイル
 - `resolveAlvisDeviceProfile()` がUser-Agent、platform、maxTouchPointsから端末クラスとモデル設定を決定する。
 - iPhone/iPod/Androidスマートフォン: Qwen3-1.7B、context 1024。
