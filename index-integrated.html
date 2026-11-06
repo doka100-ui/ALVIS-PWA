@@ -2047,7 +2047,8 @@ async function sendToAlvis(){
       ...recent.slice(0,-1).slice(-priorMessageLimit).map(item=>({...item,content:String(item.content||"").slice(-100)})),
       {role:"user",content:text}
     ];
-    const systemPrompt=buildCompactAlvisSystemPrompt(japanDateTime.date,japanDateTime.time,numberedResearchSources.length>0,isWeatherQuestion(text));
+    const hasUntrustedReferences=numberedResearchSources.length>0||relevantLearnings.some(item=>item.sourceType==="external_ai")||!!onlineReferenceText;
+    const systemPrompt=buildCompactAlvisSystemPrompt(japanDateTime.date,japanDateTime.time,hasUntrustedReferences,isWeatherQuestion(text));
     const activeSystemPrompt=systemPrompt;
     const activePromptWithJapanesePack=activeSystemPrompt+"\n"+buildJapaneseLanguageGuidance(text,true)+"\n"+buildCompactConversationVariationGuidance(text,data.history)+"\n【承認済み記憶】"+(memoryText||"なし")+"\n【承認済み学び・参考資料】"+(learningContext||"なし");
     // 単独の挨拶はモデルに任せず、短く自然に返す。
