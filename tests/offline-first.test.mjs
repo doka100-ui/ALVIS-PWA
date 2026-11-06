@@ -306,7 +306,7 @@ const compactWeatherPrompt=buildCompactAlvisSystemPrompt("2026年11月6日（金
 assert.match(compactWeatherPrompt,/天気データは未取得/);
 const compactResearchPrompt=buildCompactAlvisSystemPrompt("2026年11月6日（金）","12:00",true,false);
 assert.match(compactResearchPrompt,/外部資料は承認済みでも未検証/);
-assert.match(compactResearchPrompt,/根拠にした文だけ\\[出典N\\]/);
+assert.match(compactResearchPrompt,/根拠にした文だけ\[出典N\]/);
 const compactVariationStart=app.indexOf("function buildCompactConversationVariationGuidance(");
 const compactVariationEnd=app.indexOf("\nfunction buildContextualQuery",compactVariationStart);
 assert.ok(compactVariationStart>=0&&compactVariationEnd>compactVariationStart,"compact variation guidance must exist");
