@@ -140,6 +140,26 @@ for (const [name, passed] of checks) {
 console.log(`\n${checks.length}/${checks.length} offline-first policy checks passed.`);
 
 
+// Autonomous goal proposal parsing and context-driven self-planning.
+const goalParserStart=app.indexOf("function parseAutonomyGoalProposal(");
+const goalParserEnd=app.indexOf("\n}\n\nfunction renderAutonomyIssues",goalParserStart);
+assert.ok(goalParserStart>=0&&goalParserEnd>goalParserStart,"autonomous goal parser must exist");
+const parseAutonomyGoalProposal=new Function(app.slice(goalParserStart,goalParserEnd+2)+"; return parseAutonomyGoalProposal;")();
+assert.deepEqual(parseAutonomyGoalProposal(JSON.stringify({goal:"改善文脈理解",reason:"直近会話で参照先の取り違えがあった",firstAction:"会話履歴の参照テストを追加する",successCriteria:"参照先の回帰テストが通る",priority:"high"})),{
+  goal:"改善文脈理解",reason:"直近会話で参照先の取り違えがあった",firstAction:"会話履歴の参照テストを追加する",successCriteria:"参照先の回帰テストが通る",priority:"high"
+});
+assert.throws(()=>parseAutonomyGoalProposal("回答だけでJSONがない"),/JSON/);
+assert.throws(()=>parseAutonomyGoalProposal(JSON.stringify({goal:"目標だけ"})),/最初の一歩/);
+assert.equal(parseAutonomyGoalProposal(JSON.stringify({goal:"調査",firstAction:"公式資料を確認",priority:"invalid"})).priority,"medium");
+const autonomyCycleStart=app.indexOf('$("autonomyCycleButton").addEventListener("click",async()=>{');
+const autonomyCycleEnd=app.indexOf('\n\n$("proposeAutonomyTask").addEventListener',autonomyCycleStart);
+assert.ok(autonomyCycleStart>=0&&autonomyCycleEnd>autonomyCycleStart,"self-directed goal cycle must exist");
+const autonomyCycle=app.slice(autonomyCycleStart,autonomyCycleEnd);
+for(const evidence of ["slice(-24)","data.autonomyIssues","data.improvements","data.autonomyTasks","data.learnings","successCriteria","外部送信","バックグラウンド実行"]) assert.ok(autonomyCycle.includes(evidence),`self-planning must consider and constrain: ${evidence}`);
+assert.match(app,/task\.successCriteria/);
+assert.match(app,/task\.reason/);
+assert.match(app,/origin:\$\("autonomyTaskDraft"\)\.dataset\.origin/);
+
 // Dedicated external AI answer review UI
 assert.match(app, /data-page="externalAiPage">外部AIの回答/);
 assert.match(app, /id="externalAiPage"/);
