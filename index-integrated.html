@@ -456,19 +456,19 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 /* v128: reference composition rebuilt as a single fixed-coordinate hologram scene */
 .display-dock .mode-stage.jarvis-stage{
  display:block!important;position:relative!important;isolation:isolate!important;
- width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:1/1!important;
+ width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:406/326!important;
  min-height:0!important;height:auto!important;margin:12px auto 18px!important;padding:0!important;
  overflow:hidden!important;border:0!important;border-radius:0!important;
  background:#01040b!important;box-shadow:0 0 28px #0b6b9b33!important;
 }
-.alvis-reference-scene{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+.alvis-reference-scene{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;image-rendering:auto}
 .display-dock .mode-stage.jarvis-stage>.hud-side,
 .display-dock .mode-stage.jarvis-stage>.hud-center,
 .display-dock .mode-stage.jarvis-stage>.hud-caption{visibility:hidden!important;pointer-events:none!important}
 .display-dock .mode-stage.jarvis-stage #hudAiAction{
  visibility:visible!important;display:flex!important;position:absolute!important;z-index:5!important;
- left:50%!important;top:42%!important;transform:translate(-50%,-50%)!important;
- width:38%!important;height:40%!important;margin:0!important;padding:0!important;
+ left:50%!important;top:50.5%!important;transform:translate(-50%,-50%)!important;
+ width:38%!important;height:45%!important;margin:0!important;padding:0!important;
  opacity:.001!important;border:0!important;background:transparent!important;
  cursor:pointer!important;pointer-events:auto!important;
 }
@@ -506,6 +506,24 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 .alvis-reference-scene .ref-energy-pulse{animation:none!important;transform:none!important}
 .alvis-reference-scene #globeClip path{shape-rendering:geometricPrecision}
 .alvis-reference-scene [clip-path="url(#globeClip)"]{shape-rendering:geometricPrecision}
+
+
+/* v131: match the supplied 406x326 reference aspect ratio and sharpen the globe */
+.display-dock .mode-stage.jarvis-stage{
+ aspect-ratio:406/326!important;
+ width:min(100%,520px)!important;
+ max-width:520px!important;
+ min-height:0!important;
+ height:auto!important;
+}
+.alvis-reference-scene{aspect-ratio:406/326;object-fit:fill}
+.alvis-reference-scene text{filter:none!important}
+.alvis-reference-scene .ref-base-rotor,
+.alvis-reference-scene .ref-base-counter,
+.alvis-reference-scene .ref-energy-pulse{animation:none!important;transform:none!important}
+@media(max-width:600px){
+ .display-dock .mode-stage.jarvis-stage{width:100%!important;max-width:406px!important}
+}
 
 </style>
 </head>
@@ -549,7 +567,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
-<svg class="alvis-reference-scene" viewBox="0 0 406 406" role="img" aria-label="参考画像に合わせたALVISホログラム投影"><defs>
+<svg class="alvis-reference-scene" viewBox="0 0 406 326" preserveAspectRatio="xMidYMid meet" role="img" aria-label="参考画像に合わせたALVISホログラム投影"><defs>
 <radialGradient id="sceneBg"><stop stop-color="#082b50"/><stop offset=".58" stop-color="#031326"/><stop offset="1" stop-color="#01040b"/></radialGradient>
 <radialGradient id="globeFill" cx="38%" cy="25%" r="78%"><stop stop-color="#b9f7ff" stop-opacity=".92"/><stop offset=".18" stop-color="#187fbd" stop-opacity=".75"/><stop offset=".62" stop-color="#06406f" stop-opacity=".8"/><stop offset="1" stop-color="#010d25" stop-opacity=".98"/></radialGradient>
 <radialGradient id="globeGlow"><stop stop-color="#5ce5ff" stop-opacity=".52"/><stop offset=".65" stop-color="#167cc2" stop-opacity=".12"/><stop offset="1" stop-color="#167cc2" stop-opacity="0"/></radialGradient>
@@ -644,8 +662,8 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  <circle cx="110" cy="145" r="1.1" fill="#e3fbff"/><circle cx="294" cy="210" r="1.2" fill="#e3fbff"/>
 </g>
 <!-- title -->
-<text x="204" y="181" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="1.4" fill="#dffaff" filter="url(#glow)">ALVIS</text>
-<text x="204" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.2" letter-spacing="2.1" fill="#b7edff" opacity=".6">PERSONAL AI</text>
+<text x="204" y="181" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="1.4" fill="#e6fbff">ALVIS</text>
+<text x="204" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.2" letter-spacing="2.1" fill="#b7edff" opacity=".72">PERSONAL AI</text>
 <!-- center vertical energy beam -->
 <path d="M204 194V302" stroke="url(#redBeam)" stroke-width="7" opacity=".9" filter="url(#soft)"/>
 <path d="M204 192V302" stroke="url(#redBeam)" stroke-width="2.2" filter="url(#glow)"/>
