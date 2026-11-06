@@ -212,6 +212,93 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 
 @media(prefers-reduced-motion:reduce){.hud-thinking-readout[data-state="thinking"] b:before{animation:none}}
 
+
+/* v125: reference-led cinematic hologram composition */
+.jarvis-stage{
+  min-height:430px;
+  grid-template-columns:minmax(150px,.78fr) minmax(280px,1.55fr) minmax(150px,.78fr);
+  gap:clamp(10px,2.2vw,28px);
+  padding:26px clamp(14px,2.4vw,32px) 48px;
+  background:
+    radial-gradient(ellipse at 50% 48%,#0b4775 0%,#082744 34%,#031426 64%,#01060f 100%);
+}
+.jarvis-stage:before{opacity:.24;background-size:34px 34px;mask-image:radial-gradient(ellipse at center,#000 0%,transparent 78%)}
+.jarvis-stage:after{opacity:.24;background:repeating-linear-gradient(180deg,transparent 0 5px,#67dfff08 6px 7px)}
+.hud-side{
+  padding:14px 12px;
+  background:linear-gradient(145deg,#06182bd9,#071d32a8 58%,#061426c9);
+  border-color:#45bdf477;
+  box-shadow:inset 0 1px #e2faff20,inset 0 0 25px #0284c71b,0 0 24px #0284c71b;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.hud-center{min-height:340px}
+.hud-core{
+  width:min(29vw,280px);min-width:190px;
+  background:
+    radial-gradient(ellipse at 34% 26%,#e5fbff88 0%,#80dfff35 8%,transparent 25%),
+    radial-gradient(circle at 48% 48%,#0e6fa8 0%,#075080 42%,#03213d 72%,#010a18 100%);
+  box-shadow:0 0 22px #38bdf8b8,0 0 64px #0284c766,inset 0 0 38px #67e8f977,inset -22px -18px 40px #020617dd;
+}
+.hud-core:before{
+  inset:4%;border:1px solid #b8f3ff99;
+  background:
+    repeating-radial-gradient(ellipse at 50% 50%,transparent 0 13px,#9deaff2b 14px 15px),
+    repeating-linear-gradient(90deg,transparent 0 24px,#9deaff20 25px 26px),
+    repeating-linear-gradient(0deg,transparent 0 19px,#9deaff1a 20px 21px);
+  box-shadow:inset 0 0 28px #38bdf855,0 0 18px #22d3ee66;
+}
+.hud-core:after{
+  inset:12%;border:1px solid #a5f3fc88;
+  background:radial-gradient(ellipse at 36% 28%,#e0faff2b,transparent 42%),radial-gradient(ellipse at 50% 50%,transparent 60%,#020b1d88 100%);
+  box-shadow:inset 0 0 30px #0ea5e977,0 0 24px #22d3ee44;
+}
+.hud-orbit-a{width:126%;height:48%;border-color:#75dcffbb}
+.hud-orbit-b{width:116%;height:66%;border-color:#0ea5e988}
+.hud-orbit-c{width:138%;height:34%;border-color:#b5efff66}
+.hud-projector{width:112px;height:27px;top:0;box-shadow:0 0 22px #0ea5e988}
+.hud-projector i{height:100px}
+.hud-beam{top:9%;height:76%;width:42%;background:linear-gradient(180deg,#38bdf800,#38bdf812 35%,#38bdf81b 72%,#fb71851c 94%,transparent)}
+.hud-platform{height:62px;width:100%;bottom:2%;background:radial-gradient(ellipse at 50% 35%,#38bdf84a 0%,#0ea5e925 40%,transparent 72%);box-shadow:0 15px 24px -14px #38bdf8}
+.hud-platform:before{width:84%;height:34px;border-color:#75dcffcc}
+.hud-platform:after{width:64%;height:29px;border-color:#67e8f999}
+.hud-platform i{width:42%;height:22px;border-color:#fb7185bb;box-shadow:0 0 13px #fb718566}
+.hud-platform span{background:#fff1f2;box-shadow:0 0 12px 4px #fb7185}
+.hud-center-caption{bottom:-5px;letter-spacing:.2em}
+.hud-caption{letter-spacing:.2em;color:#8bdfff}
+@media(max-width:760px){
+  .jarvis-stage{
+    min-height:350px;
+    grid-template-columns:minmax(76px,.66fr) minmax(150px,1.5fr) minmax(76px,.66fr);
+    gap:4px;padding:22px 6px 38px;
+    background:radial-gradient(ellipse at 50% 48%,#0a3b63 0%,#061d34 48%,#010711 100%);
+  }
+  .hud-side{padding:9px 6px;background:linear-gradient(145deg,#06182bdc,#071d32b5 58%,#061426d4)}
+  .hud-center{min-height:290px}
+  .hud-core{width:min(43vw,205px);min-width:142px}
+  .hud-orbit-a{width:138%;height:48%}
+  .hud-orbit-b{width:126%;height:68%}
+  .hud-orbit-c{width:148%;height:34%}
+  .hud-projector{width:92px;height:23px}
+  .hud-projector i{height:78px}
+  .hud-platform{height:48px}
+  .hud-platform:before{height:27px}.hud-platform:after{height:22px}.hud-platform i{height:17px}
+  .hud-caption{font-size:6px;letter-spacing:.08em}
+}
+@media(max-width:430px){
+  .jarvis-stage{min-height:340px;grid-template-columns:72px minmax(0,1fr) 72px;gap:3px;padding:21px 4px 36px}
+  .hud-side{padding:7px 4px}
+  .hud-center{min-height:282px}
+  .hud-core{width: min(48vw,184px);min-width:136px}
+  .hud-orbit-a{width:145%}.hud-orbit-b{width:132%}.hud-orbit-c{width:155%}
+  .hud-center-caption{font-size:5px;letter-spacing:.06em}
+  .hud-projector{width:82px;height:21px}
+  .hud-platform{height:43px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hud-orbit-a,.hud-orbit-b,.hud-core:before{animation:none}
+}
+/* end v125 hologram refinement */
+
 </style>
 </head>
 <body>
