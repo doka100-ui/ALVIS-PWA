@@ -741,3 +741,11 @@ The HUD is a CSS/HTML presentation layer inside index-integrated.html. The exist
 
 - `sendToAlvis()` uses an application-level in-progress guard around the entire turn, from input acceptance through save/render. The guard is set only after validation and always cleared in `finally`.
 - This complements the engine-level inference queue: the engine queue serializes model calls, while the turn guard prevents overlapping history/context/online-reference pipelines. No persisted data schema or encryption/sync/backup behavior changes.
+
+
+## ログイン時の音声ウェルカム（v117）
+
+- 保管庫の解除に成功し、ALVIS画面への遷移が終わった後に「おかえりなさい」を一度だけ読み上げる。
+- 既存の自動読み上げ設定（`ALVIS_AUTO_SPEAK` / 保管庫内 `voiceSettings.autoSpeak`）を尊重する。
+- Kokoro音声がすでにメモリ上で準備済みなら選択中のKokoro音声を使用。未準備時はログイン時のモデル取得・初期化を避け、ブラウザ標準音声へフォールバックする。
+- 端末/ブラウザの音声自動再生制限により再生されない場合があり、実機確認が必要。音声を出せなくても認証・ログインは継続する。
