@@ -699,6 +699,24 @@ function parseAutonomyGoalProposal(value){
   return proposal;
 }
 
+function parseAutonomyRetrospective(value){
+  const output=String(value||"").trim();
+  const start=output.indexOf("{"),end=output.lastIndexOf("}");
+  if(start<0||end<start)throw new Error("振り返りをJSONとして読み取れませんでした。");
+  const parsed=JSON.parse(output.slice(start,end+1));
+  const result={
+    outcome:["success","partial","blocked","unclear"].includes(parsed.outcome)?parsed.outcome:"unclear",
+    evidence:String(parsed.evidence||"").trim().slice(0,600),
+    lesson:String(parsed.lesson||"").trim().slice(0,700),
+    nextExperiment:String(parsed.nextExperiment||"").trim().slice(0,600),
+    confidence:["high","medium","low"].includes(parsed.confidence)?parsed.confidence:"low"
+  };
+  if(!result.lesson)throw new Error("学びの内容が空でした。");
+  if(!result.evidence)result.evidence="実行メモに客観的な根拠の記載なし";
+  if(!result.nextExperiment)result.nextExperiment="次回、同じ条件で小さく再確認する";
+  return result;
+}
+
 function renderAutonomyIssues(){
   const box=$("autonomyIssueList");if(!box)return;
   box.replaceChildren();
@@ -747,6 +765,13 @@ function renderAutonomy(){
     if(task.successCriteria){const criteria=document.createElement("p");criteria.className="small";criteria.textContent="完了条件："+task.successCriteria;card.appendChild(criteria);}
     if(task.note){const note=document.createElement("p");note.className="small";note.textContent="実行メモ："+task.note;card.appendChild(note);}
     if(task.review){const review=document.createElement("p");review.className="growth-copy";review.textContent="AI振り返り："+task.review;card.appendChild(review);}
+    if(task.retrospective){
+      const outcome=document.createElement("p");outcome.className="small";
+      outcome.textContent="評価："+({success:"成功",partial:"一部達成",blocked:"阻害あり",unclear:"判断不能"}[task.retrospective.outcome]||"判断不能")+" ／ 確信度："+({high:"高",medium:"中",low:"低"}[task.retrospective.confidence]||"低");
+      const evidence=document.createElement("p");evidence.className="small";evidence.textContent="根拠："+task.retrospective.evidence;
+      const experiment=document.createElement("p");experiment.className="small";experiment.textContent="次の検証："+task.retrospective.nextExperiment;
+      card.append(outcome,evidence,experiment);
+    }
     const actions=document.createElement("div");actions.className="actions";
     if(task.status==="proposed"){
       const start=document.createElement("button");start.textContent="タスク開始";start.addEventListener("click",async()=>{task.status="active";task.startedAt=new Date().toISOString();await saveLocal();renderAll();});actions.appendChild(start);
@@ -758,10 +783,26 @@ function renderAutonomy(){
         if(!aiEngine){alert("先にQwen3-4Bを読み込んでください。");return;}
         reflect.disabled=true;reflect.textContent="分析中…";
         try{
-          const promptText=["次のタスクを振り返り、事実に基づく学びを1〜2文で作ってください。実行メモにない成果を作らないでください。","目標："+(task.goal||""),"行動："+(task.action||""),"実行メモ："+(task.note||"未記入")].join("\n");
-          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは慎重な学習支援AIです。誇張せず具体的に答えてください。"},{role:"user",content:promptText}],temperature:0.25,max_tokens:150,extra_body:{enable_thinking:false}});
-          task.review=String(result.choices?.[0]?.message?.content||"学びを生成できませんでした。").trim();
-          data.learnings.push({text:task.review,sourceTask:task.title,status:"pending",createdAt:new Date().toISOString()});await saveLocal();renderAll();
+          const promptText=[
+            "タスクの結果を厳密に振り返り、JSONオブジェクトだけを返してください。",
+            "outcomeはsuccess（成功）/partial（一部達成）/blocked（阻害）/unclear（判断不能）。実行メモに書かれた事実だけをevidenceに記載し、情報がなければ空文字にしてください。",
+            "lessonは次回に活かせる具体的な学び。nextExperimentは次に試す小さく安全な検証。confidenceはhigh/medium/low。",
+            "実行メモにない成果を作らない。ユーザーの自己申告を外部検証済みと表現しない。成功と断定できない場合はunclearかpartialにする。",
+            "形式："+JSON.stringify({outcome:"success|partial|blocked|unclear",evidence:"確認できた根拠",lesson:"今回の学び",nextExperiment:"次に試すこと",confidence:"high|medium|low"}),
+            "目標："+(task.goal||""),"行動："+(task.action||""),"完了条件："+(task.successCriteria||"未設定"),
+            "実行メモ："+(task.note||"未記入")
+          ].join("\n");
+          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠と不確実性を重視する学習評価AIです。JSON以外は返しません。"},{role:"user",content:promptText}],temperature:0.2,max_tokens:220,extra_body:{enable_thinking:false}});
+          const retrospective=parseAutonomyRetrospective(result.choices?.[0]?.message?.content||"");
+          task.retrospective=retrospective;
+          task.review=retrospective.lesson;
+          data.learnings.push({
+            text:retrospective.lesson,sourceTask:task.title,status:"pending",
+            outcome:retrospective.outcome,evidence:retrospective.evidence,
+            nextExperiment:retrospective.nextExperiment,confidence:retrospective.confidence,
+            createdAt:new Date().toISOString()
+          });
+          await saveLocal();renderAll();
         }catch(error){alert("振り返りに失敗しました: "+(error?.message||String(error)));reflect.disabled=false;reflect.textContent="AIで学習を振り返る";}
       });actions.appendChild(reflect);
     }
@@ -774,6 +815,7 @@ function renderAutonomy(){
     const label=document.createElement("span");label.className="growth-status";label.textContent=learning.status==="approved"?"承認済み":"承認待ち";
     const body=document.createElement("p");body.className="growth-copy";body.textContent=learning.text||"";
     const source=document.createElement("p");source.className="small";
+    if(learning.outcome){source.textContent="評価："+({success:"成功",partial:"一部達成",blocked:"阻害あり",unclear:"判断不能"}[learning.outcome]||"判断不能")+" ／ 根拠："+(learning.evidence||"記録なし")+" ／ 次の検証："+(learning.nextExperiment||"未設定")+" ／ 確信度："+({high:"高",medium:"中",low:"低"}[learning.confidence]||"低");}
     if(learning.sourceType==="external_ai"){
       label.textContent=learning.status==="approved"?"承認済み・外部AI参考":"外部AI参考・未検証／承認待ち";
       source.textContent="出典："+(learning.sourceProvider||"外部AI")+(learning.sourceModel?"（"+learning.sourceModel+"）":"")+" ／ 元質問："+(learning.sourceQuestion||"記録なし");
