@@ -288,6 +288,7 @@ assert.match(app,/直近の返答：/);
 assert.match(app,/const priorMessageLimit=isFollowUpMessage\(text\)\?2:1/);
 assert.match(app,/slice\(-100\)/);
 assert.match(app,/const activeSystemPrompt=systemPrompt/);
+assert.match(app,/const hasUntrustedReferences=numberedResearchSources\.length>0\|\|relevantLearnings\.some\(item=>item\.sourceType==="external_ai"\)\|\|!!onlineReferenceText/,"approved external AI references must retain untrusted-source safeguards");
 assert.match(app,/context_window_size:2048/);
 assert.match(app,/\.slice\(0,180\)/);
 assert.match(app,/\.slice\(0,420\)/);
