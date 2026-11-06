@@ -757,3 +757,5 @@
 - 選択した記事だけ外部調査の学習候補に保存。承認前は知識利用しない。承認後も未検証・出典付きで利用する。会話履歴/長期記憶/認証情報は送信しない。
 - 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / docs。
 - 次: Node.js/GitHub Actionsの結果を確認。iPad Safariで成長計画→Qwen3-4Bは未ロードでもよい→調査欄へ短い日本語テーマを入力→検索→出典が表示されるか確認。結果の学習候補化・承認は内容確認後に実施。
+
+- v83修正: 外部調査候補の承認確認分岐を構文修正。外部調査候補も却下可能。Service Worker cache v84。
