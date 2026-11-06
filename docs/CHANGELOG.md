@@ -1,3 +1,12 @@
+## 2026-11-07 — v114 ログイン→ALVIS画面の連続演出
+
+- 対象: `development` / `index-integrated.html`、`service-worker.js`、`tests/offline-first.test.mjs`、開発資料。
+- 認証成功時のみ、ログインパネルのフェード/縮小、チャットワークスペースのフェード/上昇、全画面のシアン光スイープを連続再生する。
+- 動きを減らすOS設定を尊重し、アニメーションを省略する。認証失敗時の表示は従来どおり。
+- 暗号化保管庫・既存データ・音声設定・同期・AIモデル・バックアップ処理への変更なし。
+- Service Worker cache: `alvis-cache-v114-integrated`。
+- 静的ソース検査を実施。Node.js標準テストランナーとSafari実機での確認は未実施。
+
 ## 2026-11-06 — v113 応答状態・応答時間HUDとセキュアログイン画面
 
 - SYSTEM STATUSへPROCESS（THINKING/READY/STANDBY）とRESPONSE TIMEを追加。会話ターン開始時に考え中へ切り替え、finallyで送信開始から完了までの経過秒を表示する。端末内即答も同じ計測対象。
