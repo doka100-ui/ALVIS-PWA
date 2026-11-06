@@ -339,7 +339,7 @@ assert.match(app, /sourceType==="external_research"/);
 
 // Approved public-research citations are shown only when the model cites a numbered source.
 assert.match(app, /function extractApprovedResearchCitations\(value,sources\)/);
-assert.match(app, /公開情報を回答の根拠として実際に使った場合だけ/);
+assert.match(app, /根拠にした文だけ\[出典N\]を付ける/);
 assert.match(app, /参考にした情報源：/);
 assert.match(app, /関連する承認済み資料：/);
 assert.match(app, /const attachedResearchSources=citationResult\.sources\.length\?citationResult\.sources:numberedResearchSources/);
