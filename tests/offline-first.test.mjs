@@ -297,7 +297,7 @@ assert.match(app, /公開情報を回答の根拠として実際に使った場�
 assert.match(app, /参考にした情報源：/);
 assert.match(app, /sources:citationResult\.sources/);
 const citationStart=app.indexOf("function extractApprovedResearchCitations(");
-const citationEnd=app.indexOf("\\nfunction getJapanDateTime()",citationStart);
+const citationEnd=app.indexOf("\nfunction getJapanDateTime()",citationStart);
 assert.ok(citationStart>=0&&citationEnd>citationStart,"citation extraction helper must exist");
 const extractCitations=new Function(app.slice(citationStart,citationEnd)+"; return extractApprovedResearchCitations;")();
 const citationSources=[{title:"富士山",url:"https://ja.wikipedia.org/wiki/富士山"},{title:"登山道",url:"https://ja.wikipedia.org/wiki/登山道"}];
