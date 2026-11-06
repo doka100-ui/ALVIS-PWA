@@ -1534,9 +1534,9 @@ function selectRelevantLearnings(query, history, learnings){
 
 function formatApprovedLearningForPrompt(item,citationNumber=null){
   const text=String(item?.text||"").trim();
-  if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\\n"+text;
-  if(item?.sourceType==="external_research")return "【外部公開情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"公開情報")+"／URL："+String(item.sourceUrl||"不明")+"／検索テーマ："+String(item.sourceQuestion||"不明")+"】"+(Number.isInteger(citationNumber)&&citationNumber>0?"／回答内引用："+`[出典${citationNumber}]`:"")+"\\n"+text;
-  return "【ALVISの学び】\\n"+text;
+  if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\n"+text;
+  if(item?.sourceType==="external_research")return "【外部公開情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"公開情報")+"／URL："+String(item.sourceUrl||"不明")+"／検索テーマ："+String(item.sourceQuestion||"不明")+"】"+(Number.isInteger(citationNumber)&&citationNumber>0?"／回答内引用："+`[出典${citationNumber}]`:"")+"\n"+text;
+  return "【ALVISの学び】\n"+text;
 }
 
 function extractApprovedResearchCitations(value,sources){
