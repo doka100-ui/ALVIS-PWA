@@ -847,3 +847,4 @@
 - v97で追加した生成上限判定より前に `finalChoice` を初期化。Temporal Dead Zoneによる `Cannot access 'finalChoice' before initialization` を解消。
 - 初期化順を検査する回帰テストを追加。Service Worker cache: `alvis-cache-v98-integrated`。
 - 検証: インラインJavaScript構文PASS、初期化順PASS、offline-firstテスト本文268アサーションPASS（V8互換実行）。Node.js標準ランナー・GitHub Actions・iPad Safari実機は未確認。
+\n\n## 2026-11-06 — Qwen推論の同時実行防止 v99\n- チャット・成長計画・課題分析・自律タスク等が同じQwen3-4Bを直接呼び出すため、操作が重なるとWebGPU推論が並行する可能性があった。\n- モデル生成APIを共通キューで直列化し、先行する推論が終わるまで次の推論を待機させる。\n- モデル終了処理もキュー完了後に実行し、生成中のGPUリソース解放との競合を防止。\n- 記憶庫・会話履歴・バックアップ・同期形式・モデル自体は変更なし。Service Worker cache: `alvis-cache-v99-integrated`。\n- 回帰テストに同時4要求の直列実行と終了処理を追加。iPad Safari実機での再発有無は未確認。\n
