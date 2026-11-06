@@ -42,7 +42,7 @@ textarea{min-height:90px;resize:vertical}
 /* Keep the selected ALVIS display visible while the chat page scrolls. */
 .display-dock{position:sticky;top:8px;z-index:30;padding:8px 0 4px;background:#1e293b;box-shadow:0 8px 14px #0f172a66;border-radius:10px}
 .display-dock .mode-stage{margin-bottom:0}
-@media(max-width:600px){.display-dock{top:6px;padding:6px 0 8px}.display-dock .mode-stage{min-height:156px}.display-dock .avatar-stage{min-height:156px;padding:12px;gap:12px}.display-dock .avatar-placeholder{transform:scale(.85)}.display-dock .avatar-copy{max-width:160px}}
+@media(max-width:600px){.display-dock{top:6px;padding:6px 0 8px}.display-dock .mode-stage{min-height:174px}.display-dock .jarvis-stage{grid-template-columns:1fr 1.15fr 1fr;gap:4px;padding:10px 6px}.display-dock .hud-metric{width:58px;height:58px;font-size:10px}.display-dock .hud-metric strong{font-size:13px}.display-dock .hud-metric span{font-size:9px}.display-dock .hud-core{width:min(30vw,118px)}.display-dock .hud-action{min-width:160px;padding:7px 14px}.display-dock .avatar-stage{min-height:174px;padding:12px;gap:12px}.display-dock .avatar-placeholder{transform:scale(.85)}.display-dock .avatar-copy{max-width:160px}}
 
 .mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
 .mode-switch button{width:100%;border:1px solid #31577b;background:#101c30;color:#a9d9ff}
@@ -51,6 +51,12 @@ textarea{min-height:90px;resize:vertical}
 .jarvis-stage{display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;gap:8px;padding:16px 10px}
 .hud-metric{border:1px solid #0878b7;border-radius:50%;width:64px;height:64px;display:grid;place-content:center;text-align:center;margin:auto;box-shadow:inset 0 0 12px #0891b255,0 0 12px #0284c755;font-size:12px;color:#a5f3fc}
 .hud-metric strong{font-size:16px;display:block}
+.hud-metric span{display:block;font-size:10px;line-height:1.35;margin-top:3px}
+.hud-ai-metric strong[data-state="online"]{color:#86efac}
+.hud-ai-metric strong[data-state="loading"],.hud-ai-metric strong[data-state="stopping"]{color:#fcd34d}
+.hud-ai-metric strong[data-state="error"]{color:#fca5a5}
+.hud-action{grid-column:1/-1;justify-self:center;width:auto;min-width:180px;padding:8px 18px;border:1px solid #67e8f9;background:linear-gradient(135deg,#075985,#0e7490);box-shadow:0 0 18px #0ea5e944;font-size:12px;letter-spacing:.04em}
+.hud-action:disabled{opacity:.55}
 .hud-core{width:min(34vw,142px);aspect-ratio:1;border:2px solid #0ea5e9;border-radius:50%;margin:auto;display:grid;place-items:center;position:relative;box-shadow:0 0 22px #0284c777,inset 0 0 22px #0284c744}
 .hud-core:before,.hud-core:after{content:"";position:absolute;inset:10%;border:1px dashed #38bdf8;border-radius:50%;animation:alvisHudSpin 18s linear infinite}
 .hud-core:after{inset:23%;border-style:solid;animation-direction:reverse;animation-duration:12s}
@@ -130,14 +136,15 @@ textarea{min-height:90px;resize:vertical}
 <h2>ALVISとの会話</h2>
 <div class="display-dock" aria-label="固定表示エリア">
 <div class="mode-switch" role="group" aria-label="ALVIS表示モード">
-<button id="jarvisModeButton" type="button" data-display-mode="jarvis" aria-pressed="true">JARVISモード</button>
+<button id="jarvisModeButton" type="button" data-display-mode="jarvis" aria-pressed="true">ALVISモード</button>
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
-<div class="mode-stage jarvis-stage" aria-label="JARVISホログラム表示">
-<div class="hud-metric"><strong>AI</strong>ONLINE</div>
+<div class="mode-stage jarvis-stage" aria-label="ALVISシステム表示">
+<div class="hud-metric hud-ai-metric"><strong id="hudAiState" data-state="offline">OFFLINE</strong><span id="hudAiDetail">Qwen3-4B 未起動</span></div>
 <div class="hud-core"><span>ALVIS</span></div>
-<div class="hud-metric"><strong>LOCAL</strong>QWEN 4B</div>
+<div class="hud-metric"><strong>LOCAL</strong><span>WEBGPU</span></div>
 <div class="hud-caption">PERSONAL AI SYSTEM　/　OFFLINE FIRST</div>
+<button id="hudModelAction" class="hud-action" type="button">Qwen3-4Bを起動</button>
 </div>
 <div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
@@ -419,8 +426,24 @@ const $ = id => document.getElementById(id);
 
 // ログイン操作は他の初期化処理より先に登録し、後続処理の例外で無反応にならないようにする。
 
+function updateHudAiStatus(value=""){
+  const stateNode=$("hudAiState");
+  if(!stateNode)return;
+  const message=String(value||"");
+  let state="offline",label="OFFLINE",detail="Qwen3-4B 未起動";
+  if(/エラー|失われ|失敗|停止扱い/.test(message)){state="error";label="ERROR";detail="モデル状態を確認してください";}
+  else if(/終了して|解放しています/.test(message)){state="stopping";label="STOPPING";detail="メモリ解放中";}
+  else if(aiEngine){state="online";label="ONLINE";detail="Qwen3-4B 稼働中・端末内推論";}
+  else if(aiLoading){state="loading";label="LOADING";detail="Qwen3-4B 準備中";}
+  stateNode.textContent=label;stateNode.dataset.state=state;
+  const detailNode=$("hudAiDetail");if(detailNode)detailNode.textContent=detail;
+  const action=$("hudModelAction");
+  if(action){action.disabled=aiLoading||state==="stopping";action.textContent=aiEngine?"Qwen3-4Bを終了":aiLoading?"モデルを読み込み中…":state==="error"?"Qwen3-4Bを再読み込み":"Qwen3-4Bを起動";}
+}
 function setStatus(id,value){
-  $(id).textContent = typeof value === "string" ? value : JSON.stringify(value,null,2);
+  const output=typeof value === "string" ? value : JSON.stringify(value,null,2);
+  $(id).textContent=output;
+  if(id==="aiStatus")updateHudAiStatus(output);
 }
 function setAutoState(value){ $("autoState").textContent = "自動同期：" + value; }
 
@@ -1397,6 +1420,11 @@ function lockApp(){
   setStatus("lockStatus","ロック中");
 }
 
+$("hudModelAction")?.addEventListener("click",()=>{
+  if(aiLoading)return;
+  if(aiEngine)$("unloadAiModel").click();
+  else $("loadAiModel").click();
+});
 $("loadAiModel").addEventListener("click",async()=>{
   if(aiLoading)return;
   if(aiEngine){setStatus("aiStatus","Qwen3-4Bはすでに起動しています。");return;}
@@ -1447,6 +1475,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     aiLoading=false;
     $("loadAiModel").disabled=false;
     $("unloadAiModel").disabled=!aiEngine;
+    updateHudAiStatus($("aiStatus")?.textContent||"");
   }
 });
 $("unloadAiModel").addEventListener("click",async()=>{
@@ -1467,6 +1496,7 @@ $("unloadAiModel").addEventListener("click",async()=>{
     $("sendChat").disabled=!!aiEngine;
     $("loadAiModel").disabled=!!aiEngine;
     $("unloadAiModel").disabled=!aiEngine;
+    updateHudAiStatus($("aiStatus")?.textContent||"");
   }
 });
 $("unlockButton").addEventListener("click",unlock);
