@@ -5,7 +5,7 @@
 - Qwen使用中にKokoroが選択されている場合は、同時起動せず端末標準音声へフォールバック。Qwen終了後はKokoroを準備して利用できる。
 - Kokoro公式READMEにランタイム解放APIの記載がないため、非公開内部オブジェクトを操作したり、参照だけをnullにして解放を偽装したりしない。
 - 記憶庫・暗号化・会話履歴・同期・バックアップ形式、保存済み音声キャッシュは変更しない。Service Worker cache: `alvis-cache-v121-integrated`。
-- 回帰アサーションを追加。JavaScript構文と回帰テストは静的/V8互換検証を実施予定。iPhone/iPad Safari実機でのQwen安定性は確認待ち。
+- 検証: アプリ内JavaScript構文、Service Worker構文、offline-first回帰アサーション全体をV8互換ハーネスで実行しPASS。Node.js標準ランナー、GitHub Actions、iPhone/iPad Safari実機でのQwen安定性は未確認。
 
 ## 2026-11-07 — v120 Kokoro歓迎音声の安定化と端末内キャッシュ
 
