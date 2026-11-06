@@ -1115,3 +1115,8 @@
 - 地球周囲の軌道アニメーションを維持。下部投影台は静止のまま。既存のAI・記憶・履歴・暗号化・同期・バックアップ処理は変更なし。
 - Service Worker cache: alvis-cache-v133-integrated。コード上のSVG構造とキャッシュ版を確認。Safari実機での画質確認は未実施。
 - 地理データ出典: Natural Earth 1:110m land, public domain. <https://www.naturalearthdata.com/>.
+
+
+## v134 — ホログラム表示の鮮明化
+- 表示中のSVGからGaussian blurフィルターを除去し、Safariでの広範囲なぼけを切り分ける描画へ変更。地球・HUD・軌道の構造と下部投影台の静止状態は維持。
+- Service Worker cache v134。実機確認は未実施。
