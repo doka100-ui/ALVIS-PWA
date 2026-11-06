@@ -32,7 +32,7 @@ assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"e
 assert.match(send,/const responseTokenLimit=isBriefConversationalTurn\?64:192/,"local inference output is capped to reduce iPad latency and GPU pressure");
 assert.match(send,/recent\.slice\(-6\)\.map\(item=>\(\{\.\.\.item,content:String\(item\.content\|\|""\)\.slice\(-700\)\}\)\)/,"normal inference history is bounded");
 const metaStart=app.indexOf("function isInternalMetaReply(");
-const metaEnd=app.indexOf("\\nfunction isCorruptedModelReply(",metaStart);
+const metaEnd=app.indexOf("\nfunction isCorruptedModelReply(",metaStart);
 assert.ok(metaStart>=0&&metaEnd>metaStart,"internal monologue detector must exist");
 const internalMetaDetector=new Function(app.slice(metaStart,metaEnd)+"; return isInternalMetaReply;")();
 const leakedMonologue="SYNC しています。それから、ユーザーがどんなことを話そうとしているのか、今一度確認してみます。";
