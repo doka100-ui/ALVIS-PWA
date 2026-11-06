@@ -847,3 +847,7 @@ Safari等でログイン後の遅延音声再生が拒否される場合に備�
 
 ## v135 描画レイヤー
 - Safariでstickyなdisplay-dockとbackdrop-filterが重なることによる矩形状の合成ぼけを避けるため、display-dock/mode-stage/SVGのfilter・backdrop-filterを無効化。appPanel入場アニメーションもblurを使用せずopacityのみ。
+
+
+## v136 描画方針
+- ALVISの固定表示・HUDでは半透明の背景表現を使うが、Safariの合成ぼけを避けるためbackdrop-filter blurとfilter blurは使わない。CSSの回帰テストで再導入を検出する。
