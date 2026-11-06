@@ -1070,7 +1070,7 @@ function renderChat(){
     line.appendChild(body);
     if(item.role==="alvis" && Array.isArray(item.sources)&&item.sources.length){
       const sourceBox=document.createElement("div");sourceBox.className="small";sourceBox.style.marginTop="8px";
-      const label=document.createElement("span");label.textContent="参考にした情報源：";sourceBox.appendChild(label);
+      const label=document.createElement("span");label.textContent=item.sourceLabel||"参考にした情報源：";sourceBox.appendChild(label);
       item.sources.forEach(source=>{const link=document.createElement("a");link.href=source.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=source.title||"公開記事";link.style.display="inline-block";link.style.marginRight="10px";sourceBox.appendChild(link);});
       line.appendChild(sourceBox);
     }
@@ -1942,7 +1942,7 @@ async function sendToAlvis(){
     // 短い雑談は出力上限を小さくし、長い崩れた生成が再試行を引き起こす時間を抑える。
     const conversationalMarkers=/(?:ですね|ですよ|ですか|でした|だよね|だよ|かな|かも|なんだ|なの|だね|だな|だった|てる|てた|お疲れ|ありがとう|助かった|ただいま|おかえり|元気|眠い|疲れた|嬉しい|悲しい|困った|楽しみ|すごい|ほんと|本当|そうなんだ|なるほど|いいね|わかった|了解|どうした|何してる|何してた)/u.test(text);
     const isBriefConversationalTurn=text.length<=180&&(conversationalMarkers||/^(?:はい|うん|そう|いや|でも|それで|じゃあ|なるほど|たしかに|ありがとう|了解|わかった)[。！!？?、\s　]*$/u.test(text));
-    const responseTokenLimit=isBriefConversationalTurn?96:384;
+    const responseTokenLimit=isBriefConversationalTurn?96:512;
     const conversationForGeneration=isBriefConversationalTurn
       ?recent.slice(-4).map(item=>({...item,content:String(item.content||"").slice(-200)}))
       :recent;
@@ -2148,7 +2148,11 @@ async function sendToAlvis(){
     // 通常の非ストリーミング応答では、過去と同じ文章でも毎回新しい返答として追加する。
     const citationResult=extractApprovedResearchCitations(reply,numberedResearchSources);
     reply=citationResult.text||reply;
-    data.history.push({role:"alvis",text:reply,...(citationResult.sources.length?{sources:citationResult.sources}:{}),createdAt:new Date().toISOString()});
+    // Qwenが引用番号を出し忘れても、回答生成時に渡した関連資料への導線を失わない。
+    // 引用番号がある場合だけ「参考にした」、ない場合は「関連する承認済み資料」と区別する。
+    const attachedResearchSources=citationResult.sources.length?citationResult.sources:numberedResearchSources;
+    const sourceLabel=citationResult.sources.length?"参考にした情報源：":"関連する承認済み資料：";
+    data.history.push({role:"alvis",text:reply,...(attachedResearchSources.length?{sources:attachedResearchSources,sourceLabel}:{}),createdAt:new Date().toISOString()});
     if($("autoSpeak").checked)setTimeout(()=>speakAlvis(reply),80);
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
