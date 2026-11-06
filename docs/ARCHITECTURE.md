@@ -1,3 +1,10 @@
+## 2026-11-06 — Mobile inference budget (v102)
+
+- Qwen3-4B WebLLM initialization sets context_window_size: 2048 through the documented third CreateMLCEngine argument (ChatOptions).
+- Chat prefill is compacted independently from persisted data: at most one previous message for a normal turn or two for a follow-up, 100 characters each; current user input is preserved.
+- Runtime prompt budget limits relevant memory to 180 characters, approved learning/source context to 420 characters, and explicitly enabled online-AI reference material to 500 characters. The large general prompt was replaced with a compact system prompt and compact Japanese/variation guidance.
+- Persistent conversation history, encrypted memories, backup/restore, and cloud-sync schemas remain unchanged. This is a mitigation for iPad Safari prefill/KV-cache pressure, not proof that all WebGPU mapAsync failures are eliminated.
+
 # ALVIS システム構成・設計
 
 最終確認日: 2026-11-04  
