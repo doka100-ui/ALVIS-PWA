@@ -1950,6 +1950,8 @@ async function sendToAlvis(){
   if(!text)return;
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
   const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)(?:[、,\s　]*(?:ALVIS|アルヴィス|アルビス))?[！!。…\s　]*$/iu.test(text);
+  // 短い感情共有は4Bモデルを起動せず端末内で返す。重い推論を避け、会話のテンポを保つ。
+  const userIsSimpleFatigueShare=text.length<=80&&!/[?？]/u.test(text)&&/(?:疲れた|疲れちゃった|くたくた|へとへと|しんどい|今日は大変だった|疲れている)/u.test(text);
   // AI自身の「今日は何をしていた？」は、日常生活を装わず短く自然に即答する。
   const userIsAssistantActivityQuestion=/^(?:今日は|今日|今は|今)\s*(?:何してた|何をしてた|何している|何してる|何をしている|何をしてる)(?:の|ん)?[？?。！!\s]*$/u.test(text);
   const userIsAlvisNameQuestion=isAlvisNameQuestion(text);
@@ -1973,6 +1975,13 @@ async function sendToAlvis(){
       data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
       await saveLocal();
       setStatus("aiStatus","ALVISの基本情報から即答しました（Qwen3未使用・オフライン対応）。");
+      return;
+    }
+    if(userIsSimpleFatigueShare){
+      const instantReply=buildNonRepeatingEmotionFallback(text,data.history);
+      data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
+      await saveLocal();
+      setStatus("aiStatus","短い気持ちの共有へ端末内で即答しました（Qwen3未使用・オフライン対応）。");
       return;
     }
     setStatus("aiStatus","ALVISが考えています…");
