@@ -175,6 +175,8 @@ assert.throws(()=>parseAutonomyRetrospective(JSON.stringify({outcome:"success"})
 assert.match(app,/実行メモにない成果を作らない/);
 assert.match(app,/task\.retrospective/);
 assert.match(app,/learning\.nextExperiment/);
+assert.match(app,/retrospective:task\.retrospective\|\|null/);
+assert.match(app,/blockedやunclearの課題を成功扱いせず/);
 
 // Dedicated external AI answer review UI
 assert.match(app, /data-page="externalAiPage">外部AIの回答/);
