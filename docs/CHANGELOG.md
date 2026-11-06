@@ -821,3 +821,4 @@
 - 回答末尾に [出典1] 等の引用記号が付いていても、「あり／おり」で終わる未完了節を検出・除去できるように修正。
 - 引用記号の正規表現エスケープを確認し、回帰テストを追加。
 - Service Worker cache: alvis-cache-v95-integrated。
+- 検証: 端末内のJavaScript実行環境で tests/offline-first.test.mjs の全261アサーションを実行し成功。アプリ構文・引用付き未完了文の個別検査も成功。GitHub Actionsの実行記録は取得できず、iPad実機は未確認。
