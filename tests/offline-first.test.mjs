@@ -320,7 +320,7 @@ assert.equal(duplicateCitation.sources.length,1);
 // Relevant-learning ranking must preserve provenance fields used by answer citations.
 assert.match(app, /return \{\.\.\.item,text:String\(item\.text\),score:direct\+contextual,index,createdAt:item\.approvedAt\|\|item\.createdAt\|\|""\};/);
 const learningStart=app.indexOf("function selectRelevantLearnings(");
-const learningEnd=app.indexOf("\\nfunction formatApprovedLearningForPrompt",learningStart);
+const learningEnd=app.indexOf("\nfunction formatApprovedLearningForPrompt",learningStart);
 assert.ok(learningStart>=0&&learningEnd>learningStart,"learning selector must exist");
 const selectLearnings=new Function(
   "buildContextualQuery","scoreContextMatch",
