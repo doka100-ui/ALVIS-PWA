@@ -1797,6 +1797,7 @@ function analyzeJapaneseOutputQuality(value){
 function trimIncompleteJapaneseEnding(value){
   let text=String(value||"").trim();
   if(!text)return "";
+  text=text.replace(/([。！？!?])(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?.*$/u,"$1");
   text=text.replace(/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u,"");
   text=text.replace(/[、,]\s*[^。！？!?]{1,12}$/u,"");
   text=text.trim();
