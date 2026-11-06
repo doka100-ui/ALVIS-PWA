@@ -1120,3 +1120,8 @@
 ## v134 — ホログラム表示の鮮明化
 - 表示中のSVGからGaussian blurフィルターを除去し、Safariでの広範囲なぼけを切り分ける描画へ変更。地球・HUD・軌道の構造と下部投影台の静止状態は維持。
 - Service Worker cache v134。実機確認は未実施。
+
+
+## v135 — Safariの矩形ぼけ対策
+- appPanelの入場アニメーションからblurを除去し、sticky display-dockのbackdrop-filterを無効化。ホログラム表示レイヤーにぼかしをかけない。
+- Service Worker cache v135。実機検証待ち。
