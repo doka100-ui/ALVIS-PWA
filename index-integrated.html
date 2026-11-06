@@ -1797,7 +1797,8 @@ function analyzeJapaneseOutputQuality(value){
 function repairKnownJapanesePhrases(value){
   return String(value||"")
     .replace(/日本の最高の山/gu,"日本最高峰")
-    .replace(/富士山登り/gu,"富士登山");
+    // 文全体の主語・述語関係が崩れている既知パターンは、単語だけ置換せず文ごと除外する。
+    .replace(/[^。！？!?]*富士山登り[^。！？!?]*[。！？!?]?/gu,"");
 }
 
 function trimIncompleteJapaneseEnding(value){
