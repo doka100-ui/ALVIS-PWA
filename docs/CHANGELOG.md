@@ -842,3 +842,8 @@
 ### v97追加検証
 - 最新developmentの `tests/offline-first.test.mjs` 全体をV8実行環境で実行し、267アサーション成功。Node.js標準テストランナーではなく、`readFile` と `assert` を互換実装した検査であることを明記する。
 - 生成上限で途中終了するケース、出典番号付き完結文、完結文のない断片、通常の完結回答を含む。
+
+## 2026-11-06 — finalChoice初期化順の修正 v98
+- v97で追加した生成上限判定より前に `finalChoice` を初期化。Temporal Dead Zoneによる `Cannot access 'finalChoice' before initialization` を解消。
+- 初期化順を検査する回帰テストを追加。Service Worker cache: `alvis-cache-v98-integrated`。
+- 検証: インラインJavaScript構文PASS、初期化順PASS、offline-firstテスト本文268アサーションPASS（V8互換実行）。Node.js標準ランナー・GitHub Actions・iPad Safari実機は未確認。
