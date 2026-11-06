@@ -549,7 +549,7 @@ assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の文脈理解を強化","別の検証を行う"),-1,"a genuinely different action must remain registrable");
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"別の目標","直近の会話を確認する"),-1,"a different goal must remain registrable");
 assert.equal((app.match(/findDuplicateAutonomyTask\(data\.autonomyTasks,goal,action\)!==-1/g)||[]).length,2,"both autonomy task registration paths must use normalized duplicate detection");
-assert.match(sw,/alvis-cache-v111-integrated/);
+assert.match(sw,/alvis-cache-v120-integrated/);
 
 
 // v112: AI-generated autonomy metadata is only attached to the exact goal/action it describes.
@@ -564,7 +564,7 @@ assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"会話の文脈理解�
 assert.match(app,/dataset\.sourceGoal=proposal\.goal/);
 assert.match(app,/dataset\.sourceAction=proposal\.firstAction/);
 assert.match(app,/getAutonomyTaskMetadata\(\$\("autonomyTaskDraft"\),goal,action\)/);
-assert.match(sw,/alvis-cache-v112-integrated/);
+assert.match(sw,/alvis-cache-v120-integrated/);
 
 
 // v113: live conversation state/latency and branded secure login surface.
@@ -580,7 +580,7 @@ assert.match(app,/id="lockPanel" class="panel"/);
 assert.match(app,/class="login-emblem"/);
 assert.match(app,/SECURE ACCESS/);
 assert.match(app,/AES-256 ENCRYPTED/);
-assert.match(app,/alvis-cache-v113-integrated/);
+assert.match(app,/alvis-cache-v120-integrated/);
 
 
 // v117: login greeting still respects the saved auto-speech preference and transition timing.
