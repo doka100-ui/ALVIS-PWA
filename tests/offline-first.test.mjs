@@ -37,6 +37,7 @@ assert.ok(metaStart>=0&&metaEnd>metaStart,"internal monologue detector must exis
 const internalMetaDetector=new Function(app.slice(metaStart,metaEnd)+"; return isInternalMetaReply;")();
 const leakedMonologue="SYNC しています。それから、ユーザーがどんなことを話そうとしているのか、今一度確認してみます。";
 assert.equal(internalMetaDetector(leakedMonologue),true,"internal planning and sync commentary must be detected");
+assert.equal(internalMetaDetector("SYNC しています"),true,"standalone sync-state leakage must be detected");
 assert.equal(internalMetaDetector("こんにちは。"),false,"normal greeting must not be flagged");
 assert.match(send,/if\(generationAttempts===1 && reply && isInternalMetaReply\(reply\)\)[\s\S]*?modelOutputCorrupted=true/,"internal monologue must be rejected without a slow second generation");
 
