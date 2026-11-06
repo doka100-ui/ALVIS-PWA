@@ -838,3 +838,7 @@
 - 完結文末尾の `[出典N]` は維持し、引用リンク処理へ引き継ぐ。完結文が一つもない場合は、断片を回答として表示せず再質問案内に切り替える。
 - 回帰テストを追加。Service Worker cache: `alvis-cache-v97-integrated`。
 - 検証: アプリのインラインJavaScript構文と4ケースの個別動的検査は成功。Node.js全テスト・GitHub Actions・iPad Safari実機は未確認。
+
+### v97追加検証
+- 最新developmentの `tests/offline-first.test.mjs` 全体をV8実行環境で実行し、267アサーション成功。Node.js標準テストランナーではなく、`readFile` と `assert` を互換実装した検査であることを明記する。
+- 生成上限で途中終了するケース、出典番号付き完結文、完結文のない断片、通常の完結回答を含む。
