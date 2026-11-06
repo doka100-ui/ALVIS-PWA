@@ -587,7 +587,7 @@ assert.match(sw,/alvis-cache-v120-integrated/);
 assert.match(app,/function speakAlvis\(text,options=\{\}\)/);
 assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{/);
 assert.match(app,/const transitionDuration=transitionIntoAlvis\(\);/);
-assert.match(app,/if\(\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?await playWelcomeGreeting\(\)/);
+assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"\|\|\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?await playWelcomeGreeting\(\)/);
 assert.match(app,/\},transitionDuration\+120\);/);
 assert.match(sw,/alvis-cache-v120-integrated/);
 
