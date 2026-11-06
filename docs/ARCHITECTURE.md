@@ -839,3 +839,7 @@ Safari等でログイン後の遅延音声再生が拒否される場合に備�
 - 地球周囲の軌道アニメーションを維持。下部投影台は静止のまま。既存のAI・記憶・履歴・暗号化・同期・バックアップ処理は変更なし。
 - Service Worker cache: alvis-cache-v133-integrated。コード上のSVG構造とキャッシュ版を確認。Safari実機での画質確認は未実施。
 - 地理データ出典: Natural Earth 1:110m land, public domain. <https://www.naturalearthdata.com/>.
+
+
+## v134 表示描画
+- ホログラムSVGからGaussian blurフィルターを除去。SafariのSVGフィルター合成に起因するぼけを回避するため、表示シーン全体へfilter:noneを適用。軌道リングの回転と下部投影台の静止は維持。
