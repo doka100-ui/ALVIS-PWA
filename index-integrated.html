@@ -1691,6 +1691,52 @@ function analyzeJapaneseOutputQuality(value){
 }
 
 
+
+function analyzeConversationRepetition(value, history=[]){
+  const normalize=source=>String(source||"").normalize("NFKC").toLowerCase()
+    .replace(/[\\s\\u3000。、,.!！?？:：;；「」『』（）()【】\\[\\]]/gu,"");
+  const candidate=normalize(value);
+  if(candidate.length<12)return {repeated:false,matchedReply:"",similarity:0};
+  const previous=(Array.isArray(history)?history:[])
+    .filter(item=>item?.role==="alvis"&&String(item.text||"").trim())
+    .slice(-6).map(item=>String(item.text).trim());
+  const dice=(a,b)=>{
+    const pairs=source=>{const out=new Set();for(let i=0;i<source.length-1;i++)out.add(source.slice(i,i+2));return out;};
+    const aa=pairs(a),bb=pairs(b);if(!aa.size||!bb.size)return 0;
+    let overlap=0;for(const pair of aa)if(bb.has(pair))overlap++;
+    return 2*overlap/(aa.size+bb.size);
+  };
+  for(const prior of previous){
+    const normalizedPrior=normalize(prior);
+    if(normalizedPrior.length<12)continue;
+    const similarity=candidate===normalizedPrior?1:
+      (Math.min(candidate.length,normalizedPrior.length)>=24&&
+       Math.min(candidate.length,normalizedPrior.length)/Math.max(candidate.length,normalizedPrior.length)>=0.8
+        ?dice(candidate,normalizedPrior):0);
+    if(similarity>=0.82)return {repeated:true,matchedReply:prior,similarity};
+  }
+  return {repeated:false,matchedReply:"",similarity:0};
+}
+
+function buildNonRepeatingEmotionFallback(value, history=[]){
+  const text=String(value||"");
+  const fatigue=/疲れ|しんど|大変|忙し|へとへと|くたくた|休みた/u.test(text);
+  const options=fatigue?[
+    "今日はかなり負担の大きい一日だったんだね。何が一番大変だった？",
+    "本当にお疲れさま。今は少し落ち着ける時間が取れるといいね。",
+    "いろいろ重なったのかな。話したくなったら聞くよ。"
+  ]:[
+    "そう感じる出来事があったんだね。よければ、もう少し聞かせて。",
+    "それは気持ちに残るね。今は話を聞くこともできるよ。",
+    "簡単には片づけられない気持ちだと思う。急いで答えを出さなくていいよ。"
+  ];
+  for(const option of options){
+    if(!analyzeConversationRepetition(option,history).repeated)return option;
+  }
+  return options[0];
+}
+
+
 function isWeatherQuestion(value){
   return /天気|天候|気温|降水確率|傘は必要|雨は降|雪は降/u.test(String(value||""));
 }
@@ -1931,7 +1977,7 @@ async function sendToAlvis(){
       }
       // 日本語の混在・反復・不自然な定型句を検出した場合だけ、短い指示で一度だけ修復生成する。
       let japaneseRepairAttempted=false;
-      if(reply && !modelOutputCorrupted && analyzeJapaneseOutputQuality(reply).needsRepair){
+      if(reply && !modelOutputCorrupted && (analyzeJapaneseOutputQuality(reply).needsRepair || analyzeConversationRepetition(reply,data.history).repeated)){
         japaneseRepairAttempted=true;
         setStatus("aiStatus","日本語の不自然な表現を検出しました。自然な会話文に整えています…");
         const repairResult=await aiEngine.chat.completions.create({
@@ -1945,12 +1991,12 @@ async function sendToAlvis(){
           extra_body:{enable_thinking:false}
         });
         const repaired=extractVisibleAnswer(repairResult.choices?.[0]?.message);
-        if(repaired && !isCorruptedModelReply(repaired) && !analyzeJapaneseOutputQuality(repaired).needsRepair){
+        if(repaired && !isCorruptedModelReply(repaired) && !analyzeJapaneseOutputQuality(repaired).needsRepair && !analyzeConversationRepetition(repaired,data.history).repeated){
           reply=repaired;
           result=repairResult;
         }else if(analyzeJapaneseIntent(text).intent==="emotion"){
           const tired=/疲れ|しんど|大変|忙し|つら/u.test(text);
-          reply=tired?"そっか、今日は大変だったんだね。無理せず、少しゆっくり休んでね。":"そうだったんだね。話してくれてありがとう。";
+          reply=buildNonRepeatingEmotionFallback(text,data.history);
           setStatus("aiStatus","日本語の不自然な表現を検出したため、端末内の自然な会話表現に切り替えました。");
         }
       }
