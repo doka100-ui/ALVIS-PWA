@@ -1,3 +1,10 @@
+### v102 検証結果（2026-11-06）
+
+- offline-firstテスト本文をV8互換ハーネスで実行: 298 assertions PASS。
+- index-integrated.html内のJavaScript構文 PASS。service-worker.js構文 PASS。
+- 注意: Node.js標準ランナーでの実行ではない。GitHub Actionsのpush run状態は利用可能なGitHub接続から取得できず未確認。iPad Safari実機のprefill時間・GPU mapAsync安定性は未確認。
+- v102の目的は入力prefillとKV cache負荷を抑えること。実機確認前にmap async障害が解消したと断定しない。
+
 ## 2026-11-06 v102 — iPad WebGPU prefill負荷軽減
 
 - Qwen3-4Bロード時に CreateMLCEngine(..., config, {context_window_size:2048}) を指定。WebLLM 0.2.87の公式API例にある第3引数 chatOpts を使用し、KV cacheの最大コンテキストを縮小。
