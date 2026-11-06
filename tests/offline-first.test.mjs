@@ -44,6 +44,12 @@ assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高
 assert.match(app,/if\(reply && analyzeJapaneseOutputQuality\(reply\)\.incompleteEnding\)/,"must sanitize any unfinished ending after repair");
 
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。標高は約3776メートルです。").incompleteEnding,false,"complete answer must not be flagged");
+assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山は日本の最高の山です。").suspiciousPhrases.includes("日本の最高の山"),"unnatural superlative phrase must be detected");
+assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山登りとして有名です。").suspiciousPhrases.includes("富士山登り"),"unnatural climbing phrase must be detected");
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("山の斜面には多くの神社があり。").incompleteEnding,true,"continuative あり ending must be detected");
+assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。"),"富士山は日本最高峰です。","unfinished あり clause must be removed");
+assert.match(app,/【出典付き回答の厳守事項】回答に使う事実は/,"approved research answers must be grounded in source excerpts");
+assert.match(app,/【出典付き回答の修復】次の承認済み資料の抜粋/,"Japanese repair must retain approved source context");
 assert.match(app,/generationAttempts===1 && reply && isLikelyEnglishReply/);
 assert.match(app,/generationAttempts===1 && reply && isCorruptedModelReply/);
 assert.match(app,/generationAttempts===1 && reply && !modelOutputCorrupted/);
