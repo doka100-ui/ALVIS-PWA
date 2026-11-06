@@ -694,3 +694,9 @@ GPUメモリ圧迫とWebGPU device lossを避けるため、空回答・英語�
 ## Hologram UI layer (v109)
 
 The HUD is a CSS/HTML presentation layer inside index-integrated.html. The existing Qwen control and progress callback remain wired; right-side feature labels are static labels, not live telemetry. No Three.js/WebGL, external assets, or new network dependency is added. Display mode preference remains separate from the encrypted vault.
+
+
+## Conversation turn serialization (v110)
+
+- `sendToAlvis()` uses an application-level in-progress guard around the entire turn, from input acceptance through save/render. The guard is set only after validation and always cleared in `finally`.
+- This complements the engine-level inference queue: the engine queue serializes model calls, while the turn guard prevents overlapping history/context/online-reference pipelines. No persisted data schema or encryption/sync/backup behavior changes.
