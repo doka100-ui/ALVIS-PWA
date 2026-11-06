@@ -1523,9 +1523,10 @@ async function unlock(){
         await playWelcomeGreeting();
       };
     }
-    if($("autoSpeak")?.checked){
+    // Kokoroを選択している場合は、返信の自動読み上げ設定とは独立してログイン歓迎音声を再生する。
+    if($("ttsEngine")?.value==="kokoro"||$("autoSpeak")?.checked){
       window.setTimeout(async()=>{
-        if(unlocked&&$("autoSpeak")?.checked){
+        if(unlocked&&($("ttsEngine")?.value==="kokoro"||$("autoSpeak")?.checked)){
           await audioUnlockPromise;
           await playWelcomeGreeting();
         }
