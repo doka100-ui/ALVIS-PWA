@@ -648,7 +648,7 @@ assert.match(sw,/alvis-cache-v134-integrated/);
 // v132: sharpen the globe; avoid Gaussian blur on the globe and orbital details.
 assert.match(app, /stroke-opacity="\.9" stroke-width="1\.15"\/>/);
 assert.match(app, /#globeClip path\{filter:none!important;vector-effect:non-scaling-stroke\}/);
-assert.match(app, /higher-detail continuous continental coastlines/);
+assert.doesNotMatch(app, /higher-detail continuous continental coastlines/);
 assert.match(app, /alvis-cache-v134-integrated/);
 
 
