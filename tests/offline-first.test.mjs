@@ -602,6 +602,8 @@ assert.match(app,/__alvis_voice_cache__\/welcome-v1/);
 assert.match(app,/async function playWelcomeGreeting\(\)/);
 assert.match(app,/await prepareKokoroTTS\(\);[\s\S]*?await speakKokoro\("おかえりなさい"\)/);
 assert.match(app,/welcomeButton\.onclick=async\(\)=>\{[\s\S]*?await playWelcomeGreeting\(\);/);
+assert.match(app,/async function previewKokoroVoice\(voiceId,button\)\{\s*unlockAlvisAudioFromGesture\(\);/);
+assert.match(app,/previewKokoroTuned"\)\?\.addEventListener\("click",async\(\)=>\{unlockAlvisAudioFromGesture\(\)/);
 assert.match(app,/source\.connect\(alvisAudioContext\.destination\)/);
 assert.match(app,/source\.start\(0\)/);
 assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
