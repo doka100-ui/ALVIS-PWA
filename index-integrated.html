@@ -487,8 +487,8 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <section id="devicePage" class="hidden">
  <div class="panel">
  <h2>AIモデル管理</h2>
- <p class="small">チャット画面上部の円からQwen3-4Bを起動できます。モデルを終了すると端末のメモリを解放します。</p>
- <button id="loadAiModel" class="hidden" type="button">Qwen3-4Bを読み込む</button>
+ <p class="small">チャット画面上部の円から、この端末に適したQwen3モデルを起動できます。モデルを終了すると端末のメモリを解放します。</p>
+ <button id="loadAiModel" class="hidden" type="button">Qwen3モデルを読み込む</button>
  <button id="unloadAiModel" class="secondary" disabled>モデルを終了</button>
  <div id="aiStatus" class="small" aria-live="polite">AI未接続。ALVIS画面上部の円を押してモデルを読み込んでください。</div>
  </div>
@@ -549,7 +549,7 @@ let alvisResponseStartedAt = 0;
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
 function serializeAlvisInference(engine){
   const completions=engine?.chat?.completions;
-  if(!completions||typeof completions.create!=="function")throw new Error("Qwen3-4Bの生成機能を確認できません。");
+  if(!completions||typeof completions.create!=="function")throw new Error("ローカルAIモデルの生成機能を確認できません。");
   const originalCreate=completions.create.bind(completions);
   let inferenceQueue=Promise.resolve();
   completions.create=(...args)=>{
@@ -571,12 +571,33 @@ let alvisServiceWorkerReady = Promise.resolve(false);
 
 const $ = id => document.getElementById(id);
 
-// iPhone Safariでは4BモデルのGPUメモリ要求が大きいため、端末種別に応じてQwen3を選択する。
+// 端末判定とモデル設定を一か所に集約する。iPadOSのデスクトップUAもタッチ情報で識別する。
 // WebLLM v0.2.87の公式モデル定義: 1.7B 約2037MB / 4B 約3432MB。
-const ALVIS_IS_IPHONE=/iPhone/i.test(navigator.userAgent||"");
-const ALVIS_MODEL_ID=ALVIS_IS_IPHONE?"Qwen3-1.7B-q4f16_1-MLC":"Qwen3-4B-q4f16_1-MLC";
-const ALVIS_MODEL_LABEL=ALVIS_IS_IPHONE?"Qwen3-1.7B":"Qwen3-4B";
-const ALVIS_CONTEXT_WINDOW=ALVIS_IS_IPHONE?1024:2048;
+function resolveAlvisDeviceProfile({userAgent="",platform="",maxTouchPoints=0}={}){
+  const ua=String(userAgent||"");
+  const platformName=String(platform||"");
+  const isIPhone=/iPhone|iPod/i.test(ua);
+  const isIPad=/iPad/i.test(ua)||(/MacIntel/i.test(platformName)&&Number(maxTouchPoints)>1);
+  const isAndroidPhone=/Android/i.test(ua)&&/Mobile/i.test(ua);
+  const isMobile=isIPhone||isAndroidPhone;
+  const deviceType=isIPhone?"iPhone":isIPad?"iPad":isAndroidPhone?"Androidスマートフォン":"その他";
+  return {
+    deviceType,
+    isMobile,
+    modelId:isMobile?"Qwen3-1.7B-q4f16_1-MLC":"Qwen3-4B-q4f16_1-MLC",
+    modelLabel:isMobile?"Qwen3-1.7B":"Qwen3-4B",
+    contextWindow:isMobile?1024:2048
+  };
+}
+const ALVIS_DEVICE_PROFILE=resolveAlvisDeviceProfile({
+  userAgent:navigator.userAgent||"",
+  platform:navigator.platform||"",
+  maxTouchPoints:navigator.maxTouchPoints||0
+});
+const ALVIS_IS_IPHONE=ALVIS_DEVICE_PROFILE.deviceType==="iPhone";
+const ALVIS_MODEL_ID=ALVIS_DEVICE_PROFILE.modelId;
+const ALVIS_MODEL_LABEL=ALVIS_DEVICE_PROFILE.modelLabel;
+const ALVIS_CONTEXT_WINDOW=ALVIS_DEVICE_PROFILE.contextWindow;
 if($("loadAiModel"))$("loadAiModel").textContent=ALVIS_MODEL_LABEL+"を読み込む";
 
 
@@ -1299,7 +1320,7 @@ function loadSpeechVoices(){
   setStatus("voiceStatus",japanese.length?"日本語音声 "+japanese.length+"種類が利用できます。":"日本語音声がまだ見つかりません。端末の音声設定を確認してください。");
 }
 async function prepareKokoroTTS(){
-  if(aiEngine||aiLoading){setStatus("voiceStatus","Qwen3-4Bの使用中はKokoroを同時に起動できません。先にQwenを終了してください。");return null;}
+  if(aiEngine||aiLoading){setStatus("voiceStatus","ローカルAIモデルの使用中はKokoroを同時に起動できません。先にAIモデルを終了してください。");return null;}
   if(kokoroTts)return kokoroTts;
   if(kokoroLoading){setStatus("voiceStatus","Kokoroを準備中です。完了まで待ってください。");return null;}
   const button=$("prepareKokoro");
@@ -1765,10 +1786,10 @@ $("hudAiAction")?.addEventListener("click",()=>{
 });
 $("loadAiModel").addEventListener("click",async()=>{
   if(aiLoading)return;
-  if(aiEngine){setStatus("aiStatus","Qwen3-4Bはすでに起動しています。");return;}
+  if(aiEngine){setStatus("aiStatus",ALVIS_MODEL_LABEL+"はすでに起動しています。");return;}
   if(!unlocked){setStatus("aiStatus","先に記憶庫へログインしてください。");return;}
   if(kokoroTts||kokoroLoading){
-    setStatus("aiStatus","Kokoro音声モデルがメモリに残っています。安全な解放APIが確認できないため、ページを再読み込みしてからQwen3-4Bだけを起動してください。音声データと設定は保持されます。");
+    setStatus("aiStatus","Kokoro音声モデルがメモリに残っています。安全な解放APIが確認できないため、ページを再読み込みしてからAIモデルだけを起動してください。音声データと設定は保持されます。");
     return;
   }
   aiLoading=true;
@@ -1778,7 +1799,7 @@ $("loadAiModel").addEventListener("click",async()=>{
   $("unloadAiModel").disabled=true;
   $("sendChat").disabled=true;
   try{
-    setStatus("aiStatus","AI実行エンジンとQwen3-4Bを準備中…");
+    setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
     // Service Workerが利用可能なら先に起動を待ち、WebLLMのJavaScript依存コードをキャッシュできる状態にする。
     await alvisServiceWorkerReady;
     if(!CreateMLCEngine){
@@ -1801,7 +1822,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     }
     aiEngine=engine;
     aiLoadProgress=100;
-    setStatus("aiStatus","Qwen3-4B 接続中・準備完了");
+    setStatus("aiStatus",ALVIS_MODEL_LABEL+" 接続中・準備完了");
     $("sendChat").disabled=false;
     $("unloadAiModel").disabled=false;
   }catch(error){
@@ -1810,7 +1831,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     const lower=detail.toLowerCase();
     let guidance="エラー内容を確認し、必要ならページを再読み込みしてから再試行してください。";
     if(/device was lost|device lost|gpu.*lost|out of memory|oom|allocation failed|memory access out of bounds/.test(lower)){
-      guidance="iPadのメモリ不足またはWebGPU停止の可能性があります。Kokoroや他のタブを閉じ、ページを再読み込みしてからQwenだけを起動してください。繰り返す場合は、より軽いモデルが必要です。";
+      guidance="この端末のメモリ不足またはWebGPU停止の可能性があります。ほかのタブや重いアプリを閉じ、ページを再読み込みしてからALVISだけを起動してください。繰り返す場合は、さらに軽いモデルが必要です。";
     }else if(/network|fetch|failed to load|http|offline|load failed/.test(lower)){
       guidance="モデルまたは実行ファイルの取得に失敗した可能性があります。初回取得は通信が必要です。通信状態を確認して再試行してください。";
     }else if(/webgpu|adapter|gpu/.test(lower)){
@@ -1830,7 +1851,7 @@ $("unloadAiModel").addEventListener("click",async()=>{
   $("unloadAiModel").disabled=true;
   $("loadAiModel").disabled=true;
   $("sendChat").disabled=true;
-  setStatus("aiStatus","Qwen3-4Bを終了してメモリを解放しています…");
+  setStatus("aiStatus",ALVIS_MODEL_LABEL+"を終了してメモリを解放しています…");
   try{
     await engine.unload();
     if(aiEngine===engine)aiEngine=null;
@@ -3058,6 +3079,8 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
   const yesNo=value=>value?"利用可能":"利用不可";
   try{
     lines.push("接続状態の目安："+(navigator.onLine?"オンライン":"オフライン/接続なし"));
+    lines.push("ALVIS端末プロファイル："+ALVIS_DEVICE_PROFILE.deviceType);
+    lines.push("自動選択モデル："+ALVIS_MODEL_LABEL+"（コンテキスト "+ALVIS_CONTEXT_WINDOW+"）");
     lines.push("ブラウザ："+(navigator.userAgentData?.brands?.map(item=>item.brand+" "+item.version).join(", ")||navigator.userAgent));
     lines.push("WebGPU："+yesNo(!!navigator.gpu));
     if(navigator.gpu){
