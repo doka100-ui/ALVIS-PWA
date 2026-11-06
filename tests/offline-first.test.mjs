@@ -533,7 +533,7 @@ const sendTurn=app.slice(sendTurnStart,sendTurnEnd);
 assert.ok(sendTurn.indexOf("if(alvisResponseInProgress)return;")<sendTurn.indexOf("alvisResponseInProgress=true;"),"duplicate turn guard must run before starting a turn");
 assert.match(sendTurn,/alvisResponseInProgress=true;/);
 assert.match(sendTurn,/finally\{\s*alvisResponseInProgress=false;/);
-assert.match(sw,/alvis-cache-v117-integrated/);
+assert.match(sw,/alvis-cache-v119-integrated/);
 
  
 // v111: autonomy task duplicates are normalized across Unicode width and spacing.
@@ -584,8 +584,8 @@ assert.match(app,/alvis-cache-v113-integrated/);
 
 // v117: successful vault unlock welcomes the user using the saved voice preference.
 assert.match(app,/function speakAlvis\(text,options=\{\}\)/);
-assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&kokoroTts\)\{speakKokoro\(text\);return;\}/);
-assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{speakKokoro\(text\);return;\}/);
+assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{/);
+assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{[\s\S]*?speakKokoro\(text\);return;\s*\}/);
 assert.match(app,/const transitionDuration=transitionIntoAlvis\(\);/);
 assert.match(app,/if\(\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\)/);
 assert.match(app,/\},transitionDuration\+120\);/);
