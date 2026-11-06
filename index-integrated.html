@@ -499,6 +499,14 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  .alvis-reference-scene .ref-orbit,.alvis-reference-scene .ref-base-rotor,.alvis-reference-scene .ref-base-counter,.alvis-reference-scene .ref-energy-pulse{animation:none!important}
 }
 
+
+/* v130: keep the lower projector platform still; only globe orbits move */
+.alvis-reference-scene .ref-base-rotor,
+.alvis-reference-scene .ref-base-counter,
+.alvis-reference-scene .ref-energy-pulse{animation:none!important;transform:none!important}
+.alvis-reference-scene #globeClip path{shape-rendering:geometricPrecision}
+.alvis-reference-scene [clip-path="url(#globeClip)"]{shape-rendering:geometricPrecision}
+
 </style>
 </head>
 <body>
@@ -605,12 +613,14 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <circle cx="204" cy="166" r="94" fill="url(#globeGlow)"/>
 <circle cx="204" cy="166" r="82" fill="url(#globeFill)" stroke="#a7efff" stroke-opacity=".72" stroke-width="1.1" filter="url(#glow)"/>
 <g clip-path="url(#globeClip)">
-<g fill="#7edfff" fill-opacity=".65" stroke="#b9f4ff" stroke-opacity=".5" stroke-width=".7">
-<path d="M129 126L137 111L151 104L160 91L177 91L183 101L197 100L203 110L194 121L184 123L179 137L165 142L157 155L143 153L138 139Z"/>
-<path d="M165 157L178 152L188 160L194 174L188 188L182 201L175 216L164 206L160 190L151 179L155 166Z"/>
-<path d="M207 104L220 94L235 99L243 111L257 115L265 128L257 139L246 139L239 151L226 152L219 166L208 161L203 146L194 138L198 124Z"/>
-<path d="M218 165L232 158L246 164L252 177L246 190L240 204L227 213L216 202L214 187L207 178Z"/>
-<path d="M129 169L139 164L147 171L145 183L137 190L129 182Z"/>
+<g fill="#75dfff" fill-opacity=".52" stroke="#a9efff" stroke-opacity=".32" stroke-width=".55" stroke-linejoin="round">
+<!-- smooth, organic continent silhouettes; avoid blocky polygon edges -->
+<path d="M126 130 C130 119 137 113 144 108 C150 102 153 94 163 91 C172 87 181 92 184 99 C191 97 199 102 202 109 C205 116 198 121 191 124 C185 127 183 135 176 139 C169 143 165 151 157 155 C149 159 143 153 141 146 C134 144 128 139 126 130Z"/>
+<path d="M159 158 C165 151 175 150 181 155 C188 159 192 166 194 174 C196 184 190 191 186 199 C183 207 179 216 172 220 C165 216 161 207 160 198 C158 190 150 184 151 176 C151 168 154 162 159 158Z"/>
+<path d="M202 108 C208 99 216 94 225 95 C234 96 239 102 245 108 C252 111 262 115 266 124 C270 132 263 139 255 141 C247 142 244 149 237 153 C230 157 224 154 220 161 C215 167 207 164 205 156 C202 149 194 143 194 135 C194 125 197 115 202 108Z"/>
+<path d="M214 166 C220 159 230 157 237 161 C246 165 252 171 253 180 C254 188 247 194 244 202 C240 210 233 216 225 216 C218 211 214 203 214 195 C211 187 205 181 207 174 C208 171 211 168 214 166Z"/>
+<path d="M126 168 C131 162 138 161 144 165 C149 170 149 177 145 183 C141 189 135 193 130 188 C125 184 122 175 126 168Z"/>
+<path d="M251 143 C256 139 263 140 267 145 C270 150 267 156 261 158 C255 159 250 154 248 149Z"/>
 </g>
 <g fill="none" stroke="#a8eaff" stroke-opacity=".38" stroke-width=".75">
 <ellipse cx="204" cy="166" rx="27" ry="81"/><ellipse cx="204" cy="166" rx="54" ry="81"/><ellipse cx="204" cy="166" rx="75" ry="81"/>
@@ -642,11 +652,11 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <path d="M204 191V302" stroke="#d9fbff" stroke-width=".7" opacity=".9"/>
 <!-- animated energy platform -->
 <ellipse cx="212" cy="291" rx="119" ry="19" fill="#0b3153" fill-opacity=".35" stroke="#1cbbf4" stroke-width="1" filter="url(#glow)"/>
-<g class="ref-base-rotor" fill="none" transform-origin="212px 291px">
+<g fill="none">
  <ellipse cx="212" cy="291" rx="103" ry="14" stroke="#c0f5ff" stroke-width="1.1" filter="url(#glow)" stroke-dasharray="220 12 42 10"/>
  <ellipse cx="212" cy="291" rx="87" ry="10" stroke="#45d5ff" stroke-width="1.2" stroke-dasharray="120 18 60 12"/>
 </g>
-<g class="ref-base-counter" fill="none" transform-origin="212px 291px">
+<g fill="none">
  <ellipse cx="212" cy="291" rx="69" ry="6" stroke="#fb6aab" stroke-width="1" opacity=".9" stroke-dasharray="72 12 30 10"/>
  <ellipse cx="212" cy="291" rx="47" ry="4" stroke="#fff0fb" stroke-width=".8" stroke-dasharray="46 8 20 8"/>
 </g>
