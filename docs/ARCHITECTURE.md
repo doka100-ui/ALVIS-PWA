@@ -1,3 +1,9 @@
+## UI遷移（v114）
+
+- 保管庫認証に成功した場合のみ `transitionIntoAlvis()` がログインパネルとワークスペースの表示を連続アニメーションする。
+- アニメーションはCSSのみで、`prefers-reduced-motion` を尊重する。認証・暗号化・保存データ・同期処理とは分離する。
+- 実機Safariでの描画/操作確認が必要。
+
 ## 2026-11-06 — v113 応答状態・応答時間HUDとセキュアログイン画面
 
 - SYSTEM STATUSへPROCESS（THINKING/READY/STANDBY）とRESPONSE TIMEを追加。会話ターン開始時に考え中へ切り替え、finallyで送信開始から完了までの経過秒を表示する。端末内即答も同じ計測対象。
