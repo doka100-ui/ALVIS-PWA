@@ -199,3 +199,8 @@ ALVISは、ユーザー専用のローカル実行型AIと、ユーザーが管�
 - 文末が「あり／おり」などの未完了節で終わる場合は、最後の完結文までに短縮する。出典番号が後ろに付いていても検出する。
 - 完結した文が残らない場合、未完成の断片を回答として保存・表示せず、再質問を案内する。
 - この仕組みは既知パターンの限定的な安全策であり、自然言語全般の誤りや事実誤認を完全に防ぐものではない。
+
+
+## ALVIS Hologram UI (2026-11-06)
+
+ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, fine orbit rings, a top projector, a concentric energy platform, and translucent left/right panels. Cyan/blue remain dominant; red/pink accents stay restrained (target 5–10%). Responsive layouts prioritize iPad landscape and adapt for portrait/mobile. v109 is CSS/HTML presentation only, not a real 3D/WebGL scene. Existing model controls, encrypted data, memory, history, sync, and backup schemas remain unchanged.
