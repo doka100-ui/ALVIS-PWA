@@ -832,3 +832,9 @@
 - 最新developmentの offline-first.test.mjs 全263アサーションを実行し成功。
 - ユーザー提示の富士山回答パターンで、既知の不自然な一文だけが除外され、残りの完結文と出典マーカーが維持されることを確認。最終品質判定も正常。
 - アプリのインラインJavaScript構文とService Worker v96を確認。iPad Safari実機・GitHub Actionsは未確認。
+
+## 2026-11-06 — 生成上限による未完了回答の保護 v97
+- Qwenの生成終了理由が `length`（トークン上限）の場合、最後の句読点までにある完結文だけを表示し、その後ろの未完成断片を除外する。
+- 完結文末尾の `[出典N]` は維持し、引用リンク処理へ引き継ぐ。完結文が一つもない場合は、断片を回答として表示せず再質問案内に切り替える。
+- 回帰テストを追加。Service Worker cache: `alvis-cache-v97-integrated`。
+- 検証: アプリのインラインJavaScript構文と4ケースの個別動的検査は成功。Node.js全テスト・GitHub Actions・iPad Safari実機は未確認。
