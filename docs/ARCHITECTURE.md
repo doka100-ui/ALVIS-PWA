@@ -1,3 +1,9 @@
+### v102 verification status
+
+- Offline-first test body: 298 assertions passed in a V8 compatibility harness; this is not the native Node.js test runner.
+- Integrated app inline JavaScript and Service Worker syntax checks passed.
+- GitHub Actions push-run status and iPad Safari runtime performance/GPU stability remain unverified.
+
 ## 2026-11-06 — Mobile inference budget (v102)
 
 - Qwen3-4B WebLLM initialization sets context_window_size: 2048 through the documented third CreateMLCEngine argument (ChatOptions).
