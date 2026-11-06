@@ -511,6 +511,6 @@ assert.match(app,/class="hud-core"><span>ALVIS<\/span><small>PERSONAL AI SYSTEM<
 assert.match(app,/hudAiPercent/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-interface-item"/);
-assert.match(app,/--v109: spatial hologram control room/);
+assert.match(app,/v109: spatial hologram control room/);
 assert.match(app,/rgba?\(/);
 assert.match(sw,/const CACHE_NAME = "alvis-cache-v109-integrated"/);
