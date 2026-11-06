@@ -1694,7 +1694,7 @@ function analyzeJapaneseOutputQuality(value){
 
 function analyzeConversationRepetition(value, history=[]){
   const normalize=source=>String(source||"").normalize("NFKC").toLowerCase()
-    .replace(/[\\s\\u3000。、,.!！?？:：;；「」『』（）()【】\\[\\]]/gu,"");
+    .replace(/[\s\u3000。、,.!！?？:：;；「」『』（）()【】\[\]]/gu,"");
   const candidate=normalize(value);
   if(candidate.length<12)return {repeated:false,matchedReply:"",similarity:0};
   const previous=(Array.isArray(history)?history:[])
