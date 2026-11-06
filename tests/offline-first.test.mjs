@@ -51,6 +51,8 @@ assert.equal(japanesePack.analyzeJapaneseOutputQuality("山の斜面には多く
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。[出典1]"),"富士山は日本最高峰です。","unfinished clause must be removed even when followed by a citation marker");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。"),"富士山は日本最高峰です。","unfinished あり clause must be removed");
 assert.equal(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。山頂には観光客が集まり、登山者は「富士山登り」として有名です。"),"富士山は日本最高峰です。","known malformed sentence must be removed instead of being rewritten into another unsupported claim");
+assert.equal(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。山の斜面には多くの神社があり。"),"富士山は日本最高峰です。","known malformed clause must be removed without rejecting the complete sentence");
+assert.equal(japanesePack.analyzeJapaneseOutputQuality(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。山の斜面には多くの神社があり。")).suspiciousPhrases.length,0,"repairing one malformed clause must preserve the rest of the answer");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("山の斜面には多くの神社があり。"),"回答が途中で切れてしまったよ。もう一度聞いてね。","an answer containing only an unfinished clause must not be displayed as complete");
 assert.match(app,/reply=repairKnownJapanesePhrases\(reply\)/,"deterministic Japanese repair must run before display");
 assert.match(app,/finalJapaneseQuality\.suspiciousPhrases\.length/,"unrepaired awkward phrases must use a safe fallback");
