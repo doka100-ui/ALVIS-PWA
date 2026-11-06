@@ -34,7 +34,7 @@ assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"e
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
 const jaEnd=app.indexOf("\n\nfunction isWeatherQuestion",jaStart);
 assert.ok(jaStart>=0&&jaEnd>jaStart,"Japanese language pack helpers must exist");
-const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,trimIncompleteJapaneseEnding,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
+const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,repairKnownJapanesePhrases,trimIncompleteJapaneseEnding,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.version,"ja-core-1");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。また、富士山").incompleteEnding,true,"unfinished trailing clause must be detected");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。また").incompleteEnding,true,"dangling connector must be detected");
@@ -48,6 +48,10 @@ assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山は日本の最高
 assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山登りとして有名です。").suspiciousPhrases.includes("富士山登り"),"unnatural climbing phrase must be detected");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("山の斜面には多くの神社があり。").incompleteEnding,true,"continuative あり ending must be detected");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。"),"富士山は日本最高峰です。","unfinished あり clause must be removed");
+assert.equal(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。富士山登りも人気です。"),"富士山は日本最高峰です。富士登山も人気です。","known awkward Japanese phrases must be repaired deterministically");
+assert.equal(japanesePack.trimIncompleteJapaneseEnding("山の斜面には多くの神社があり。"),"回答が途中で切れてしまったよ。もう一度聞いてね。","an answer containing only an unfinished clause must not be displayed as complete");
+assert.match(app,/reply=repairKnownJapanesePhrases\(reply\)/,"deterministic Japanese repair must run before display");
+assert.match(app,/finalJapaneseQuality\.suspiciousPhrases\.length/,"unrepaired awkward phrases must use a safe fallback");
 assert.match(app,/【出典付き回答の厳守事項】回答に使う事実は/,"approved research answers must be grounded in source excerpts");
 assert.match(app,/【出典付き回答の修復】次の承認済み資料の抜粋/,"Japanese repair must retain approved source context");
 assert.match(app,/generationAttempts===1 && reply && isLikelyEnglishReply/);
