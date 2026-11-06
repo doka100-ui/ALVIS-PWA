@@ -1,3 +1,11 @@
+## 2026-11-07 — v123 端末プロファイルの共通化
+
+- 端末判定とローカルAIモデル設定を `resolveAlvisDeviceProfile()` に集約。iPhone/iPodとAndroidスマートフォンはQwen3-1.7B・コンテキスト1024、iPadはQwen3-4B・2048を選択する。
+- iPadOS SafariがデスクトップUAを返す場合も、MacIntelと複数タッチポイントからiPadとして識別する。iPadの既存4B設定は維持。
+- 端末診断にALVISの判定端末種別・選択モデル・コンテキスト長を表示。読み込み/終了/音声競合の案内を端末共通表現に統一。
+- 記憶庫、会話履歴、暗号化、同期、バックアップ、モデルID自体は変更なし。Service Worker cache: `alvis-cache-v123-integrated`。
+- 検証: アプリmodule script構文、Service Worker構文、端末プロファイル5パターン（iPhone/iPad/iPadデスクトップUA/Androidスマートフォン/デスクトップ）をV8で確認。iPhone/iPad Safari実機、WebLLMモデル起動・会話は未確認。
+
 ## 2026-11-07 — v122 iPhone向けQwen3軽量モデル選択
 
 - iPhone Safariでは `Qwen3-1.7B-q4f16_1-MLC` を選択し、KVコンテキストを1024に制限。iPad/その他端末では従来の `Qwen3-4B-q4f16_1-MLC` と2048を維持。
