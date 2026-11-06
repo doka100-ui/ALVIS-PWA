@@ -582,14 +582,13 @@ assert.match(app,/AES-256 ENCRYPTED/);
 assert.match(app,/alvis-cache-v113-integrated/);
 
 
-// v117: successful vault unlock welcomes the user using the saved voice preference.
+// v117: login greeting still respects the saved auto-speech preference and transition timing.
 assert.match(app,/function speakAlvis\(text,options=\{\}\)/);
 assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{/);
-assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{[\s\S]*?speakKokoro\(text\);return;\s*\}/);
 assert.match(app,/const transitionDuration=transitionIntoAlvis\(\);/);
-assert.match(app,/if\(\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\)/);
+assert.match(app,/if\(\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?await playWelcomeGreeting\(\)/);
 assert.match(app,/\},transitionDuration\+120\);/);
-assert.match(sw,/alvis-cache-v117-integrated/);
+assert.match(sw,/alvis-cache-v120-integrated/);
 
 
 // v120: login uses the configured Kokoro voice, unlocks Safari audio from the user gesture,
