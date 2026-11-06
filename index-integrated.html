@@ -1663,7 +1663,7 @@ function isInternalMetaReply(reply){
   const value=String(reply||"").normalize("NFKC").trim();
   if(!value)return false;
   // モデルが回答ではなく、ユーザー意図の分析・返答方針・同期状態を独白した場合は内部文として扱う。
-  return /SYNC\\s*しています|ユーザーがどんなことを話そうとしているのか|今一度確認してみます|話題をつなぐってことは|ユーザーが「こんにちは」ってだけなら|まずは「こんにちは！」って返して|ユーザーの話に合わせて答えていきます|返答方針を確認してみます|ユーザーの意図を分析しています/iu.test(value);
+  return /SYNC\s*しています|ユーザーがどんなことを話そうとしているのか|今一度確認してみます|話題をつなぐってことは|ユーザーが「こんにちは」ってだけなら|まずは「こんにちは！」って返して|ユーザーの話に合わせて答えていきます|返答方針を確認してみます|ユーザーの意図を分析しています/iu.test(value);
 }
 
 function isCorruptedModelReply(reply){
