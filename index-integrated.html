@@ -1802,6 +1802,13 @@ function repairKnownJapanesePhrases(value){
     .replace(/[^。！？!?]*山の斜面には多くの神社があり[^。！？!?]*[。！？!?]?/gu,"");
 }
 
+function retainCompleteJapaneseSentences(value){
+  const text=String(value||"").trim();
+  if(!text)return "回答が途中で切れてしまったよ。もう一度聞いてね。";
+  const complete=(text.match(/[^。！？!?]+[。！？!?](?:\\s*\\[出典\\d+\\])?/gu)||[]).join("").trim();
+  return complete||"回答が途中で切れてしまったよ。もう一度聞いてね。";
+}
+
 function trimIncompleteJapaneseEnding(value){
   let text=String(value||"").trim();
   if(!text)return "";
@@ -2139,6 +2146,14 @@ async function sendToAlvis(){
           const tired=/疲れ|しんど|大変|忙し|つら/u.test(text);
           reply=buildNonRepeatingEmotionFallback(text,data.history);
           setStatus("aiStatus","日本語の不自然な表現を検出したため、端末内の自然な会話表現に切り替えました。");
+        }
+      }
+      // トークン上限で生成が終了した場合、最後の句読点より後ろは未完成とみなし表示しない。
+      if(finalChoice.finish_reason==="length"){
+        const completeReply=retainCompleteJapaneseSentences(reply);
+        if(completeReply!==reply){
+          reply=completeReply;
+          setStatus("aiStatus","生成上限に達したため、最後の完結した文までを表示しました。");
         }
       }
       if(reply && analyzeJapaneseOutputQuality(reply).incompleteEnding){
