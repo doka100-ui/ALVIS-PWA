@@ -62,9 +62,12 @@ textarea{min-height:90px;resize:vertical}
 .hud-ai-metric[data-state="error"]:before{border-color:#f87171;opacity:.85}
 .hud-ai-metric:disabled{cursor:default;opacity:1}
 .hud-ai-metric:focus-visible{outline:2px solid #e0f2fe;outline-offset:10px}
-.hud-ai-metric strong{font-size:16px;display:block}
-.hud-ai-metric span{display:block;font-size:10px;line-height:1.35;margin-top:3px}
+.hud-ai-metric strong{font-size:19px;display:block;line-height:1.05;letter-spacing:.02em}
+.hud-ai-metric span{display:block;font-size:9px;line-height:1.25;margin-top:2px}
+.hud-ai-metric #hudAiDetail{font-size:8px;opacity:.82}
 .hud-ai-metric[data-state="online"] strong{color:#86efac}
+.hud-ai-metric[data-state="offline"] strong{color:#bae6fd}
+.hud-ai-metric[data-state="loading"] strong{color:#fde68a}
 .hud-ai-metric[data-state="loading"] strong,.hud-ai-metric[data-state="stopping"] strong{color:#fcd34d}
 .hud-ai-metric[data-state="error"] strong{color:#fca5a5}
 @keyframes alvisLoadRing{to{transform:rotate(360deg)}}
@@ -113,6 +116,11 @@ textarea{min-height:90px;resize:vertical}
 .avatar-copy p{color:#cbdff3}
 @media(max-width:600px){.display-dock{background:linear-gradient(145deg,#101b2df7,#071321f7)}.mode-switch{gap:5px;margin-bottom:8px}.mode-switch button{font-size:12px;padding:9px 4px}.hud-metric{width:52px;height:52px;font-size:10px}.hud-metric strong{font-size:14px}.hud-core{width:min(32vw,118px)}.hud-caption{font-size:8px;letter-spacing:.12em}.avatar-copy{padding:8px 9px}.avatar-copy strong{font-size:12px}.avatar-copy p{font-size:10px;line-height:1.4}}
 @media(prefers-reduced-motion:reduce){.mode-switch button{transition:none}}
+.hud-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}
+.hud-shortcut{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;padding:9px 5px;border:1px solid #1e7499;border-radius:9px;background:linear-gradient(145deg,#0b2942,#071525);color:#bae6fd;font-size:12px;font-weight:700;box-shadow:inset 0 1px #ffffff12,0 0 10px #0284c722}
+.hud-shortcut span{font-size:15px;color:#67e8f9}
+.hud-shortcut:active{background:#075985}
+@media(max-width:600px){.hud-shortcuts{gap:5px}.hud-shortcut{font-size:11px;padding:8px 2px;gap:4px}}
 
 </style>
 </head>
@@ -151,7 +159,7 @@ textarea{min-height:90px;resize:vertical}
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
 <div class="mode-stage jarvis-stage" aria-label="ALVISシステム表示">
-<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="Qwen3-4Bを起動"><strong id="hudAiState">OFFLINE</strong><span id="hudAiDetail">Qwen3-4B 未起動</span></button>
+<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="Qwen3-4Bを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">Qwen3-4B 未起動</span></button>
 <div class="hud-core"><span>ALVIS</span></div>
 <div class="hud-metric"><strong>LOCAL</strong><span>WEBGPU</span></div>
 <div class="hud-caption">PERSONAL AI SYSTEM　/　OFFLINE FIRST</div>
@@ -160,10 +168,16 @@ textarea{min-height:90px;resize:vertical}
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
 <div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
 </div>
-</div>
+<div class="hud-shortcuts" aria-label="ALVISクイック機能">
+ <button type="button" class="hud-shortcut" data-page="memoryPage"><span>◈</span>記憶</button>
+ <button type="button" class="hud-shortcut" data-page="growthPage"><span>⌁</span>成長</button>
+ <button type="button" class="hud-shortcut" data-scroll="voicePanel"><span>♫</span>音声</button>
+ <button type="button" class="hud-shortcut" data-page="devicePage"><span>⌘</span>端末</button>
+ </div>
+ </div>
 
 <div class="panel" style="margin:0 0 12px">
-<strong>音声会話（試作）</strong>
+<strong id="voicePanel">音声会話（試作）</strong>
 <label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
 <label for="ttsEngine" class="small">音声エンジン</label>
 <select id="ttsEngine" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="standard">標準音声（端末）</option><option value="kokoro">Kokoro（端末内AI音声）</option></select>
@@ -192,12 +206,7 @@ textarea{min-height:90px;resize:vertical}
 <audio id="kokoroPlayer" class="hidden" controls playsinline style="width:100%;margin-top:8px"></audio>
 <p class="small">Kokoroは初回オンライン時に音声モデルと日本語辞書を取得します。取得・キャッシュ後は端末内で合成する設計です。初回準備には空き容量と時間が必要です。</p>
 </div>
-<div class="panel" style="margin:0 0 12px">
-<strong>ローカルAIモデル</strong>
-<p class="small">Qwen3-4B Q4をiPad内で実行します。初回はモデルのダウンロードが必要です。</p>
-<button id="loadAiModel">Qwen3-4Bを読み込む</button>
-<button id="unloadAiModel" class="secondary" disabled>モデルを終了</button>
-<div id="aiStatus" class="small">AI未接続。モデルを読み込んでください。</div>
+
 </div>
 <div id="chatLog"></div>
 <textarea id="chatInput" placeholder="ALVISにメッセージを送る"></textarea>
@@ -358,6 +367,13 @@ textarea{min-height:90px;resize:vertical}
 </section>
 
 <section id="devicePage" class="hidden">
+ <div class="panel">
+ <h2>AIモデル管理</h2>
+ <p class="small">チャット画面上部の円からQwen3-4Bを起動できます。モデルを終了すると端末のメモリを解放します。</p>
+ <button id="loadAiModel" class="hidden" type="button">Qwen3-4Bを読み込む</button>
+ <button id="unloadAiModel" class="secondary" disabled>モデルを終了</button>
+ <div id="aiStatus" class="small" aria-live="polite">AI未接続。ALVIS画面上部の円を押してモデルを読み込んでください。</div>
+ </div>
 <div class="panel">
 <h2>端末・オフライン診断</h2>
 <p class="small">この診断は端末の機能とキャッシュの存在を確認します。AIモデルのオフライン再利用を保証するものではありません。</p>
@@ -407,6 +423,7 @@ let syncBusy = false;
 let lastLocalChange = 0;
 let aiEngine = null;
 let aiLoading = false;
+let aiLoadProgress = 0;
 
 // 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
@@ -441,10 +458,14 @@ function updateHudAiStatus(value=""){
   if(!stateNode)return;
   const message=String(value||"");
   let state="offline",label="OFFLINE",detail="Qwen3-4B 未起動";
+  const progressMatch=message.match(/モデル読み込み中\s+(\d+)%/);
+  if(progressMatch)aiLoadProgress=Math.max(0,Math.min(100,Number(progressMatch[1])));
   if(/エラー|失われ|失敗|停止扱い/.test(message)){state="error";label="ERROR";detail="モデル状態を確認してください";}
   else if(/終了して|解放しています/.test(message)){state="stopping";label="STOPPING";detail="メモリ解放中";}
-  else if(aiEngine){state="online";label="ONLINE";detail="Qwen3-4B 稼働中・端末内推論";}
+  else if(aiEngine){state="online";label="ONLINE";detail="Qwen3-4B 稼働中・端末内推論";aiLoadProgress=100;}
   else if(aiLoading){state="loading";label="LOADING";detail="Qwen3-4B 準備中";}
+  else{aiLoadProgress=0;}
+  const percentNode=$("hudAiPercent");if(percentNode)percentNode.textContent=aiLoadProgress+"%";
   stateNode.textContent=label;stateNode.dataset.state=state;
   const detailNode=$("hudAiDetail");if(detailNode)detailNode.textContent=detail;
   const action=$("hudAiAction");
@@ -1440,6 +1461,8 @@ $("loadAiModel").addEventListener("click",async()=>{
   if(aiEngine){setStatus("aiStatus","Qwen3-4Bはすでに起動しています。");return;}
   if(!unlocked){setStatus("aiStatus","先に記憶庫へログインしてください。");return;}
   aiLoading=true;
+  aiLoadProgress=0;
+  updateHudAiStatus("モデル読み込み中 0%");
   $("loadAiModel").disabled=true;
   $("unloadAiModel").disabled=true;
   $("sendChat").disabled=true;
@@ -1453,7 +1476,8 @@ $("loadAiModel").addEventListener("click",async()=>{
     }
     const loadedEngine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
       initProgressCallback:p=>{
-        const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
+        const percent=typeof p.progress==="number"?Math.max(0,Math.min(100,Math.round(p.progress*100))):aiLoadProgress;
+        aiLoadProgress=percent;
         setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
       }
     },{context_window_size:2048});
@@ -1465,6 +1489,7 @@ $("loadAiModel").addEventListener("click",async()=>{
       return;
     }
     aiEngine=engine;
+    aiLoadProgress=100;
     setStatus("aiStatus","Qwen3-4B 接続中・準備完了");
     $("sendChat").disabled=false;
     $("unloadAiModel").disabled=false;
@@ -1498,6 +1523,7 @@ $("unloadAiModel").addEventListener("click",async()=>{
   try{
     await engine.unload();
     if(aiEngine===engine)aiEngine=null;
+    aiLoadProgress=0;
     setStatus("aiStatus","モデルを終了しました。メモリ解放処理が完了しました。");
   }catch(error){
     // unload失敗時は参照を保持し、状態を偽って再ロードさせない。
@@ -2834,6 +2860,12 @@ document.querySelectorAll("nav button[data-page]").forEach(button=>{
     document.querySelectorAll("nav button[data-page]").forEach(item=>item.classList.toggle("secondary",item!==button));
   });
 });
+document.querySelectorAll(".hud-shortcut[data-page]").forEach(button=>button.addEventListener("click",()=>{
+  document.querySelector(`nav button[data-page="${button.dataset.page}"]`)?.click();
+}));
+document.querySelectorAll(".hud-shortcut[data-scroll]").forEach(button=>button.addEventListener("click",()=>{
+  const target=$(button.dataset.scroll);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+}));
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   alvisServiceWorkerReady=(async()=>{
