@@ -204,3 +204,11 @@ ALVISは、ユーザー専用のローカル実行型AIと、ユーザーが管�
 ## ALVIS Hologram UI (2026-11-06)
 
 ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, fine orbit rings, a top projector, a concentric energy platform, and translucent left/right panels. Cyan/blue remain dominant; red/pink accents stay restrained (target 5–10%). Responsive layouts prioritize iPad landscape and adapt for portrait/mobile. v109 is CSS/HTML presentation only, not a real 3D/WebGL scene. Existing model controls, encrypted data, memory, history, sync, and backup schemas remain unchanged.
+
+
+## ログイン時の音声案内（v117）
+
+- 保管庫の解除成功後、画面遷移後に「おかえりなさい」を一度読み上げる。
+- 既存の自動読み上げ設定がOFFの場合は読み上げない。
+- 選択中のKokoroが既に準備済みならKokoroを使用し、未準備なら端末標準音声を使用する。ログイン時にKokoroモデルを新規ロードしない。
+- 音声再生はブラウザの自動再生ポリシーに依存し、実機で確認する。
