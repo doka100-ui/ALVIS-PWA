@@ -480,7 +480,7 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(app,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
 
 
 // v108 HUD progress, compact chat layout, and working quick navigation.
@@ -498,4 +498,4 @@ assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
 assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
 assert.match(app,/id="unloadAiModel"/,"model unload control must remain available");
-assert.match(app,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
