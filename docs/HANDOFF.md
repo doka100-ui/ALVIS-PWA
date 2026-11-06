@@ -847,3 +847,4 @@
 - Service Worker cache: `alvis-cache-v98-integrated`。
 - 検証: インラインJavaScript構文PASS、初期化順PASS、offline-firstテスト本文268アサーションPASS（V8互換実行）。Node.js標準ランナー・GitHub Actions・iPad Safari実機は未確認。
 - 次: 開発版を再読み込みしてモデルを読み込み、富士山の回答と出典表示を最終確認。
+\n\n## v99追記（2026-11-06）\n- 同一WebLLMエンジンに対するすべての `chat.completions.create` を直列化するラッパー `serializeAlvisInference` を追加。チャット・成長計画・課題分析・自律タスクの同時生成を防ぐ。\n- `engine.unload()` は実行中/待機中の生成キューが完了するまで待機する。エラー後の解放や画面ロック時の終了処理にも適用。\n- Service Worker cache: `alvis-cache-v99-integrated`。データ形式・暗号化・同期・バックアップは変更なし。\n- 回帰テスト: 4件の同時要求が最大同時実行数1で処理されること、推論後にunloadできることを確認するテストを追加。\n- iPad Safari実機で `map async was not successful` が再発しないかは未確認。WebGPUデバイス損失そのものを完全に防ぐ保証ではない。\n
