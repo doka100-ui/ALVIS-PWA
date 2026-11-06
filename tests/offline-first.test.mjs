@@ -450,7 +450,7 @@ assert.match(app,/const ALVIS_DISPLAY_MODE_KEY="ALVIS_DISPLAY_MODE"/);
 assert.match(app,/localStorage\.setItem\(ALVIS_DISPLAY_MODE_KEY,safeMode\)/);
 assert.match(app,/localStorage\.getItem\(ALVIS_DISPLAY_MODE_KEY\)/);
 assert.match(app,/aria-pressed/);
-assert.match(app,/#chatPage\\\[data-display-mode="jarvis"\\\] \\.avatar-stage/);
+assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{display:none}'));
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
