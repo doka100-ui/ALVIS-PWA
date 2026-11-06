@@ -89,7 +89,7 @@ textarea{min-height:90px;resize:vertical}
 @media(prefers-reduced-motion:reduce){.hud-core:before,.hud-core:after,.hud-ai-metric[data-state="loading"]:before{animation:none}}
 
 /* v105 visual polish: premium glass HUD and a more dimensional avatar preview */
-.display-dock{background:linear-gradient(145deg,#101b2dF2,#071321F5);border:1px solid #38bdf833;box-shadow:0 14px 34px #02061799,0 0 22px #0284c722;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.display-dock{background:linear-gradient(145deg,#101b2dF2,#071321F5);border:1px solid #38bdf833;box-shadow:0 14px 34px #02061799,0 0 22px #0284c722;}
 .mode-switch{padding:3px;background:#07111f;border:1px solid #1e4966;border-radius:12px}
 .mode-switch button{border-radius:9px;letter-spacing:.04em;font-weight:700;transition:background .25s,border-color .25s,box-shadow .25s}
 .mode-switch button[aria-pressed="true"]{background:linear-gradient(135deg,#075985,#0369a1 55%,#0e7490);border-color:#67e8f9;box-shadow:0 0 18px #0ea5e955,inset 0 1px #bae6fd55}
@@ -111,7 +111,7 @@ textarea{min-height:90px;resize:vertical}
 .avatar-placeholder:after{background:linear-gradient(110deg,#f8fafc 0%,#cbd5e1 48%,#64748b 100%);box-shadow:inset 0 8px 14px #fff8}
 .avatar-eyes{height:5px;border-left-width:6px;border-right-width:6px;border-color:#26364a;box-shadow:0 1px 0 #fff8;opacity:.9}
 .avatar-eyes:after{content:"";position:absolute;left:13px;top:16px;width:14px;height:5px;border-bottom:1.5px solid #9f5963;border-radius:50%}
-.avatar-copy{z-index:1;padding:12px 14px;border:1px solid #93c5fd33;border-radius:12px;background:#07142688;box-shadow:inset 0 1px #fff1;backdrop-filter:blur(8px)}
+.avatar-copy{z-index:1;padding:12px 14px;border:1px solid #93c5fd33;border-radius:12px;background:#07142688;box-shadow:inset 0 1px #fff1;}
 .avatar-copy strong{letter-spacing:.16em;color:#f0f9ff;text-shadow:0 0 12px #38bdf866}
 .avatar-copy p{color:#cbdff3}
 @media(max-width:600px){.display-dock{background:linear-gradient(145deg,#101b2df7,#071321f7)}.mode-switch{gap:5px;margin-bottom:8px}.mode-switch button{font-size:12px;padding:9px 4px}.hud-metric{width:52px;height:52px;font-size:10px}.hud-metric strong{font-size:14px}.hud-core{width:min(32vw,118px)}.hud-caption{font-size:8px;letter-spacing:.12em}.avatar-copy{padding:8px 9px}.avatar-copy strong{font-size:12px}.avatar-copy p{font-size:10px;line-height:1.4}}
@@ -127,7 +127,7 @@ textarea{min-height:90px;resize:vertical}
 .jarvis-stage{min-height:390px;display:grid;grid-template-columns:minmax(145px,.82fr) minmax(260px,1.5fr) minmax(145px,.82fr);align-items:center;gap:clamp(8px,2vw,24px);padding:24px clamp(12px,2vw,28px) 42px;background:radial-gradient(ellipse at 50% 47%,#0b3b60 0%,#071d34 42%,#020812 78%);isolation:isolate}
 .jarvis-stage:before{opacity:.19;background-size:28px 28px;mask-image:radial-gradient(ellipse at center,#000 4%,transparent 82%)}
 .jarvis-stage:after{opacity:.35;background:linear-gradient(180deg,transparent 48%,#38bdf812 50%,transparent 52%);background-size:100% 7px}
-.hud-side{position:relative;z-index:2;align-self:center;min-width:0;padding:13px 12px;border:1px solid #38bdf866;border-radius:8px 15px 8px 15px;background:linear-gradient(135deg,#0b294bbd,#061426a8 72%,#0b1e35b8);box-shadow:inset 0 1px #dff8ff19,inset 0 0 22px #0284c71b,0 0 20px #0284c722;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);clip-path:polygon(0 9px,9px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.hud-side{position:relative;z-index:2;align-self:center;min-width:0;padding:13px 12px;border:1px solid #38bdf866;border-radius:8px 15px 8px 15px;background:linear-gradient(135deg,#0b294bbd,#061426a8 72%,#0b1e35b8);box-shadow:inset 0 1px #dff8ff19,inset 0 0 22px #0284c71b,0 0 20px #0284c722;clip-path:polygon(0 9px,9px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
 .hud-panel-heading{display:flex;align-items:center;gap:7px;padding-bottom:10px;border-bottom:1px solid #38bdf833;color:#9be7ff;font-size:10px;letter-spacing:.16em;font-weight:800}
 .hud-panel-heading i{width:6px;height:6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 9px #22d3ee}
 .hud-side-left .hud-ai-metric{margin:16px auto 14px}
@@ -204,7 +204,7 @@ body.auth-transitioning #appPanel{pointer-events:none}
 body.auth-transitioning:before,body.auth-transitioning:after{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none}
 body.auth-transitioning:before{background:radial-gradient(ellipse at 50% 46%,#d9faff22 0%,#67e8f922 12%,#38bdf80d 30%,transparent 58%);opacity:0;animation:alvisAmbientGlow 900ms ease-out forwards}
 body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,transparent 0%,transparent 22%,#a5f3fc22 22.15%,#67e8f91c 22.35%,transparent 22.8%,transparent 100%);opacity:0;transform:scale(.72);animation:alvisQuietWave 880ms cubic-bezier(.16,.68,.22,1) forwards}
-@keyframes alvisLoginDissolve{0%{opacity:1;transform:scale(1);filter:blur(0)}45%{opacity:.72;transform:scale(.985);filter:blur(2px)}100%{opacity:0;transform:scale(.96);filter:blur(7px)}}
+@keyframes alvisLoginDissolve{0%{opacity:1;transform:scale(1);}45%{opacity:.72;transform:scale(.985);}100%{opacity:0;transform:scale(.96);}}
 @keyframes alvisWorkspaceAwake{0%{opacity:0;filter:none}45%{opacity:.82;filter:none}100%{opacity:1;filter:none}}
 @keyframes alvisAmbientGlow{0%{opacity:0}28%{opacity:.8}100%{opacity:0}}
 @keyframes alvisQuietWave{0%{opacity:0;transform:scale(.72)}28%{opacity:.72}100%{opacity:0;transform:scale(1.85)}}
@@ -229,7 +229,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   background:linear-gradient(145deg,#06182bd9,#071d32a8 58%,#061426c9);
   border-color:#45bdf477;
   box-shadow:inset 0 1px #e2faff20,inset 0 0 25px #0284c71b,0 0 24px #0284c71b;
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  
 }
 .hud-center{min-height:340px}
 .hud-core{
@@ -362,7 +362,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   padding:12px 8px;
   background:linear-gradient(90deg,#06182b33,#082b4855 50%,#06182b33);
   box-shadow:none;
-  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  
 }
 .display-dock .hud-side:before{
   content:"";position:absolute;inset:0;pointer-events:none;
@@ -550,6 +550,19 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   filter:none!important;
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
+}
+
+/* v136: restore crisp early ALVIS rendering — translucent glass without backdrop blur */
+#appPanel .display-dock,
+#appPanel .display-dock *,
+#appPanel .mode-stage,
+#appPanel .mode-stage *{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#appPanel .display-dock,
+#appPanel .display-dock *{
+  filter:none!important;
 }
 </style>
 </head>
