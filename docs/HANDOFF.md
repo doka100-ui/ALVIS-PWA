@@ -748,3 +748,5 @@
 - 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / docs。
 - 次: Node.js回帰テスト・GitHub Actions確認。iPad Safariで既存の完了済みタスクを1件選び「AIで学習を振り返る」を実行、根拠と確信度が表示されることを確認する。
 - これは経験と承認済み記憶を用いたシステム層の継続改善であり、Qwen3-4Bのモデル重み自体を学習・更新する機能ではない。
+
+- v81追加調整: 構造化振り返りを課題スキャンと次の目標設定の双方に引き継ぐ。blocked/unclearの結果を成功扱いせず次の検証へ反映。SW cache v82。
