@@ -602,7 +602,11 @@ assert.match(app,/__alvis_voice_cache__\/welcome-v1/);
 assert.match(app,/async function playWelcomeGreeting\(\)/);
 assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);
 assert.match(app,/const cached=await getCachedKokoroWelcomeBlob\(\);[\s\S]*?await playKokoroBlob\(cached,"おかえりなさい"\)/);
-assert.doesNotMatch(app,/async function playWelcomeGreeting\(\)\{[\s\S]*?await prepareKokoroTTS\(\)/);
+const welcomeStart=app.indexOf("async function playWelcomeGreeting()");
+const welcomeEnd=app.indexOf("\
+function speakAlvis",welcomeStart);
+assert.ok(welcomeStart>=0&&welcomeEnd>welcomeStart,"welcome greeting function must be isolated");
+assert.doesNotMatch(app.slice(welcomeStart,welcomeEnd),/prepareKokoroTTS/);
 assert.match(app,/welcomeButton\.onclick=async\(\)=>\{[\s\S]*?await playWelcomeGreeting\(\);/);
 assert.match(app,/async function previewKokoroVoice\(voiceId,button\)\{\s*unlockAlvisAudioFromGesture\(\);/);
 assert.match(app,/previewKokoroTuned"\)\?\.addEventListener\("click",async\(\)=>\{unlockAlvisAudioFromGesture\(\)/);
