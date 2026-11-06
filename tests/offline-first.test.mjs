@@ -469,7 +469,7 @@ assert.match(app,/id="hudAiDetail"/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/function updateHudAiStatus\(value=""\)/);
 assert.match(app,/function lockApp\(\)[\s\S]*?updateHudAiStatus\("ログアウトしました。モデル未起動"\)/);
-assert.match(app,/Qwen3-4B 稼働中・端末内推論/);
+assert.match(app,/detail=ALVIS_MODEL_LABEL\+" 稼働中・端末内推論"/);
 assert.match(app,/if\(id==="aiStatus"\)updateHudAiStatus\(output\)/);
 assert.match(app,/hudAiAction.*addEventListener/s);
 assert.match(app,/\.hud-ai-metric\[data-state="loading"\]:before[\s\S]*?animation:alvisLoadRing/);
