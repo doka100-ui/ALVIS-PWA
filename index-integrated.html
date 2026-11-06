@@ -452,6 +452,36 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 @media(prefers-reduced-motion:reduce){.display-dock .hud-orbit-a,.display-dock .hud-orbit-b{animation:none!important}}
 /* end v127 reference composition */
 
+
+/* v128: reference composition rebuilt as a single fixed-coordinate hologram scene */
+.display-dock .mode-stage.jarvis-stage{
+ display:block!important;position:relative!important;isolation:isolate!important;
+ width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:1/1!important;
+ min-height:0!important;height:auto!important;margin:12px auto 18px!important;padding:0!important;
+ overflow:hidden!important;border:0!important;border-radius:0!important;
+ background:#01040b!important;box-shadow:0 0 28px #0b6b9b33!important;
+}
+.alvis-reference-scene{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+.display-dock .mode-stage.jarvis-stage>.hud-side,
+.display-dock .mode-stage.jarvis-stage>.hud-center,
+.display-dock .mode-stage.jarvis-stage>.hud-caption{visibility:hidden!important;pointer-events:none!important}
+.display-dock .mode-stage.jarvis-stage #hudAiAction{
+ visibility:visible!important;display:flex!important;position:absolute!important;z-index:5!important;
+ left:50%!important;top:42%!important;transform:translate(-50%,-50%)!important;
+ width:38%!important;height:40%!important;margin:0!important;padding:0!important;
+ opacity:.001!important;border:0!important;background:transparent!important;
+ cursor:pointer!important;pointer-events:auto!important;
+}
+.display-dock .mode-stage.jarvis-stage #hudAiAction>*{opacity:0!important}
+.display-dock .mode-stage.jarvis-stage #hudAiAction:focus-visible{
+ opacity:.18!important;outline:2px solid #8beaff!important;border-radius:50%!important
+}
+@media(max-width:600px){
+ .display-dock .mode-stage.jarvis-stage{width:100%!important;max-width:406px!important;margin:8px auto 14px!important}
+}
+@media(prefers-reduced-motion:reduce){.alvis-reference-scene{animation:none!important}}
+/* end v128 */
+
 </style>
 </head>
 <body>
@@ -494,6 +524,97 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
+<svg class="alvis-reference-scene" viewBox="0 0 406 406" role="img" aria-label="参考画像に合わせたALVISホログラム投影"><defs>
+<radialGradient id="sceneBg"><stop stop-color="#082b50"/><stop offset=".58" stop-color="#031326"/><stop offset="1" stop-color="#01040b"/></radialGradient>
+<radialGradient id="globeFill" cx="38%" cy="25%" r="78%"><stop stop-color="#b9f7ff" stop-opacity=".92"/><stop offset=".18" stop-color="#187fbd" stop-opacity=".75"/><stop offset=".62" stop-color="#06406f" stop-opacity=".8"/><stop offset="1" stop-color="#010d25" stop-opacity=".98"/></radialGradient>
+<radialGradient id="globeGlow"><stop stop-color="#5ce5ff" stop-opacity=".52"/><stop offset=".65" stop-color="#167cc2" stop-opacity=".12"/><stop offset="1" stop-color="#167cc2" stop-opacity="0"/></radialGradient>
+<linearGradient id="beam" x2="0" y2="1"><stop stop-color="#31c8ff" stop-opacity="0"/><stop offset=".28" stop-color="#32bfff" stop-opacity=".13"/><stop offset=".7" stop-color="#36d7ff" stop-opacity=".2"/><stop offset=".9" stop-color="#ff3d9a" stop-opacity=".22"/><stop offset="1" stop-color="#ff477c" stop-opacity="0"/></linearGradient>
+<linearGradient id="redBeam" x2="0" y2="1"><stop stop-color="#36cfff" stop-opacity="0"/><stop offset=".55" stop-color="#36cfff" stop-opacity=".25"/><stop offset=".86" stop-color="#ff4b9b" stop-opacity=".9"/><stop offset="1" stop-color="#ffefff"/></linearGradient>
+<linearGradient id="panelLine"><stop stop-color="#39cfff"/><stop offset=".55" stop-color="#1677ae" stop-opacity=".28"/><stop offset="1" stop-color="#4ce4ff"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+<clipPath id="globeClip"><circle cx="204" cy="166" r="81"/></clipPath>
+</defs>
+<rect width="406" height="406" fill="url(#sceneBg)"/>
+<g opacity=".18" stroke="#147db2" stroke-width=".5"><path d="M0 50H406M0 100H406M0 150H406M0 200H406M0 250H406M0 300H406M0 350H406"/><path d="M50 0V406M100 0V406M150 0V406M200 0V406M250 0V406M300 0V406M350 0V406"/></g>
+<g fill="none" stroke-linejoin="round">
+<path d="M0 44L0 26 7 26M37 51L59 27H142M264 27H367L389 50V67" stroke="#36d5ff" stroke-width="1.5" opacity=".9"/>
+<path d="M0 26H8M37 51V27M59 27H143M263 27H367M389 50V68" stroke="#ff4e7b" stroke-width="1" opacity=".85"/>
+<path d="M0 363L0 388M40 303L55 303M55 303H91M314 303H386L404 289" stroke="#fb476f" stroke-width="1.6" opacity=".9"/>
+<path d="M37 51L37 286M389 67V288" stroke="#1da9d9" stroke-width=".7" opacity=".55"/>
+</g>
+<g opacity=".9" stroke="#4ad7ff" fill="none"><path d="M37 27L37 52L59 27" stroke-width="1.6"/><path d="M367 27L389 50L389 68" stroke="#ff6687" stroke-width="1.5"/></g>
+<!-- top projector -->
+<ellipse cx="213" cy="35" rx="68" ry="7" fill="#0b2745" stroke="#59dfff" stroke-width="1.1" filter="url(#glow)"/>
+<ellipse cx="213" cy="35" rx="59" ry="3.5" stroke="#b6f5ff" stroke-width=".6" opacity=".85"/>
+<path d="M145 35V55M281 35V55M154 38V53M272 38V53" stroke="#38caff" stroke-width=".7" opacity=".55"/>
+<path d="M153 40L153 151M273 40L273 151" stroke="#36bfff" stroke-width=".7" opacity=".16"/>
+<path d="M174 41V278L202 300L224 278V41" fill="url(#beam)" opacity=".8"/>
+<path d="M204 39V297" stroke="#55dfff" stroke-width="1" opacity=".5" filter="url(#glow)"/>
+<!-- left radar -->
+<g transform="translate(77 84)" fill="none" stroke="#46d8ff">
+<circle r="27" stroke-width="1.2" opacity=".85"/><circle r="22" stroke-width=".7" opacity=".8"/><circle r="15" stroke-width=".6" opacity=".5"/><circle r="7" stroke-width=".7" opacity=".65"/>
+<path d="M-29 0H29M0-29V29M-20-20L20 20M20-20L-20 20" opacity=".28" stroke-width=".6"/>
+<path d="M0-25A25 25 0 0 1 24 7L0 0Z" fill="#31baff" fill-opacity=".2" stroke="none"/>
+<path d="M-10-4L-2-8L8-5L12 1L4 7L-8 5Z" stroke="#c4f9ff" stroke-width="1"/>
+<circle r="2" fill="#aaf4ff" filter="url(#glow)"/><path d="M-32-12L-27-16M27 17L32 13" stroke="#ff557d" stroke-width="1.3"/>
+</g>
+<!-- right top data panel -->
+<g stroke="#3dcfff" fill="none" opacity=".82"><path d="M326 57H380L386 64V111H326Z" stroke-width=".8"/><path d="M332 67H378M332 77H374M332 87H380M332 97H370" stroke-width=".7"/><path d="M333 63H347M333 73H358M333 83H350M333 93H360M333 103H354" stroke-width="1.2"/><path d="M364 63H378M365 73H380M362 83H378M366 93H380M361 103H377" stroke-width="1.5"/></g>
+<!-- left middle data panel -->
+<g fill="none" stroke="#37c9f8" opacity=".9"><path d="M40 158H90V224H40Z" stroke-width=".8"/><path d="M45 168H82M45 178H85M45 188H78M45 198H84M45 208H75M45 218H83" stroke-width=".7"/><path d="M45 164H57M45 174H63M45 184H55M45 194H68M45 204H59M45 214H66" stroke-width="1.1"/></g>
+<!-- right middle panel -->
+<g fill="none" stroke="#35cafa" opacity=".9"><path d="M321 159H382V198H321Z" stroke-width=".8"/><path d="M326 167H376M326 176H368M326 185H379M326 193H359" stroke-width=".7"/><path d="M326 164H338M326 173H345M326 182H337M326 190H349" stroke-width="1.1"/></g>
+<!-- chart boxes -->
+<g fill="none" stroke="#35cfff" opacity=".9"><path d="M40 233H98V279H40Z" stroke-width=".8"/><path d="M329 216H388V279H329Z" stroke-width=".8"/></g>
+<g fill="#36c9ff" filter="url(#glow)"><path d="M46 272V250H51V272ZM55 272V243H60V272ZM64 272V257H69V272ZM73 272V239H78V272ZM82 272V248H87V272ZM91 272V254H95V272Z"/><path d="M335 271V251H340V271ZM344 271V238H349V271ZM353 271V246H358V271ZM362 271V229H367V271ZM371 271V244H376V271ZM380 271V235H384V271Z"/></g>
+<g stroke="#62dcff" stroke-width=".7" opacity=".6"><path d="M45 276H95M334 275H383"/></g>
+<!-- globe atmosphere -->
+<circle cx="204" cy="166" r="94" fill="url(#globeGlow)"/>
+<circle cx="204" cy="166" r="82" fill="url(#globeFill)" stroke="#a7efff" stroke-opacity=".72" stroke-width="1.1" filter="url(#glow)"/>
+<g clip-path="url(#globeClip)">
+<g fill="#7edfff" fill-opacity=".65" stroke="#b9f4ff" stroke-opacity=".5" stroke-width=".7">
+<path d="M129 126L137 111L151 104L160 91L177 91L183 101L197 100L203 110L194 121L184 123L179 137L165 142L157 155L143 153L138 139Z"/>
+<path d="M165 157L178 152L188 160L194 174L188 188L182 201L175 216L164 206L160 190L151 179L155 166Z"/>
+<path d="M207 104L220 94L235 99L243 111L257 115L265 128L257 139L246 139L239 151L226 152L219 166L208 161L203 146L194 138L198 124Z"/>
+<path d="M218 165L232 158L246 164L252 177L246 190L240 204L227 213L216 202L214 187L207 178Z"/>
+<path d="M129 169L139 164L147 171L145 183L137 190L129 182Z"/>
+</g>
+<g fill="none" stroke="#a8eaff" stroke-opacity=".38" stroke-width=".75">
+<ellipse cx="204" cy="166" rx="27" ry="81"/><ellipse cx="204" cy="166" rx="54" ry="81"/><ellipse cx="204" cy="166" rx="75" ry="81"/>
+<ellipse cx="204" cy="166" rx="81" ry="29"/><ellipse cx="204" cy="166" rx="81" ry="55"/>
+<path d="M122 166H286M204 84V248"/>
+</g>
+<g fill="#baf6ff" opacity=".65"><circle cx="173" cy="119" r="1.5"/><circle cx="232" cy="130" r="1.2"/><circle cx="188" cy="197" r="1.3"/><circle cx="245" cy="180" r="1.1"/><circle cx="151" cy="162" r="1.1"/><circle cx="211" cy="99" r="1.4"/></g>
+</g>
+<!-- orbit ellipses -->
+<g fill="none" filter="url(#glow)">
+<ellipse cx="204" cy="180" rx="124" ry="37" stroke="#9ceeff" stroke-width=".9" opacity=".8"/>
+<ellipse cx="204" cy="180" rx="137" ry="29" stroke="#2bbdf7" stroke-width=".8" opacity=".52" transform="rotate(-7 204 180)"/>
+<ellipse cx="204" cy="180" rx="117" ry="55" stroke="#48d3ff" stroke-width=".65" opacity=".46" transform="rotate(68 204 180)"/>
+<ellipse cx="204" cy="180" rx="99" ry="70" stroke="#67dcff" stroke-width=".6" opacity=".36" transform="rotate(-62 204 180)"/>
+</g>
+<g fill="#a8f2ff" filter="url(#glow)"><circle cx="80" cy="170" r="1.7"/><circle cx="327" cy="176" r="1.5"/><circle cx="274" cy="145" r="1.2"/><circle cx="120" cy="206" r="1.1"/></g>
+<!-- title -->
+<text x="204" y="181" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="1.4" fill="#dffaff" filter="url(#glow)">ALVIS</text>
+<text x="204" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.2" letter-spacing="2.1" fill="#b7edff" opacity=".6">PERSONAL AI</text>
+<!-- center vertical energy beam -->
+<path d="M204 194V302" stroke="url(#redBeam)" stroke-width="7" opacity=".9" filter="url(#soft)"/>
+<path d="M204 192V302" stroke="url(#redBeam)" stroke-width="2.2" filter="url(#glow)"/>
+<path d="M204 191V302" stroke="#d9fbff" stroke-width=".7" opacity=".9"/>
+<!-- base projection rings -->
+<ellipse cx="212" cy="291" rx="119" ry="19" fill="#0b3153" fill-opacity=".35" stroke="#1cbbf4" stroke-width="1" filter="url(#glow)"/>
+<ellipse cx="212" cy="291" rx="103" ry="14" fill="none" stroke="#c0f5ff" stroke-width="1.1" filter="url(#glow)"/>
+<ellipse cx="212" cy="291" rx="87" ry="10" fill="none" stroke="#45d5ff" stroke-width="1.2"/>
+<ellipse cx="212" cy="291" rx="69" ry="6" fill="none" stroke="#fb6aab" stroke-width="1" opacity=".9"/>
+<ellipse cx="212" cy="291" rx="47" ry="4" fill="none" stroke="#fff0fb" stroke-width=".8"/>
+<path d="M93 291H331" stroke="#38caff" stroke-width=".8" opacity=".5"/>
+<path d="M46 302L77 302L90 298M331 301L372 301L385 298" stroke="#ff557d" stroke-width="2" filter="url(#glow)"/>
+<path d="M42 305H97M321 305H386" stroke="#ff597f" stroke-width=".7" opacity=".8"/>
+<g fill="#ff5c91" filter="url(#glow)"><circle cx="204" cy="291" r="3.5"/><circle cx="204" cy="301" r="1.8"/></g>
+<g fill="#42d8ff" opacity=".7"><circle cx="111" cy="290" r="1.1"/><circle cx="314" cy="290" r="1.1"/><circle cx="130" cy="298" r=".8"/><circle cx="294" cy="298" r=".8"/></g>
+<rect x="1" y="1" width="404" height="404" fill="none" stroke="#0b4167" stroke-width="1"/>
+</svg>
 <div class="hud-side hud-side-left">
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
 <button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button>
