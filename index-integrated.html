@@ -493,6 +493,7 @@ let lastLocalChange = 0;
 let aiEngine = null;
 let aiLoading = false;
 let aiLoadProgress = 0;
+let alvisResponseInProgress = false;
 
 // 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
@@ -2180,6 +2181,8 @@ function isAlvisNameQuestion(value){
 }
 
 async function sendToAlvis(){
+  // Enterキー連打などによる複数ターンの重複開始を防ぐ。
+  if(alvisResponseInProgress)return;
   const input=$("chatInput");
   const text=input.value.trim();
   if(!text)return;
@@ -2198,6 +2201,7 @@ async function sendToAlvis(){
     setStatus("aiStatus","先にQwen3-4Bを読み込んでください。");
     return;
   }
+  alvisResponseInProgress=true;
   $("sendChat").disabled=true;
   input.value="";
   data.history.push({role:"user",text,createdAt:new Date().toISOString()});
@@ -2473,6 +2477,7 @@ async function sendToAlvis(){
     try{await saveLocal();}catch(saveError){}
     setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。Qwen3-4Bを再読み込みしてください。":message);
   }finally{
+    alvisResponseInProgress=false;
     $("sendChat").disabled=false;
     renderAll();
   }
