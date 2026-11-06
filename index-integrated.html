@@ -1982,7 +1982,7 @@ async function sendToAlvis(){
         setStatus("aiStatus","日本語の不自然な表現を検出しました。自然な会話文に整えています…");
         const repairResult=await aiEngine.chat.completions.create({
           messages:[
-            {role:"system",content:"あなたは自然な日本語で話すALVISです。ユーザーの発言に対する返事を、会話として自然な日本語で1〜2文だけ返してください。英単語を混ぜないでください。意味の通らない否定や不自然な敬語を使わず、相手の気持ちを受け止めてください。説明や自己評価は不要です。"},
+            {role:"system",content:"あなたは自然な日本語で話すALVISです。ユーザーの発言に対する返事を、会話として自然な日本語で1〜2文だけ返してください。英単語を混ぜず、意味の通らない否定や不自然な敬語を使わないでください。直近の過去回答と同じ文章・同じ慰め文句を使わず、今回の発言の具体的な内容に合わせて別の返答を作ってください。説明や自己評価は不要です。"},
             ...conversationForGeneration.slice(-2).filter((item,index,items)=>!(index===items.length-1&&item.role==="user")),
             {role:"user",content:"直前の回答を使わず、次の発言に自然な日本語で返答してください。\n"+text}
           ],
