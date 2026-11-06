@@ -360,3 +360,32 @@ assert.equal(selectedLearning.sourceType,"external_research");
 assert.equal(selectedLearning.sourceUrl,approvedResearch.sourceUrl);
 assert.equal(selectedLearning.sourceProvider,"Wikipedia");
 assert.equal(selectedLearning.sourceQuestion,"富士山");
+
+
+// Every Qwen inference request must be serialized, and unload must wait for active inference.
+const inferenceGuardStart=app.indexOf("function serializeAlvisInference(");
+const inferenceGuardEnd=app.indexOf("\\nlet CreateMLCEngine",inferenceGuardStart);
+assert.ok(inferenceGuardStart>=0&&inferenceGuardEnd>inferenceGuardStart,"inference serializer must exist before model setup");
+const serializeInference=new Function(app.slice(inferenceGuardStart,inferenceGuardEnd)+"; return serializeAlvisInference;")();
+let activeInferenceCount=0;
+let maximumConcurrentInferenceCount=0;
+let unloadCompleted=false;
+const fakeEngine={
+  chat:{completions:{create:async({id})=>{
+    activeInferenceCount++;
+    maximumConcurrentInferenceCount=Math.max(maximumConcurrentInferenceCount,activeInferenceCount);
+    await Promise.resolve();
+    await Promise.resolve();
+    activeInferenceCount--;
+    return {id};
+  }}},
+  unload:async()=>{unloadCompleted=true;}
+};
+serializeInference(fakeEngine);
+const serializedResults=await Promise.all([1,2,3,4].map(id=>fakeEngine.chat.completions.create({id})));
+assert.deepEqual(serializedResults.map(item=>item.id),[1,2,3,4]);
+assert.equal(maximumConcurrentInferenceCount,1,"Qwen inference must never overlap");
+await fakeEngine.unload();
+assert.equal(unloadCompleted,true,"engine unload must remain available after queued inference");
+assert.match(app,/const engine=serializeAlvisInference\\(loadedEngine\\)/,"loaded Qwen engine must be wrapped before use");
+assert.match(app,/await inferenceQueue\\.catch\\(\\(\\)=>\\{\\}\\)/,"unload must wait for queued inference");
