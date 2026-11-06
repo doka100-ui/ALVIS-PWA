@@ -847,10 +847,11 @@ function renderAutonomy(){
     if(learning.status!=="approved"){
       const approve=document.createElement("button");approve.textContent=(learning.sourceType==="external_ai"||learning.sourceType==="external_research")?"内容を確認して学びに承認":"学びを承認";
       approve.addEventListener("click",async()=>{
-        if(learning.sourceType==="external_ai"&&!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\n事実の正しさが保証されるわけではありません。"))return;\n        if(learning.sourceType==="external_research"&&!confirm("この公開情報を、出典URL付きの未検証参考情報としてALVISが今後の会話で参照できるようにしますか？"))return;
+        if(learning.sourceType==="external_ai"&&!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\n事実の正しさが保証されるわけではありません。"))return;
+        if(learning.sourceType==="external_research"&&!confirm("この公開情報を、出典URL付きの未検証参考情報としてALVISが今後の会話で参照できるようにしますか？"))return;
         learning.status="approved";learning.approvedAt=new Date().toISOString();await saveLocal();renderAll();
       });card.appendChild(approve);
-      if(learning.sourceType==="external_ai"){
+      if(learning.sourceType==="external_ai"||learning.sourceType==="external_research"){
         const reject=document.createElement("button");reject.className="secondary";reject.textContent="今回は却下";
         reject.addEventListener("click",async()=>{if(!confirm("この外部AIの学習候補を削除しますか？"))return;data.learnings.splice(index,1);await saveLocal();renderAll();});
         card.appendChild(reject);
