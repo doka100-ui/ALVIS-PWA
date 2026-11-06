@@ -34,9 +34,15 @@ assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"e
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
 const jaEnd=app.indexOf("\n\nfunction isWeatherQuestion",jaStart);
 assert.ok(jaStart>=0&&jaEnd>jaStart,"Japanese language pack helpers must exist");
-const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
+const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,trimIncompleteJapaneseEnding,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.version,"ja-core-1");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。また、富士山").incompleteEnding,true,"unfinished trailing clause must be detected");
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。また").incompleteEnding,true,"dangling connector must be detected");
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。さらに").incompleteEnding,true,"dangling continuation must be detected");
+assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰の山です。また"),"富士山は日本最高峰の山です。","must keep complete sentences and remove dangling connector");
+assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。また、標高は"),"富士山は日本最高峰です。","must remove incomplete trailing clause");
+assert.match(app,/if\(reply && analyzeJapaneseOutputQuality\(reply\)\.incompleteEnding\)/,"must sanitize any unfinished ending after repair");
+
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。標高は約3776メートルです。").incompleteEnding,false,"complete answer must not be flagged");
 assert.match(app,/generationAttempts===1 && reply && isLikelyEnglishReply/);
 assert.match(app,/generationAttempts===1 && reply && isCorruptedModelReply/);
