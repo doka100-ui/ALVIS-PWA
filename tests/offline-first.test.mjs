@@ -160,6 +160,22 @@ assert.match(app,/task\.successCriteria/);
 assert.match(app,/task\.reason/);
 assert.match(app,/origin:\$\("autonomyTaskDraft"\)\.dataset\.origin/);
 
+// Structured, evidence-grounded autonomy retrospectives.
+const retrospectiveParserStart=app.indexOf("function parseAutonomyRetrospective(");
+const retrospectiveParserEnd=app.indexOf("\n}\n\nfunction renderAutonomyIssues",retrospectiveParserStart);
+assert.ok(retrospectiveParserStart>=0&&retrospectiveParserEnd>retrospectiveParserStart,"retrospective parser must exist");
+const parseAutonomyRetrospective=new Function(app.slice(retrospectiveParserStart,retrospectiveParserEnd+2)+"; return parseAutonomyRetrospective;")();
+assert.deepEqual(parseAutonomyRetrospective(JSON.stringify({outcome:"partial",evidence:"実行メモに1件の確認結果",lesson:"手順を分けると確認しやすい",nextExperiment:"次回は1手順ずつ検証",confidence:"medium"})),{
+  outcome:"partial",evidence:"実行メモに1件の確認結果",lesson:"手順を分けると確認しやすい",nextExperiment:"次回は1手順ずつ検証",confidence:"medium"
+});
+assert.equal(parseAutonomyRetrospective(JSON.stringify({outcome:"invalid",lesson:"学びのみ"})).outcome,"unclear");
+assert.equal(parseAutonomyRetrospective(JSON.stringify({lesson:"学びのみ"})).evidence,"実行メモに客観的な根拠の記載なし");
+assert.throws(()=>parseAutonomyRetrospective("ただの文章"),/JSON/);
+assert.throws(()=>parseAutonomyRetrospective(JSON.stringify({outcome:"success"})),/学び/);
+assert.match(app,/実行メモにない成果を作らない/);
+assert.match(app,/task\.retrospective/);
+assert.match(app,/learning\.nextExperiment/);
+
 // Dedicated external AI answer review UI
 assert.match(app, /data-page="externalAiPage">外部AIの回答/);
 assert.match(app, /id="externalAiPage"/);
