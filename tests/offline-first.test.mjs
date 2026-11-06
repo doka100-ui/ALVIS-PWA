@@ -580,7 +580,7 @@ assert.match(app,/id="lockPanel" class="panel"/);
 assert.match(app,/class="login-emblem"/);
 assert.match(app,/SECURE ACCESS/);
 assert.match(app,/AES-256 ENCRYPTED/);
-assert.match(app,/alvis-cache-v120-integrated/);
+assert.match(sw,/alvis-cache-v120-integrated/);
 
 
 // v117: login greeting still respects the saved auto-speech preference and transition timing.
