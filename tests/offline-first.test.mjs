@@ -555,3 +555,19 @@ assert.match(app,/dataset\.sourceGoal=proposal\.goal/);
 assert.match(app,/dataset\.sourceAction=proposal\.firstAction/);
 assert.match(app,/getAutonomyTaskMetadata\(\$\("autonomyTaskDraft"\),goal,action\)/);
 assert.match(sw,/alvis-cache-v112-integrated/);
+
+
+// v113: live conversation state/latency and branded secure login surface.
+assert.match(app,/id="hudThinkingReadout" data-state="idle"/);
+assert.match(app,/id="hudThinkingState">STANDBY/);
+assert.match(app,/id="hudResponseTime">--\.\- s/);
+assert.match(app,/function updateHudConversationState\(/);
+assert.match(app,/alvisResponseStartedAt=performance\.now\(\)/);
+assert.match(app,/updateHudConversationState\("thinking"\)/);
+assert.match(app,/updateHudConversationState\("ready",elapsed\)/);
+assert.match(app,/performance\.now\(\)-alvisResponseStartedAt/);
+assert.match(app,/id="lockPanel" class="panel"/);
+assert.match(app,/class="login-emblem"/);
+assert.match(app,/SECURE ACCESS/);
+assert.match(app,/AES-256 ENCRYPTED/);
+assert.match(app,/alvis-cache-v113-integrated/);
