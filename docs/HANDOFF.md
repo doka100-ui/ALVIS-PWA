@@ -1124,3 +1124,9 @@
 - 表示中のSVGホログラムに含まれていたGaussian blurフィルター（glow/soft）と参照属性を除去。SafariのSVGフィルター合成による広範囲のぼけを切り分けるため、シーン全体と子要素をfilter:noneで描画。
 - 地球のベクター輪郭、経緯線、軌道リング、中央操作領域は維持。下部投影台は静止のまま。
 - Service Worker cache: alvis-cache-v134-integrated。ソース上のフィルター除去とテストガードを追加。Safari実機でぼけが解消したかは未確認。
+
+
+## v135 — Safariの上半分ぼけ対策（2026-11-07）
+- スクリーンショットで確認されたシーン上部の矩形ぼけについて、SVG内部だけでなく祖先レイヤーを調査。stickyなdisplay-dockのbackdrop-filterと、appPanel入場アニメーションのfilter:blurを候補原因として除去。
+- ワークスペース入場演出はopacityのみとし、appPanel/display-dock/mode-stage/SVGにfilter・backdrop-filterを適用しない。
+- 地球・リング・下部静止台の構造は維持。Safari実機確認は未実施。
