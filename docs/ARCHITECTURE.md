@@ -689,3 +689,8 @@ GPUメモリ圧迫とWebGPU device lossを避けるため、空回答・英語�
 ## 不自然な文の安全な除外（v94）
 - 「富士山登り」を含む既知の不自然な文は、語句の単純置換で新しい主張を作らず、文単位で除外する。
 - これは既知パターンのみを扱う安全策で、一般的な日本語の意味解析ではない。
+
+
+## Hologram UI layer (v109)
+
+The HUD is a CSS/HTML presentation layer inside index-integrated.html. The existing Qwen control and progress callback remain wired; right-side feature labels are static labels, not live telemetry. No Three.js/WebGL, external assets, or new network dependency is added. Display mode preference remains separate from the encrypted vault.
