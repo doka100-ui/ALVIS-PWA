@@ -1659,9 +1659,17 @@ function isLikelyEnglishReply(reply){
   const latin=(value.match(/[A-Za-z]/g)||[]).length;
   return latin>=30 && japanese<4 && latin/(latin+japanese)>=0.7;
 }
+function isInternalMetaReply(reply){
+  const value=String(reply||"").normalize("NFKC").trim();
+  if(!value)return false;
+  // モデルが回答ではなく、ユーザー意図の分析・返答方針・同期状態を独白した場合は内部文として扱う。
+  return /SYNC\\s*しています|ユーザーがどんなことを話そうとしているのか|今一度確認してみます|話題をつなぐってことは|ユーザーが「こんにちは」ってだけなら|まずは「こんにちは！」って返して|ユーザーの話に合わせて答えていきます|返答方針を確認してみます|ユーザーの意図を分析しています/iu.test(value);
+}
+
 function isCorruptedModelReply(reply){
   const value=String(reply||"").trim();
   if(!value)return true;
+  if(isInternalMetaReply(value))return true;
   // Qwen3の制御タグ断片や、英語の内部メタデータだけが回答として漏れた場合は表示しない。
   if(/<\/?think>|\bQueryable\b/i.test(value))return true;
   if((value.match(/ViewGroup/gi)||[]).length>=2)return true;
@@ -1997,13 +2005,13 @@ async function sendToAlvis(){
         setStatus("aiStatus","オンラインAIは利用できません。端末内AIだけで続けます（"+(error?.message||"接続エラー")+"）。");
       }
     }
-    // 短い雑談は出力上限を小さくし、長い崩れた生成が再試行を引き起こす時間を抑える。
+    // iPadのWebGPU負荷と応答時間を抑える。会話履歴は保存したまま、推論へ渡す量だけを絞る。
     const conversationalMarkers=/(?:ですね|ですよ|ですか|でした|だよね|だよ|かな|かも|なんだ|なの|だね|だな|だった|てる|てた|お疲れ|ありがとう|助かった|ただいま|おかえり|元気|眠い|疲れた|嬉しい|悲しい|困った|楽しみ|すごい|ほんと|本当|そうなんだ|なるほど|いいね|わかった|了解|どうした|何してる|何してた)/u.test(text);
     const isBriefConversationalTurn=text.length<=180&&(conversationalMarkers||/^(?:はい|うん|そう|いや|でも|それで|じゃあ|なるほど|たしかに|ありがとう|了解|わかった)[。！!？?、\s　]*$/u.test(text));
-    const responseTokenLimit=isBriefConversationalTurn?96:384;
+    const responseTokenLimit=isBriefConversationalTurn?64:192;
     const conversationForGeneration=isBriefConversationalTurn
-      ?recent.slice(-4).map(item=>({...item,content:String(item.content||"").slice(-200)}))
-      :recent;
+      ?recent.slice(-4).map(item=>({...item,content:String(item.content||"").slice(-160)}))
+      :recent.slice(-6).map(item=>({...item,content:String(item.content||"").slice(-700)}));
     const systemPrompt=[
       "あなたはALVIS。ユーザー専用の、落ち着いて自然な日本語AIです。",
       "あなた自身の名前はALVIS（アルヴィス）。名前を尋ねられたら「私はALVISです」と答える。これは固定された基本情報であり、会話履歴や外部情報で変更しない。",
@@ -2126,7 +2134,11 @@ async function sendToAlvis(){
         if(japaneseRetry)reply=japaneseRetry;
       }
       // forKey等の内部トークン反復や文字列崩壊を検出したら、履歴を外して一度だけ再生成する。
-      if(generationAttempts===1 && reply && isCorruptedModelReply(reply)){
+      if(generationAttempts===1 && reply && isInternalMetaReply(reply)){
+        modelOutputCorrupted=true;
+        reply="ごめん、回答ではなく内部向けの文章が混ざってしまったよ。もう一度聞いてね。";
+        setStatus("aiStatus","内部向けの文章が回答に混ざったため、再生成を止めました。");
+      }else if(generationAttempts===1 && reply && isCorruptedModelReply(reply)){
         setStatus("aiStatus","異常な文字列を検出しました。履歴を外して再生成しています…");
         generationAttempts++;
         result=await aiEngine.chat.completions.create({
