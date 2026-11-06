@@ -490,7 +490,7 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v133-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v134-integrated"/);
 
 
 // v108 HUD progress, compact chat layout, and working quick navigation.
@@ -508,7 +508,7 @@ assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
 assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
 assert.match(app,/id="unloadAiModel"/,"model unload control must remain available");
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v133-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v134-integrated"/);
 
 // v109 spatial hologram HUD: visual-only layers; existing model action and display modes stay wired.
 assert.match(app,/aria-label="ALVIS立体ホログラム管制画面"/);
@@ -523,7 +523,7 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-interface-item"/);
 assert.match(app,/v109: spatial hologram control room/);
 assert.match(app,/#(?:[0-9a-fA-F]{3,8})\b/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v133-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v134-integrated"/);
 
 // A single user turn must own the conversation pipeline until its finally block.
 assert.match(app,/let alvisResponseInProgress = false;/);
@@ -534,7 +534,7 @@ const sendTurn=app.slice(sendTurnStart,sendTurnEnd);
 assert.ok(sendTurn.indexOf("if(alvisResponseInProgress)return;")<sendTurn.indexOf("alvisResponseInProgress=true;"),"duplicate turn guard must run before starting a turn");
 assert.match(sendTurn,/alvisResponseInProgress=true;/);
 assert.match(sendTurn,/finally\{[\s\S]*?alvisResponseInProgress=false;/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
  
 // v111: autonomy task duplicates are normalized across Unicode width and spacing.
@@ -549,7 +549,7 @@ assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の文脈理解を強化","別の検証を行う"),-1,"a genuinely different action must remain registrable");
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"別の目標","直近の会話を確認する"),-1,"a different goal must remain registrable");
 assert.equal((app.match(/findDuplicateAutonomyTask\(data\.autonomyTasks,goal,action\)!==-1/g)||[]).length,2,"both autonomy task registration paths must use normalized duplicate detection");
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 
 // v112: AI-generated autonomy metadata is only attached to the exact goal/action it describes.
@@ -564,7 +564,7 @@ assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"会話の文脈理解�
 assert.match(app,/dataset\.sourceGoal=proposal\.goal/);
 assert.match(app,/dataset\.sourceAction=proposal\.firstAction/);
 assert.match(app,/getAutonomyTaskMetadata\(\$\("autonomyTaskDraft"\),goal,action\)/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 
 // v113: live conversation state/latency and branded secure login surface.
@@ -580,7 +580,7 @@ assert.match(app,/id="lockPanel" class="panel"/);
 assert.match(app,/class="login-emblem"/);
 assert.match(app,/SECURE ACCESS/);
 assert.match(app,/AES-256 ENCRYPTED/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 
 // v117: login greeting still respects the saved auto-speech preference and transition timing.
@@ -589,7 +589,7 @@ assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackT
 assert.match(app,/const transitionDuration=transitionIntoAlvis\(\);/);
 assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"\|\|\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?await playWelcomeGreeting\(\)/);
 assert.match(app,/\},transitionDuration\+120\);/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 
 // v120: login uses the configured Kokoro voice, unlocks Safari audio from the user gesture,
@@ -614,7 +614,7 @@ assert.match(app,/source\.connect\(alvisAudioContext\.destination\)/);
 assert.match(app,/source\.start\(0\)/);
 assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
 assert.match(app,/value="0\.98"/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 // v121: Kokoro and Qwen must not be initialized together on memory-constrained phones.
 // Login reuses the cached greeting audio only; it never loads the Kokoro inference runtime.
@@ -623,7 +623,7 @@ assert.match(app,/if\(kokoroTts\|\|kokoroLoading\)\{[\s\S]*?ページを再読�
 assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?端末標準音声で読み上げます/);
 assert.match(app,/async function playKokoroBlob\(blob,clean\)/);
 assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 
 // v122-v123: choose an appropriately sized local model from a centralized device profile.
@@ -642,18 +642,25 @@ assert.match(app,/CreateMLCEngine\(ALVIS_MODEL_ID,/);
 assert.match(app,/context_window_size:ALVIS_CONTEXT_WINDOW/);
 assert.match(app,/ALVIS_MODEL_LABEL\+"を読み込む"/);
 assert.match(app,/自動選択モデル：/);
-assert.match(sw,/alvis-cache-v133-integrated/);
+assert.match(sw,/alvis-cache-v134-integrated/);
 
 
 // v132: sharpen the globe; avoid Gaussian blur on the globe and orbital details.
 assert.match(app, /stroke-opacity="\.9" stroke-width="1\.15"\/>/);
 assert.match(app, /#globeClip path\{filter:none!important;vector-effect:non-scaling-stroke\}/);
 assert.match(app, /higher-detail continuous continental coastlines/);
-assert.match(app, /alvis-cache-v133-integrated/);
+assert.match(app, /alvis-cache-v134-integrated/);
 
 
 // v133: replace simplified globe blobs with Natural Earth land geometry.
 assert.match(app, /id="natural-earth-globe"/);
 assert.match(app, /Natural Earth public-domain 1:110m land geometry/);
 assert.doesNotMatch(app, /higher-detail continuous continental coastlines/);
-assert.match(app, /alvis-cache-v133-integrated/);
+assert.match(app, /alvis-cache-v134-integrated/);
+
+
+// v134: remove SVG Gaussian blur layers from the visible hologram to avoid Safari compositing blur.
+assert.doesNotMatch(app, /<filter id="(?:glow|soft)">/);
+assert.doesNotMatch(app, /feGaussianBlur/);
+assert.doesNotMatch(app, /filter="url\(#(?:glow|soft)\)"/);
+assert.match(app, /v134: Safari-safe crisp SVG rendering/);
