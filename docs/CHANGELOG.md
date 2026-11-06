@@ -1,3 +1,8 @@
+## v102 検証追記（2026-11-06）
+
+- tests/offline-first.test.mjs 全体をV8互換ハーネスで実行し、298アサーションPASS。アプリ内JavaScriptとService Workerの構文確認もPASS。
+- この実行はNode.js標準テストランナーではない。GitHub Actionsのpush実行状態は現在のGitHub接続ツールから一覧取得できず未確認。iPad Safari実機の推論時間・GPU安定性も未確認。
+
 ## 2026-11-06 — iPad WebGPUのprefill負荷軽減（v102）
 
 - WebLLM 0.2.87の正式な第3引数 chatOpts を使い、Qwen3-4BのKV cache context windowを4096既定から2048へ縮小。長い会話の履歴は保存したまま、推論時にのみ直近1〜2発言・各100文字へ圧縮し、現在の質問本文は保持する。
