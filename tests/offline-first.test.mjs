@@ -592,11 +592,18 @@ assert.match(app,/\},transitionDuration\+120\);/);
 assert.match(sw,/alvis-cache-v117-integrated/);
 
 
-// v119: manual welcome playback is always available, and explicit standard-voice fallback overrides Kokoro.
-assert.match(app,/id="welcomeVoiceButton"/);
-assert.match(app,/welcomeButton\.classList\.remove\("hidden"\);/);
-assert.match(app,/welcomeButton\.onclick=\(\)=>\{[\s\S]*?speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\);/);
-assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{/);
-assert.ok(app.indexOf('if\($("ttsEngine")?.value==="kokoro"&&!options.fallbackToStandard\)')<app.indexOf('if(kokoroAudio){kokoroAudio.pause()'),"explicit standard fallback must bypass Kokoro");
-assert.match(app,/utterance\.onerror=event=>\{[\s\S]*?if\(clean==="おかえりなさい"\)\$\("welcomeVoiceButton"\)\?\.classList\.remove\("hidden"\);\s*\};/);
-assert.match(sw,/alvis-cache-v119-integrated/);
+// v120: login uses the configured Kokoro voice, unlocks Safari audio from the user gesture,
+// and caches the fixed welcome phrase locally so it is not synthesized on every login.
+assert.match(app,/function unlockAlvisAudioFromGesture\(\)/);
+assert.match(app,/const audioUnlockPromise=unlockAlvisAudioFromGesture\(\);/);
+assert.match(app,/async function getKokoroSpeechBlob\(clean,voiceId\)/);
+assert.match(app,/caches\.open\("alvis-voice-cache-v1"\)/);
+assert.match(app,/__alvis_voice_cache__\/welcome-v1/);
+assert.match(app,/async function playWelcomeGreeting\(\)/);
+assert.match(app,/await prepareKokoroTTS\(\);[\s\S]*?await speakKokoro\("おかえりなさい"\)/);
+assert.match(app,/welcomeButton\.onclick=async\(\)=>\{[\s\S]*?await playWelcomeGreeting\(\);/);
+assert.match(app,/source\.connect\(alvisAudioContext\.destination\)/);
+assert.match(app,/source\.start\(0\)/);
+assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
+assert.match(app,/value="0\.98"/);
+assert.match(sw,/alvis-cache-v120-integrated/);
