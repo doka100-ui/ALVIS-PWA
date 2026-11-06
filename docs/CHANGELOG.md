@@ -1125,3 +1125,8 @@
 ## v135 — Safariの矩形ぼけ対策
 - appPanelの入場アニメーションからblurを除去し、sticky display-dockのbackdrop-filterを無効化。ホログラム表示レイヤーにぼかしをかけない。
 - Service Worker cache v135。実機検証待ち。
+
+
+## v136 — 後付けの背景ぼかしを除去
+- Git履歴で追加時期を確認したdisplay-dock/hud-side等のbackdrop blurとfilter blurをCSSから除去。半透明のガラス色は保持。
+- Service Worker cache v136。実機確認待ち。
