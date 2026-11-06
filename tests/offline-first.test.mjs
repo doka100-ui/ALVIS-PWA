@@ -26,7 +26,7 @@ for(const sample of ["富士山の高さは3776メートルです。","JavaScrip
 assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
-assert.ok(app.includes("聞かれたことに直接答え"));
+assert.ok(app.includes("質問には直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
 assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"emotion fallback must remain active");
 assert.match(send,/userIsSimpleFatigueShare=text\.length<=80/,"short fatigue sharing must be recognized for local instant response");
