@@ -524,7 +524,6 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 .alvis-reference-scene #globeClip line,
 .alvis-reference-scene #globeClip path{stroke-linecap:round;stroke-linejoin:round}
 .alvis-reference-scene .ref-orbit{filter:none!important}
-.alvis-reference-scene [filter="url(#glow)"]{filter:none!important}
 .alvis-reference-scene text{filter:none!important}
 .alvis-reference-scene .ref-base-rotor,
 .alvis-reference-scene .ref-base-counter,
@@ -533,6 +532,11 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  .display-dock .mode-stage.jarvis-stage{width:100%!important;max-width:406px!important}
 }
 
+
+/* v134: Safari-safe crisp SVG rendering; avoid SVG Gaussian blur filter layers */
+.alvis-reference-scene,.alvis-reference-scene *{filter:none!important;}
+.alvis-reference-scene #globeClip path{shape-rendering:geometricPrecision;}
+.alvis-reference-scene .ref-orbit{filter:none!important;}
 </style>
 </head>
 <body>
@@ -582,8 +586,6 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <linearGradient id="beam" x2="0" y2="1"><stop stop-color="#31c8ff" stop-opacity="0"/><stop offset=".28" stop-color="#32bfff" stop-opacity=".13"/><stop offset=".7" stop-color="#36d7ff" stop-opacity=".2"/><stop offset=".9" stop-color="#ff3d9a" stop-opacity=".22"/><stop offset="1" stop-color="#ff477c" stop-opacity="0"/></linearGradient>
 <linearGradient id="redBeam" x2="0" y2="1"><stop stop-color="#36cfff" stop-opacity="0"/><stop offset=".55" stop-color="#36cfff" stop-opacity=".25"/><stop offset=".86" stop-color="#ff4b9b" stop-opacity=".9"/><stop offset="1" stop-color="#ffefff"/></linearGradient>
 <linearGradient id="panelLine"><stop stop-color="#39cfff"/><stop offset=".55" stop-color="#1677ae" stop-opacity=".28"/><stop offset="1" stop-color="#4ce4ff"/></linearGradient>
-<filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-<filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
 <clipPath id="globeClip"><circle cx="204" cy="166" r="81"/></clipPath>
 </defs>
 <rect width="406" height="406" fill="url(#sceneBg)"/>
@@ -596,19 +598,19 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 </g>
 <g opacity=".9" stroke="#4ad7ff" fill="none"><path d="M37 27L37 52L59 27" stroke-width="1.6"/><path d="M367 27L389 50L389 68" stroke="#ff6687" stroke-width="1.5"/></g>
 <!-- top projector -->
-<ellipse cx="213" cy="35" rx="68" ry="7" fill="#0b2745" stroke="#59dfff" stroke-width="1.1" filter="url(#glow)"/>
+<ellipse cx="213" cy="35" rx="68" ry="7" fill="#0b2745" stroke="#59dfff" stroke-width="1.1"/>
 <ellipse cx="213" cy="35" rx="59" ry="3.5" stroke="#b6f5ff" stroke-width=".6" opacity=".85"/>
 <path d="M145 35V55M281 35V55M154 38V53M272 38V53" stroke="#38caff" stroke-width=".7" opacity=".55"/>
 <path d="M153 40L153 151M273 40L273 151" stroke="#36bfff" stroke-width=".7" opacity=".16"/>
 <path d="M174 41V278L202 300L224 278V41" fill="url(#beam)" opacity=".8"/>
-<path d="M204 39V297" stroke="#55dfff" stroke-width="1" opacity=".5" filter="url(#glow)"/>
+<path d="M204 39V297" stroke="#55dfff" stroke-width="1" opacity=".5"/>
 <!-- left radar -->
 <g transform="translate(77 84)" fill="none" stroke="#46d8ff">
 <circle r="27" stroke-width="1.2" opacity=".85"/><circle r="22" stroke-width=".7" opacity=".8"/><circle r="15" stroke-width=".6" opacity=".5"/><circle r="7" stroke-width=".7" opacity=".65"/>
 <path d="M-29 0H29M0-29V29M-20-20L20 20M20-20L-20 20" opacity=".28" stroke-width=".6"/>
 <path d="M0-25A25 25 0 0 1 24 7L0 0Z" fill="#31baff" fill-opacity=".2" stroke="none"/>
 <path d="M-10-4L-2-8L8-5L12 1L4 7L-8 5Z" stroke="#c4f9ff" stroke-width="1"/>
-<circle r="2" fill="#aaf4ff" filter="url(#glow)"/><path d="M-32-12L-27-16M27 17L32 13" stroke="#ff557d" stroke-width="1.3"/>
+<circle r="2" fill="#aaf4ff"/><path d="M-32-12L-27-16M27 17L32 13" stroke="#ff557d" stroke-width="1.3"/>
 </g>
 <!-- right top data panel -->
 <g stroke="#3dcfff" fill="none" opacity=".82"><path d="M326 57H380L386 64V111H326Z" stroke-width=".8"/><path d="M332 67H378M332 77H374M332 87H380M332 97H370" stroke-width=".7"/><path d="M333 63H347M333 73H358M333 83H350M333 93H360M333 103H354" stroke-width="1.2"/><path d="M364 63H378M365 73H380M362 83H378M366 93H380M361 103H377" stroke-width="1.5"/></g>
@@ -618,7 +620,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <g fill="none" stroke="#35cafa" opacity=".9"><path d="M321 159H382V198H321Z" stroke-width=".8"/><path d="M326 167H376M326 176H368M326 185H379M326 193H359" stroke-width=".7"/><path d="M326 164H338M326 173H345M326 182H337M326 190H349" stroke-width="1.1"/></g>
 <!-- chart boxes -->
 <g fill="none" stroke="#35cfff" opacity=".9"><path d="M40 233H98V279H40Z" stroke-width=".8"/><path d="M329 216H388V279H329Z" stroke-width=".8"/></g>
-<g fill="#36c9ff" filter="url(#glow)"><path d="M46 272V250H51V272ZM55 272V243H60V272ZM64 272V257H69V272ZM73 272V239H78V272ZM82 272V248H87V272ZM91 272V254H95V272Z"/><path d="M335 271V251H340V271ZM344 271V238H349V271ZM353 271V246H358V271ZM362 271V229H367V271ZM371 271V244H376V271ZM380 271V235H384V271Z"/></g>
+<g fill="#36c9ff"><path d="M46 272V250H51V272ZM55 272V243H60V272ZM64 272V257H69V272ZM73 272V239H78V272ZM82 272V248H87V272ZM91 272V254H95V272Z"/><path d="M335 271V251H340V271ZM344 271V238H349V271ZM353 271V246H358V271ZM362 271V229H367V271ZM371 271V244H376V271ZM380 271V235H384V271Z"/></g>
 <g stroke="#62dcff" stroke-width=".7" opacity=".6"><path d="M45 276H95M334 275H383"/></g>
 
 <!-- micro HUD labels and calibration marks -->
@@ -715,15 +717,15 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <g fill="#baf6ff" opacity=".65"><circle cx="173" cy="119" r="1.5"/><circle cx="232" cy="130" r="1.2"/><circle cx="188" cy="197" r="1.3"/><circle cx="245" cy="180" r="1.1"/><circle cx="151" cy="162" r="1.1"/><circle cx="211" cy="99" r="1.4"/></g>
 </g>
 <!-- animated orbital rings -->
-<g class="ref-orbit ref-orbit-slow" fill="none" filter="url(#glow)">
+<g class="ref-orbit ref-orbit-slow" fill="none">
  <ellipse cx="204" cy="180" rx="124" ry="37" stroke="#9ceeff" stroke-width=".9" opacity=".8" stroke-dasharray="420 8 36 10"/>
  <ellipse cx="204" cy="180" rx="137" ry="29" stroke="#2bbdf7" stroke-width=".8" opacity=".52" stroke-dasharray="260 22 80 18"/>
 </g>
-<g class="ref-orbit ref-orbit-fast" fill="none" filter="url(#glow)">
+<g class="ref-orbit ref-orbit-fast" fill="none">
  <ellipse cx="204" cy="180" rx="117" ry="55" stroke="#48d3ff" stroke-width=".65" opacity=".46" transform="rotate(68 204 180)" stroke-dasharray="220 18 60 14"/>
  <ellipse cx="204" cy="180" rx="99" ry="70" stroke="#67dcff" stroke-width=".6" opacity=".36" transform="rotate(-62 204 180)" stroke-dasharray="180 16 50 12"/>
 </g>
-<g class="ref-orbit-points" filter="url(#glow)">
+<g class="ref-orbit-points">
  <circle cx="80" cy="170" r="1.7" fill="#a8f2ff"/><circle cx="327" cy="176" r="1.5" fill="#a8f2ff"/>
  <circle cx="274" cy="145" r="1.2" fill="#a8f2ff"/><circle cx="120" cy="206" r="1.1" fill="#a8f2ff"/>
  <circle cx="110" cy="145" r="1.1" fill="#e3fbff"/><circle cx="294" cy="210" r="1.2" fill="#e3fbff"/>
@@ -732,13 +734,13 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <text x="204" y="181" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="1.4" fill="#e6fbff">ALVIS</text>
 <text x="204" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.2" letter-spacing="2.1" fill="#b7edff" opacity=".72">PERSONAL AI</text>
 <!-- center vertical energy beam -->
-<path d="M204 194V302" stroke="url(#redBeam)" stroke-width="7" opacity=".9" filter="url(#soft)"/>
-<path d="M204 192V302" stroke="url(#redBeam)" stroke-width="2.2" filter="url(#glow)"/>
+<path d="M204 194V302" stroke="url(#redBeam)" stroke-width="7" opacity=".9"/>
+<path d="M204 192V302" stroke="url(#redBeam)" stroke-width="2.2"/>
 <path d="M204 191V302" stroke="#d9fbff" stroke-width=".7" opacity=".9"/>
 <!-- animated energy platform -->
-<ellipse cx="212" cy="291" rx="119" ry="19" fill="#0b3153" fill-opacity=".35" stroke="#1cbbf4" stroke-width="1" filter="url(#glow)"/>
+<ellipse cx="212" cy="291" rx="119" ry="19" fill="#0b3153" fill-opacity=".35" stroke="#1cbbf4" stroke-width="1"/>
 <g fill="none">
- <ellipse cx="212" cy="291" rx="103" ry="14" stroke="#c0f5ff" stroke-width="1.1" filter="url(#glow)" stroke-dasharray="220 12 42 10"/>
+ <ellipse cx="212" cy="291" rx="103" ry="14" stroke="#c0f5ff" stroke-width="1.1" stroke-dasharray="220 12 42 10"/>
  <ellipse cx="212" cy="291" rx="87" ry="10" stroke="#45d5ff" stroke-width="1.2" stroke-dasharray="120 18 60 12"/>
 </g>
 <g fill="none">
@@ -746,9 +748,9 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  <ellipse cx="212" cy="291" rx="47" ry="4" stroke="#fff0fb" stroke-width=".8" stroke-dasharray="46 8 20 8"/>
 </g>
 <path d="M93 291H331" stroke="#38caff" stroke-width=".8" opacity=".5"/>
-<path d="M46 302L77 302L90 298M331 301L372 301L385 298" stroke="#ff557d" stroke-width="2" filter="url(#glow)"/>
+<path d="M46 302L77 302L90 298M331 301L372 301L385 298" stroke="#ff557d" stroke-width="2"/>
 <path d="M42 305H97M321 305H386" stroke="#ff597f" stroke-width=".7" opacity=".8"/>
-<g fill="#ff5c91" filter="url(#glow)" class="ref-energy-pulse"><circle cx="204" cy="291" r="3.5"/><circle cx="204" cy="301" r="1.8"/></g>
+<g fill="#ff5c91" class="ref-energy-pulse"><circle cx="204" cy="291" r="3.5"/><circle cx="204" cy="301" r="1.8"/></g>
 <g fill="#42d8ff" opacity=".7"><circle cx="111" cy="290" r="1.1"/><circle cx="314" cy="290" r="1.1"/><circle cx="130" cy="298" r=".8"/><circle cx="294" cy="298" r=".8"/></g>
 <rect x="1" y="1" width="404" height="404" fill="none" stroke="#0b4167" stroke-width="1"/>
 </svg>
