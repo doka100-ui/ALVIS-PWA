@@ -28,7 +28,7 @@ assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAl
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 assert.ok(app.includes("聞かれたことに直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
-assert.match(app,/buildNonRepeatingEmotionFallback\\(text,data\\.history\\)/);
+assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"emotion fallback must remain active");
 
 // Offline Japanese language foundation: intent, tense, register, phrase retrieval and diagnostics.
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
