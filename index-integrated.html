@@ -305,7 +305,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <label for="kokoroVoice" class="small">Kokoroの日本語女性音声</label>
 <select id="kokoroVoice" style="width:100%;padding:12px;border-radius:10px;background:#0f172a;color:white;border:1px solid #475569;margin:4px 0 8px"><option value="jf_alpha">Alpha（女性）</option><option value="jf_gongitsune">Gongitsune（女性）</option><option value="jf_nezumi">Nezumi（女性）</option><option value="jf_tebukuro">Tebukuro（女性）</option></select>
 <label for="kokoroRate" class="small">声の高さ・話す速さ（微調整）</label>
-<div style="display:flex;align-items:center;gap:10px;margin:4px 0 8px"><span class="small">低め</span><input id="kokoroRate" type="range" min="0.96" max="1.10" step="0.02" value="1.04" style="flex:1"><span class="small">高め</span><strong id="kokoroRateValue" class="small">標準</strong></div>
+<div style="display:flex;align-items:center;gap:10px;margin:4px 0 8px"><span class="small">低め</span><input id="kokoroRate" type="range" min="0.96" max="1.10" step="0.02" value="0.98" style="flex:1"><span class="small">高め</span><strong id="kokoroRateValue" class="small">標準</strong></div>
 <p class="small">再生速度を少し変える調整です。高めにすると声も少し高くなり、低めにすると少し低くなります。</p>
 <div class="actions"><button id="previewKokoroTuned" class="secondary" type="button">今の設定で試聴</button></div>
 <p class="small">4種類を同じ文章で比較できます。ボタンを押すと、その声を選択・保存して試聴します。iPadのメモリ競合を避けるため、Qwen3-4Bを使用中の場合は先に「モデルを終了」してください。</p>
@@ -755,7 +755,7 @@ function collectVoiceSettings(){
   return {
     engine:["standard","kokoro"].includes($("ttsEngine")?.value)?$("ttsEngine").value:"standard",
     kokoroVoice:["jf_alpha","jf_gongitsune","jf_nezumi","jf_tebukuro"].includes($("kokoroVoice")?.value)?$("kokoroVoice").value:"jf_alpha",
-    kokoroRate:Math.min(1.10,Math.max(0.96,Number($("kokoroRate")?.value||1.04))),
+    kokoroRate:Math.min(1.10,Math.max(0.96,Number($("kokoroRate")?.value||0.98))),
     voiceName:String($("voiceSelect")?.value||"").slice(0,200),
     voiceStyle:["natural","gentle","bright","calm","energetic"].includes($("voiceStyle")?.value)?$("voiceStyle").value:"natural",
     autoSpeak:!!$("autoSpeak")?.checked
@@ -1245,7 +1245,7 @@ function normalizeData(value){
     if(typeof settings.autoSpeak==="boolean")localStorage.setItem("ALVIS_AUTO_SPEAK",settings.autoSpeak?"true":"false");
     if($("ttsEngine"))$("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
     if($("kokoroVoice"))$("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
-    if($("kokoroRate")){$("kokoroRate").value=localStorage.getItem("ALVIS_KOKORO_RATE")||"1.04";updateKokoroRateLabel();}
+    if($("kokoroRate")){$("kokoroRate").value=localStorage.getItem("ALVIS_KOKORO_RATE")||"0.98";updateKokoroRateLabel();}
     if($("voiceStyle"))$("voiceStyle").value=localStorage.getItem("ALVIS_VOICE_STYLE")||"natural";
     if($("autoSpeak"))$("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
     if($("voiceSelect")&&Array.from($("voiceSelect").options).some(option=>option.value===localStorage.getItem("ALVIS_VOICE_NAME")))$("voiceSelect").value=localStorage.getItem("ALVIS_VOICE_NAME");
@@ -1259,7 +1259,18 @@ let kokoroTts=null;
 let kokoroLoading=false;
 let kokoroAudio=null;
 let kokoroObjectUrl=null;
+let kokoroAudioSource=null;
+let alvisAudioContext=null;
 // 読み上げ時だけ ALVIS の英字読みを日本語名に置き換える（画面表示・保存内容は変更しない）
+function unlockAlvisAudioFromGesture(){
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)return Promise.resolve(false);
+  try{
+    if(!alvisAudioContext)alvisAudioContext=new AudioContextClass();
+    if(alvisAudioContext.state==="running")return Promise.resolve(true);
+    return alvisAudioContext.resume().then(()=>alvisAudioContext.state==="running").catch(()=>false);
+  }catch(error){return Promise.resolve(false);}
+}
 function normalizeAlvisSpeechText(value){
   return String(value||"").replace(/ALVIS/gi,"アルビス");
 }
@@ -1297,36 +1308,92 @@ async function prepareKokoroTTS(){
     return null;
   }finally{kokoroLoading=false;if(button)button.disabled=false;}
 }
+async function getKokoroSpeechBlob(clean,voiceId){
+  // ログイン時の固定フレーズは端末内Cache Storageへ保存し、毎回の再合成を避ける。
+  if(clean==="おかえりなさい"&&"caches" in window){
+    try{
+      const cache=await caches.open("alvis-voice-cache-v1");
+      const request=new Request("https://alvis.local/__voice-cache/welcome-v1/"+encodeURIComponent(voiceId));
+      const cached=await cache.match(request);
+      if(cached){setStatus("voiceStatus","保存済みのKokoro音声を再生しています…");return await cached.blob();}
+      const result=await kokoroTts.speak(clean,voiceId);
+      const blob=result.toBlob();
+      await cache.put(request,new Response(blob,{headers:{"Content-Type":blob.type||"audio/wav"}}));
+      return blob;
+    }catch(cacheError){
+      const result=await kokoroTts.speak(clean,voiceId);
+      return result.toBlob();
+    }
+  }
+  const result=await kokoroTts.speak(clean,voiceId);
+  return result.toBlob();
+}
 async function speakKokoro(text){
   const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();if(!clean)return;
-  if(!kokoroTts){setStatus("voiceStatus","先に「Kokoroを準備・モデルを取得」を押してください。");return;}
+  if(!kokoroTts){setStatus("voiceStatus","Kokoroの準備が必要です。音声設定の「Kokoroを準備」を一度実行してください。");return;}
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
+    if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
     const player=$("kokoroPlayer");
+    if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
     if(player){player.pause();player.removeAttribute("src");player.classList.add("hidden");}
     if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
-    setStatus("voiceStatus","Kokoroで音声を生成しています…");
-    const result=await kokoroTts.speak(clean,$("kokoroVoice").value||"jf_alpha");
-    const blob=result.toBlob();
+    setStatus("voiceStatus","Kokoroで音声を準備しています…");
+    const voiceId=$("kokoroVoice").value||"jf_alpha";
+    const blob=await getKokoroSpeechBlob(clean,voiceId);
+    const rate=Number($("kokoroRate")?.value||0.98);
+    // Safariの再生制限対策：ログイン/送信/ボタン操作で事前に解放したAudioContextから再生する。
+    if(alvisAudioContext&&alvisAudioContext.state==="running"){
+      try{
+        const audioBuffer=await alvisAudioContext.decodeAudioData(await blob.arrayBuffer());
+        const source=alvisAudioContext.createBufferSource();
+        source.buffer=audioBuffer;
+        source.playbackRate.value=rate;
+        source.connect(alvisAudioContext.destination);
+        source.onended=()=>{
+          if(kokoroAudioSource===source)kokoroAudioSource=null;
+          setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
+          if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");
+        };
+        kokoroAudioSource=source;
+        source.start(0);
+        setStatus("voiceStatus","Kokoroが話しています…");
+        return;
+      }catch(audioContextError){
+        setStatus("voiceStatus","音声を再生形式へ変換しています…");
+      }
+    }
+    // AudioContextを利用できない場合は、音声プレーヤーを表示してユーザー操作で再生できるようにする。
     kokoroObjectUrl=URL.createObjectURL(blob);
     kokoroAudio=player||new Audio();
     kokoroAudio.src=kokoroObjectUrl;
-    kokoroAudio.playbackRate=Number($("kokoroRate")?.value||1.04);
-    // 少し高めの声色に寄せるため、再生速度に合わせてピッチもわずかに上げる
+    kokoroAudio.playbackRate=rate;
     if("preservesPitch" in kokoroAudio)kokoroAudio.preservesPitch=false;
     if("webkitPreservesPitch" in kokoroAudio)kokoroAudio.webkitPreservesPitch=false;
     if(player){player.classList.remove("hidden");player.load();}
     kokoroAudio.onended=()=>{setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
-    kokoroAudio.onerror=()=>{setStatus("voiceStatus","Kokoro音声の再生に失敗しました。再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
+    kokoroAudio.onerror=()=>{setStatus("voiceStatus","Kokoro音声の再生に失敗しました。プレーヤーの再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
     try{
       await kokoroAudio.play();
       setStatus("voiceStatus","Kokoroが話しています…");
     }catch(playError){
-      setStatus("voiceStatus","音声を生成しました。下の再生ボタンを押してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
+      setStatus("voiceStatus","音声を準備しました。下のプレーヤーの再生ボタンを押してください。");
+      if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
     }
   }catch(error){
-    setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error))+"。標準音声へ切り替えて試せます。");
+    setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error)));
+    if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
   }
+}
+async function playWelcomeGreeting(){
+  if(!unlocked)return;
+  if($("ttsEngine")?.value==="kokoro"){
+    const engine=await prepareKokoroTTS();
+    if(!engine){$("welcomeVoiceButton")?.classList.remove("hidden");return;}
+    await speakKokoro("おかえりなさい");
+    return;
+  }
+  speakAlvis("おかえりなさい");
 }
 function speakAlvis(text,options={}){
   // 明示的な標準音声指定は、Kokoroの選択/ロード状態より優先する。
@@ -1365,6 +1432,7 @@ function speakAlvis(text,options={}){
 }
 function stopAlvisSpeech(){
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
+  if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
   if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
   const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
@@ -1421,6 +1489,8 @@ function transitionIntoAlvis(){
 }
 
 async function unlock(){
+  // click/Enterのユーザー操作中に音声出力を解放し、認証完了後のKokoro再生に備える。
+  const audioUnlockPromise=unlockAlvisAudioFromGesture();
   const password=$("password").value;
   if(password.length<8){setStatus("lockStatus","パスワードは8文字以上にしてください。");return;}
   try{
@@ -1443,20 +1513,21 @@ async function unlock(){
     $("password").value="";
     const transitionDuration=transitionIntoAlvis();
     renderAll();
-    // ログイン演出が終わったら、保存済みの音声設定で短く歓迎する。
-    // Kokoro未ロード時は端末標準の日本語音声へフォールバックし、モデルの追加ロードは行わない。
+    // 選択済みエンジンとKokoro音声を使う。固定の歓迎フレーズは初回生成後に端末内保存する。
     const welcomeButton=$("welcomeVoiceButton");
     if(welcomeButton){
       welcomeButton.classList.remove("hidden");
-      welcomeButton.onclick=()=>{
+      welcomeButton.onclick=async()=>{
         if(!unlocked)return;
-        speakAlvis("おかえりなさい",{fallbackToStandard:true});
+        unlockAlvisAudioFromGesture();
+        await playWelcomeGreeting();
       };
     }
     if($("autoSpeak")?.checked){
-      window.setTimeout(()=>{
+      window.setTimeout(async()=>{
         if(unlocked&&$("autoSpeak")?.checked){
-          speakAlvis("おかえりなさい",{fallbackToStandard:true});
+          await audioUnlockPromise;
+          await playWelcomeGreeting();
         }
       },transitionDuration+120);
     }
@@ -2313,6 +2384,8 @@ async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
   if(!text)return;
+  // 送信操作中に音声出力を解放し、推論完了後のKokoro読み上げに備える。
+  unlockAlvisAudioFromGesture();
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
   const userIsGreeting=/^(こんにちは|おはようございます|こんばんは|おはよう|やあ|はじめまして)(?:[、,\s　]*(?:ALVIS|アルヴィス|アルビス))?[！!。…\s　]*$/iu.test(text);
   // 短い感情共有は4Bモデルを起動せず端末内で返す。重い推論を避け、会話のテンポを保つ。
