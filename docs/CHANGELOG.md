@@ -1,3 +1,11 @@
+## 2026-11-07 — v115 中心放射型ログイン演出
+
+- v114の下から上がるワークスペース表示を、中央コアから全方向へ広がる円形クリップ演出に変更。
+- 青白い中心発光、回転しながら広がるシアンの星芒、ログインパネルの中心縮小フェードで神秘的な起動感を追加。
+- 動きを減らすOS設定を尊重。認証/暗号化/既存データ/同期/AI推論/バックアップ処理は変更なし。
+- Service Worker cache: `alvis-cache-v115-integrated`。
+- 静的チェックと構文検査は実施。Safari実機確認は未実施。
+
 ## 2026-11-07 — v114 ログイン→ALVIS画面の連続演出
 
 - 対象: `development` / `index-integrated.html`、`service-worker.js`、`tests/offline-first.test.mjs`、開発資料。
