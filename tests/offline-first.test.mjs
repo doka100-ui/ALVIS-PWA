@@ -29,6 +29,9 @@ assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用�
 assert.ok(app.includes("聞かれたことに直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
 assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"emotion fallback must remain active");
+assert.match(send,/userIsSimpleFatigueShare=text\.length<=80/,"short fatigue sharing must be recognized for local instant response");
+assert.match(send,/if\(userIsSimpleFatigueShare\)[\s\S]*?Qwen3未使用・オフライン対応/,"simple fatigue sharing must bypass slow model inference");
+
 assert.match(send,/const responseTokenLimit=isBriefConversationalTurn\?64:192/,"local inference output is capped to reduce iPad latency and GPU pressure");
 assert.match(send,/recent\.slice\(-6\)\.map\(item=>\(\{\.\.\.item,content:String\(item\.content\|\|""\)\.slice\(-700\)\}\)\)/,"normal inference history is bounded");
 const metaStart=app.indexOf("function isInternalMetaReply(");
