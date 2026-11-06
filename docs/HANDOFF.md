@@ -1,3 +1,8 @@
+## v124 モデル表示の端末適応（2026-11-07）
+- ホログラムHUD、AI管理画面、音声・成長機能のステータス表示で、選択中のモデル名を端末プロファイルに合わせる。
+- AIステータス共通表示処理でQwen3-4B表記を選択モデル名へ統一し、iPhoneで4Bと誤表示しない。
+- 暗号化データ・記憶・履歴・同期形式に変更なし。実機動作は未検証。
+
 ## v123 端末別AIプロファイル整理（2026-11-07）
 - 端末判定を `resolveAlvisDeviceProfile()` に集約。iPhone / iPod / Androidスマートフォンは Qwen3-1.7B・context 1024、iPadとその他は Qwen3-4B・context 2048。
 - iPadOS SafariのデスクトップUAを考慮し、`navigator.platform === "MacIntel"` かつ `maxTouchPoints > 1` の場合はiPadとして扱う。
