@@ -285,7 +285,7 @@ assert.match(app, /AIであることを毎回説明しない/);
 assert.match(app, /英語を混ぜず/);
 assert.match(app, /const conversationForGeneration=isBriefConversationalTurn/);
 assert.match(app, /recent\.slice\(-4\)/);
-assert.match(app, /slice\(-200\)/);
+assert.match(app, /slice\(-160\)/);
 assert.match(app, /const activeSystemPrompt=isBriefConversationalTurn/);
 assert.match(app, /content:activePromptWithJapanesePack/);
 assert.match(app, /join\("\\n"\)/);
