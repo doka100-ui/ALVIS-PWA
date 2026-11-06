@@ -26,13 +26,15 @@ for(const sample of ["富士山の高さは3776メートルです。","JavaScrip
 assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
-// Center-origin, mystical core reveal replaces the former upward slide.
-assert.match(app,/#appPanel\.auth-enter\{[^}]*clip-path:circle\(0% at 50% 46%\)/,"workspace must reveal from the central core");
-assert.match(app,/@keyframes alvisCoreReveal[\s\S]*?clip-path:circle\(150% at 50% 46%\)/,"workspace reveal must radiate outward from center");
-assert.match(app,/@keyframes alvisCoreBloom[\s\S]*?@keyframes alvisStarburst/,"central bloom and starburst must be animated");
-assert.match(app,/conic-gradient\(from 0deg at 50% 46%/,"starburst rays must originate from the center");
-assert.match(app,/prefers-reduced-motion:reduce[\s\S]*?body\.auth-transitioning:before,body\.auth-transitioning:after/,"center reveal must respect reduced-motion preference");
-assert.match(app,/\},1120\)/,"transition overlay cleanup must allow the center reveal to finish");
+// v116: restrained cinematic awakening replaces the game-like radial starburst.
+assert.match(app,/#appPanel\.auth-enter\{[^}]*animation:alvisWorkspaceAwake/,"workspace must fade into focus without a circular game-like wipe");
+assert.match(app,/@keyframes alvisWorkspaceAwake[\s\S]*?filter:blur\(0\) brightness\(1\)/,"workspace must resolve softly into focus");
+assert.match(app,/radial-gradient\(ellipse at 50% 46%/,"a restrained central ambient glow must remain");
+assert.match(app,/@keyframes alvisQuietWave[\s\S]*?transform:scale\(1\.85\)/,"one subtle expanding light wave must originate at the center");
+assert.doesNotMatch(app,/conic-gradient\(from 0deg at 50% 46%/,"no starburst rays");
+assert.doesNotMatch(app,/clip-path:circle\(0% at 50% 46%\)/,"no game-like circular mask reveal");
+assert.match(app,/prefers-reduced-motion:reduce[\s\S]*?body\.auth-transitioning:before,body\.auth-transitioning:after/,"transition must respect reduced-motion preference");
+assert.match(app,/\},980\)/,"transition cleanup must allow the refined reveal to finish");
 assert.ok(app.includes("質問には直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
 assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"emotion fallback must remain active");
