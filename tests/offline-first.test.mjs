@@ -34,13 +34,17 @@ assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"e
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
 const jaEnd=app.indexOf("\n\nfunction isWeatherQuestion",jaStart);
 assert.ok(jaStart>=0&&jaEnd>jaStart,"Japanese language pack helpers must exist");
-const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,repairKnownJapanesePhrases,trimIncompleteJapaneseEnding,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
+const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,repairKnownJapanesePhrases,trimIncompleteJapaneseEnding,retainCompleteJapaneseSentences,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.version,"ja-core-1");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。また、富士山").incompleteEnding,true,"unfinished trailing clause must be detected");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。また").incompleteEnding,true,"dangling connector must be detected");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。さらに").incompleteEnding,true,"dangling continuation must be detected");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰の山です。また"),"富士山は日本最高峰の山です。","must keep complete sentences and remove dangling connector");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。また、標高は"),"富士山は日本最高峰です。","must remove incomplete trailing clause");
+assert.equal(japanesePack.retainCompleteJapaneseSentences("富士山は日本最高峰です。標高は3776メートルで、山頂には"),"富士山は日本最高峰です。","token-limit truncation must retain only completed sentences");
+assert.equal(japanesePack.retainCompleteJapaneseSentences("富士山は日本最高峰です。[出典1] 標高は約"),"富士山は日本最高峰です。[出典1]","token-limit trimming must preserve citation markers attached to completed sentences");
+assert.equal(japanesePack.retainCompleteJapaneseSentences("標高は約"),"回答が途中で切れてしまったよ。もう一度聞いてね。","must not present a fragment as a complete answer");
+assert.match(app,/finalChoice\.finish_reason==="length"[\\s\\S]*?retainCompleteJapaneseSentences\(reply\)/,"token-limit finish reason must activate complete-sentence guard");
 assert.match(app,/if\(reply && analyzeJapaneseOutputQuality\(reply\)\.incompleteEnding\)/,"must sanitize any unfinished ending after repair");
 
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。標高は約3776メートルです。").incompleteEnding,false,"complete answer must not be flagged");
