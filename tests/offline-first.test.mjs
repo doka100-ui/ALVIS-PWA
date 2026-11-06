@@ -44,7 +44,7 @@ assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高
 assert.equal(japanesePack.retainCompleteJapaneseSentences("富士山は日本最高峰です。標高は3776メートルで、山頂には"),"富士山は日本最高峰です。","token-limit truncation must retain only completed sentences");
 assert.equal(japanesePack.retainCompleteJapaneseSentences("富士山は日本最高峰です。[出典1] 標高は約"),"富士山は日本最高峰です。[出典1]","token-limit trimming must preserve citation markers attached to completed sentences");
 assert.equal(japanesePack.retainCompleteJapaneseSentences("標高は約"),"回答が途中で切れてしまったよ。もう一度聞いてね。","must not present a fragment as a complete answer");
-assert.match(app,/finalChoice\.finish_reason==="length"[\\s\\S]*?retainCompleteJapaneseSentences\(reply\)/,"token-limit finish reason must activate complete-sentence guard");
+assert.match(app,/finalChoice\.finish_reason==="length"[\s\S]*?retainCompleteJapaneseSentences\(reply\)/,"token-limit finish reason must activate complete-sentence guard");
 assert.match(app,/if\(reply && analyzeJapaneseOutputQuality\(reply\)\.incompleteEnding\)/,"must sanitize any unfinished ending after repair");
 
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高峰です。標高は約3776メートルです。").incompleteEnding,false,"complete answer must not be flagged");
