@@ -205,7 +205,7 @@ body.auth-transitioning:before,body.auth-transitioning:after{content:"";position
 body.auth-transitioning:before{background:radial-gradient(ellipse at 50% 46%,#d9faff22 0%,#67e8f922 12%,#38bdf80d 30%,transparent 58%);opacity:0;animation:alvisAmbientGlow 900ms ease-out forwards}
 body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,transparent 0%,transparent 22%,#a5f3fc22 22.15%,#67e8f91c 22.35%,transparent 22.8%,transparent 100%);opacity:0;transform:scale(.72);animation:alvisQuietWave 880ms cubic-bezier(.16,.68,.22,1) forwards}
 @keyframes alvisLoginDissolve{0%{opacity:1;transform:scale(1);filter:blur(0)}45%{opacity:.72;transform:scale(.985);filter:blur(2px)}100%{opacity:0;transform:scale(.96);filter:blur(7px)}}
-@keyframes alvisWorkspaceAwake{0%{opacity:0;filter:blur(5px) brightness(1.12)}45%{opacity:.82;filter:blur(1.5px) brightness(1.06)}100%{opacity:1;filter:blur(0) brightness(1)}}
+@keyframes alvisWorkspaceAwake{0%{opacity:0;filter:none}45%{opacity:.82;filter:none}100%{opacity:1;filter:none}}
 @keyframes alvisAmbientGlow{0%{opacity:0}28%{opacity:.8}100%{opacity:0}}
 @keyframes alvisQuietWave{0%{opacity:0;transform:scale(.72)}28%{opacity:.72}100%{opacity:0;transform:scale(1.85)}}
 @media(prefers-reduced-motion:reduce){#lockPanel.auth-exit,#appPanel.auth-enter,body.auth-transitioning:before,body.auth-transitioning:after{animation:none!important}#lockPanel.auth-exit{opacity:0}#appPanel.auth-enter{opacity:1;filter:none}}
@@ -537,6 +537,20 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 .alvis-reference-scene,.alvis-reference-scene *{filter:none!important;}
 .alvis-reference-scene #globeClip path{shape-rendering:geometricPrecision;}
 .alvis-reference-scene .ref-orbit{filter:none!important;}
+
+/* v135: Safari sticky/backdrop compositing guard — never blur the hologram layer */
+#appPanel.auth-enter{filter:none!important}
+#appPanel .display-dock{
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#appPanel .display-dock .mode-stage,
+#appPanel .display-dock .alvis-reference-scene{
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
 </style>
 </head>
 <body>
