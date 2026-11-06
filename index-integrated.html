@@ -1411,6 +1411,7 @@ function stopPolling(){
 function lockApp(){
   stopPolling();
   if(aiEngine){aiEngine.unload().catch(()=>{});aiEngine=null;}
+  updateHudAiStatus("ログアウトしました。モデル未起動");
   cryptoKey=null;encryptionSalt=null;
   data={memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[],learnings:[]};
   unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
