@@ -822,3 +822,8 @@
 - 引用記号の正規表現エスケープを確認し、回帰テストを追加。
 - Service Worker cache: alvis-cache-v95-integrated。
 - 検証: 端末内のJavaScript実行環境で tests/offline-first.test.mjs の全261アサーションを実行し成功。アプリ構文・引用付き未完了文の個別検査も成功。GitHub Actionsの実行記録は取得できず、iPad実機は未確認。
+
+## 2026-11-06 — 部分修復の改善 v96
+- 既知の不自然表現が含まれても回答全体を拒否せず、該当する一文だけを除外するよう修正。
+- 「山の斜面には多くの神社があり」を検出対象から外し、該当文を局所的に除去。残った完結文はそのまま表示する。
+- 回帰テスト追加。Service Worker cache: alvis-cache-v96-integrated。
