@@ -458,6 +458,7 @@ assert.match(app,/id="hudAiState"/);
 assert.match(app,/id="hudAiDetail"/);
 assert.match(app,/id="hudModelAction"/);
 assert.match(app,/function updateHudAiStatus\(value=""\)/);
+assert.match(app,/function lockApp\(\)[\s\S]*?updateHudAiStatus\("ログアウトしました。モデル未起動"\)/);
 assert.match(app,/Qwen3-4B 稼働中・端末内推論/);
 assert.match(app,/if\(id==="aiStatus"\)updateHudAiStatus\(output\)/);
 assert.match(app,/hudModelAction.*addEventListener/s);
