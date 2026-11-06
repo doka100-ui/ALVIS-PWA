@@ -480,7 +480,7 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(app,/const CACHE_NAME = "alvis-cache-v105-integrated"/);
+assert.match(app,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
 
 
 // v108 HUD progress, compact chat layout, and working quick navigation.
