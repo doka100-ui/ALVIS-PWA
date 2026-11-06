@@ -78,7 +78,7 @@ assert.equal(japanesePack.analyzeJapaneseOutputQuality(japanesePack.repairKnownJ
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("山の斜面には多くの神社があり。"),"回答が途中で切れてしまったよ。もう一度聞いてね。","an answer containing only an unfinished clause must not be displayed as complete");
 assert.match(app,/reply=repairKnownJapanesePhrases\(reply\)/,"deterministic Japanese repair must run before display");
 assert.match(app,/finalJapaneseQuality\.suspiciousPhrases\.length/,"unrepaired awkward phrases must use a safe fallback");
-assert.match(app,/【出典付き回答の厳守事項】回答に使う事実は/,"approved research answers must be grounded in source excerpts");
+assert.match(app,/資料に明記された事実だけを使い/,"approved research answers must be grounded in source excerpts");
 assert.match(app,/【出典付き回答の修復】次の承認済み資料の抜粋/,"Japanese repair must retain approved source context");
 assert.match(app,/generationAttempts===1 && reply && isLikelyEnglishReply/);
 assert.match(app,/generationAttempts===1 && reply && isCorruptedModelReply/);
