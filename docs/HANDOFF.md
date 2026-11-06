@@ -1130,3 +1130,9 @@
 - スクリーンショットで確認されたシーン上部の矩形ぼけについて、SVG内部だけでなく祖先レイヤーを調査。stickyなdisplay-dockのbackdrop-filterと、appPanel入場アニメーションのfilter:blurを候補原因として除去。
 - ワークスペース入場演出はopacityのみとし、appPanel/display-dock/mode-stage/SVGにfilter・backdrop-filterを適用しない。
 - 地球・リング・下部静止台の構造は維持。Safari実機確認は未実施。
+
+
+## v136 — 初期表示の鮮明さを回復するぼかし除去（2026-11-07）
+- Git履歴でv105のdisplay-dock backdrop blur(14px)、v125のhud-side blur(12px)など後付けのガラスぼかしを確認。CSS全体からbackdrop-filterのblur指定とfilter:blur指定を除去。
+- 半透明背景・枠線・色は維持。SVGの地球形状・経緯線・軌道・中央操作領域・下部静止台は維持。
+- display-dockと子要素へぼかし禁止ガードを追加。実機描画は未確認。
