@@ -452,6 +452,15 @@ assert.match(app,/\.display-dock \.mode-stage\{margin-bottom:0\}/);
 assert.match(app,/@media\(max-width:600px\)\{\.display-dock/);
 
 assert.match(app,/id="jarvisModeButton"/);
+assert.match(app,/>ALVISモード<\/button>/);
+assert.doesNotMatch(app,/>JARVISモード<\/button>/);
+assert.match(app,/id="hudAiState"/);
+assert.match(app,/id="hudAiDetail"/);
+assert.match(app,/id="hudModelAction"/);
+assert.match(app,/function updateHudAiStatus\(value=""\)/);
+assert.match(app,/Qwen3-4B 稼働中・端末内推論/);
+assert.match(app,/if\(id==="aiStatus"\)updateHudAiStatus\(output\)/);
+assert.match(app,/hudModelAction.*addEventListener/s);
 assert.match(app,/id="avatarModeButton"/);
 assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="mode-stage avatar-stage"/);
