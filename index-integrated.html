@@ -174,6 +174,12 @@ textarea{min-height:90px;resize:vertical}
 <p class="small">会話・未完了タスク・承認済みの学びを分析し、課題の発見と優先順位付けを提案します。採用・実行・学習は確認して進めます。</p>
 <button id="scanAutonomyIssues">課題を自動発見して優先順位を付ける</button>
 <div id="autonomyIssueStatus" class="small" style="margin:10px 0">まだ課題分析を実行していません。</div>
+<label for="autonomyResearchQuery">ALVISが調べるテーマ</label>
+<input id="autonomyResearchQuery" placeholder="例：ローカルAIの記憶の仕組み">
+<button id="autonomyResearchButton" class="secondary">公開情報を検索して学習候補を作る</button>
+<p class="small">検索したテーマだけをWikipediaへ送ります。会話履歴・長期記憶・パスワードは送信しません。検索結果は未検証で、承認するまで学習に使いません。</p>
+<div id="autonomyResearchStatus" class="small" style="margin:10px 0">オンライン時のみ利用できます。オフライン機能には影響しません。</div>
+<div id="autonomyResearchResults"></div>
 <div id="autonomyIssueList"></div>
 <button id="autonomyCycleButton" class="secondary">自分で次の目標を立てる</button>
 <div id="autonomyCycleStatus" class="small" style="margin:10px 0">会話・発見した課題・実行履歴・承認済み学習をもとに、ALVIS自身が次の目標を提案します。</div>
@@ -717,6 +723,20 @@ function parseAutonomyRetrospective(value){
   return result;
 }
 
+function normalizeAutonomyResearchResults(searchData,detailData,query){
+  const matches=Array.isArray(searchData?.query?.search)?searchData.query.search:[];
+  const rawPages=detailData?.query?.pages||[];
+  const pages=Array.isArray(rawPages)?rawPages:Object.values(rawPages);
+  const byId=new Map(pages.map(page=>[Number(page.pageid),page]));
+  return matches.slice(0,5).map(match=>{
+    const page=byId.get(Number(match.pageid));
+    const title=String(page?.title||match.title||"").trim().slice(0,180);
+    const extract=String(page?.extract||"").replace(/\s+/gu," ").trim().slice(0,1800);
+    if(!title||!extract)return null;
+    return {title,extract,url:"https://ja.wikipedia.org/wiki/"+encodeURIComponent(title.replace(/ /gu,"_")),query:String(query||"").slice(0,120)};
+  }).filter(Boolean);
+}
+
 function renderAutonomyIssues(){
   const box=$("autonomyIssueList");if(!box)return;
   box.replaceChildren();
@@ -819,12 +839,15 @@ function renderAutonomy(){
     if(learning.sourceType==="external_ai"){
       label.textContent=learning.status==="approved"?"承認済み・外部AI参考":"外部AI参考・未検証／承認待ち";
       source.textContent="出典："+(learning.sourceProvider||"外部AI")+(learning.sourceModel?"（"+learning.sourceModel+"）":"")+" ／ 元質問："+(learning.sourceQuestion||"記録なし");
+    }else if(learning.sourceType==="external_research"){
+      label.textContent=learning.status==="approved"?"承認済み・外部調査参考":"外部調査・未検証／承認待ち";
+      source.textContent="出典："+(learning.sourceProvider||"公開情報")+" ／ "+(learning.sourceUrl||"URL不明")+" ／ 検索テーマ："+(learning.sourceQuestion||"記録なし");
     }else source.textContent="元タスク："+(learning.sourceTask||"");
     card.append(label,body,source);
     if(learning.status!=="approved"){
-      const approve=document.createElement("button");approve.textContent=learning.sourceType==="external_ai"?"内容を確認して学びに承認":"学びを承認";
+      const approve=document.createElement("button");approve.textContent=(learning.sourceType==="external_ai"||learning.sourceType==="external_research")?"内容を確認して学びに承認":"学びを承認";
       approve.addEventListener("click",async()=>{
-        if(learning.sourceType==="external_ai"&&!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\n事実の正しさが保証されるわけではありません。"))return;
+        if(learning.sourceType==="external_ai"&&!confirm("この外部AIの回答を、未検証の参考情報としてALVISが今後の会話で参照できるようにしますか？\n事実の正しさが保証されるわけではありません。"))return;\n        if(learning.sourceType==="external_research"&&!confirm("この公開情報を、出典URL付きの未検証参考情報としてALVISが今後の会話で参照できるようにしますか？"))return;
         learning.status="approved";learning.approvedAt=new Date().toISOString();await saveLocal();renderAll();
       });card.appendChild(approve);
       if(learning.sourceType==="external_ai"){
@@ -1505,6 +1528,7 @@ function selectRelevantLearnings(query, history, learnings){
 function formatApprovedLearningForPrompt(item){
   const text=String(item?.text||"").trim();
   if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\n"+text;
+  if(item?.sourceType==="external_research")return "【外部公開情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"公開情報")+"／URL："+String(item.sourceUrl||"不明")+"／検索テーマ："+String(item.sourceQuestion||"不明")+"】\n"+text;
   return "【ALVISの学び】\n"+text;
 }
 
@@ -2191,6 +2215,51 @@ $("reviewGrowth").addEventListener("click",async()=>{
   }catch(error){setStatus("growthStatus","改善案を作成できませんでした: "+(error?.message||String(error)));}
   finally{button.disabled=false;button.textContent="会話を振り返って改善案を作る";}
 });
+$("autonomyResearchButton").addEventListener("click",async()=>{
+  const query=$("autonomyResearchQuery").value.trim();
+  if(!query){setStatus("autonomyResearchStatus","調べたいテーマを入力してください。");return;}
+  if(query.length>120){setStatus("autonomyResearchStatus","検索テーマは120文字以内にしてください。");return;}
+  const button=$("autonomyResearchButton"),box=$("autonomyResearchResults");
+  button.disabled=true;button.textContent="公開情報を検索中…";box.replaceChildren();
+  try{
+    const searchUrl=new URL("https://ja.wikipedia.org/w/api.php");
+    const searchParams=new URLSearchParams({action:"query",list:"search",srsearch:query,srnamespace:"0",srlimit:"5",format:"json",formatversion:"2",origin:"*"});
+    searchUrl.search=searchParams.toString();
+    const searchResponse=await fetch(searchUrl.toString(),{method:"GET",credentials:"omit",headers:{Accept:"application/json"}});
+    if(!searchResponse.ok)throw new Error("検索サービスから応答がありません（HTTP "+searchResponse.status+"）。");
+    const searchData=await searchResponse.json();
+    if(searchData?.error)throw new Error(String(searchData.error.info||"検索APIエラー"));
+    const matches=Array.isArray(searchData?.query?.search)?searchData.query.search:[];
+    if(!matches.length){setStatus("autonomyResearchStatus","該当する公開記事が見つかりませんでした。別の言葉で試してください。");return;}
+    const detailUrl=new URL("https://ja.wikipedia.org/w/api.php");
+    detailUrl.search=new URLSearchParams({action:"query",prop:"extracts",explaintext:"1",exintro:"1",exsentences:"5",pageids:matches.slice(0,5).map(item=>item.pageid).join("|"),format:"json",formatversion:"2",origin:"*"}).toString();
+    const detailResponse=await fetch(detailUrl.toString(),{method:"GET",credentials:"omit",headers:{Accept:"application/json"}});
+    if(!detailResponse.ok)throw new Error("記事本文を取得できませんでした（HTTP "+detailResponse.status+"）。");
+    const detailData=await detailResponse.json();
+    if(detailData?.error)throw new Error(String(detailData.error.info||"記事取得APIエラー"));
+    const results=normalizeAutonomyResearchResults(searchData,detailData,query);
+    if(!results.length){setStatus("autonomyResearchStatus","検索結果はありましたが、本文を取得できませんでした。");return;}
+    results.forEach(item=>{
+      const card=document.createElement("div");card.className="growth-item";
+      const title=document.createElement("strong");title.textContent=item.title;
+      const summary=document.createElement("p");summary.className="growth-copy";summary.textContent=item.extract;
+      const source=document.createElement("a");source.href=item.url;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Wikipediaで出典を確認";
+      const add=document.createElement("button");add.textContent="この情報を学習候補にする";
+      add.addEventListener("click",async()=>{
+        if(data.learnings.some(entry=>entry.sourceType==="external_research"&&entry.sourceUrl===item.url)){
+          setStatus("autonomyResearchStatus","この出典はすでに学習候補へ登録されています。");return;
+        }
+        data.learnings.push({text:item.title+"\n"+item.extract,sourceType:"external_research",sourceProvider:"Wikipedia",sourceModel:"MediaWiki Action API",sourceQuestion:query,sourceUrl:item.url,status:"pending",createdAt:new Date().toISOString()});
+        await saveLocal();renderAll();add.disabled=true;add.textContent="学習候補に登録済み";
+        setStatus("autonomyResearchStatus","出典付きの学習候補を追加しました。内容を確認して承認するまではALVISの知識に加わりません。");
+      });
+      card.append(title,summary,source,add);box.appendChild(card);
+    });
+    setStatus("autonomyResearchStatus",results.length+"件の記事を取得しました。内容と出典を確認し、必要なものだけ学習候補にしてください。");
+  }catch(error){setStatus("autonomyResearchStatus","調査に失敗しました: "+(error?.message||String(error))+" オフライン時は利用できません。");}
+  finally{button.disabled=false;button.textContent="公開情報を検索して学習候補を作る";}
+});
+
 $("scanAutonomyIssues").addEventListener("click",async()=>{
   if(!aiEngine){setStatus("autonomyIssueStatus","先にチャット画面でQwen3-4Bを読み込んでください。");return;}
   const button=$("scanAutonomyIssues");button.disabled=true;button.textContent="課題を分析中…";
