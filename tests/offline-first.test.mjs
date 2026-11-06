@@ -47,6 +47,8 @@ assert.equal(japanesePack.analyzeJapaneseOutputQuality("富士山は日本最高
 assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山は日本の最高の山です。").suspiciousPhrases.includes("日本の最高の山"),"unnatural superlative phrase must be detected");
 assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山登りとして有名です。").suspiciousPhrases.includes("富士山登り"),"unnatural climbing phrase must be detected");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("山の斜面には多くの神社があり。").incompleteEnding,true,"continuative あり ending must be detected");
+assert.equal(japanesePack.analyzeJapaneseOutputQuality("山の斜面には多くの神社があり。[出典1]").incompleteEnding,true,"citation marker must not hide an unfinished clause");
+assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。[出典1]"),"富士山は日本最高峰です。","unfinished clause must be removed even when followed by a citation marker");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。"),"富士山は日本最高峰です。","unfinished あり clause must be removed");
 assert.equal(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。山頂には観光客が集まり、登山者は「富士山登り」として有名です。"),"富士山は日本最高峰です。","known malformed sentence must be removed instead of being rewritten into another unsupported claim");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("山の斜面には多くの神社があり。"),"回答が途中で切れてしまったよ。もう一度聞いてね。","an answer containing only an unfinished clause must not be displayed as complete");
