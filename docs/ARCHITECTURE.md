@@ -1,3 +1,10 @@
+## 端末別Qwenモデル選択（v122）
+
+- iPhone Safari: Qwen3-1.7B-q4f16_1-MLC、context_window_size=1024。
+- iPad/その他: Qwen3-4B-q4f16_1-MLC、context_window_size=2048（既存動作を維持）。
+- WebLLM 0.2.87 prebuilt configのvram_required_MBは1.7B=2036.66、4B=3431.59。端末のGPUメモリ上限と実際の使用可能量は異なるため、これは負荷比較の参考値であり、クラッシュ原因の確定値ではない。
+- 4Bの既存キャッシュ・ユーザーデータは削除しない。端末判定はiPhone User-Agentを用いる。iPadOS Safariは既存4Bを維持する。
+
 ## Kokoro/Qwenのメモリ排他制御（v121）
 
 - KokoroJPの公開READMEにはランタイム解放APIが記載されていないため、実装が確認できないdispose/unloadを呼ばない。
