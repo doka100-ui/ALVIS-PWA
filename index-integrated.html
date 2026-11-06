@@ -914,7 +914,7 @@ function renderGrowthPlans(){
 }
 function normalizeAutonomyTaskText(value){
   return String(value||"").normalize("NFKC").toLocaleLowerCase("ja-JP")
-    .replace(/[\\s\\p{P}\\p{S}]+/gu,"");
+    .replace(/[\s\p{P}\p{S}]+/gu,"");
 }
 function findDuplicateAutonomyTask(tasks,goal,action){
   const normalizedGoal=normalizeAutonomyTaskText(goal);
