@@ -1788,7 +1788,9 @@ function analyzeJapaneseOutputQuality(value){
   const repeatedSentence=sentences.some((sentence,index)=>sentences.indexOf(sentence)!==index);
   const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そんなに頑張ってない","そんなに頑張っていない","頑張ってないんですか","頑張っていないんですか","そうyeah","そう yeah"];
   const suspiciousPhrases=awkwardPhrases.filter(phrase=>text.includes(phrase));
-  return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence,suspiciousPhrases,needsRepair:suspiciousLatin.length>0||repeatedSentence||suspiciousPhrases.length>0};
+  // 読点の直後に短い断片だけが残る回答（例：「また、富士山」）を未完了として扱う。
+  const incompleteEnding=/[、,]\s*[^。！？!?]{1,12}$/u.test(text);
+  return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence,suspiciousPhrases,incompleteEnding,needsRepair:suspiciousLatin.length>0||repeatedSentence||suspiciousPhrases.length>0||incompleteEnding};
 }
 
 
@@ -1942,7 +1944,7 @@ async function sendToAlvis(){
     // 短い雑談は出力上限を小さくし、長い崩れた生成が再試行を引き起こす時間を抑える。
     const conversationalMarkers=/(?:ですね|ですよ|ですか|でした|だよね|だよ|かな|かも|なんだ|なの|だね|だな|だった|てる|てた|お疲れ|ありがとう|助かった|ただいま|おかえり|元気|眠い|疲れた|嬉しい|悲しい|困った|楽しみ|すごい|ほんと|本当|そうなんだ|なるほど|いいね|わかった|了解|どうした|何してる|何してた)/u.test(text);
     const isBriefConversationalTurn=text.length<=180&&(conversationalMarkers||/^(?:はい|うん|そう|いや|でも|それで|じゃあ|なるほど|たしかに|ありがとう|了解|わかった)[。！!？?、\s　]*$/u.test(text));
-    const responseTokenLimit=isBriefConversationalTurn?96:512;
+    const responseTokenLimit=isBriefConversationalTurn?96:384;
     const conversationForGeneration=isBriefConversationalTurn
       ?recent.slice(-4).map(item=>({...item,content:String(item.content||"").slice(-200)}))
       :recent;
@@ -2051,7 +2053,7 @@ async function sendToAlvis(){
         reply=extractVisibleAnswer(result.choices?.[0]?.message);
       }
       // 日本語の質問に対して英語主体の回答が返った場合だけ、日本語指定で一度再生成する。
-      if(reply && isLikelyEnglishReply(reply) && /[\u3040-\u30ff\u3400-\u9fff]/.test(text)){
+      if(generationAttempts===1 && reply && isLikelyEnglishReply(reply) && /[\u3040-\u30ff\u3400-\u9fff]/.test(text)){
         setStatus("aiStatus","英語の回答を検出しました。日本語で再生成しています…");
         generationAttempts++;
         result=await aiEngine.chat.completions.create({
@@ -2067,7 +2069,7 @@ async function sendToAlvis(){
         if(japaneseRetry)reply=japaneseRetry;
       }
       // forKey等の内部トークン反復や文字列崩壊を検出したら、履歴を外して一度だけ再生成する。
-      if(reply && isCorruptedModelReply(reply)){
+      if(generationAttempts===1 && reply && isCorruptedModelReply(reply)){
         setStatus("aiStatus","異常な文字列を検出しました。履歴を外して再生成しています…");
         generationAttempts++;
         result=await aiEngine.chat.completions.create({
@@ -2089,7 +2091,7 @@ async function sendToAlvis(){
       }
       // 日本語の混在・反復・不自然な定型句を検出した場合だけ、短い指示で一度だけ修復生成する。
       let japaneseRepairAttempted=false;
-      if(reply && !modelOutputCorrupted && (analyzeJapaneseOutputQuality(reply).needsRepair || analyzeConversationRepetition(reply,data.history).repeated)){
+      if(generationAttempts===1 && reply && !modelOutputCorrupted && (analyzeJapaneseOutputQuality(reply).needsRepair || analyzeConversationRepetition(reply,data.history).repeated)){
         japaneseRepairAttempted=true;
         setStatus("aiStatus","日本語の不自然な表現を検出しました。自然な会話文に整えています…");
         const repairResult=await aiEngine.chat.completions.create({
