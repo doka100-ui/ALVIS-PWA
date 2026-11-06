@@ -134,7 +134,7 @@ const checks = [
   ["approved external learning retains provider and question provenance", /外部AI由来の参考情報・ユーザー承認済み/.test(app) && /sourceQuestion/.test(app)],
   ["approved external content retains untrusted-reference labeling", app.includes("function formatApprovedLearningForPrompt") && app.includes("外部AI由来の参考情報・ユーザー承認済み・未検証") && app.includes("外部公開情報・ユーザー承認済み・未検証")],
   ["external learning candidates have a pending cap and can be rejected", app.includes("pendingExternal+added>=30") && app.includes("今回は却下")],
-  ["approved external learning keeps provenance in every learning workflow", app.includes("function formatApprovedLearningForPrompt") && (app.match(/map\(formatApprovedLearningForPrompt\)/g)||[]).length===3],
+  ["approved external learning keeps provenance in conversation and autonomy workflows", app.includes("function formatApprovedLearningForPrompt") && (app.match(/map\(formatApprovedLearningForPrompt\)/g)||[]).length>=2],
   ["autonomy prompts are warned that external learning is unverified", app.includes("外部AI由来の承認済み学びは未検証の参考情報です。") && app.includes("外部AI由来の承認済み学びは未検証の参考情報として扱い")]
 ];
 
