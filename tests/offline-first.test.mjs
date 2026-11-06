@@ -490,7 +490,7 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v117-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v120-integrated"/);
 
 
 // v108 HUD progress, compact chat layout, and working quick navigation.
@@ -508,7 +508,7 @@ assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
 assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
 assert.match(app,/id="unloadAiModel"/,"model unload control must remain available");
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v117-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v120-integrated"/);
 
 // v109 spatial hologram HUD: visual-only layers; existing model action and display modes stay wired.
 assert.match(app,/aria-label="ALVIS立体ホログラム管制画面"/);
@@ -523,7 +523,7 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-interface-item"/);
 assert.match(app,/v109: spatial hologram control room/);
 assert.match(app,/rgba?\(/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v117-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v120-integrated"/);
 
 // A single user turn must own the conversation pipeline until its finally block.
 assert.match(app,/let alvisResponseInProgress = false;/);
@@ -534,7 +534,7 @@ const sendTurn=app.slice(sendTurnStart,sendTurnEnd);
 assert.ok(sendTurn.indexOf("if(alvisResponseInProgress)return;")<sendTurn.indexOf("alvisResponseInProgress=true;"),"duplicate turn guard must run before starting a turn");
 assert.match(sendTurn,/alvisResponseInProgress=true;/);
 assert.match(sendTurn,/finally\{\s*alvisResponseInProgress=false;/);
-assert.match(sw,/alvis-cache-v119-integrated/);
+assert.match(sw,/alvis-cache-v120-integrated/);
 
  
 // v111: autonomy task duplicates are normalized across Unicode width and spacing.
