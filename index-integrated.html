@@ -2695,6 +2695,7 @@ $("testOnlineAiConnection").addEventListener("click",testOnlineAiGateway);
 $("stopSpeech").addEventListener("click",stopAlvisSpeech);
 $("prepareKokoro").addEventListener("click",prepareKokoroTTS);
 async function previewKokoroVoice(voiceId,button){
+  unlockAlvisAudioFromGesture();
   if(aiEngine||aiLoading){setStatus("voiceStatus","メモリ競合を避けるため、先にQwen3-4Bの「モデルを終了」を押してください。");return;}
   const select=$("kokoroVoice");
   if(!select||!["jf_alpha","jf_gongitsune","jf_nezumi","jf_tebukuro"].includes(voiceId))return;
@@ -2719,7 +2720,7 @@ document.querySelectorAll("[data-kokoro-voice]").forEach(button=>button.addEvent
 function updateKokoroRateLabel(){const rate=Number($("kokoroRate")?.value||1.04);const label=$("kokoroRateValue");if(label)label.textContent=rate===1?"標準":(rate<1?"低め ":"高め ")+rate.toFixed(2)+"倍";if(kokoroAudio)kokoroAudio.playbackRate=rate;}
 $("kokoroRate")?.addEventListener("input",updateKokoroRateLabel);
 $("kokoroRate")?.addEventListener("change",()=>{localStorage.setItem("ALVIS_KOKORO_RATE",$("kokoroRate").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
-$("previewKokoroTuned")?.addEventListener("click",async()=>{if(aiEngine||aiLoading){setStatus("voiceStatus","メモリ競合を避けるため、先にQwen3-4Bの「モデルを終了」を押してください。");return;}const engine=await prepareKokoroTTS();if(engine)await speakKokoro("こんにちは。ALVISです。今日も一緒に、いろいろなことを考えていきましょう。何でも気軽に話してくださいね。");});
+$("previewKokoroTuned")?.addEventListener("click",async()=>{unlockAlvisAudioFromGesture();if(aiEngine||aiLoading){setStatus("voiceStatus","メモリ競合を避けるため、先にQwen3-4Bの「モデルを終了」を押してください。");return;}const engine=await prepareKokoroTTS();if(engine)await speakKokoro("こんにちは。ALVISです。今日も一緒に、いろいろなことを考えていきましょう。何でも気軽に話してくださいね。");});
 $("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
 $("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
 $("kokoroRate").value=localStorage.getItem("ALVIS_KOKORO_RATE")||"1.04";updateKokoroRateLabel();
