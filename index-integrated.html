@@ -1794,13 +1794,23 @@ function analyzeJapaneseOutputQuality(value){
 }
 
 // 未完了の接続語・読点断片が修復後にも残った場合、最後の未完了部分だけを除き、完結した文を残す。
+function repairKnownJapanesePhrases(value){
+  return String(value||"")
+    .replace(/日本の最高の山/gu,"日本最高峰")
+    .replace(/富士山登り/gu,"富士登山");
+}
+
 function trimIncompleteJapaneseEnding(value){
   let text=String(value||"").trim();
   if(!text)return "";
   text=text.replace(/([。！？!?])(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?.*$/u,"$1");
   text=text.replace(/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u,"");
   text=text.replace(/[、,]\s*[^。！？!?]{1,12}$/u,"");
-  text=text.replace(/([。！？!?])[^。！？!?]*(?:あり|おり)[。！？!?]?$/u,"$1");
+  const danglingClause=text.match(/(?:^|([。！？!?]))[^。！？!?]*(?:あり|おり)[。！？!?]?$/u);
+  if(danglingClause){
+    const boundary=danglingClause[1];
+    text=boundary?text.slice(0,danglingClause.index+boundary.length):"";
+  }
   text=text.trim();
   if(!text)return "回答が途中で切れてしまったよ。もう一度聞いてね。";
   if(!/[。！？!?]$/u.test(text))text+="。";
@@ -2133,6 +2143,11 @@ async function sendToAlvis(){
         reply=trimIncompleteJapaneseEnding(reply);
         setStatus("aiStatus","回答の末尾が未完成だったため、完結した文章だけを表示しました。");
       }
+      const finalJapaneseQuality=analyzeJapaneseOutputQuality(reply);
+      if(finalJapaneseQuality.suspiciousPhrases.length){
+        reply="ごめんね。今回は自然な日本語に整えられなかったよ。もう一度聞いてね。";
+        setStatus("aiStatus","不自然な表現が残ったため、安全な短い応答に切り替えました。");
+      }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
       const finalChoice=result?.choices?.[0]||{};
       const usage=result?.usage||{};
@@ -2151,6 +2166,8 @@ async function sendToAlvis(){
       }
     }
     reply=reply.replace(/<think>[\s\S]*?<\/think>/gi,"").replace(/^\s*<think>[\s\S]*$/i,"").trim();
+    // 既知の不自然な定型表現は、修復生成が失敗しても端末内ルールで補正する。
+    reply=repairKnownJapanesePhrases(reply);
     // 最新データを取得していない天気予報の断定文は、回答表示前に必ず除外する。
     reply=suppressUnsupportedWeatherClaims(reply,text);
     // 日本語の質問に対する英語主体の回答が再試行後も残る場合は、そのまま表示しない。
