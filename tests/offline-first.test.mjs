@@ -364,18 +364,20 @@ assert.equal(selectedLearning.sourceQuestion,"富士山");
 
 // Every Qwen inference request must be serialized, and unload must wait for active inference.
 const inferenceGuardStart=app.indexOf("function serializeAlvisInference(");
-const inferenceGuardEnd=app.indexOf("\\nlet CreateMLCEngine",inferenceGuardStart);
+const inferenceGuardEnd=app.indexOf("\nlet CreateMLCEngine",inferenceGuardStart);
 assert.ok(inferenceGuardStart>=0&&inferenceGuardEnd>inferenceGuardStart,"inference serializer must exist before model setup");
 const serializeInference=new Function(app.slice(inferenceGuardStart,inferenceGuardEnd)+"; return serializeAlvisInference;")();
 let activeInferenceCount=0;
 let maximumConcurrentInferenceCount=0;
 let unloadCompleted=false;
+let releaseSlowInference;
+const slowInferenceGate=new Promise(resolve=>{releaseSlowInference=resolve;});
 const fakeEngine={
-  chat:{completions:{create:async({id})=>{
+  chat:{completions:{create:async({id,slow})=>{
     activeInferenceCount++;
     maximumConcurrentInferenceCount=Math.max(maximumConcurrentInferenceCount,activeInferenceCount);
-    await Promise.resolve();
-    await Promise.resolve();
+    if(slow)await slowInferenceGate;
+    else{await Promise.resolve();await Promise.resolve();}
     activeInferenceCount--;
     return {id};
   }}},
@@ -385,7 +387,15 @@ serializeInference(fakeEngine);
 const serializedResults=await Promise.all([1,2,3,4].map(id=>fakeEngine.chat.completions.create({id})));
 assert.deepEqual(serializedResults.map(item=>item.id),[1,2,3,4]);
 assert.equal(maximumConcurrentInferenceCount,1,"Qwen inference must never overlap");
-await fakeEngine.unload();
-assert.equal(unloadCompleted,true,"engine unload must remain available after queued inference");
-assert.match(app,/const engine=serializeAlvisInference\\(loadedEngine\\)/,"loaded Qwen engine must be wrapped before use");
-assert.match(app,/await inferenceQueue\\.catch\\(\\(\\)=>\\{\\}\\)/,"unload must wait for queued inference");
+const slowRequest=fakeEngine.chat.completions.create({id:5,slow:true});
+await Promise.resolve();
+await Promise.resolve();
+const pendingUnload=fakeEngine.unload();
+await Promise.resolve();
+assert.equal(unloadCompleted,false,"unload must wait while inference is active");
+releaseSlowInference();
+assert.deepEqual(await slowRequest,{id:5});
+await pendingUnload;
+assert.equal(unloadCompleted,true,"engine unload must complete after inference finishes");
+assert.match(app,/const engine=serializeAlvisInference\(loadedEngine\)/,"loaded Qwen engine must be wrapped before use");
+assert.match(app,/await inferenceQueue\.catch\(\(\)=>\{\}\)/,"unload must wait for queued inference");
