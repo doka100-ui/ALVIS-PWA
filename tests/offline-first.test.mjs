@@ -193,6 +193,7 @@ assert.match(app,/credentials:"omit"/);
 assert.match(app,/sourceType:"external_research"/);
 assert.match(app,/sourceUrl:item\.url/);
 assert.match(app,/sourceQuestion:query/);
+assert.match(app,/learning\.sourceType==="external_ai"\|\|learning\.sourceType==="external_research"/);
 assert.match(app,/未検証参考情報としてALVISが今後の会話で参照/);
 
 // Dedicated external AI answer review UI
