@@ -48,7 +48,7 @@ assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山は日本の最高
 assert.ok(japanesePack.analyzeJapaneseOutputQuality("富士山登りとして有名です。").suspiciousPhrases.includes("富士山登り"),"unnatural climbing phrase must be detected");
 assert.equal(japanesePack.analyzeJapaneseOutputQuality("山の斜面には多くの神社があり。").incompleteEnding,true,"continuative あり ending must be detected");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("富士山は日本最高峰です。山の斜面には多くの神社があり。"),"富士山は日本最高峰です。","unfinished あり clause must be removed");
-assert.equal(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。富士山登りも人気です。"),"富士山は日本最高峰です。富士登山も人気です。","known awkward Japanese phrases must be repaired deterministically");
+assert.equal(japanesePack.repairKnownJapanesePhrases("富士山は日本の最高の山です。山頂には観光客が集まり、登山者は「富士山登り」として有名です。"),"富士山は日本最高峰です。","known malformed sentence must be removed instead of being rewritten into another unsupported claim");
 assert.equal(japanesePack.trimIncompleteJapaneseEnding("山の斜面には多くの神社があり。"),"回答が途中で切れてしまったよ。もう一度聞いてね。","an answer containing only an unfinished clause must not be displayed as complete");
 assert.match(app,/reply=repairKnownJapanesePhrases\(reply\)/,"deterministic Japanese repair must run before display");
 assert.match(app,/finalJapaneseQuality\.suspiciousPhrases\.length/,"unrepaired awkward phrases must use a safe fallback");
