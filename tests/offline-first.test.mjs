@@ -480,7 +480,7 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v109-integrated"/);
 
 
 // v108 HUD progress, compact chat layout, and working quick navigation.
@@ -498,4 +498,19 @@ assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
 assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
 assert.match(app,/id="unloadAiModel"/,"model unload control must remain available");
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v109-integrated"/);
+
+// v109 spatial hologram HUD: visual-only layers; existing model action and display modes stay wired.
+assert.match(app,/aria-label="ALVIS立体ホログラム管制画面"/);
+assert.match(app,/class="hud-side hud-side-left"/);
+assert.match(app,/class="hud-side hud-side-right"/);
+assert.match(app,/class="hud-projector"/);
+assert.match(app,/class="hud-platform"/);
+assert.match(app,/class="hud-orbit hud-orbit-a"/);
+assert.match(app,/class="hud-core"><span>ALVIS<\/span><small>PERSONAL AI SYSTEM<\/small>/);
+assert.match(app,/hudAiPercent/);
+assert.match(app,/id="hudAiAction"/);
+assert.match(app,/class="hud-interface-item"/);
+assert.match(app,/--v109: spatial hologram control room/);
+assert.match(app,/rgba?\(/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v109-integrated"/);
