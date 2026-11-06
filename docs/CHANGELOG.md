@@ -827,3 +827,8 @@
 - 既知の不自然表現が含まれても回答全体を拒否せず、該当する一文だけを除外するよう修正。
 - 「山の斜面には多くの神社があり」を検出対象から外し、該当文を局所的に除去。残った完結文はそのまま表示する。
 - 回帰テスト追加。Service Worker cache: alvis-cache-v96-integrated。
+
+### v96検証結果
+- 最新developmentの offline-first.test.mjs 全263アサーションを実行し成功。
+- ユーザー提示の富士山回答パターンで、既知の不自然な一文だけが除外され、残りの完結文と出典マーカーが維持されることを確認。最終品質判定も正常。
+- アプリのインラインJavaScript構文とService Worker v96を確認。iPad Safari実機・GitHub Actionsは未確認。
