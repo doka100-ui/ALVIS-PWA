@@ -484,7 +484,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 
 
 /* v129: animated precision rings and micro-detail */
-.alvis-reference-scene .ref-orbit{transform-box:view-box;transform-origin:204px 180px;will-change:transform}
+.alvis-reference-scene .ref-orbit{transform-box:view-box;transform-origin:204px 155px;will-change:transform}
 .alvis-reference-scene .ref-orbit-slow{animation:alvisOrbitCW 42s linear infinite}
 .alvis-reference-scene .ref-orbit-fast{animation:alvisOrbitCCW 29s linear infinite}
 .alvis-reference-scene .ref-base-rotor{animation:alvisBaseCW 18s linear infinite}
@@ -564,6 +564,12 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 #appPanel .display-dock *{
   filter:none!important;
 }
+
+/* v137: align globe and orbit cluster to the supplied ALVIS hologram reference */
+.alvis-reference-scene #globeAssembly{transform-box:view-box;transform-origin:204px 141px}
+.alvis-reference-scene #natural-earth-globe{fill:#69d7ff;fill-opacity:.78;stroke:#d8f8ff;stroke-opacity:.78;stroke-width:.5}
+.alvis-reference-scene #globeAssembly>circle:first-of-type{opacity:.9}
+.alvis-reference-scene .ref-orbit{transform-origin:204px 155px}
 </style>
 </head>
 <body>
@@ -630,7 +636,10 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <path d="M145 35V55M281 35V55M154 38V53M272 38V53" stroke="#38caff" stroke-width=".7" opacity=".55"/>
 <path d="M153 40L153 151M273 40L273 151" stroke="#36bfff" stroke-width=".7" opacity=".16"/>
 <path d="M174 41V278L202 300L224 278V41" fill="url(#beam)" opacity=".8"/>
-<path d="M204 39V297" stroke="#55dfff" stroke-width="1" opacity=".5"/>
+<path d="M204 39V291" stroke="#35caff" stroke-width="9" opacity=".055"/>
+<path d="M204 39V291" stroke="#55dfff" stroke-width="2.2" opacity=".62"/>
+<path d="M204 39V291" stroke="#d7fbff" stroke-width=".65" opacity=".92"/>
+<path d="M198 42V285M210 42V285" stroke="#42cfff" stroke-width=".55" opacity=".2"/>
 <!-- left radar -->
 <g transform="translate(77 84)" fill="none" stroke="#46d8ff">
 <circle r="27" stroke-width="1.2" opacity=".85"/><circle r="22" stroke-width=".7" opacity=".8"/><circle r="15" stroke-width=".6" opacity=".5"/><circle r="7" stroke-width=".7" opacity=".65"/>
@@ -664,6 +673,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  <circle cx="23" cy="117" r=".8"/><circle cx="386" cy="139" r=".8"/><circle cx="18" cy="322" r=".8"/>
  <circle cx="391" cy="323" r=".8"/><circle cx="115" cy="35" r=".7"/><circle cx="311" cy="35" r=".7"/>
 </g>
+<g id="globeAssembly" transform="translate(0 -25)">
 <!-- globe atmosphere -->
 <circle cx="204" cy="166" r="94" fill="url(#globeGlow)"/>
 <circle cx="204" cy="166" r="82" fill="url(#globeFill)" stroke="#baf5ff" stroke-opacity=".9" stroke-width="1.15"/>
@@ -756,6 +766,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  <circle cx="80" cy="170" r="1.7" fill="#a8f2ff"/><circle cx="327" cy="176" r="1.5" fill="#a8f2ff"/>
  <circle cx="274" cy="145" r="1.2" fill="#a8f2ff"/><circle cx="120" cy="206" r="1.1" fill="#a8f2ff"/>
  <circle cx="110" cy="145" r="1.1" fill="#e3fbff"/><circle cx="294" cy="210" r="1.2" fill="#e3fbff"/>
+</g>
 </g>
 <!-- title -->
 <text x="204" y="181" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="1.4" fill="#e6fbff">ALVIS</text>
