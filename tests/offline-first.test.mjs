@@ -438,3 +438,20 @@ await pendingUnload;
 assert.equal(unloadCompleted,true,"engine unload must complete after inference finishes");
 assert.match(app,/const engine=serializeAlvisInference\(loadedEngine\)/,"loaded Qwen engine must be wrapped before use");
 assert.match(app,/await inferenceQueue\.catch\(\(\)=>\{\}\)/,"unload must wait for queued inference");
+
+
+// ALVIS dual display mode foundation: UI preference is separate from encrypted vault data.
+assert.match(app,/id="jarvisModeButton"/);
+assert.match(app,/id="avatarModeButton"/);
+assert.match(app,/class="mode-stage jarvis-stage"/);
+assert.match(app,/class="mode-stage avatar-stage"/);
+assert.match(app,/function applyAlvisDisplayMode\(mode,save=true\)/);
+assert.match(app,/const ALVIS_DISPLAY_MODE_KEY="ALVIS_DISPLAY_MODE"/);
+assert.match(app,/localStorage\.setItem\(ALVIS_DISPLAY_MODE_KEY,safeMode\)/);
+assert.match(app,/localStorage\.getItem\(ALVIS_DISPLAY_MODE_KEY\)/);
+assert.match(app,/aria-pressed/);
+assert.match(app,/#chatPage\\\[data-display-mode="jarvis"\\\] \\.avatar-stage/);
+assert.match(app,/ここに3Dアバターを表示する準備をしています/);
+assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
+assert.match(app,/ALVIS_ENCRYPTED_V1/);
+assert.match(app,/const CACHE_NAME = "alvis-cache-v102-integrated"/);
