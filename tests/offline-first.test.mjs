@@ -295,7 +295,7 @@ assert.match(app,/\.slice\(0,500\)/);
 assert.match(app, /content:activePromptWithJapanesePack/);
 assert.match(app, /join\("\\n"\)/);
 const compactPromptStart=app.indexOf("function buildCompactAlvisSystemPrompt(");
-const compactPromptEnd=app.indexOf("\\nfunction buildCompactConversationVariationGuidance",compactPromptStart);
+const compactPromptEnd=app.indexOf("\nfunction buildCompactConversationVariationGuidance",compactPromptStart);
 assert.ok(compactPromptStart>=0&&compactPromptEnd>compactPromptStart,"compact system prompt builder must exist");
 const buildCompactAlvisSystemPrompt=new Function(app.slice(compactPromptStart,compactPromptEnd)+"; return buildCompactAlvisSystemPrompt;")();
 const compactBasePrompt=buildCompactAlvisSystemPrompt("2026年11月6日（金）","12:00",false,false);
@@ -308,7 +308,7 @@ const compactResearchPrompt=buildCompactAlvisSystemPrompt("2026年11月6日（�
 assert.match(compactResearchPrompt,/外部資料は承認済みでも未検証/);
 assert.match(compactResearchPrompt,/根拠にした文だけ\\[出典N\\]/);
 const compactVariationStart=app.indexOf("function buildCompactConversationVariationGuidance(");
-const compactVariationEnd=app.indexOf("\\nfunction buildContextualQuery",compactVariationStart);
+const compactVariationEnd=app.indexOf("\nfunction buildContextualQuery",compactVariationStart);
 assert.ok(compactVariationStart>=0&&compactVariationEnd>compactVariationStart,"compact variation guidance must exist");
 const buildCompactConversationVariationGuidance=new Function("analyzeJapaneseIntent",app.slice(compactVariationStart,compactVariationEnd)+"; return buildCompactConversationVariationGuidance;")(japanesePack.analyzeJapaneseIntent);
 const compactEmotionGuidance=buildCompactConversationVariationGuidance("今日は疲れた",[{role:"alvis",text:"今日は本当に大変だったね。"}]);
