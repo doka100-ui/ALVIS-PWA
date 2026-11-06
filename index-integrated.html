@@ -313,6 +313,28 @@ let syncBusy = false;
 let lastLocalChange = 0;
 let aiEngine = null;
 let aiLoading = false;
+
+// 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
+// unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
+function serializeAlvisInference(engine){
+  const completions=engine?.chat?.completions;
+  if(!completions||typeof completions.create!=="function")throw new Error("Qwen3-4Bの生成機能を確認できません。");
+  const originalCreate=completions.create.bind(completions);
+  let inferenceQueue=Promise.resolve();
+  completions.create=(...args)=>{
+    const request=inferenceQueue.then(()=>originalCreate(...args));
+    inferenceQueue=request.then(()=>undefined,()=>undefined);
+    return request;
+  };
+  if(typeof engine.unload==="function"){
+    const originalUnload=engine.unload.bind(engine);
+    engine.unload=async(...args)=>{
+      await inferenceQueue.catch(()=>{});
+      return originalUnload(...args);
+    };
+  }
+  return engine;
+}
 let CreateMLCEngine = null;
 let alvisServiceWorkerReady = Promise.resolve(false);
 
@@ -1314,12 +1336,13 @@ $("loadAiModel").addEventListener("click",async()=>{
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
       CreateMLCEngine=webllm.CreateMLCEngine;
     }
-    const engine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
+    const loadedEngine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
       initProgressCallback:p=>{
         const percent=typeof p.progress==="number"?Math.round(p.progress*100):"";
         setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
       }
     });
+    const engine=serializeAlvisInference(loadedEngine);
     // 読み込み中にロックされた場合、エンジンを残さず解放する。
     if(!unlocked){
       try{await engine.unload();}catch(cleanupError){}
