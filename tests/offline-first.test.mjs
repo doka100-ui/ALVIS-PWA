@@ -529,7 +529,7 @@ assert.match(sw,/alvis-cache-v110-integrated/);
  
 // v111: autonomy task duplicates are normalized across Unicode width and spacing.
 const autonomyHelperStart=app.indexOf("function normalizeAutonomyTaskText(");
-const autonomyHelperEnd=app.indexOf("\\nfunction parseAutonomyGoalProposal",autonomyHelperStart);
+const autonomyHelperEnd=app.indexOf("\nfunction parseAutonomyGoalProposal",autonomyHelperStart);
 assert.ok(autonomyHelperStart>=0&&autonomyHelperEnd>autonomyHelperStart,"autonomy task normalization helpers must exist");
 const autonomyHelpers=new Function(app.slice(autonomyHelperStart,autonomyHelperEnd)+"; return {normalizeAutonomyTaskText,findDuplicateAutonomyTask};")();
 assert.equal(autonomyHelpers.normalizeAutonomyTaskText(" ＡＬＶＩＳ　 成長計画！ "),"alvis成長計画","task text normalization must fold width, spaces, and punctuation");
@@ -538,5 +538,5 @@ assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の文脈理解を強化","直近の会話を確認する。"),0,"punctuation-only task variation must be found");
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の文脈理解を強化","別の検証を行う"),-1,"a genuinely different action must remain registrable");
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"別の目標","直近の会話を確認する"),-1,"a different goal must remain registrable");
-assert.equal((app.match(/findDuplicateAutonomyTask\\(data\\.autonomyTasks,goal,action\\)!==-1/g)||[]).length,2,"both autonomy task registration paths must use normalized duplicate detection");
+assert.equal((app.match(/findDuplicateAutonomyTask\(data\.autonomyTasks,goal,action\)!==-1/g)||[]).length,2,"both autonomy task registration paths must use normalized duplicate detection");
 assert.match(sw,/alvis-cache-v111-integrated/);
