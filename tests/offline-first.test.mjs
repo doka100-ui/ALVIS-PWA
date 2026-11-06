@@ -29,6 +29,17 @@ assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用�
 assert.ok(app.includes("聞かれたことに直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
 assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"emotion fallback must remain active");
+assert.match(send,/const responseTokenLimit=isBriefConversationalTurn\?64:192/,"local inference output is capped to reduce iPad latency and GPU pressure");
+assert.match(send,/recent\.slice\(-6\)\.map\(item=>\(\{\.\.\.item,content:String\(item\.content\|\|""\)\.slice\(-700\)\}\)\)/,"normal inference history is bounded");
+const metaStart=app.indexOf("function isInternalMetaReply(");
+const metaEnd=app.indexOf("\\nfunction isCorruptedModelReply(",metaStart);
+assert.ok(metaStart>=0&&metaEnd>metaStart,"internal monologue detector must exist");
+const internalMetaDetector=new Function(app.slice(metaStart,metaEnd)+"; return isInternalMetaReply;")();
+const leakedMonologue="SYNC しています。それから、ユーザーがどんなことを話そうとしているのか、今一度確認してみます。";
+assert.equal(internalMetaDetector(leakedMonologue),true,"internal planning and sync commentary must be detected");
+assert.equal(internalMetaDetector("こんにちは。"),false,"normal greeting must not be flagged");
+assert.match(send,/if\(generationAttempts===1 && reply && isInternalMetaReply\(reply\)\)[\s\S]*?modelOutputCorrupted=true/,"internal monologue must be rejected without a slow second generation");
+
 
 // Offline Japanese language foundation: intent, tense, register, phrase retrieval and diagnostics.
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
