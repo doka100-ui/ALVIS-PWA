@@ -609,3 +609,5 @@ ALVIS自身の名前はALVIS（アルヴィス）を固定基本情報として�
 - evidenceは実行メモに明記された内容だけ。記載がない場合は根拠なしと明示し、成功を捏造しない。confidenceは自己評価であり外部検証とは区別する。
 - lessonは既存のdata.learningsへpendingで追加し、ユーザー承認後のみapproved学習として将来の目標計画へ渡す。
 - 旧データはretrospectiveフィールドなしでも従来どおり表示。新しいモデル・ネットワーク・保存形式の変更なし。
+
+- v81追加調整: 課題スキャンと自律目標プランナーのコンテキストへtask.retrospectiveを渡し、outcome/evidence/nextExperiment/confidenceを次サイクルの判断材料にする。blocked/unclearを成功扱いしない指示を追加。
