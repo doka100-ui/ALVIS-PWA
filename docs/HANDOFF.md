@@ -740,3 +740,11 @@
 - 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / CHANGELOG / ARCHITECTURE。
 - 次: Node.jsテストとGitHub Actionsの成功を確認。その後iPad Safariで成長計画を開き、Qwen3-4Bをロードして「自分で次の目標を立てる」を一度実行。提案が画面に表示されることだけを確認し、登録は内容を見てから。
 - 調査機能は別工程。現時点の自律目標提案はローカルの記録とモデル知識を使うもので、最新のWeb情報を自動検索するものではない。
+
+
+## 2026-11-06 — 自律学習振り返り v81
+- 完了タスクの「AIで学習を振り返る」は構造化JSONを生成。結果（成功/一部達成/阻害/判断不能）、根拠、学び、次の検証、確信度を表示。
+- 根拠はタスク実行メモ内に限定。根拠不在時はその旨を表示。学びはpending候補として保存し、ユーザー承認前は承認済み学習として使わない。
+- 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / docs。
+- 次: Node.js回帰テスト・GitHub Actions確認。iPad Safariで既存の完了済みタスクを1件選び「AIで学習を振り返る」を実行、根拠と確信度が表示されることを確認する。
+- これは経験と承認済み記憶を用いたシステム層の継続改善であり、Qwen3-4Bのモデル重み自体を学習・更新する機能ではない。
