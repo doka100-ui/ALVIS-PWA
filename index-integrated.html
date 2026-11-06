@@ -1400,6 +1400,7 @@ function speakAlvis(text,options={}){
     if(kokoroTts){speakKokoro(text);return;}
     speakKokoro(text);return;
   }
+  if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
   if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
   const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
