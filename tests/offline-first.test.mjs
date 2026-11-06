@@ -618,8 +618,8 @@ assert.match(sw,/alvis-cache-v122-integrated/);
 
 // v121: Kokoro and Qwen must not be initialized together on memory-constrained phones.
 // Login reuses the cached greeting audio only; it never loads the Kokoro inference runtime.
-assert.match(app,/if\(aiEngine\|\|aiLoading\)\{setStatus\("voiceStatus","Qwen3-4Bの使用中はKokoroを同時に起動できません。/);
-assert.match(app,/if\(kokoroTts\|\|kokoroLoading\)\{[\s\S]*?ページを再読み込みしてからQwen3-4Bだけを起動/);
+assert.match(app,/if\(aiEngine\|\|aiLoading\)\{setStatus\("voiceStatus","ローカルAIモデルの使用中はKokoroを同時に起動できません。/);
+assert.match(app,/if\(kokoroTts\|\|kokoroLoading\)\{[\s\S]*?ページを再読み込みしてからAIモデルだけを起動/);
 assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?端末標準音声で読み上げます/);
 assert.match(app,/async function playKokoroBlob\(blob,clean\)/);
 assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);
