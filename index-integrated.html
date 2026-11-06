@@ -330,6 +330,128 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 @media(prefers-reduced-motion:reduce){.hud-globe-map{filter:none}}
 /* end v126 */
 
+
+/* v127: match the reference image's full composition, not just its palette */
+.display-dock .mode-stage.jarvis-stage{
+  min-height:390px;
+  overflow:hidden;
+  border:1px solid #164a70;
+  background:
+    radial-gradient(ellipse at 50% 47%,#0b4b7c 0%,#062744 28%,#031426 57%,#01050d 100%);
+  box-shadow:inset 0 0 60px #020817,0 0 30px #0284c722;
+}
+.display-dock .mode-stage.jarvis-stage:before{
+  opacity:.22;
+  background-image:
+    linear-gradient(#38bdf81c 1px,transparent 1px),
+    linear-gradient(90deg,#38bdf81c 1px,transparent 1px),
+    radial-gradient(ellipse at 50% 48%,transparent 0 34%,#38bdf81c 35%,transparent 65%);
+  background-size:28px 28px,28px 28px,100% 100%;
+  mask-image:radial-gradient(ellipse at center,#000 8%,transparent 86%);
+}
+.display-dock .mode-stage.jarvis-stage:after{
+  opacity:.28;
+  background:repeating-linear-gradient(180deg,transparent 0 3px,#8beaff08 4px 5px);
+}
+.display-dock .hud-side{
+  align-self:stretch;
+  margin-block:16px 24px;
+  border:0;
+  border-radius:0;
+  clip-path:none;
+  padding:12px 8px;
+  background:linear-gradient(90deg,#06182b33,#082b4855 50%,#06182b33);
+  box-shadow:none;
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+}
+.display-dock .hud-side:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  border-top:1px solid #3fc9f477;border-bottom:1px solid #3fc9f433;
+  background:linear-gradient(135deg,#8beaff12,transparent 28%,transparent 72%,#8beaff08);
+  clip-path:polygon(0 7%,12% 0,100% 0,100% 100%,0 100%);
+}
+.display-dock .hud-side-left:after{
+  content:"";position:absolute;left:7px;bottom:17px;width:calc(100% - 14px);height:48px;pointer-events:none;
+  background:
+   linear-gradient(to top,#38bdf8aa 0 38%,transparent 38%) 0 100%/7% 100%,
+   linear-gradient(to top,#38bdf8cc 0 72%,transparent 72%) 14% 100%/7% 100%,
+   linear-gradient(to top,#38bdf877 0 52%,transparent 52%) 28% 100%/7% 100%,
+   linear-gradient(to top,#38bdf8bb 0 88%,transparent 88%) 42% 100%/7% 100%,
+   linear-gradient(to top,#38bdf888 0 62%,transparent 62%) 56% 100%/7% 100%,
+   linear-gradient(to top,#38bdf8cc 0 78%,transparent 78%) 70% 100%/7% 100%,
+   linear-gradient(to top,#38bdf899 0 45%,transparent 45%) 84% 100%/7% 100%;
+  background-repeat:no-repeat;
+  border-bottom:1px solid #38bdf877;
+  filter:drop-shadow(0 0 4px #0ea5e9);
+}
+.display-dock .hud-side-right:after{
+  content:"";position:absolute;right:7px;bottom:17px;width:calc(100% - 14px);height:52px;pointer-events:none;
+  background:
+   linear-gradient(to top,#38bdf899 0 46%,transparent 46%) 0 100%/8% 100%,
+   linear-gradient(to top,#38bdf8cc 0 84%,transparent 84%) 17% 100%/8% 100%,
+   linear-gradient(to top,#38bdf877 0 61%,transparent 61%) 34% 100%/8% 100%,
+   linear-gradient(to top,#38bdf8bb 0 94%,transparent 94%) 51% 100%/8% 100%,
+   linear-gradient(to top,#38bdf888 0 70%,transparent 70%) 68% 100%/8% 100%,
+   linear-gradient(to top,#38bdf8cc 0 54%,transparent 54%) 85% 100%/8% 100%;
+  background-repeat:no-repeat;border-bottom:1px solid #38bdf877;filter:drop-shadow(0 0 4px #0ea5e9);
+}
+.display-dock .hud-side-left .hud-panel-heading:before{
+  content:"";display:block;position:absolute;top:38px;left:50%;width:48px;height:48px;transform:translateX(-50%);
+  border:1px solid #5edaff99;border-radius:50%;
+  background:radial-gradient(circle at center,transparent 0 22%,#38bdf822 23% 24%,transparent 25% 48%,#38bdf866 49% 51%,transparent 52%),conic-gradient(from 20deg,transparent 0 12%,#38bdf899 13% 14%,transparent 15% 48%,#38bdf866 49% 50%,transparent 51%);
+  box-shadow:0 0 12px #0ea5e955,inset 0 0 10px #0ea5e933;
+}
+.display-dock .hud-center{min-height:330px}
+.display-dock .hud-core{
+  width:min(27vw,248px);min-width:180px;
+  background:radial-gradient(circle at 36% 26%,#d8fbff55,#168bc244 18%,#075080 47%,#02162d 78%,#010711 100%);
+  box-shadow:0 0 22px #38bdf8bb,0 0 68px #0284c777,inset 0 0 40px #67e8f977,inset -22px -18px 38px #020617dd;
+}
+.display-dock .hud-globe-map{opacity:.96;filter:drop-shadow(0 0 9px #38bdf899)}
+.display-dock .hud-core:before{
+  inset:3%;border:1px solid #c6f6ffbb;
+  background:repeating-linear-gradient(0deg,transparent 0 13px,#b8f4ff20 14px 15px),repeating-linear-gradient(90deg,transparent 0 15px,#b8f4ff1c 16px 17px);
+  box-shadow:0 0 17px #22d3ee88,inset 0 0 22px #38bdf855;
+}
+.display-dock .hud-core:after{inset:10%;border:1px solid #a5f3fc99;box-shadow:inset 0 0 28px #0ea5e988,0 0 18px #22d3ee66}
+.display-dock .hud-core span{font-size:clamp(18px,3vw,26px);font-weight:500;letter-spacing:.18em;text-shadow:0 0 10px #fff,0 0 25px #38bdf8,0 0 42px #0ea5e9}
+.display-dock .hud-core small{top:64%;font-size:6px;letter-spacing:.16em}
+.display-dock .hud-orbit{border-width:1px;box-shadow:0 0 12px #38bdf866}
+.display-dock .hud-orbit-a{width:132%;height:48%;border-color:#a8efffdd}
+.display-dock .hud-orbit-b{width:122%;height:67%;border-color:#38bdf8bb}
+.display-dock .hud-orbit-c{width:145%;height:31%;border-color:#d8fbff77}
+.display-dock .hud-projector{top:0;width:138px;height:26px;border-color:#a5f3fcdd;background:radial-gradient(ellipse,#38bdf877,#071d34 72%);box-shadow:0 0 20px #0ea5e9aa}
+.display-dock .hud-projector i{height:106px;box-shadow:0 0 12px #38bdf8}
+.display-dock .hud-beam{top:8%;height:80%;width:46%;background:linear-gradient(180deg,#38bdf800,#38bdf814 25%,#38bdf822 65%,#fb718533 94%,transparent)}
+.display-dock .hud-platform{bottom:1%;height:60px;width:112%;background:radial-gradient(ellipse at center,#38bdf855 0%,#0ea5e933 36%,transparent 72%);box-shadow:0 12px 25px -12px #38bdf8}
+.display-dock .hud-platform:before{width:88%;height:34px;border-color:#8beaffdd;box-shadow:0 0 16px #0ea5e988}
+.display-dock .hud-platform:after{width:66%;height:28px;border-color:#67e8f9bb}
+.display-dock .hud-platform i{width:42%;height:22px;border-color:#fb7185dd;box-shadow:0 0 15px #fb718588}
+.display-dock .hud-platform b{height:48px;border-color:#a5f3fcbb;box-shadow:0 0 10px #38bdf8}
+.display-dock .hud-platform span{background:#fff1f2;box-shadow:0 0 14px 5px #fb7185}
+@media(max-width:760px){
+ .display-dock .mode-stage.jarvis-stage{min-height:340px!important;grid-template-columns:66px minmax(0,1fr) 66px!important;padding:16px 3px 34px!important}
+ .display-dock .hud-side{margin-block:14px 22px;padding:9px 4px}
+ .display-dock .hud-side-left .hud-panel-heading:before{top:31px;width:38px;height:38px}
+ .display-dock .hud-side-left:after,.display-dock .hud-side-right:after{height:36px;bottom:12px}
+ .display-dock .hud-center{min-height:290px!important}
+ .display-dock .hud-core{width:min(47vw,194px)!important;min-width:136px!important}
+ .display-dock .hud-orbit-a{width:142%!important;height:48%!important}
+ .display-dock .hud-orbit-b{width:132%!important;height:66%!important}
+ .display-dock .hud-orbit-c{width:155%!important;height:31%!important}
+ .display-dock .hud-projector{width:92px;height:21px}
+ .display-dock .hud-projector i{height:82px}
+ .display-dock .hud-platform{height:47px;width:118%}
+ .display-dock .hud-center-caption{font-size:5px;letter-spacing:.04em}
+}
+@media(max-width:390px){
+ .display-dock .mode-stage.jarvis-stage{grid-template-columns:58px minmax(0,1fr) 58px!important;min-height:326px!important}
+ .display-dock .hud-center{min-height:276px!important}
+ .display-dock .hud-core{width:min(46vw,178px)!important;min-width:128px!important}
+}
+@media(prefers-reduced-motion:reduce){.display-dock .hud-orbit-a,.display-dock .hud-orbit-b{animation:none!important}}
+/* end v127 reference composition */
+
 </style>
 </head>
 <body>
