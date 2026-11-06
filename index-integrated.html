@@ -926,6 +926,18 @@ function findDuplicateAutonomyTask(tasks,goal,action){
   );
 }
 
+function getAutonomyTaskMetadata(draft,goal,action){
+  const matchesSource=String(draft?.dataset?.sourceGoal||"").trim()===String(goal||"").trim() &&
+    String(draft?.dataset?.sourceAction||"").trim()===String(action||"").trim();
+  if(!matchesSource)return {reason:"",successCriteria:"",priority:"medium",origin:"user_goal"};
+  return {
+    reason:String(draft.dataset.goalReason||""),
+    successCriteria:String(draft.dataset.successCriteria||""),
+    priority:["high","medium","low"].includes(draft.dataset.priority)?draft.dataset.priority:"medium",
+    origin:draft.dataset.origin==="self_goal"?"self_goal":"user_goal"
+  };
+}
+
 function parseAutonomyGoalProposal(value){
   const output=String(value||"").trim();
   const start=output.indexOf("{"),end=output.lastIndexOf("}");
@@ -2672,6 +2684,8 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
     $("autonomyTaskDraft").dataset.successCriteria=proposal.successCriteria;
     $("autonomyTaskDraft").dataset.priority=proposal.priority;
     $("autonomyTaskDraft").dataset.origin="self_goal";
+    $("autonomyTaskDraft").dataset.sourceGoal=proposal.goal;
+    $("autonomyTaskDraft").dataset.sourceAction=proposal.firstAction;
   }catch(error){setStatus("autonomyCycleStatus","次の目標を作成できませんでした: "+(error?.message||String(error)));}
   finally{button.disabled=false;button.textContent="自分で次の目標を立てる";}
 });
@@ -2692,15 +2706,17 @@ $("saveAutonomyTask").addEventListener("click",async()=>{
   const goal=$("autonomyGoal").value.trim(),action=$("autonomyTaskDraft").value.trim();
   if(!goal||!action){alert("目標と次の行動を入力してください。");return;}
   if(findDuplicateAutonomyTask(data.autonomyTasks,goal,action)!==-1){alert("同じ内容のタスクが登録済みです（全角・半角や空白の違いも確認します）。");return;}
+  const taskMetadata=getAutonomyTaskMetadata($("autonomyTaskDraft"),goal,action);
   data.autonomyTasks.push({title:action.slice(0,60),goal,action,status:"proposed",
-    reason:$("autonomyTaskDraft").dataset.goalReason||"",
-    successCriteria:$("autonomyTaskDraft").dataset.successCriteria||"",
-    priority:$("autonomyTaskDraft").dataset.priority||"medium",
-    origin:$("autonomyTaskDraft").dataset.origin||"user_goal",
+    reason:taskMetadata.reason,
+    successCriteria:taskMetadata.successCriteria,
+    priority:taskMetadata.priority,
+    origin:taskMetadata.origin,
     createdAt:new Date().toISOString()});
   $("autonomyTaskDraft").value="";
   delete $("autonomyTaskDraft").dataset.goalReason;delete $("autonomyTaskDraft").dataset.successCriteria;
   delete $("autonomyTaskDraft").dataset.priority;delete $("autonomyTaskDraft").dataset.origin;
+  delete $("autonomyTaskDraft").dataset.sourceGoal;delete $("autonomyTaskDraft").dataset.sourceAction;
   setStatus("autonomyStatus","タスクを登録しました。開始ボタンを押すまで実行されません。");await saveLocal();renderAll();
 });
 
