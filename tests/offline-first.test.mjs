@@ -592,9 +592,11 @@ assert.match(app,/\},transitionDuration\+120\);/);
 assert.match(sw,/alvis-cache-v117-integrated/);
 
 
-// v118: provide a direct user-gesture fallback for browsers that block delayed speech.
+// v119: manual welcome playback is always available, and explicit standard-voice fallback overrides Kokoro.
 assert.match(app,/id="welcomeVoiceButton"/);
-assert.match(app,/welcomeButton\.onclick=\(\)=>\{if\(unlocked\)speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\);\};/);
-assert.match(app,/if\(welcomeButton\)welcomeButton\.classList\.remove\("hidden"\);/);
-assert.match(app,/if\(clean==="おかえりなさい"\)\$\("welcomeVoiceButton"\)\?\.classList\.remove\("hidden"\)/);
-assert.match(sw,/alvis-cache-v118-integrated/);
+assert.match(app,/welcomeButton\.classList\.remove\("hidden"\);/);
+assert.match(app,/welcomeButton\.onclick=\(\)=>\{[\s\S]*?speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\);/);
+assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackToStandard\)\{/);
+assert.ok(app.indexOf('if\($("ttsEngine")?.value==="kokoro"&&!options.fallbackToStandard\)')<app.indexOf('if(kokoroAudio){kokoroAudio.pause()'),"explicit standard fallback must bypass Kokoro");
+assert.match(app,/utterance\.onerror=event=>\{[\s\S]*?if\(clean==="おかえりなさい"\)\$\("welcomeVoiceButton"\)\?\.classList\.remove\("hidden"\);\s*\};/);
+assert.match(sw,/alvis-cache-v119-integrated/);
