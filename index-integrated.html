@@ -912,6 +912,20 @@ function renderGrowthPlans(){
     card.appendChild(actions);container.appendChild(card);
   });
 }
+function normalizeAutonomyTaskText(value){
+  return String(value||"").normalize("NFKC").toLocaleLowerCase("ja-JP")
+    .replace(/[\\s\\p{P}\\p{S}]+/gu,"");
+}
+function findDuplicateAutonomyTask(tasks,goal,action){
+  const normalizedGoal=normalizeAutonomyTaskText(goal);
+  const normalizedAction=normalizeAutonomyTaskText(action);
+  if(!normalizedGoal||!normalizedAction)return -1;
+  return (Array.isArray(tasks)?tasks:[]).findIndex(task=>
+    normalizeAutonomyTaskText(task?.goal)===normalizedGoal &&
+    normalizeAutonomyTaskText(task?.action)===normalizedAction
+  );
+}
+
 function parseAutonomyGoalProposal(value){
   const output=String(value||"").trim();
   const start=output.indexOf("{"),end=output.lastIndexOf("}");
@@ -979,7 +993,7 @@ function renderAutonomyIssues(){
       const adopt=document.createElement("button");adopt.textContent="課題を採用してタスク化";
       adopt.addEventListener("click",async()=>{
         const goal=issue.title||"発見した改善課題",action=issue.nextAction||issue.reason||goal;
-        if(data.autonomyTasks.some(task=>task.goal===goal&&task.action===action)){alert("同じタスクが登録済みです。");return;}
+        if(findDuplicateAutonomyTask(data.autonomyTasks,goal,action)!==-1){alert("同じ内容のタスクが登録済みです（全角・半角や空白の違いも確認します）。");return;}
         data.autonomyTasks.push({title:action.slice(0,60),goal,action,status:"proposed",priority:issue.priority,sourceIssue:issue.title,createdAt:new Date().toISOString()});
         issue.status="adopted";issue.adoptedAt=new Date().toISOString();await saveLocal();renderAll();
       });actions.appendChild(adopt);
@@ -2677,7 +2691,7 @@ $("proposeAutonomyTask").addEventListener("click",async()=>{
 $("saveAutonomyTask").addEventListener("click",async()=>{
   const goal=$("autonomyGoal").value.trim(),action=$("autonomyTaskDraft").value.trim();
   if(!goal||!action){alert("目標と次の行動を入力してください。");return;}
-  if(data.autonomyTasks.some(task=>task.goal===goal&&task.action===action)){alert("同じタスクが登録済みです。");return;}
+  if(findDuplicateAutonomyTask(data.autonomyTasks,goal,action)!==-1){alert("同じ内容のタスクが登録済みです（全角・半角や空白の違いも確認します）。");return;}
   data.autonomyTasks.push({title:action.slice(0,60),goal,action,status:"proposed",
     reason:$("autonomyTaskDraft").dataset.goalReason||"",
     successCriteria:$("autonomyTaskDraft").dataset.successCriteria||"",
