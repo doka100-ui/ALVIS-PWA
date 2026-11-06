@@ -1,3 +1,12 @@
+
+## 2026-11-07 — v116 控えめなシネマティック起動演出
+
+- Branch: `development`
+- Files: `index-integrated.html`, `service-worker.js`, `tests/offline-first.test.mjs`, `docs/HANDOFF.md`, `docs/ARCHITECTURE.md`, `docs/CHANGELOG.md`
+- Purpose: v115の派手な星芒・放射光線・円形ワイプを廃止し、淡い中心環境光と短いフォーカス復帰による上品な起動演出へ変更。
+- Data impact: 認証、暗号化データ、記憶、履歴、音声、同期、モデル、バックアップのロジックと形式は変更なし。
+- Tests: 静的回帰アサーションを更新。実行時の構文/テスト確認と実機確認は未実施。
+
 ## 2026-11-07 — v115 中心放射型ログイン演出
 
 - v114の下から上がるワークスペース表示を、中央コアから全方向へ広がる円形クリップ演出に変更。
