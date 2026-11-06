@@ -1327,8 +1327,9 @@ async function speakKokoro(text){
     setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error))+"。標準音声へ切り替えて試せます。");
   }
 }
-function speakAlvis(text){
-  if($("ttsEngine")?.value==="kokoro"){speakKokoro(text);return;}
+function speakAlvis(text,options={}){
+  if($("ttsEngine")?.value==="kokoro"&&kokoroTts){speakKokoro(text);return;}
+  if($("ttsEngine")?.value==="kokoro"&&!options.fallbackToStandard){speakKokoro(text);return;}
   if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
   const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
@@ -1397,7 +1398,7 @@ function transitionIntoAlvis(){
   if(reduceMotion){
     lockPanel.classList.add("hidden");
     appPanel.classList.remove("hidden");
-    return;
+    return 0;
   }
   lockPanel.classList.add("auth-exit");
   appPanel.classList.remove("hidden");
@@ -1409,6 +1410,7 @@ function transitionIntoAlvis(){
     appPanel.classList.remove("auth-enter");
     document.body.classList.remove("auth-transitioning");
   },980);
+  return 980;
 }
 
 async function unlock(){
@@ -1432,8 +1434,15 @@ async function unlock(){
     localStorage.setItem(DB_KEY,JSON.stringify(await encryptData()));
     await restoreRememberedSyncToken();
     $("password").value="";
-    transitionIntoAlvis();
+    const transitionDuration=transitionIntoAlvis();
     renderAll();
+    // ログイン演出が終わったら、保存済みの音声設定で短く歓迎する。
+    // Kokoro未ロード時は端末標準の日本語音声へフォールバックし、モデルの追加ロードは行わない。
+    if($("autoSpeak")?.checked){
+      window.setTimeout(()=>{
+        if(unlocked&&$("autoSpeak")?.checked)speakAlvis("おかえりなさい",{fallbackToStandard:true});
+      },transitionDuration+120);
+    }
     setStatus("appStatus","保管庫を解除しました。");
     setAutoState("未接続（同期状態を確認してください）");
   }catch(error){
