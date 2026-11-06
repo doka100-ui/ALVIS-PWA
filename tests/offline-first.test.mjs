@@ -626,11 +626,20 @@ assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);
 assert.match(sw,/alvis-cache-v122-integrated/);
 
 
-// v122: iPhone uses the smaller Qwen3-1.7B model and shorter KV context; iPad retains 4B.
-assert.match(app,/const ALVIS_IS_IPHONE=\/iPhone\/i\.test\(navigator\.userAgent\|\|""\)/);
-assert.match(app,/ALVIS_MODEL_ID=ALVIS_IS_IPHONE\?"Qwen3-1\.7B-q4f16_1-MLC":"Qwen3-4B-q4f16_1-MLC"/);
-assert.match(app,/ALVIS_CONTEXT_WINDOW=ALVIS_IS_IPHONE\?1024:2048/);
+// v122-v123: choose an appropriately sized local model from a centralized device profile.
+const deviceProfileStart=app.indexOf("function resolveAlvisDeviceProfile(");
+const deviceProfileEnd=app.indexOf("\nconst ALVIS_DEVICE_PROFILE",deviceProfileStart);
+assert.ok(deviceProfileStart>=0&&deviceProfileEnd>deviceProfileStart,"device profile resolver must exist");
+const resolveAlvisDeviceProfile=new Function(app.slice(deviceProfileStart,deviceProfileEnd)+"; return resolveAlvisDeviceProfile;")();
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)"}),{deviceType:"iPhone",isMobile:true,modelId:"Qwen3-1.7B-q4f16_1-MLC",modelLabel:"Qwen3-1.7B",contextWindow:1024});
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)"}),{deviceType:"iPad",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:2048});
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15",platform:"MacIntel",maxTouchPoints:5}),{deviceType:"iPad",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:2048},"iPadOS desktop-class Safari UA must retain the tablet profile");
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Mobile Safari/537.36"}),{deviceType:"Androidスマートフォン",isMobile:true,modelId:"Qwen3-1.7B-q4f16_1-MLC",modelLabel:"Qwen3-1.7B",contextWindow:1024});
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15",platform:"MacIntel",maxTouchPoints:0}),{deviceType:"その他",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:2048});
+assert.match(app,/const ALVIS_MODEL_ID=ALVIS_DEVICE_PROFILE\.modelId/);
+assert.match(app,/const ALVIS_CONTEXT_WINDOW=ALVIS_DEVICE_PROFILE\.contextWindow/);
 assert.match(app,/CreateMLCEngine\(ALVIS_MODEL_ID,/);
 assert.match(app,/context_window_size:ALVIS_CONTEXT_WINDOW/);
 assert.match(app,/ALVIS_MODEL_LABEL\+"を読み込む"/);
-assert.match(sw,/alvis-cache-v122-integrated/);
+assert.match(app,/自動選択モデル：/);
+assert.match(sw,/alvis-cache-v123-integrated/);
