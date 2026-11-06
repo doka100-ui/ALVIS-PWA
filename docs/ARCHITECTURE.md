@@ -611,3 +611,9 @@ ALVIS自身の名前はALVIS（アルヴィス）を固定基本情報として�
 - 旧データはretrospectiveフィールドなしでも従来どおり表示。新しいモデル・ネットワーク・保存形式の変更なし。
 
 - v81追加調整: 課題スキャンと自律目標プランナーのコンテキストへtask.retrospectiveを渡し、outcome/evidence/nextExperiment/confidenceを次サイクルの判断材料にする。blocked/unclearを成功扱いしない指示を追加。
+
+
+## 出典付き公開情報リサーチ v83
+- ALVISの成長計画画面から、利用者が入力した検索語を日本語Wikipedia Action APIへ匿名GETで送信する。`origin=*`と`credentials: omit`を使用し、会話履歴・長期記憶・パスワード・同期トークンをリクエストへ含めない。
+- 検索結果5件までを記事本文抜粋とともに表示。結果は`textContent`で描画し、出典URLを保持。利用者が明示的に学習候補化した記事のみ`data.learnings`へ`sourceType: external_research`としてpending保存。
+- ユーザー承認前は`formatApprovedLearningForPrompt`の対象外。承認後も出典URL・検索テーマをプロンプトへ含め、未検証参考情報として扱う。検索機能はオンライン専用で、ローカル推論経路を変更しない。
