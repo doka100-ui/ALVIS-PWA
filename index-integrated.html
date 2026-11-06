@@ -37,6 +37,31 @@ textarea{min-height:90px;resize:vertical}
 .auto-state{font-weight:700;color:#9bd4ff}
 .memory-category{display:inline-block;font-size:11px;color:#bfdbfe;background:#1e3a5f;border:1px solid #365579;border-radius:999px;padding:2px 8px;margin:0 0 6px}
 .growth-item{padding:14px 0;border-bottom:1px solid #334155}.growth-item:last-child{border:0}.growth-status{display:inline-block;font-size:11px;color:#bfdbfe;background:#1e3a5f;border-radius:999px;padding:3px 8px;margin-bottom:8px}.growth-copy{white-space:pre-wrap;line-height:1.6;margin:8px 0}
+
+/* ALVIS dual display modes: JARVIS HUD and avatar stage */
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.mode-switch button{width:100%;border:1px solid #31577b;background:#101c30;color:#a9d9ff}
+.mode-switch button[aria-pressed="true"]{background:#075985;border-color:#38bdf8;color:#fff;box-shadow:0 0 14px #0284c755}
+.mode-stage{position:relative;min-height:210px;overflow:hidden;border:1px solid #164e78;border-radius:14px;margin:0 0 14px;background:radial-gradient(ellipse at center,#0b2947 0%,#061426 52%,#020812 100%);color:#7dd3fc}
+.jarvis-stage{display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;gap:8px;padding:16px 10px}
+.hud-metric{border:1px solid #0878b7;border-radius:50%;width:64px;height:64px;display:grid;place-content:center;text-align:center;margin:auto;box-shadow:inset 0 0 12px #0891b255,0 0 12px #0284c755;font-size:12px;color:#a5f3fc}
+.hud-metric strong{font-size:16px;display:block}
+.hud-core{width:min(34vw,142px);aspect-ratio:1;border:2px solid #0ea5e9;border-radius:50%;margin:auto;display:grid;place-items:center;position:relative;box-shadow:0 0 22px #0284c777,inset 0 0 22px #0284c744}
+.hud-core:before,.hud-core:after{content:"";position:absolute;inset:10%;border:1px dashed #38bdf8;border-radius:50%;animation:alvisHudSpin 18s linear infinite}
+.hud-core:after{inset:23%;border-style:solid;animation-direction:reverse;animation-duration:12s}
+.hud-core span{font-size:13px;letter-spacing:3px;text-shadow:0 0 10px #38bdf8}
+.hud-caption{grid-column:1/-1;text-align:center;font-size:10px;letter-spacing:2px;color:#60a5fa;margin-top:4px}
+@keyframes alvisHudSpin{to{transform:rotate(360deg)}}
+.avatar-stage{display:flex;align-items:center;justify-content:center;gap:18px;padding:20px;min-height:210px;background:radial-gradient(ellipse at 50% 42%,#1e3a5f 0%,#101a2b 55%,#050b14 100%)}
+.avatar-placeholder{width:112px;height:142px;position:relative;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 18px #38bdf866)}
+.avatar-placeholder:before{content:"";position:absolute;top:5px;width:74px;height:88px;border-radius:48% 48% 44% 44%;background:linear-gradient(115deg,#f4d6c4,#d9b6a5 55%,#9b7c7d);box-shadow:inset -9px -4px 12px #654c5b55,0 0 0 3px #93c5fd55;}
+.avatar-placeholder:after{content:"";position:absolute;top:78px;width:112px;height:64px;border-radius:52% 52% 12px 12px;background:linear-gradient(110deg,#e2e8f0,#94a3b8 55%,#475569);clip-path:polygon(28% 0,72% 0,100% 100%,0 100%)}
+.avatar-eyes{z-index:1;position:absolute;top:39px;width:42px;height:7px;border-left:7px solid #334155;border-right:7px solid #334155;border-radius:50%;opacity:.8}
+.avatar-copy{max-width:190px}.avatar-copy strong{display:block;color:#e0f2fe;font-size:15px;margin-bottom:7px}.avatar-copy p{font-size:12px;line-height:1.6;color:#bfdbfe;margin:0}
+#chatPage[data-display-mode="jarvis"] .avatar-stage{display:none}
+#chatPage[data-display-mode="avatar"] .jarvis-stage{display:none}
+#chatPage[data-display-mode="avatar"] .mode-stage{border-color:#64748b;background:#111827}
+@media(prefers-reduced-motion:reduce){.hud-core:before,.hud-core:after{animation:none}}
 </style>
 </head>
 <body>
@@ -68,6 +93,21 @@ textarea{min-height:90px;resize:vertical}
 <section id="chatPage">
 <div class="panel">
 <h2>ALVISとの会話</h2>
+<div class="mode-switch" role="group" aria-label="ALVIS表示モード">
+<button id="jarvisModeButton" type="button" data-display-mode="jarvis" aria-pressed="true">JARVISモード</button>
+<button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
+</div>
+<div class="mode-stage jarvis-stage" aria-label="JARVISホログラム表示">
+<div class="hud-metric"><strong>AI</strong>ONLINE</div>
+<div class="hud-core"><span>ALVIS</span></div>
+<div class="hud-metric"><strong>LOCAL</strong>QWEN 4B</div>
+<div class="hud-caption">PERSONAL AI SYSTEM　/　OFFLINE FIRST</div>
+</div>
+<div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
+<div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
+<div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
+</div>
+
 <div class="panel" style="margin:0 0 12px">
 <strong>音声会話（試作）</strong>
 <label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
@@ -2691,6 +2731,23 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     button.disabled=false;button.textContent="この端末を診断する";
   }
 });
+
+
+const ALVIS_DISPLAY_MODE_KEY="ALVIS_DISPLAY_MODE";
+function applyAlvisDisplayMode(mode,save=true){
+  const safeMode=mode==="avatar"?"avatar":"jarvis";
+  const chatPage=$("chatPage");
+  if(!chatPage)return;
+  chatPage.dataset.displayMode=safeMode;
+  $("jarvisModeButton")?.setAttribute("aria-pressed",String(safeMode==="jarvis"));
+  $("avatarModeButton")?.setAttribute("aria-pressed",String(safeMode==="avatar"));
+  if(save){try{localStorage.setItem(ALVIS_DISPLAY_MODE_KEY,safeMode);}catch(error){}}
+}
+$("jarvisModeButton")?.addEventListener("click",()=>applyAlvisDisplayMode("jarvis"));
+$("avatarModeButton")?.addEventListener("click",()=>applyAlvisDisplayMode("avatar"));
+let initialDisplayMode="jarvis";
+try{initialDisplayMode=localStorage.getItem(ALVIS_DISPLAY_MODE_KEY)==="avatar"?"avatar":"jarvis";}catch(error){}
+applyAlvisDisplayMode(initialDisplayMode,false);
 
 document.querySelectorAll("nav button[data-page]").forEach(button=>{
   button.addEventListener("click",()=>{
