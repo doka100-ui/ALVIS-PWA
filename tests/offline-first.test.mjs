@@ -645,44 +645,15 @@ assert.match(app,/自動選択モデル：/);
 assert.match(sw,/alvis-cache-v137-integrated/);
 
 
-// v132: sharpen the globe; avoid Gaussian blur on the globe and orbital details.
-assert.match(app, /stroke-opacity="\.9" stroke-width="1\.15"\/>/);
-assert.match(app, /#globeClip path\{filter:none!important;vector-effect:non-scaling-stroke\}/);
-assert.doesNotMatch(app, /higher-detail continuous continental coastlines/);
-assert.match(app, /alvis-cache-v137-integrated/);
 
-
-// v133: replace simplified globe blobs with Natural Earth land geometry.
-assert.match(app, /id="natural-earth-globe"/);
-assert.match(app, /Natural Earth public-domain 1:110m land geometry/);
-assert.doesNotMatch(app, /higher-detail continuous continental coastlines/);
-assert.match(app, /alvis-cache-v137-integrated/);
-
-
-// v134: remove SVG Gaussian blur layers from the visible hologram to avoid Safari compositing blur.
-assert.doesNotMatch(app, /<filter id="(?:glow|soft)">/);
-assert.doesNotMatch(app, /feGaussianBlur/);
-assert.doesNotMatch(app, /filter="url\(#(?:glow|soft)\)"/);
-assert.match(app, /v134: Safari-safe crisp SVG rendering/);
-
-
-// v135: prevent the app-entry animation and sticky glass dock from blurring the hologram.
-assert.doesNotMatch(app, /@keyframes alvisWorkspaceAwake\{[^}]*blur\(/);
-assert.match(app, /#appPanel\.auth-enter\{filter:none!important\}/);
-assert.match(app, /\.display-dock\{\s*filter:none!important;\s*backdrop-filter:none!important;\s*-webkit-backdrop-filter:none!important;/);
-assert.match(app, /alvis-cache-v137-integrated/);
-
-
-// v136: no CSS backdrop blur or blur filter remains in the ALVIS display styles.
-assert.doesNotMatch(app, /(?:backdrop-filter|-webkit-backdrop-filter)\s*:[^;{}]*blur\(/);
-assert.doesNotMatch(app, /filter\s*:\s*blur\(/);
-assert.match(app, /v136: restore crisp early ALVIS rendering/);
-assert.match(app, /id="natural-earth-globe"/);
-
-
-// v137: globe and its orbit cluster are raised into the supplied reference composition.
-assert.match(app, /id="globeAssembly" transform="translate\(0 -25\)"/);
-assert.match(app, /ref-orbit\{transform-box:view-box;transform-origin:204px 155px/);
-assert.match(app, /M204 39V291/);
-assert.match(app, /v137: align globe and orbit cluster/);
-assert.match(app, /alvis-cache-v137-integrated/);
+// v138: use the exact supplied reference image instead of the hand-drawn SVG scene.
+assert.match(app, /class="alvis-reference-image" src="\.\/assets\/alvis-reference\.jpg"/);
+assert.match(app, /class="alvis-motion-orbit alvis-motion-orbit-a"/);
+assert.match(app, /class="alvis-motion-orbit alvis-motion-orbit-b"/);
+assert.match(app, /id="hudAiAction"/);
+assert.match(app, /@keyframes alvisRefOrbitA/);
+assert.match(app, /@keyframes alvisRefOrbitB/);
+assert.match(app, /@media\(prefers-reduced-motion:reduce\).*alvis-motion-orbit/s);
+assert.match(app, /aspect-ratio:406\/326/);
+assert.match(sw, /alvis-cache-v138-integrated/);
+assert.match(sw, /\.\/assets\/alvis-reference\.jpg/);
