@@ -482,6 +482,23 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 @media(prefers-reduced-motion:reduce){.alvis-reference-scene{animation:none!important}}
 /* end v128 */
 
+
+/* v129: animated precision rings and micro-detail */
+.alvis-reference-scene .ref-orbit{transform-box:view-box;transform-origin:204px 180px;will-change:transform}
+.alvis-reference-scene .ref-orbit-slow{animation:alvisOrbitCW 42s linear infinite}
+.alvis-reference-scene .ref-orbit-fast{animation:alvisOrbitCCW 29s linear infinite}
+.alvis-reference-scene .ref-base-rotor{animation:alvisBaseCW 18s linear infinite}
+.alvis-reference-scene .ref-base-counter{animation:alvisBaseCCW 12s linear infinite}
+.alvis-reference-scene .ref-energy-pulse{transform-box:fill-box;transform-origin:center;animation:alvisEnergyPulse 2.4s ease-in-out infinite}
+@keyframes alvisOrbitCW{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes alvisOrbitCCW{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes alvisBaseCW{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes alvisBaseCCW{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes alvisEnergyPulse{0%,100%{opacity:.68;filter:drop-shadow(0 0 3px #fb7185)}50%{opacity:1;filter:drop-shadow(0 0 8px #ff4d9b)}}
+@media(prefers-reduced-motion:reduce){
+ .alvis-reference-scene .ref-orbit,.alvis-reference-scene .ref-base-rotor,.alvis-reference-scene .ref-base-counter,.alvis-reference-scene .ref-energy-pulse{animation:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -569,6 +586,21 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <g fill="none" stroke="#35cfff" opacity=".9"><path d="M40 233H98V279H40Z" stroke-width=".8"/><path d="M329 216H388V279H329Z" stroke-width=".8"/></g>
 <g fill="#36c9ff" filter="url(#glow)"><path d="M46 272V250H51V272ZM55 272V243H60V272ZM64 272V257H69V272ZM73 272V239H78V272ZM82 272V248H87V272ZM91 272V254H95V272Z"/><path d="M335 271V251H340V271ZM344 271V238H349V271ZM353 271V246H358V271ZM362 271V229H367V271ZM371 271V244H376V271ZM380 271V235H384V271Z"/></g>
 <g stroke="#62dcff" stroke-width=".7" opacity=".6"><path d="M45 276H95M334 275H383"/></g>
+
+<!-- micro HUD labels and calibration marks -->
+<g fill="#8feaff" font-family="Arial,sans-serif" font-size="3.8" letter-spacing=".7" opacity=".72">
+ <text x="42" y="151">SYSTEM / 01</text><text x="326" y="51">TELEMETRY</text>
+ <text x="42" y="229">ANALYSIS</text><text x="330" y="210">SIGNAL</text>
+ <text x="42" y="287">ENERGY</text><text x="350" y="287">OUTPUT</text>
+</g>
+<g stroke="#55dfff" stroke-width=".65" opacity=".65" fill="none">
+ <path d="M40 145h15m-15 0v5M326 45h18m-18 0v5M40 285h13m-13 0v-5M329 284h16m-16 0v-5"/>
+ <path d="M102 75h12m-6-6v12M294 75h12m-6-6v12M103 247h12m-6-6v12M291 247h12m-6-6v12"/>
+</g>
+<g fill="#b8f4ff" opacity=".8">
+ <circle cx="23" cy="117" r=".8"/><circle cx="386" cy="139" r=".8"/><circle cx="18" cy="322" r=".8"/>
+ <circle cx="391" cy="323" r=".8"/><circle cx="115" cy="35" r=".7"/><circle cx="311" cy="35" r=".7"/>
+</g>
 <!-- globe atmosphere -->
 <circle cx="204" cy="166" r="94" fill="url(#globeGlow)"/>
 <circle cx="204" cy="166" r="82" fill="url(#globeFill)" stroke="#a7efff" stroke-opacity=".72" stroke-width="1.1" filter="url(#glow)"/>
@@ -587,14 +619,20 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 </g>
 <g fill="#baf6ff" opacity=".65"><circle cx="173" cy="119" r="1.5"/><circle cx="232" cy="130" r="1.2"/><circle cx="188" cy="197" r="1.3"/><circle cx="245" cy="180" r="1.1"/><circle cx="151" cy="162" r="1.1"/><circle cx="211" cy="99" r="1.4"/></g>
 </g>
-<!-- orbit ellipses -->
-<g fill="none" filter="url(#glow)">
-<ellipse cx="204" cy="180" rx="124" ry="37" stroke="#9ceeff" stroke-width=".9" opacity=".8"/>
-<ellipse cx="204" cy="180" rx="137" ry="29" stroke="#2bbdf7" stroke-width=".8" opacity=".52" transform="rotate(-7 204 180)"/>
-<ellipse cx="204" cy="180" rx="117" ry="55" stroke="#48d3ff" stroke-width=".65" opacity=".46" transform="rotate(68 204 180)"/>
-<ellipse cx="204" cy="180" rx="99" ry="70" stroke="#67dcff" stroke-width=".6" opacity=".36" transform="rotate(-62 204 180)"/>
+<!-- animated orbital rings -->
+<g class="ref-orbit ref-orbit-slow" fill="none" filter="url(#glow)">
+ <ellipse cx="204" cy="180" rx="124" ry="37" stroke="#9ceeff" stroke-width=".9" opacity=".8" stroke-dasharray="420 8 36 10"/>
+ <ellipse cx="204" cy="180" rx="137" ry="29" stroke="#2bbdf7" stroke-width=".8" opacity=".52" stroke-dasharray="260 22 80 18"/>
 </g>
-<g fill="#a8f2ff" filter="url(#glow)"><circle cx="80" cy="170" r="1.7"/><circle cx="327" cy="176" r="1.5"/><circle cx="274" cy="145" r="1.2"/><circle cx="120" cy="206" r="1.1"/></g>
+<g class="ref-orbit ref-orbit-fast" fill="none" filter="url(#glow)">
+ <ellipse cx="204" cy="180" rx="117" ry="55" stroke="#48d3ff" stroke-width=".65" opacity=".46" transform="rotate(68 204 180)" stroke-dasharray="220 18 60 14"/>
+ <ellipse cx="204" cy="180" rx="99" ry="70" stroke="#67dcff" stroke-width=".6" opacity=".36" transform="rotate(-62 204 180)" stroke-dasharray="180 16 50 12"/>
+</g>
+<g class="ref-orbit-points" filter="url(#glow)">
+ <circle cx="80" cy="170" r="1.7" fill="#a8f2ff"/><circle cx="327" cy="176" r="1.5" fill="#a8f2ff"/>
+ <circle cx="274" cy="145" r="1.2" fill="#a8f2ff"/><circle cx="120" cy="206" r="1.1" fill="#a8f2ff"/>
+ <circle cx="110" cy="145" r="1.1" fill="#e3fbff"/><circle cx="294" cy="210" r="1.2" fill="#e3fbff"/>
+</g>
 <!-- title -->
 <text x="204" y="181" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="1.4" fill="#dffaff" filter="url(#glow)">ALVIS</text>
 <text x="204" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.2" letter-spacing="2.1" fill="#b7edff" opacity=".6">PERSONAL AI</text>
@@ -602,16 +640,20 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <path d="M204 194V302" stroke="url(#redBeam)" stroke-width="7" opacity=".9" filter="url(#soft)"/>
 <path d="M204 192V302" stroke="url(#redBeam)" stroke-width="2.2" filter="url(#glow)"/>
 <path d="M204 191V302" stroke="#d9fbff" stroke-width=".7" opacity=".9"/>
-<!-- base projection rings -->
+<!-- animated energy platform -->
 <ellipse cx="212" cy="291" rx="119" ry="19" fill="#0b3153" fill-opacity=".35" stroke="#1cbbf4" stroke-width="1" filter="url(#glow)"/>
-<ellipse cx="212" cy="291" rx="103" ry="14" fill="none" stroke="#c0f5ff" stroke-width="1.1" filter="url(#glow)"/>
-<ellipse cx="212" cy="291" rx="87" ry="10" fill="none" stroke="#45d5ff" stroke-width="1.2"/>
-<ellipse cx="212" cy="291" rx="69" ry="6" fill="none" stroke="#fb6aab" stroke-width="1" opacity=".9"/>
-<ellipse cx="212" cy="291" rx="47" ry="4" fill="none" stroke="#fff0fb" stroke-width=".8"/>
+<g class="ref-base-rotor" fill="none" transform-origin="212px 291px">
+ <ellipse cx="212" cy="291" rx="103" ry="14" stroke="#c0f5ff" stroke-width="1.1" filter="url(#glow)" stroke-dasharray="220 12 42 10"/>
+ <ellipse cx="212" cy="291" rx="87" ry="10" stroke="#45d5ff" stroke-width="1.2" stroke-dasharray="120 18 60 12"/>
+</g>
+<g class="ref-base-counter" fill="none" transform-origin="212px 291px">
+ <ellipse cx="212" cy="291" rx="69" ry="6" stroke="#fb6aab" stroke-width="1" opacity=".9" stroke-dasharray="72 12 30 10"/>
+ <ellipse cx="212" cy="291" rx="47" ry="4" stroke="#fff0fb" stroke-width=".8" stroke-dasharray="46 8 20 8"/>
+</g>
 <path d="M93 291H331" stroke="#38caff" stroke-width=".8" opacity=".5"/>
 <path d="M46 302L77 302L90 298M331 301L372 301L385 298" stroke="#ff557d" stroke-width="2" filter="url(#glow)"/>
 <path d="M42 305H97M321 305H386" stroke="#ff597f" stroke-width=".7" opacity=".8"/>
-<g fill="#ff5c91" filter="url(#glow)"><circle cx="204" cy="291" r="3.5"/><circle cx="204" cy="301" r="1.8"/></g>
+<g fill="#ff5c91" filter="url(#glow)" class="ref-energy-pulse"><circle cx="204" cy="291" r="3.5"/><circle cx="204" cy="301" r="1.8"/></g>
 <g fill="#42d8ff" opacity=".7"><circle cx="111" cy="290" r="1.1"/><circle cx="314" cy="290" r="1.1"/><circle cx="130" cy="298" r=".8"/><circle cx="294" cy="298" r=".8"/></g>
 <rect x="1" y="1" width="404" height="404" fill="none" stroke="#0b4167" stroke-width="1"/>
 </svg>
