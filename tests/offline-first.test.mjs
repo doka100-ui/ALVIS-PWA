@@ -441,6 +441,11 @@ assert.match(app,/await inferenceQueue\.catch\(\(\)=>\{\}\)/,"unload must wait f
 
 
 // ALVIS dual display mode foundation: UI preference is separate from encrypted vault data.
+assert.match(app,/class="display-dock" aria-label="固定表示エリア"/);
+assert.match(app,/\.display-dock\{position:sticky;top:8px;z-index:30/);
+assert.match(app,/\.display-dock \.mode-stage\{margin-bottom:0\}/);
+assert.match(app,/@media\(max-width:600px\)\{\.display-dock/);
+
 assert.match(app,/id="jarvisModeButton"/);
 assert.match(app,/id="avatarModeButton"/);
 assert.match(app,/class="mode-stage jarvis-stage"/);
@@ -454,4 +459,4 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/ここに3Dアバターを表示する準備をしています/);
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(app,/const CACHE_NAME = "alvis-cache-v102-integrated"/);
+assert.match(app,/const CACHE_NAME = "alvis-cache-v104-integrated"/);
