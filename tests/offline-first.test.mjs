@@ -26,13 +26,13 @@ for(const sample of ["富士山の高さは3776メートルです。","JavaScrip
 assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
-assert.ok(app.includes("聞かれたことに直接答え"));
+assert.ok(app.includes("聞かれたことに直接答え"));\nassert.match(app,/analyzeConversationRepetition\\(reply,data\\.history\\)\\.repeated/);\nassert.match(app,/buildNonRepeatingEmotionFallback\\(text,data\\.history\\)/);
 
 // Offline Japanese language foundation: intent, tense, register, phrase retrieval and diagnostics.
 const jaStart=app.indexOf("const ALVIS_JAPANESE_LANGUAGE_PACK=");
 const jaEnd=app.indexOf("\n\nfunction isWeatherQuestion",jaStart);
 assert.ok(jaStart>=0&&jaEnd>jaStart,"Japanese language pack helpers must exist");
-const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality};")();
+const japanesePack=new Function(app.slice(jaStart,jaEnd)+"; return {ALVIS_JAPANESE_LANGUAGE_PACK,analyzeJapaneseIntent,buildJapaneseLanguageGuidance,buildConversationVariationGuidance,analyzeJapaneseOutputQuality,analyzeConversationRepetition,buildNonRepeatingEmotionFallback};")();
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.version,"ja-core-1");
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.lexicon.particles["は"],"話題・対比");
 assert.equal(japanesePack.ALVIS_JAPANESE_LANGUAGE_PACK.lexicon.particles["を"],"動作の対象");
@@ -58,6 +58,13 @@ assert.match(fatigueVariation,/無理せず休んでね/);
 assert.match(japanesePack.buildConversationVariationGuidance("不安で眠れない",[]),/根拠なく『大丈夫』と断言しない/);
 assert.match(japanesePack.buildConversationVariationGuidance("今日は嬉しいことがあった",[]),/一緒に喜ぶ/);
 assert.match(japanesePack.buildConversationVariationGuidance("仕事で失敗して悔しい",[]),/不満や悔しさ/);
+const repeatedReply="今日は本当に大変ですね。しっかり休んでくださいね。";
+const repeatHistory=[{role:"alvis",text:repeatedReply}];
+assert.equal(japanesePack.analyzeConversationRepetition(repeatedReply,repeatHistory).repeated,true);
+assert.equal(japanesePack.analyzeConversationRepetition("今日はかなり負担の大きい一日だったんだね。何が一番大変だった？",repeatHistory).repeated,false);
+assert.equal(japanesePack.analyzeConversationRepetition("富士山の高さは約3776メートルです。",repeatHistory).repeated,false);
+assert.equal(japanesePack.buildNonRepeatingEmotionFallback("今日は本当に大変だった",repeatHistory), "今日はかなり負担の大きい一日だったんだね。何が一番大変だった？");
+
 
 assert.equal(japanesePack.analyzeJapaneseIntent("この文章を直して").intent,"request");
 assert.equal(japanesePack.analyzeJapaneseIntent("私はそう思う").intent,"opinion");
