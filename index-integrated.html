@@ -1786,7 +1786,7 @@ function analyzeJapaneseOutputQuality(value){
   const suspiciousLatin=latinWords.filter(word=>!allowedLatin.has(word)&&!allowedLatin.has(word.toUpperCase()));
   const sentences=(text.match(/[^。！？!?]+[。！？!?]?/gu)||[]).map(part=>part.trim()).filter(Boolean);
   const repeatedSentence=sentences.some((sentence,index)=>sentences.indexOf(sentence)!==index);
-  const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そんなに頑張ってない","そんなに頑張っていない","頑張ってないんですか","頑張っていないんですか","そうyeah","そう yeah","日本の最高の山","富士山登り","山の斜面には多くの神社があり"];
+  const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そんなに頑張ってない","そんなに頑張っていない","頑張ってないんですか","頑張っていないんですか","そうyeah","そう yeah","日本の最高の山","富士山登り"];
   const suspiciousPhrases=awkwardPhrases.filter(phrase=>text.includes(phrase));
   // 読点の直後の断片に加え、「また」「さらに」など接続語で終わる回答も未完了として扱う。
   const incompleteEnding=/[、,]\s*[^。！？!?]{1,12}$/u.test(text)||/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u.test(text)||/(?:あり|おり)[。！？!?]?(?:\s*\[出典\d+\])?$/u.test(text);
@@ -1797,8 +1797,9 @@ function analyzeJapaneseOutputQuality(value){
 function repairKnownJapanesePhrases(value){
   return String(value||"")
     .replace(/日本の最高の山/gu,"日本最高峰")
-    // 文全体の主語・述語関係が崩れている既知パターンは、単語だけ置換せず文ごと除外する。
-    .replace(/[^。！？!?]*富士山登り[^。！？!?]*[。！？!?]?/gu,"");
+    // 不自然な既知パターンは回答全体ではなく、該当する一文だけを除外する。
+    .replace(/[^。！？!?]*富士山登り[^。！？!?]*[。！？!?]?/gu,"")
+    .replace(/[^。！？!?]*山の斜面には多くの神社があり[^。！？!?]*[。！？!?]?/gu,"");
 }
 
 function trimIncompleteJapaneseEnding(value){
