@@ -7,6 +7,7 @@
 - Kokoroモデルは各ページセッションでメモリへ再初期化する必要があるが、ライブラリ/CDNのキャッシュを利用する設計。モデルファイルが毎回ネットワーク再取得されないことは実機で未確認。
 - 暗号化保管庫、記憶、履歴、同期、バックアップ形式は変更なし。Service Worker cache: `alvis-cache-v120-integrated`。
 - 静的回帰アサーションを追加。Safari/iPad/iPhoneでの自動再生、AudioContextの継続、モデルキャッシュ再利用は実機確認待ち。
+- 検証: アプリ内JavaScript構文、Service Worker構文、offline-first回帰テスト全体をV8互換ハーネスで実行しPASS。Node.js標準ランナー、GitHub Actions、Safari/iPad/iPhone実機での音声再生は未確認。
 ## 2026-11-07 — v119 ログイン歓迎音声の再生経路修正
 
 - v118で「何も言わない」問題を受けて、歓迎音声の再生経路を修正。
