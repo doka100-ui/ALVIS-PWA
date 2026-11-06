@@ -517,6 +517,14 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  height:auto!important;
 }
 .alvis-reference-scene{aspect-ratio:406/326;object-fit:fill}
+.alvis-reference-scene #globeClip,
+.alvis-reference-scene #globeClip *{shape-rendering:geometricPrecision}
+.alvis-reference-scene #globeClip path{filter:none!important;vector-effect:non-scaling-stroke}
+.alvis-reference-scene #globeClip ellipse,
+.alvis-reference-scene #globeClip line,
+.alvis-reference-scene #globeClip path{stroke-linecap:round;stroke-linejoin:round}
+.alvis-reference-scene .ref-orbit{filter:none!important}
+.alvis-reference-scene [filter="url(#glow)"]{filter:none!important}
 .alvis-reference-scene text{filter:none!important}
 .alvis-reference-scene .ref-base-rotor,
 .alvis-reference-scene .ref-base-counter,
@@ -629,16 +637,19 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 </g>
 <!-- globe atmosphere -->
 <circle cx="204" cy="166" r="94" fill="url(#globeGlow)"/>
-<circle cx="204" cy="166" r="82" fill="url(#globeFill)" stroke="#a7efff" stroke-opacity=".72" stroke-width="1.1" filter="url(#glow)"/>
+<circle cx="204" cy="166" r="82" fill="url(#globeFill)" stroke="#baf5ff" stroke-opacity=".9" stroke-width="1.15"/>
+<circle cx="204" cy="166" r="82.8" fill="none" stroke="#58dfff" stroke-opacity=".5" stroke-width=".55"/>
+<circle cx="204" cy="166" r="78.5" fill="none" stroke="#9cecff" stroke-opacity=".22" stroke-width=".45"/>
 <g clip-path="url(#globeClip)">
-<g fill="#75dfff" fill-opacity=".52" stroke="#a9efff" stroke-opacity=".32" stroke-width=".55" stroke-linejoin="round">
-<!-- smooth, organic continent silhouettes; avoid blocky polygon edges -->
-<path d="M126 130 C130 119 137 113 144 108 C150 102 153 94 163 91 C172 87 181 92 184 99 C191 97 199 102 202 109 C205 116 198 121 191 124 C185 127 183 135 176 139 C169 143 165 151 157 155 C149 159 143 153 141 146 C134 144 128 139 126 130Z"/>
-<path d="M159 158 C165 151 175 150 181 155 C188 159 192 166 194 174 C196 184 190 191 186 199 C183 207 179 216 172 220 C165 216 161 207 160 198 C158 190 150 184 151 176 C151 168 154 162 159 158Z"/>
-<path d="M202 108 C208 99 216 94 225 95 C234 96 239 102 245 108 C252 111 262 115 266 124 C270 132 263 139 255 141 C247 142 244 149 237 153 C230 157 224 154 220 161 C215 167 207 164 205 156 C202 149 194 143 194 135 C194 125 197 115 202 108Z"/>
-<path d="M214 166 C220 159 230 157 237 161 C246 165 252 171 253 180 C254 188 247 194 244 202 C240 210 233 216 225 216 C218 211 214 203 214 195 C211 187 205 181 207 174 C208 171 211 168 214 166Z"/>
-<path d="M126 168 C131 162 138 161 144 165 C149 170 149 177 145 183 C141 189 135 193 130 188 C125 184 122 175 126 168Z"/>
-<path d="M251 143 C256 139 263 140 267 145 C270 150 267 156 261 158 C255 159 250 154 248 149Z"/>
+<g fill="#75dfff" fill-opacity=".60" stroke="#c2f6ff" stroke-opacity=".56" stroke-width=".7" stroke-linejoin="round" stroke-linecap="round">
+<!-- higher-detail continuous continental coastlines -->
+<path d="M126 130 C128 124 131 119 136 115 C139 110 143 108 147 105 C151 100 153 95 159 93 C164 89 169 88 174 91 C179 92 181 96 184 100 C189 98 193 100 197 104 C201 108 204 112 203 117 C201 121 196 123 192 125 C188 128 186 132 182 135 C178 139 174 140 170 144 C166 148 163 153 157 155 C151 157 146 153 143 148 C140 145 136 145 133 141 C129 138 127 134 126 130Z"/>
+<path d="M158 158 C162 154 166 152 171 153 C176 151 181 154 185 158 C190 162 192 168 194 174 C196 180 193 186 190 191 C187 197 184 203 181 210 C178 216 175 221 170 220 C166 217 164 212 162 206 C160 201 160 195 157 190 C154 186 151 181 151 176 C152 169 154 163 158 158Z"/>
+<path d="M201 108 C205 103 209 99 214 97 C219 94 224 94 229 97 C234 98 238 102 242 106 C246 110 252 111 257 115 C262 118 267 122 267 128 C268 134 263 138 258 140 C253 142 248 143 245 148 C241 152 236 155 231 155 C226 157 223 160 220 164 C216 168 211 166 208 162 C204 158 204 152 200 148 C196 144 193 140 193 135 C194 125 197 115 201 108Z"/>
+<path d="M214 166 C218 162 222 159 227 160 C232 158 238 161 243 164 C248 167 252 172 253 178 C255 184 251 190 247 195 C244 200 242 206 237 211 C233 216 228 218 224 216 C219 213 216 208 215 202 C213 196 212 190 208 185 C205 180 206 173 210 169Z"/>
+<path d="M126 168 C130 164 135 161 139 163 C144 164 148 168 149 173 C150 178 147 183 143 187 C139 191 134 193 130 189 C126 185 123 179 124 174Z"/>
+<path d="M251 143 C255 140 260 139 264 142 C268 145 270 149 267 153 C264 157 259 160 255 157 C251 155 248 149 251 143Z"/>
+<path d="M177 102 C180 99 183 99 186 102 L190 107 L186 111 L181 109Z" opacity=".72"/>
 </g>
 <g fill="none" stroke="#a8eaff" stroke-opacity=".38" stroke-width=".75">
 <ellipse cx="204" cy="166" rx="27" ry="81"/><ellipse cx="204" cy="166" rx="54" ry="81"/><ellipse cx="204" cy="166" rx="75" ry="81"/>
