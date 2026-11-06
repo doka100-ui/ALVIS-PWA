@@ -1789,7 +1789,7 @@ function analyzeJapaneseOutputQuality(value){
   const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そんなに頑張ってない","そんなに頑張っていない","頑張ってないんですか","頑張っていないんですか","そうyeah","そう yeah","日本の最高の山","富士山登り","山の斜面には多くの神社があり"];
   const suspiciousPhrases=awkwardPhrases.filter(phrase=>text.includes(phrase));
   // 読点の直後の断片に加え、「また」「さらに」など接続語で終わる回答も未完了として扱う。
-  const incompleteEnding=/[、,]\s*[^。！？!?]{1,12}$/u.test(text)||/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u.test(text)||/(?:あり|おり)[。！？!?]?$/u.test(text);
+  const incompleteEnding=/[、,]\s*[^。！？!?]{1,12}$/u.test(text)||/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u.test(text)||/(?:あり|おり)[。！？!?]?(?:\\s*\\[出典\\d+\\])?$/u.test(text);
   return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence,suspiciousPhrases,incompleteEnding,needsRepair:suspiciousLatin.length>0||repeatedSentence||suspiciousPhrases.length>0||incompleteEnding};
 }
 
@@ -1807,7 +1807,7 @@ function trimIncompleteJapaneseEnding(value){
   text=text.replace(/([。！？!?])(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?.*$/u,"$1");
   text=text.replace(/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u,"");
   text=text.replace(/[、,]\s*[^。！？!?]{1,12}$/u,"");
-  const danglingClause=text.match(/(?:^|([。！？!?]))[^。！？!?]*(?:あり|おり)[。！？!?]?$/u);
+  const danglingClause=text.match(/(?:^|([。！？!?]))[^。！？!?]*(?:あり|おり)[。！？!?]?(?:\\s*\\[出典\\d+\\])?$/u);
   if(danglingClause){
     const boundary=danglingClause[1];
     text=boundary?text.slice(0,danglingClause.index+boundary.length):"";
