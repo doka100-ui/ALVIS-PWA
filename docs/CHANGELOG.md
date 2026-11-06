@@ -1,3 +1,12 @@
+## 2026-11-07 — v117 ログイン時の音声ウェルカム
+
+- 対象ブランチ: `development`
+- 変更ファイル: `index-integrated.html`, `service-worker.js`, `tests/offline-first.test.mjs`, `docs/HANDOFF.md`, `docs/CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/ALVIS_SPEC.md`
+- 認証成功後、画面遷移が終わってから「おかえりなさい」を読み上げる。自動読み上げ設定がOFFなら再生しない。
+- Kokoroが既にロード済みなら選択中のKokoro音声を使用。未ロード時は重いモデルをログイン時に読み込まず、端末標準音声へフォールバックする。
+- 認証・暗号化・保存データ形式・同期・バックアップへの影響なし。
+- 静的回帰アサーションを追加。実機Safariの音声自動再生と音質は未確認。
+
 
 ## 2026-11-07 — v116 控えめなシネマティック起動演出
 
