@@ -1,3 +1,10 @@
+## 端末別ローカルAIプロファイル
+- `resolveAlvisDeviceProfile()` がUser-Agent、platform、maxTouchPointsから端末クラスとモデル設定を決定する。
+- iPhone/iPod/Androidスマートフォン: Qwen3-1.7B、context 1024。
+- iPad（通常UAまたはMacIntel + 複数タッチポイント）/その他: Qwen3-4B、context 2048。
+- この判定はローカル実行モデルの選択だけに使い、暗号化データや同期ペイロードには影響しない。
+- UAは完全なハードウェア性能判定ではない。実機でクラッシュする場合は別途、より軽いモデルへの切替・実測が必要。
+
 ## 端末別Qwenモデル選択（v122）
 
 - iPhone Safari: Qwen3-1.7B-q4f16_1-MLC、context_window_size=1024。
