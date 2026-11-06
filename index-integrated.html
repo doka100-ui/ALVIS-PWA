@@ -196,19 +196,19 @@ textarea{min-height:90px;resize:vertical}
 #lockPanel #lockStatus{min-height:18px;margin-top:12px;text-align:center;color:#9bdcf2}
 #lockPanel .login-security{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:20px;padding-top:14px;border-top:1px solid #38bdf833;color:#78a9c4;font-size:8px;letter-spacing:.13em}
 
-/* Mystical center-origin ALVIS reveal */
-#lockPanel.auth-exit{position:relative;z-index:4;pointer-events:none;transform-origin:center;animation:alvisLoginDissolve 680ms cubic-bezier(.2,.72,.18,1) forwards}
-#appPanel.auth-enter{transform-origin:50% 46%;clip-path:circle(0% at 50% 46%);animation:alvisCoreReveal 1050ms cubic-bezier(.16,.78,.18,1) forwards}
+/* Quiet cinematic ALVIS awakening: restrained light, no rays or game-like burst */
+#lockPanel.auth-exit{position:relative;z-index:4;pointer-events:none;transform-origin:center;animation:alvisLoginDissolve 620ms cubic-bezier(.22,.68,.2,1) forwards}
+#appPanel.auth-enter{transform-origin:50% 46%;animation:alvisWorkspaceAwake 920ms cubic-bezier(.2,.72,.2,1) both}
 body.auth-transitioning{overflow-x:hidden}
 body.auth-transitioning #appPanel{pointer-events:none}
 body.auth-transitioning:before,body.auth-transitioning:after{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none}
-body.auth-transitioning:before{background:radial-gradient(circle at 50% 46%,#ffffff 0%,#d8fbff 1.2%,#67e8f9 3%,#38bdf8 7%,#38bdf844 15%,transparent 31%);opacity:0;transform:scale(.08);animation:alvisCoreBloom 880ms cubic-bezier(.12,.72,.18,1) forwards}
-body.auth-transitioning:after{background:conic-gradient(from 0deg at 50% 46%,transparent 0deg,#a5f3fcaa 1deg,transparent 3deg,transparent 17deg,#7dd3fc99 18deg,transparent 20deg,transparent 37deg,#cffafe99 38deg,transparent 40deg,transparent 57deg,#38bdf899 58deg,transparent 60deg,transparent 77deg,#a5f3fc99 78deg,transparent 80deg,transparent 97deg,#7dd3fc99 98deg,transparent 100deg,transparent 117deg,#cffafe99 118deg,transparent 120deg,transparent 137deg,#38bdf899 138deg,transparent 140deg,transparent 157deg,#a5f3fc99 158deg,transparent 160deg,transparent 177deg,#7dd3fc99 178deg,transparent 180deg,transparent 197deg,#cffafe99 198deg,transparent 200deg,transparent 217deg,#38bdf899 218deg,transparent 220deg,transparent 237deg,#a5f3fc99 238deg,transparent 240deg,transparent 257deg,#7dd3fc99 258deg,transparent 260deg,transparent 277deg,#cffafe99 278deg,transparent 280deg,transparent 297deg,#38bdf899 298deg,transparent 300deg,transparent 317deg,#a5f3fc99 318deg,transparent 320deg,transparent 337deg,#7dd3fc99 338deg,transparent 340deg,transparent 360deg);mask-image:radial-gradient(circle at 50% 46%,transparent 0%,#000 5%,#000 8%,transparent 43%);opacity:0;transform:scale(.08) rotate(-18deg);animation:alvisStarburst 1050ms cubic-bezier(.12,.7,.18,1) forwards}
-@keyframes alvisLoginDissolve{0%{opacity:1;transform:scale(1);filter:blur(0)}35%{opacity:.9;transform:scale(.97);filter:blur(1px);box-shadow:0 0 54px #67e8f988}100%{opacity:0;transform:scale(.82);filter:blur(12px)}}
-@keyframes alvisCoreReveal{0%{opacity:.15;clip-path:circle(0% at 50% 46%);filter:brightness(2.2) saturate(1.5)}38%{opacity:1;filter:brightness(1.45) saturate(1.25)}75%{clip-path:circle(115% at 50% 46%);filter:brightness(1.08)}100%{opacity:1;clip-path:circle(150% at 50% 46%);filter:brightness(1)}}
-@keyframes alvisCoreBloom{0%{opacity:0;transform:scale(.08)}18%{opacity:1}52%{opacity:.8;transform:scale(2.5)}100%{opacity:0;transform:scale(5.2)}}
-@keyframes alvisStarburst{0%{opacity:0;transform:scale(.08) rotate(-18deg)}20%{opacity:.95}65%{opacity:.58;transform:scale(2.9) rotate(24deg)}100%{opacity:0;transform:scale(4.8) rotate(52deg)}}
-@media(prefers-reduced-motion:reduce){#lockPanel.auth-exit,#appPanel.auth-enter,body.auth-transitioning:before,body.auth-transitioning:after{animation:none!important}#lockPanel.auth-exit{opacity:0}#appPanel.auth-enter{opacity:1;clip-path:none;filter:none}}
+body.auth-transitioning:before{background:radial-gradient(ellipse at 50% 46%,#d9faff22 0%,#67e8f922 12%,#38bdf80d 30%,transparent 58%);opacity:0;animation:alvisAmbientGlow 900ms ease-out forwards}
+body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,transparent 0%,transparent 22%,#a5f3fc22 22.15%,#67e8f91c 22.35%,transparent 22.8%,transparent 100%);opacity:0;transform:scale(.72);animation:alvisQuietWave 880ms cubic-bezier(.16,.68,.22,1) forwards}
+@keyframes alvisLoginDissolve{0%{opacity:1;transform:scale(1);filter:blur(0)}45%{opacity:.72;transform:scale(.985);filter:blur(2px)}100%{opacity:0;transform:scale(.96);filter:blur(7px)}}
+@keyframes alvisWorkspaceAwake{0%{opacity:0;filter:blur(5px) brightness(1.12)}45%{opacity:.82;filter:blur(1.5px) brightness(1.06)}100%{opacity:1;filter:blur(0) brightness(1)}}
+@keyframes alvisAmbientGlow{0%{opacity:0}28%{opacity:.8}100%{opacity:0}}
+@keyframes alvisQuietWave{0%{opacity:0;transform:scale(.72)}28%{opacity:.72}100%{opacity:0;transform:scale(1.85)}}
+@media(prefers-reduced-motion:reduce){#lockPanel.auth-exit,#appPanel.auth-enter,body.auth-transitioning:before,body.auth-transitioning:after{animation:none!important}#lockPanel.auth-exit{opacity:0}#appPanel.auth-enter{opacity:1;filter:none}}
 
 @media(prefers-reduced-motion:reduce){.hud-thinking-readout[data-state="thinking"] b:before{animation:none}}
 
