@@ -1481,7 +1481,7 @@ function buildCompactConversationVariationGuidance(value,history=[]){
   const intent=analyzeJapaneseIntent(value).intent;
   const lastReply=(Array.isArray(history)?history:[])
     .filter(item=>item?.role==="alvis"&&String(item.text||"").trim())
-    .slice(-1).map(item=>String(item.text).trim().replace(/\\s+/g," ").slice(0,36))[0]||"";
+    .slice(-1).map(item=>String(item.text).trim().replace(/\s+/g," ").slice(0,36))[0]||"";
   const direction=intent==="emotion"
     ?"気持ちを具体的に短く受け止め、求められていない助言を急がない。"
     :"今回の発言に合わせ、前回と同じ相づちや締めくくりを避ける。";
