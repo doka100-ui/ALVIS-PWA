@@ -1,3 +1,10 @@
+## 2026-11-06 — v104 アバター／JARVIS表示のスクロール固定
+
+- チャット画面の表示モード切替とJARVIS／アバター表示を `display-dock` にまとめ、CSS stickyで画面上部に固定。チャットや音声設定を下へスクロールしても選択中の表示が見えるようにする。
+- iPhone等の狭い画面では表示ステージを156pxに縮小し、アバターの仮表示も調整。2つの表示モード、選択保存、暗号化記憶・会話履歴・バックアップ形式は変更しない。
+- Service Worker cache: `alvis-cache-v104-integrated`。
+- 回帰テストに固定領域・sticky指定・狭幅レイアウトの静的検査を追加。実際のスクロール挙動はiPad/iPhone Safariでの確認が必要。
+
 ## 2026-11-06 — v103 JARVIS/アバター2モードの土台
 
 - 開発版 `development` の `index-integrated.html` にJARVISモードとアバターモードの切り替えUIを追加。
