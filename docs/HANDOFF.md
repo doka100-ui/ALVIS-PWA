@@ -1,3 +1,11 @@
+## v123 端末別AIプロファイル整理（2026-11-07）
+- 端末判定を `resolveAlvisDeviceProfile()` に集約。iPhone / iPod / Androidスマートフォンは Qwen3-1.7B・context 1024、iPadとその他は Qwen3-4B・context 2048。
+- iPadOS SafariのデスクトップUAを考慮し、`navigator.platform === "MacIntel"` かつ `maxTouchPoints > 1` の場合はiPadとして扱う。
+- AIモデル管理画面の説明・読み込み/終了ステータスを選択モデルに合わせて表示。端末診断にも端末プロファイルとモデル選択を表示。
+- 既存の暗号化保管庫、記憶候補、会話履歴、バックアップ、同期形式は変更していない。モデル選択は端末内のみで決定し、個人データを外部送信しない。
+- テストにiPhone/iPad/デスクトップUA/Android/タッチ対応MacIntelのプロファイル判定を追加。実機Safariでのモデル読込・GPU安定性は未検証。
+- 次の確認: iPhoneで1.7B、iPadで4Bの選択が画面に表示されることを確認し、それぞれ短い会話を試す。iPhoneが引き続きクラッシュする場合、0.6Bへの縮小またはクラッシュ位置の診断を検討。
+
 ## 2026-11-07 — v123 端末プロファイルの共通化
 
 - 端末判定とローカルAIモデル設定を `resolveAlvisDeviceProfile()` に集約。iPhone/iPodとAndroidスマートフォンはQwen3-1.7B・コンテキスト1024、iPadはQwen3-4B・2048を選択する。
