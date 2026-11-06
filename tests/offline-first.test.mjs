@@ -26,6 +26,13 @@ for(const sample of ["富士山の高さは3776メートルです。","JavaScrip
 assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
+// Successful vault authentication reveals the workspace with a reduced-motion-aware transition.
+assert.match(app,/function transitionIntoAlvis\(\)[\s\S]*?lockPanel\.classList\.add\("auth-exit"\)[\s\S]*?appPanel\.classList\.remove\("hidden"\)[\s\S]*?appPanel\.classList\.add\("auth-enter"\)/);
+assert.match(app,/transitionIntoAlvis\(\);[\s\S]*?renderAll\(\);/,"successful unlock must run the visual transition before rendering the app");
+assert.match(app,/prefers-reduced-motion:reduce[\s\S]*?#lockPanel\.auth-exit,#appPanel\.auth-enter/,"transition must respect reduced-motion preference");
+assert.match(app,/@keyframes alvisLoginExit[\s\S]*?@keyframes alvisWorkspaceEnter[\s\S]*?@keyframes alvisAccessSweep/,"login exit, workspace entrance and light sweep animations must exist");
+assert.match(app,/setTimeout\(\(\)=>\{[\s\S]*?lockPanel\.classList\.add\("hidden"\)[\s\S]*?\},720\)/,"login panel must be hidden after transition completes");
+
 assert.ok(app.includes("質問には直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
 assert.ok(app.includes("buildNonRepeatingEmotionFallback(text,data.history)"),"emotion fallback must remain active");
