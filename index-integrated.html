@@ -2148,6 +2148,7 @@ async function sendToAlvis(){
           setStatus("aiStatus","日本語の不自然な表現を検出したため、端末内の自然な会話表現に切り替えました。");
         }
       }
+      const finalChoice=result?.choices?.[0]||{};
       // トークン上限で生成が終了した場合、最後の句読点より後ろは未完成とみなし表示しない。
       if(finalChoice.finish_reason==="length"){
         const completeReply=retainCompleteJapaneseSentences(reply);
@@ -2166,7 +2167,6 @@ async function sendToAlvis(){
         setStatus("aiStatus","不自然な表現が残ったため、安全な短い応答に切り替えました。");
       }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
-      const finalChoice=result?.choices?.[0]||{};
       const usage=result?.usage||{};
       const promptCharacters=activeSystemPrompt.length+conversationForGeneration.reduce((sum,item)=>sum+String(item.content||"").length,0);
       generationStatusDetails=(modelOutputCorrupted?"異常出力を検出":!reply?"空回答":"生成完了")
