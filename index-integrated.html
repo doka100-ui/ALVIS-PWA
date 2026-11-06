@@ -480,6 +480,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <h2>保管庫</h2>
 <button id="lockButton" class="danger">画面をロック</button>
 <div id="appStatus" class="small">準備完了</div>
+<button id="welcomeVoiceButton" class="secondary hidden" type="button" style="margin-top:10px">🔊 おかえりなさいを聞く</button>
 </div>
 </section>
 
@@ -1315,13 +1316,13 @@ async function speakKokoro(text){
     if("preservesPitch" in kokoroAudio)kokoroAudio.preservesPitch=false;
     if("webkitPreservesPitch" in kokoroAudio)kokoroAudio.webkitPreservesPitch=false;
     if(player){player.classList.remove("hidden");player.load();}
-    kokoroAudio.onended=()=>setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
-    kokoroAudio.onerror=()=>setStatus("voiceStatus","Kokoro音声の再生に失敗しました。再生ボタンを押してもう一度試してください。");
+    kokoroAudio.onended=()=>{setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
+    kokoroAudio.onerror=()=>{setStatus("voiceStatus","Kokoro音声の再生に失敗しました。再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
     try{
       await kokoroAudio.play();
       setStatus("voiceStatus","Kokoroが話しています…");
     }catch(playError){
-      setStatus("voiceStatus","音声を生成しました。iPhone/iPadでは下の再生ボタンを押してください。");
+      setStatus("voiceStatus","音声を生成しました。下の再生ボタンを押してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
     }
   }catch(error){
     setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error))+"。標準音声へ切り替えて試せます。");
@@ -1351,9 +1352,9 @@ function speakAlvis(text,options={}){
   const selected=$("voiceSelect").value;
   const voice=availableSpeechVoices.find(item=>item.name===selected)||availableSpeechVoices.find(item=>/^ja(?:-|$)/i.test(item.lang));
   if(voice)utterance.voice=voice;
-  utterance.onstart=()=>setStatus("voiceStatus","ALVISが話しています…");
+  utterance.onstart=()=>{setStatus("voiceStatus","ALVISが話しています…");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
   utterance.onend=()=>setStatus("voiceStatus","読み上げ完了");
-  utterance.onerror=event=>setStatus("voiceStatus","音声再生エラー: "+event.error);
+  utterance.onerror=event=>setStatus("voiceStatus","音声再生エラー: "+event.error);if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
   window.speechSynthesis.speak(utterance);
 }
 function stopAlvisSpeech(){
@@ -1438,9 +1439,17 @@ async function unlock(){
     renderAll();
     // ログイン演出が終わったら、保存済みの音声設定で短く歓迎する。
     // Kokoro未ロード時は端末標準の日本語音声へフォールバックし、モデルの追加ロードは行わない。
+    const welcomeButton=$("welcomeVoiceButton");
+    if(welcomeButton){
+      welcomeButton.classList.add("hidden");
+      welcomeButton.onclick=()=>{if(unlocked)speakAlvis("おかえりなさい",{fallbackToStandard:true});};
+    }
     if($("autoSpeak")?.checked){
       window.setTimeout(()=>{
-        if(unlocked&&$("autoSpeak")?.checked)speakAlvis("おかえりなさい",{fallbackToStandard:true});
+        if(unlocked&&$("autoSpeak")?.checked){
+          if(welcomeButton)welcomeButton.classList.remove("hidden");
+          speakAlvis("おかえりなさい",{fallbackToStandard:true});
+        }
       },transitionDuration+120);
     }
     setStatus("appStatus","保管庫を解除しました。");
