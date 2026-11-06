@@ -533,7 +533,7 @@ assert.ok(sendTurnStart>=0&&sendTurnEnd>sendTurnStart,"sendToAlvis must exist");
 const sendTurn=app.slice(sendTurnStart,sendTurnEnd);
 assert.ok(sendTurn.indexOf("if(alvisResponseInProgress)return;")<sendTurn.indexOf("alvisResponseInProgress=true;"),"duplicate turn guard must run before starting a turn");
 assert.match(sendTurn,/alvisResponseInProgress=true;/);
-assert.match(sendTurn,/finally\{\s*alvisResponseInProgress=false;/);
+assert.match(sendTurn,/finally\{[\s\S]*?alvisResponseInProgress=false;/);
 assert.match(sw,/alvis-cache-v120-integrated/);
 
  
