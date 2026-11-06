@@ -1,3 +1,12 @@
+## 2026-11-06 — v103 JARVIS/アバター2モードの土台
+
+- 開発版 `development` の `index-integrated.html` にJARVISモードとアバターモードの切り替えUIを追加。
+- JARVISモードは青い円形HUD表示。アバターモードは将来の3D表示領域と暫定プレビューを表示する。現時点では本物の3Dモデル、表情制御、視線追従、リップシンクは未実装。
+- 選択モードは `ALVIS_DISPLAY_MODE` へ保存。暗号化保管庫 `ALVIS_ENCRYPTED_V1`、会話履歴、長期記憶、同期・バックアップ形式には触れない。
+- Service Worker cache: `alvis-cache-v103-integrated`。
+- 回帰テストにモードUI、保存キー、表示切替、既存暗号化データとの分離を確認するアサーションを追加。
+- iPad/iPhone Safariでの表示・切り替え・再読み込み後の設定保持は未確認。3D描画性能も未検証。
+
 ### v102 検証結果（2026-11-06）
 
 - offline-firstテスト本文をV8互換ハーネスで実行: 298 assertions PASS。
