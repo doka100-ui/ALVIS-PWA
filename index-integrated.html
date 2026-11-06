@@ -1068,6 +1068,12 @@ function renderChat(){
     const body=document.createElement("div");
     body.textContent=item.text||item.body||item.title||"";
     line.appendChild(body);
+    if(item.role==="alvis" && Array.isArray(item.sources)&&item.sources.length){
+      const sourceBox=document.createElement("div");sourceBox.className="small";sourceBox.style.marginTop="8px";
+      const label=document.createElement("span");label.textContent="参考にした情報源：";sourceBox.appendChild(label);
+      item.sources.forEach(source=>{const link=document.createElement("a");link.href=source.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=source.title||"公開記事";link.style.display="inline-block";link.style.marginRight="10px";sourceBox.appendChild(link);});
+      line.appendChild(sourceBox);
+    }
     if(item.role==="alvis" && (item.text||item.body||item.title)){
       const speakButton=document.createElement("button");
       speakButton.type="button";speakButton.className="secondary";
@@ -1526,11 +1532,21 @@ function selectRelevantLearnings(query, history, learnings){
   return relevant;
 }
 
-function formatApprovedLearningForPrompt(item){
+function formatApprovedLearningForPrompt(item,citationNumber=null){
   const text=String(item?.text||"").trim();
-  if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\n"+text;
-  if(item?.sourceType==="external_research")return "【外部公開情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"公開情報")+"／URL："+String(item.sourceUrl||"不明")+"／検索テーマ："+String(item.sourceQuestion||"不明")+"】\n"+text;
-  return "【ALVISの学び】\n"+text;
+  if(item?.sourceType==="external_ai")return "【外部AI由来の参考情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"外部AI")+"／元質問："+String(item.sourceQuestion||"不明")+"】\\n"+text;
+  if(item?.sourceType==="external_research")return "【外部公開情報・ユーザー承認済み・未検証／出典："+String(item.sourceProvider||"公開情報")+"／URL："+String(item.sourceUrl||"不明")+"／検索テーマ："+String(item.sourceQuestion||"不明")+"】"+(Number.isInteger(citationNumber)&&citationNumber>0?"／回答内引用："+`[出典${citationNumber}]`:"")+"\\n"+text;
+  return "【ALVISの学び】\\n"+text;
+}
+
+function extractApprovedResearchCitations(value,sources){
+  const cited=[];
+  const text=String(value||"").replace(/\\[出典(\\d+)\\]/gu,(marker,digits)=>{
+    const source=(Array.isArray(sources)?sources:[])[Number(digits)-1];
+    if(source&&!cited.some(item=>item.url===source.url))cited.push(source);
+    return "";
+  }).replace(/[ \\t]{2,}/gu," ").replace(/\\s+([。、「」])/gu,"$1").trim();
+  return {text,sources:cited};
 }
 
 function getJapanDateTime(){
@@ -1896,6 +1912,16 @@ async function sendToAlvis(){
     setStatus("aiStatus","ALVISが考えています…");
     const relevantMemories=selectRelevantMemories(text,data.memories,data.history);
     const memoryText=relevantMemories.map(item=>item.text).join("\n").slice(0,2200);
+    const relevantLearnings=selectRelevantLearnings(text,data.history,data.learnings);
+    const numberedResearchSources=[];
+    const learningContext=relevantLearnings.map(item=>{
+      if(item.sourceType==="external_research"&&/^https:\/\//i.test(String(item.sourceUrl||""))){
+        let sourceIndex=numberedResearchSources.findIndex(source=>source.url===item.sourceUrl);
+        if(sourceIndex<0){sourceIndex=numberedResearchSources.length;numberedResearchSources.push({title:String(item.text||"").split("\n")[0].slice(0,180)||"公開情報",url:String(item.sourceUrl)});}
+        return formatApprovedLearningForPrompt(item,sourceIndex+1);
+      }
+      return formatApprovedLearningForPrompt(item);
+    }).join("\n").slice(0,1800);
     // 保存済みの全履歴は保持し、推論時だけ直近の関連会話に絞る。
     const recent=buildConversationMessages(data.history,text);
     let onlineReferenceText="";
@@ -1958,7 +1984,8 @@ async function sendToAlvis(){
       memoryText||"まだ登録されていません。",
       "",
       "【ALVISがユーザー承認済みの作業から得た学び】",
-      selectRelevantLearnings(text,data.history,data.learnings).map(formatApprovedLearningForPrompt).join("\n").slice(0,1800)||"今回の質問に関連する承認済み学びはありません。"
+      learningContext||"今回の質問に関連する承認済み学びはありません。",
+      numberedResearchSources.length?"公開情報を回答の根拠として実際に使った場合だけ、対応する [出典1] などの番号を回答末尾に付ける。使っていない資料は引用しない。引用番号は上の参考資料に記載された番号だけを使う。":""
     ].join("\n");
     const activeSystemPrompt=isBriefConversationalTurn
       ?["あなたはALVIS。親しみやすく自然な日本語で会話する。一人称は「私」。","直前の会話を読んでから返答する。ユーザーの発言が直前の私の返事への反応なら、そのつながりを保つ。引用・確認・冗談・反語を本人の主張と混同しない。","肯定と否定、誰が何をしたか、誰に向けた言葉かを確認する。ユーザーが言っていない経験・感情・意見を勝手に補わない。","短い雑談は1〜2文。聞かれたことに直接答え、共感は短く自然に伝える。説明口調・業務報告・定型の締め・不要な質問は禁止。","前の返答と同じ相づちや慰め文句を繰り返さず、今回の発言に含まれる具体的な話題を拾う。","AIであることを毎回説明しない。人間のふりもせず、会話に必要な範囲で正直に答える。英語を混ぜず、同じ意味を繰り返さない。"].join("\n")
@@ -2119,7 +2146,9 @@ async function sendToAlvis(){
     }
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
     // 通常の非ストリーミング応答では、過去と同じ文章でも毎回新しい返答として追加する。
-    data.history.push({role:"alvis",text:reply,createdAt:new Date().toISOString()});
+    const citationResult=extractApprovedResearchCitations(reply,numberedResearchSources);
+    reply=citationResult.text||reply;
+    data.history.push({role:"alvis",text:reply,...(citationResult.sources.length?{sources:citationResult.sources}:{}),createdAt:new Date().toISOString()});
     if($("autoSpeak").checked)setTimeout(()=>speakAlvis(reply),80);
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
