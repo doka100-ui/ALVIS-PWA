@@ -843,3 +843,7 @@ Safari等でログイン後の遅延音声再生が拒否される場合に備�
 
 ## v134 表示描画
 - ホログラムSVGからGaussian blurフィルターを除去。SafariのSVGフィルター合成に起因するぼけを回避するため、表示シーン全体へfilter:noneを適用。軌道リングの回転と下部投影台の静止は維持。
+
+
+## v135 描画レイヤー
+- Safariでstickyなdisplay-dockとbackdrop-filterが重なることによる矩形状の合成ぼけを避けるため、display-dock/mode-stage/SVGのfilter・backdrop-filterを無効化。appPanel入場アニメーションもblurを使用せずopacityのみ。
