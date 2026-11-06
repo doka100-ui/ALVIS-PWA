@@ -1805,7 +1805,7 @@ function repairKnownJapanesePhrases(value){
 function retainCompleteJapaneseSentences(value){
   const text=String(value||"").trim();
   if(!text)return "回答が途中で切れてしまったよ。もう一度聞いてね。";
-  const complete=(text.match(/[^。！？!?]+[。！？!?](?:\\s*\\[出典\\d+\\])?/gu)||[]).join("").trim();
+  const complete=(text.match(/[^。！？!?]+[。！？!?](?:\s*\[出典\d+\])?/gu)||[]).join("").trim();
   return complete||"回答が途中で切れてしまったよ。もう一度聞いてね。";
 }
 
