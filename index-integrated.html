@@ -67,6 +67,36 @@ textarea{min-height:90px;resize:vertical}
 #chatPage[data-display-mode="avatar"] .jarvis-stage{display:none}
 #chatPage[data-display-mode="avatar"] .mode-stage{border-color:#64748b;background:#111827}
 @media(prefers-reduced-motion:reduce){.hud-core:before,.hud-core:after{animation:none}}
+
+/* v105 visual polish: premium glass HUD and a more dimensional avatar preview */
+.display-dock{background:linear-gradient(145deg,#101b2dF2,#071321F5);border:1px solid #38bdf833;box-shadow:0 14px 34px #02061799,0 0 22px #0284c722;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.mode-switch{padding:3px;background:#07111f;border:1px solid #1e4966;border-radius:12px}
+.mode-switch button{border-radius:9px;letter-spacing:.04em;font-weight:700;transition:background .25s,border-color .25s,box-shadow .25s}
+.mode-switch button[aria-pressed="true"]{background:linear-gradient(135deg,#075985,#0369a1 55%,#0e7490);border-color:#67e8f9;box-shadow:0 0 18px #0ea5e955,inset 0 1px #bae6fd55}
+.mode-stage{isolation:isolate;border-color:#38bdf866;box-shadow:inset 0 0 32px #0284c722,0 8px 24px #02061777}
+.jarvis-stage{background:radial-gradient(ellipse at 50% 45%,#123d60 0%,#071d34 48%,#020812 100%);overflow:hidden}
+.jarvis-stage:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.22;background-image:linear-gradient(#38bdf822 1px,transparent 1px),linear-gradient(90deg,#38bdf822 1px,transparent 1px);background-size:22px 22px;mask-image:radial-gradient(ellipse at center,#000 8%,transparent 78%)}
+.jarvis-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 48%,#38bdf80d 50%,transparent 52%);background-size:100% 8px;opacity:.45}
+.hud-metric{width:66px;height:66px;border-color:#22d3ee88;background:radial-gradient(circle,#0e749022,#020617aa);box-shadow:inset 0 0 18px #0891b566,0 0 18px #06b6d455;color:#cffafe}
+.hud-metric strong{font-size:17px;letter-spacing:.08em;text-shadow:0 0 12px #67e8f9}
+.hud-core{border-color:#67e8f9;box-shadow:0 0 32px #06b6d477,inset 0 0 28px #0891b566}
+.hud-core:before{inset:5%;border:1px dashed #a5f3fc;box-shadow:0 0 14px #22d3ee55}
+.hud-core:after{inset:19%;border:1px solid #38bdf8aa;box-shadow:inset 0 0 18px #0ea5e944}
+.hud-core span{font-weight:800;font-size:14px;letter-spacing:.22em;color:#e0faff;text-shadow:0 0 8px #22d3ee,0 0 22px #0ea5e9}
+.hud-caption{color:#7dd3fc;letter-spacing:.24em;text-shadow:0 0 10px #0ea5e9}
+.avatar-stage{position:relative;overflow:hidden;background:radial-gradient(ellipse at 48% 30%,#254b70 0%,#142b45 44%,#060d19 100%);border-color:#7dd3fc88}
+.avatar-stage:before{content:"";position:absolute;width:190px;height:190px;border:1px solid #93c5fd33;border-radius:50%;box-shadow:0 0 0 14px #93c5fd0b,0 0 0 30px #93c5fd08,0 0 45px #38bdf822;left:calc(50% - 95px);top:calc(50% - 95px);pointer-events:none}
+.avatar-placeholder{z-index:1;transform:translateY(3px);filter:drop-shadow(0 8px 14px #020617aa) drop-shadow(0 0 18px #7dd3fc88)}
+.avatar-placeholder:before{background:linear-gradient(110deg,#ffe0ce 0%,#e8c0ae 48%,#a77f83 100%);box-shadow:inset -10px -7px 15px #654c5b55,inset 5px 4px 10px #fff8,0 0 0 2px #bfdbfe99,0 0 26px #60a5fa55}
+.avatar-placeholder:after{background:linear-gradient(110deg,#f8fafc 0%,#cbd5e1 48%,#64748b 100%);box-shadow:inset 0 8px 14px #fff8}
+.avatar-eyes{height:5px;border-left-width:6px;border-right-width:6px;border-color:#26364a;box-shadow:0 1px 0 #fff8;opacity:.9}
+.avatar-eyes:after{content:"";position:absolute;left:13px;top:16px;width:14px;height:5px;border-bottom:1.5px solid #9f5963;border-radius:50%}
+.avatar-copy{z-index:1;padding:12px 14px;border:1px solid #93c5fd33;border-radius:12px;background:#07142688;box-shadow:inset 0 1px #fff1;backdrop-filter:blur(8px)}
+.avatar-copy strong{letter-spacing:.16em;color:#f0f9ff;text-shadow:0 0 12px #38bdf866}
+.avatar-copy p{color:#cbdff3}
+@media(max-width:600px){.display-dock{background:linear-gradient(145deg,#101b2df7,#071321f7)}.mode-switch{gap:5px;margin-bottom:8px}.mode-switch button{font-size:12px;padding:9px 4px}.hud-metric{width:52px;height:52px;font-size:10px}.hud-metric strong{font-size:14px}.hud-core{width:min(32vw,118px)}.hud-caption{font-size:8px;letter-spacing:.12em}.avatar-copy{padding:8px 9px}.avatar-copy strong{font-size:12px}.avatar-copy p{font-size:10px;line-height:1.4}}
+@media(prefers-reduced-motion:reduce){.mode-switch button{transition:none}}
+
 </style>
 </head>
 <body>
