@@ -1289,6 +1289,7 @@ function loadSpeechVoices(){
   setStatus("voiceStatus",japanese.length?"日本語音声 "+japanese.length+"種類が利用できます。":"日本語音声がまだ見つかりません。端末の音声設定を確認してください。");
 }
 async function prepareKokoroTTS(){
+  if(aiEngine||aiLoading){setStatus("voiceStatus","Qwen3-4Bの使用中はKokoroを同時に起動できません。先にQwenを終了してください。");return null;}
   if(kokoroTts)return kokoroTts;
   if(kokoroLoading){setStatus("voiceStatus","Kokoroを準備中です。完了まで待ってください。");return null;}
   const button=$("prepareKokoro");
@@ -1327,9 +1328,7 @@ async function getKokoroSpeechBlob(clean,voiceId){
   }
   return blob;
 }
-async function speakKokoro(text){
-  const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();if(!clean)return;
-  if(!kokoroTts){setStatus("voiceStatus","Kokoroの準備が必要です。音声設定の「Kokoroを準備」を一度実行してください。");return;}
+async function playKokoroBlob(blob,clean){
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
     if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
@@ -1337,9 +1336,6 @@ async function speakKokoro(text){
     if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
     if(player){player.pause();player.removeAttribute("src");player.classList.add("hidden");}
     if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
-    setStatus("voiceStatus","Kokoroで音声を準備しています…");
-    const voiceId=$("kokoroVoice").value||"jf_alpha";
-    const blob=await getKokoroSpeechBlob(clean,voiceId);
     const rate=Number($("kokoroRate")?.value||0.98);
     // Safariの再生制限対策：ログイン/送信/ボタン操作で事前に解放したAudioContextから再生する。
     if(alvisAudioContext&&alvisAudioContext.state==="running"){
@@ -1384,12 +1380,38 @@ async function speakKokoro(text){
     if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
   }
 }
+async function speakKokoro(text){
+  const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();if(!clean)return;
+  if(!kokoroTts){setStatus("voiceStatus","Kokoroの準備が必要です。音声設定の「Kokoroを準備」を一度実行してください。");return;}
+  try{
+    setStatus("voiceStatus","Kokoroで音声を準備しています…");
+    const voiceId=$("kokoroVoice").value||"jf_alpha";
+    const blob=await getKokoroSpeechBlob(clean,voiceId);
+    await playKokoroBlob(blob,clean);
+  }catch(error){
+    setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error)));
+    if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
+  }
+}
+async function getCachedKokoroWelcomeBlob(){
+  if(!("caches" in window))return null;
+  try{
+    const voiceId=$("kokoroVoice")?.value||"jf_alpha";
+    const cache=await caches.open("alvis-voice-cache-v1");
+    const request=new Request(new URL("./__alvis_voice_cache__/welcome-v1/"+encodeURIComponent(voiceId),location.href).href);
+    const cached=await cache.match(request);
+    return cached?await cached.blob():null;
+  }catch(error){return null;}
+}
 async function playWelcomeGreeting(){
   if(!unlocked)return;
   if($("ttsEngine")?.value==="kokoro"){
-    const engine=await prepareKokoroTTS();
-    if(!engine){$("welcomeVoiceButton")?.classList.remove("hidden");return;}
-    await speakKokoro("おかえりなさい");
+    // ログイン時は保存済みの短い音声だけを再生し、Kokoro推論モデルは起動しない。
+    // これによりQwen3-4Bとの同時メモリ使用を避ける。
+    const cached=await getCachedKokoroWelcomeBlob();
+    if(cached){await playKokoroBlob(cached,"おかえりなさい");return;}
+    setStatus("voiceStatus","保存済みのKokoro歓迎音声がないため、端末標準音声で案内します。");
+    speakAlvis("おかえりなさい",{fallbackToStandard:true});
     return;
   }
   speakAlvis("おかえりなさい");
@@ -1397,8 +1419,14 @@ async function playWelcomeGreeting(){
 function speakAlvis(text,options={}){
   // 明示的な標準音声指定は、Kokoroの選択/ロード状態より優先する。
   if($("ttsEngine")?.value==="kokoro"&&!options.fallbackToStandard){
-    if(kokoroTts){speakKokoro(text);return;}
-    speakKokoro(text);return;
+    if(aiEngine||aiLoading){
+      setStatus("voiceStatus","Qwen3-4Bの使用中はメモリ競合を避けるため、端末標準音声で読み上げます。");
+      options={...options,fallbackToStandard:true};
+    }else if(kokoroTts){speakKokoro(text);return;}
+    else{
+      prepareKokoroTTS().then(engine=>{if(engine)speakKokoro(text);});
+      return;
+    }
   }
   if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
   if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
@@ -1729,6 +1757,10 @@ $("loadAiModel").addEventListener("click",async()=>{
   if(aiLoading)return;
   if(aiEngine){setStatus("aiStatus","Qwen3-4Bはすでに起動しています。");return;}
   if(!unlocked){setStatus("aiStatus","先に記憶庫へログインしてください。");return;}
+  if(kokoroTts||kokoroLoading){
+    setStatus("aiStatus","Kokoro音声モデルがメモリに残っています。安全な解放APIが確認できないため、ページを再読み込みしてからQwen3-4Bだけを起動してください。音声データと設定は保持されます。");
+    return;
+  }
   aiLoading=true;
   aiLoadProgress=0;
   updateHudAiStatus("モデル読み込み中 0%");
