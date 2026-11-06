@@ -277,7 +277,7 @@ assert.match(app, /ユーザーが気持ちや考えを話したとき/);
 assert.match(app, /過剰な同意・称賛/);
 assert.match(app, /実行できないことを実行したと主張しない/);
 assert.match(app, /const isBriefConversationalTurn=text\.length<=180/);
-assert.match(app, /const responseTokenLimit=isBriefConversationalTurn\?96:384/);
+assert.match(app, /const responseTokenLimit=isBriefConversationalTurn\?64:192/);
 assert.equal((app.match(/max_tokens:responseTokenLimit/g)||[]).length, 1);
 assert.equal((app.match(/max_tokens:64/g)||[]).length, 4);
 assert.equal((app.match(/max_tokens:512/g)||[]).length, 0);
