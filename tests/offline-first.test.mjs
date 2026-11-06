@@ -27,7 +27,7 @@ assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 assert.ok(app.includes("聞かれたことに直接答え"));
-assert.match(app,/analyzeConversationRepetition\\(reply,data\\.history\\)\\.repeated/);
+assert.match(app,/analyzeConversationRepetition\(reply,data\.history\)\.repeated/);
 assert.match(app,/buildNonRepeatingEmotionFallback\\(text,data\\.history\\)/);
 
 // Offline Japanese language foundation: intent, tense, register, phrase retrieval and diagnostics.
