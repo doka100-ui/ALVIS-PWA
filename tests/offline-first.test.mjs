@@ -178,6 +178,23 @@ assert.match(app,/learning\.nextExperiment/);
 assert.match(app,/retrospective:task\.retrospective\|\|null/);
 assert.match(app,/blockedやunclearの課題を成功扱いせず/);
 
+// Public-source research result normalization and provenance retention.
+const researchParserStart=app.indexOf("function normalizeAutonomyResearchResults(");
+const researchParserEnd=app.indexOf("\n}\n\nfunction renderAutonomyIssues",researchParserStart);
+assert.ok(researchParserStart>=0&&researchParserEnd>researchParserStart,"research result normalizer must exist");
+const normalizeAutonomyResearchResults=new Function(app.slice(researchParserStart,researchParserEnd+2)+"; return normalizeAutonomyResearchResults;")();
+const researchResults=normalizeAutonomyResearchResults({query:{search:[{pageid:12,title:"例の記事"}]}},{query:{pages:[{pageid:12,title:"例の記事",extract:"本文の要約"}]}},"検索テーマ");
+assert.equal(researchResults.length,1);
+assert.equal(researchResults[0].title,"例の記事");
+assert.match(researchResults[0].url,/ja\.wikipedia\.org\/wiki/);
+assert.equal(normalizeAutonomyResearchResults({query:{search:[]}},{query:{pages:[]}},"x").length,0);
+assert.match(app,/origin:"\*"/);
+assert.match(app,/credentials:"omit"/);
+assert.match(app,/sourceType:"external_research"/);
+assert.match(app,/sourceUrl:item\.url/);
+assert.match(app,/sourceQuestion:query/);
+assert.match(app,/未検証参考情報としてALVISが今後の会話で参照/);
+
 // Dedicated external AI answer review UI
 assert.match(app, /data-page="externalAiPage">外部AIの回答/);
 assert.match(app, /id="externalAiPage"/);
