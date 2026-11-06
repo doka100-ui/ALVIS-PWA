@@ -766,3 +766,10 @@
 - ネット接続時のみ動作。ローカルQwen、オフライン動作、既存の外部AI連携・暗号化形式は変更なし。MediaWiki公式のAction API/CORS仕様に従いorigin=*・credentials omitを使用。Service Worker cache v83。
 
 - v83修正: 外部調査学習候補の承認確認処理の改行構文を修正し、外部調査候補も却下できるようにした。Service Worker cache v84。
+
+## 2026-11-06 — 出典情報の引き継ぎ修正（v87）
+
+- 承認済み学習の関連度ランキング時に、本文・スコアだけでなく元レコードの出典メタデータ（sourceType/sourceUrl/sourceProvider/sourceQuestion等）も保持する。
+- v86で実装した回答内の出典番号とリンク表示が、実際の外部調査学習レコードにも接続されるよう修正。
+- 回帰テストを追加し、関連学習選択後もWikipediaのURL・提供元・検索テーマが保持されることを検証する。
+- Service Worker cache: `alvis-cache-v87-integrated`。iPad Safari実機テストおよびGitHub Actionsは未確認。
