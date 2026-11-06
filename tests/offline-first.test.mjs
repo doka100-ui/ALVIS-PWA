@@ -309,3 +309,22 @@ assert.equal(invalidCitation.text,"回答です。");
 assert.deepEqual(invalidCitation.sources,[]);
 const duplicateCitation=extractCitations("同じ出典。[出典1][出典1]",citationSources);
 assert.equal(duplicateCitation.sources.length,1);
+
+// Relevant-learning ranking must preserve provenance fields used by answer citations.
+assert.match(app, /return \{\.\.\.item,text:String\(item\.text\),score:direct\+contextual,index,createdAt:item\.approvedAt\|\|item\.createdAt\|\|""\};/);
+const learningStart=app.indexOf("function selectRelevantLearnings(");
+const learningEnd=app.indexOf("\\nfunction formatApprovedLearningForPrompt",learningStart);
+assert.ok(learningStart>=0&&learningEnd>learningStart,"learning selector must exist");
+const selectLearnings=new Function(
+  "buildContextualQuery","scoreContextMatch",
+  app.slice(learningStart,learningEnd)+"; return selectRelevantLearnings;"
+)(
+  query=>({text:query,usedContext:false}),
+  ()=>3
+);
+const approvedResearch={status:"approved",text:"富士山は日本最高峰。",sourceType:"external_research",sourceProvider:"Wikipedia",sourceUrl:"https://ja.wikipedia.org/wiki/富士山",sourceQuestion:"富士山",approvedAt:"2026-11-06"};
+const selectedLearning=selectLearnings("富士山",[],[approvedResearch])[0];
+assert.equal(selectedLearning.sourceType,"external_research");
+assert.equal(selectedLearning.sourceUrl,approvedResearch.sourceUrl);
+assert.equal(selectedLearning.sourceProvider,"Wikipedia");
+assert.equal(selectedLearning.sourceQuestion,"富士山");
