@@ -590,3 +590,11 @@ assert.match(app,/const transitionDuration=transitionIntoAlvis\(\);/);
 assert.match(app,/if\(\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\)/);
 assert.match(app,/\},transitionDuration\+120\);/);
 assert.match(sw,/alvis-cache-v117-integrated/);
+
+
+// v118: provide a direct user-gesture fallback for browsers that block delayed speech.
+assert.match(app,/id="welcomeVoiceButton"/);
+assert.match(app,/welcomeButton\.onclick=\(\)=>\{if\(unlocked\)speakAlvis\("おかえりなさい",\{fallbackToStandard:true\}\);\};/);
+assert.match(app,/if\(welcomeButton\)welcomeButton\.classList\.remove\("hidden"\);/);
+assert.match(app,/if\(clean==="おかえりなさい"\)\$\("welcomeVoiceButton"\)\?\.classList\.remove\("hidden"\)/);
+assert.match(sw,/alvis-cache-v118-integrated/);
