@@ -1310,23 +1310,22 @@ async function prepareKokoroTTS(){
 }
 async function getKokoroSpeechBlob(clean,voiceId){
   // ログイン時の固定フレーズは端末内Cache Storageへ保存し、毎回の再合成を避ける。
+  let cache=null,request=null;
   if(clean==="おかえりなさい"&&"caches" in window){
     try{
-      const cache=await caches.open("alvis-voice-cache-v1");
-      const request=new Request("https://alvis.local/__voice-cache/welcome-v1/"+encodeURIComponent(voiceId));
+      cache=await caches.open("alvis-voice-cache-v1");
+      request=new Request(new URL("./__alvis_voice_cache__/welcome-v1/"+encodeURIComponent(voiceId),location.href).href);
       const cached=await cache.match(request);
       if(cached){setStatus("voiceStatus","保存済みのKokoro音声を再生しています…");return await cached.blob();}
-      const result=await kokoroTts.speak(clean,voiceId);
-      const blob=result.toBlob();
-      await cache.put(request,new Response(blob,{headers:{"Content-Type":blob.type||"audio/wav"}}));
-      return blob;
-    }catch(cacheError){
-      const result=await kokoroTts.speak(clean,voiceId);
-      return result.toBlob();
-    }
+    }catch(cacheReadError){cache=null;request=null;}
   }
   const result=await kokoroTts.speak(clean,voiceId);
-  return result.toBlob();
+  const blob=result.toBlob();
+  if(cache&&request){
+    try{await cache.put(request,new Response(blob,{headers:{"Content-Type":blob.type||"audio/wav"}}));}
+    catch(cacheWriteError){setStatus("voiceStatus","音声は生成できました。次回は必要に応じて再生成します。");}
+  }
+  return blob;
 }
 async function speakKokoro(text){
   const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();if(!clean)return;
