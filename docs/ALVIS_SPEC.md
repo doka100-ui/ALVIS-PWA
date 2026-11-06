@@ -231,6 +231,7 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 ## v120 Kokoroログイン音声
 
 - 保存済みの音声エンジン、Kokoro音声ID、話速を歓迎音声にも適用する。
+- Kokoro選択時のログイン歓迎音声は、会話返信の自動読み上げ設定とは独立して再生する。
 - ログイン操作時にAudioContextを解放し、非同期合成後の音声再生を試みる。利用できない場合はプレーヤーを表示する。
 - 「おかえりなさい」の合成音声は声IDごとに端末内キャッシュし、再ログイン時の再合成を避ける。
 - 未設定のKokoro話速は0.98倍。保存済みの話速は維持する。
