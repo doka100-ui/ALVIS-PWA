@@ -214,7 +214,8 @@ const autonomyCycle=app.slice(autonomyCycleStart,autonomyCycleEnd);
 for(const evidence of ["slice(-24)","data.autonomyIssues","data.improvements","data.autonomyTasks","data.learnings","successCriteria","外部送信","バックグラウンド実行"]) assert.ok(autonomyCycle.includes(evidence),`self-planning must consider and constrain: ${evidence}`);
 assert.match(app,/task\.successCriteria/);
 assert.match(app,/task\.reason/);
-assert.match(app,/origin:\$\("autonomyTaskDraft"\)\.dataset\.origin/);
+assert.match(app,/const taskMetadata=getAutonomyTaskMetadata\(\$\("autonomyTaskDraft"\),goal,action\)/);
+assert.match(app,/origin:taskMetadata\.origin/);
 
 // Structured, evidence-grounded autonomy retrospectives.
 const retrospectiveParserStart=app.indexOf("function parseAutonomyRetrospective(");
