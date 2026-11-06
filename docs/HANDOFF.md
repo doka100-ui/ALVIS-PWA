@@ -835,3 +835,8 @@
 - 回帰テスト追加。Service Worker cache: `alvis-cache-v97-integrated`。
 - ローカル検証: アプリ構文PASS、トークン上限の4ケースPASS、テスト内ガード存在確認PASS。Node.js全テスト・GitHub Actions・iPad Safari実機は未確認。
 - 次: v97を開発版で読み込み、前回の富士山質問で回答が文末まで完結し、出典リンクが維持されるか最後に一度だけ確認。
+
+### v97追加検証
+- `tests/offline-first.test.mjs` 全体の267アサーションをV8環境で実行し成功（Node.js標準ランナーではなく、`readFile`/`assert` の互換実装を使用）。
+- 生成上限で途切れた文の除外、完結文に付く出典番号の保持、完結文がない場合の再質問案内、通常の完結文の保持を確認。
+- Node.js標準ランナー・GitHub Actions・iPad Safari実機の結果は未確認。
