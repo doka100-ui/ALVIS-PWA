@@ -617,3 +617,5 @@ ALVIS自身の名前はALVIS（アルヴィス）を固定基本情報として�
 - ALVISの成長計画画面から、利用者が入力した検索語を日本語Wikipedia Action APIへ匿名GETで送信する。`origin=*`と`credentials: omit`を使用し、会話履歴・長期記憶・パスワード・同期トークンをリクエストへ含めない。
 - 検索結果5件までを記事本文抜粋とともに表示。結果は`textContent`で描画し、出典URLを保持。利用者が明示的に学習候補化した記事のみ`data.learnings`へ`sourceType: external_research`としてpending保存。
 - ユーザー承認前は`formatApprovedLearningForPrompt`の対象外。承認後も出典URL・検索テーマをプロンプトへ含め、未検証参考情報として扱う。検索機能はオンライン専用で、ローカル推論経路を変更しない。
+
+- v83修正: 外部調査候補の承認確認分岐の構文を修正。外部AI候補と同様に外部調査候補も却下可能。
