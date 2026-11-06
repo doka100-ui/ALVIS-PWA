@@ -20,6 +20,9 @@
 
 ## 最新の開発更新（2026-11-06）
 
+- v87: `selectRelevantLearnings()` が関連度順に学びを選ぶ際、元レコードの出典メタデータを落としていた問題を修正。`sourceType` / `sourceUrl` / `sourceProvider` / `sourceQuestion` を回答生成まで保持する。v86の引用表示が外部調査の承認済み学びと接続される。Service Worker cache: `alvis-cache-v87-integrated`。
+- 関連学習の選択後も出典情報が保持される回帰テストを追加。iPad実機・GitHub Actionsは未確認。
+
 - v86: 承認済み公開情報を回答に利用した場合、ALVISが `[出典1]` 等で示した実在する出典だけを回答下へリンク表示する。引用のない回答には出典を付けない。履歴には任意の `sources` を保存し、既存履歴との互換性を維持。Service Worker cache: `alvis-cache-v86-integrated`。
 - 回帰テストを追加。コード構文・引用抽出の単体確認はこれから実施。iPad Safari/GitHub Actionsは未確認。
 
