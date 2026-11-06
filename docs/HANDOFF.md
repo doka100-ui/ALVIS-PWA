@@ -1,6 +1,6 @@
 # ALVIS 開発引き継ぎ
 
-最終更新: 2026-11-05  
+最終更新: 2026-11-06  
 リポジトリ: `doka100-ui/ALVIS-PWA`  
 作業ブランチ: `development`
 
@@ -17,6 +17,11 @@
 - モデル: `Qwen3-4B-q4f16_1-MLC`
 - 実行: iPad Safari / WebGPU
 - 同期Worker: `https://alvis-sync.dokodemodoa100.workers.dev`
+
+## 最新の開発更新（2026-11-06）
+
+- v86: 承認済み公開情報を回答に利用した場合、ALVISが `[出典1]` 等で示した実在する出典だけを回答下へリンク表示する。引用のない回答には出典を付けない。履歴には任意の `sources` を保存し、既存履歴との互換性を維持。Service Worker cache: `alvis-cache-v86-integrated`。
+- 回帰テストを追加。コード構文・引用抽出の単体確認はこれから実施。iPad Safari/GitHub Actionsは未確認。
 
 ## 最新の開発更新（2026-11-05）
 
