@@ -252,7 +252,7 @@ assert.ok(app.includes('異常な文字列を検出しました。履歴を外�
 assert.ok(app.includes('異常な回答出力を検出'));
 
 // Execute the real detector against representative good and corrupted outputs.
-const detectorStart = app.indexOf("function isCorruptedModelReply(");
+const detectorStart = app.indexOf("function isInternalMetaReply(");
 const detectorEnd = app.indexOf("\n\nfunction isWeatherQuestion", detectorStart);
 assert.ok(detectorStart >= 0 && detectorEnd > detectorStart, "corruption detector must exist");
 const isCorruptedModelReply = new Function(app.slice(detectorStart, detectorEnd) + "; return isCorruptedModelReply;")();
