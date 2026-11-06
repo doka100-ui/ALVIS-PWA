@@ -122,6 +122,55 @@ textarea{min-height:90px;resize:vertical}
 .hud-shortcut:active{background:#075985}
 @media(max-width:600px){.hud-shortcuts{gap:5px}.hud-shortcut{font-size:11px;padding:8px 2px;gap:4px}}
 
+
+/* v109: spatial hologram control room, blue-first with restrained red signal accents */
+.jarvis-stage{min-height:390px;display:grid;grid-template-columns:minmax(145px,.82fr) minmax(260px,1.5fr) minmax(145px,.82fr);align-items:center;gap:clamp(8px,2vw,24px);padding:24px clamp(12px,2vw,28px) 42px;background:radial-gradient(ellipse at 50% 47%,#0b3b60 0%,#071d34 42%,#020812 78%);isolation:isolate}
+.jarvis-stage:before{opacity:.19;background-size:28px 28px;mask-image:radial-gradient(ellipse at center,#000 4%,transparent 82%)}
+.jarvis-stage:after{opacity:.35;background:linear-gradient(180deg,transparent 48%,#38bdf812 50%,transparent 52%);background-size:100% 7px}
+.hud-side{position:relative;z-index:2;align-self:center;min-width:0;padding:13px 12px;border:1px solid #38bdf866;border-radius:8px 15px 8px 15px;background:linear-gradient(135deg,#0b294bbd,#061426a8 72%,#0b1e35b8);box-shadow:inset 0 1px #dff8ff19,inset 0 0 22px #0284c71b,0 0 20px #0284c722;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);clip-path:polygon(0 9px,9px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.hud-panel-heading{display:flex;align-items:center;gap:7px;padding-bottom:10px;border-bottom:1px solid #38bdf833;color:#9be7ff;font-size:10px;letter-spacing:.16em;font-weight:800}
+.hud-panel-heading i{width:6px;height:6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 9px #22d3ee}
+.hud-side-left .hud-ai-metric{margin:16px auto 14px}
+.hud-readout{display:flex;flex-direction:column;gap:3px;padding:7px 0;border-top:1px solid #38bdf822}
+.hud-readout span,.hud-interface-item small{font-size:8px;letter-spacing:.12em;color:#7eb8d8}
+.hud-readout b{font-size:10px;color:#d8f5ff;letter-spacing:.06em}
+.hud-side-foot{display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:9px;border-top:1px solid #38bdf833;color:#7dd3fc;font-size:8px;letter-spacing:.12em}
+.hud-status-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80}
+.hud-side-right{padding-bottom:10px}
+.hud-interface-item{display:flex;align-items:center;gap:7px;padding:10px 0;border-bottom:1px solid #38bdf822;min-width:0}
+.hud-interface-item>span{display:grid;place-items:center;flex:0 0 25px;height:25px;border:1px solid #38bdf866;border-radius:50%;color:#8be8ff;text-shadow:0 0 8px #38bdf8;font-size:14px}
+.hud-interface-item div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hud-interface-item b{font-size:9px;letter-spacing:.12em;color:#e0f7ff}
+.hud-interface-item small{white-space:nowrap;font-size:7px}
+.hud-interface-item em{margin-left:auto;font-size:7px;font-style:normal;color:#7dd3fc;letter-spacing:.06em}
+.hud-side-foot-right{justify-content:flex-end}
+.hud-center{position:relative;z-index:1;min-width:0;min-height:300px;display:grid;place-items:center;isolation:isolate}
+.hud-core{width:min(25vw,250px);min-width:170px;aspect-ratio:1;z-index:2;border:1px solid #8beaff;border-radius:50%;background:radial-gradient(circle at 34% 27%,#d8fbff55 0%,#38bdf833 13%,#07598555 42%,#020b1bdf 73%);box-shadow:0 0 18px #38bdf8aa,0 0 48px #0284c777,inset 0 0 34px #67e8f977,inset -18px -14px 35px #020617cc;overflow:visible}
+.hud-core:before{inset:5%;border:1px dashed #b9f5ff;box-shadow:0 0 16px #22d3ee77;background:repeating-linear-gradient(0deg,transparent 0 12px,#7dd3fc22 13px 14px),repeating-linear-gradient(90deg,transparent 0 18px,#7dd3fc1b 19px 20px);animation:alvisHudSpin 28s linear infinite}
+.hud-core:after{inset:17%;border:1px solid #7dd3fcaa;box-shadow:inset 0 0 24px #0ea5e966,0 0 20px #22d3ee55;background:radial-gradient(circle at 35% 30%,#dffbff22,transparent 38%)}
+.hud-core span{position:relative;z-index:3;font-weight:500;font-size:clamp(17px,2vw,25px);letter-spacing:.25em;color:#effcff;text-shadow:0 0 8px #fff,0 0 22px #38bdf8,0 0 40px #0ea5e9}
+.hud-core small{position:absolute;z-index:3;top:62%;font-size:7px;letter-spacing:.17em;color:#9deaff;text-shadow:0 0 8px #38bdf8}
+.hud-orbit{position:absolute;z-index:1;left:50%;top:48%;width:116%;height:43%;border:1px solid #38bdf899;border-radius:50%;box-shadow:0 0 10px #0ea5e933;pointer-events:none}
+.hud-orbit:after{content:"";position:absolute;left:13%;top:10%;width:5px;height:5px;border-radius:50%;background:#d8fbff;box-shadow:0 0 10px 3px #38bdf8}
+.hud-orbit-a{transform:translate(-50%,-50%) rotate(-24deg);animation:alvisHudSpin 22s linear infinite}
+.hud-orbit-b{width:108%;height:58%;transform:translate(-50%,-50%) rotate(58deg);border-color:#0ea5e977;animation:alvisHudSpin 31s linear infinite reverse}
+.hud-orbit-c{width:125%;height:31%;transform:translate(-50%,-50%) rotate(9deg);border-color:#7dd3fc55}
+.hud-projector{position:absolute;top:1%;left:50%;z-index:3;width:82px;height:22px;transform:translateX(-50%);border:1px solid #67e8f9aa;border-radius:50%;background:radial-gradient(ellipse,#38bdf855,#071d34 70%);box-shadow:0 0 16px #0ea5e977}
+.hud-projector span{position:absolute;inset:5px 15px;border:1px solid #baf6ff88;border-radius:50%}
+.hud-projector i{position:absolute;left:50%;top:18px;height:75px;border-left:1px solid #67e8f977;box-shadow:0 0 8px #38bdf8;transform:translateX(-50%)}
+.hud-beam{position:absolute;top:12%;left:50%;height:65%;width:34%;transform:translateX(-50%);z-index:0;background:linear-gradient(180deg,#38bdf800,#38bdf80c 48%,#fb718512 86%,transparent);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)}
+.hud-platform{position:absolute;left:50%;bottom:3%;width:92%;height:54px;transform:translateX(-50%);z-index:2;border-bottom:1px solid #38bdf899;border-radius:50%;background:radial-gradient(ellipse at center,#38bdf833 0%,#0ea5e91c 38%,transparent 70%);box-shadow:0 13px 18px -15px #38bdf8}
+.hud-platform:before,.hud-platform:after,.hud-platform i{content:"";position:absolute;left:50%;top:4px;width:76%;height:28px;transform:translateX(-50%);border:1px solid #38bdf8aa;border-radius:50%;box-shadow:0 0 12px #0ea5e955}
+.hud-platform:after{top:11px;width:58%;height:25px;border-color:#67e8f966}
+.hud-platform i{top:18px;width:38%;height:18px;border-color:#fb718577;box-shadow:0 0 9px #fb718533}
+.hud-platform b{position:absolute;left:50%;top:-15px;height:35px;border-left:1px solid #67e8f988;box-shadow:0 0 9px #38bdf8;transform:translateX(-50%)}
+.hud-platform span{position:absolute;left:50%;top:6px;width:5px;height:5px;border-radius:50%;background:#fda4af;box-shadow:0 0 9px 3px #fb7185;transform:translateX(-50%)}
+.hud-center-caption{position:absolute;bottom:-1px;z-index:3;color:#8bdfff;font-size:8px;letter-spacing:.18em;text-align:center;text-shadow:0 0 9px #0ea5e9;white-space:nowrap}
+.hud-caption{position:absolute;left:0;right:0;bottom:7px;font-size:8px;letter-spacing:.16em;color:#7dd3fc;text-align:center;opacity:.8}
+@media(max-width:760px){.jarvis-stage{min-height:290px;grid-template-columns:minmax(88px,.72fr) minmax(150px,1.35fr) minmax(88px,.72fr);gap:5px;padding:18px 7px 35px}.hud-side{padding:8px 6px}.hud-panel-heading{font-size:7px;letter-spacing:.08em}.hud-side-left .hud-ai-metric{width:52px;height:52px;margin:12px auto}.hud-side-left .hud-ai-metric strong{font-size:14px}.hud-side-left .hud-ai-metric span{font-size:7px}.hud-side-left .hud-ai-metric #hudAiDetail{font-size:6px}.hud-readout{padding:5px 0}.hud-readout span,.hud-interface-item small{font-size:6px}.hud-readout b,.hud-interface-item b{font-size:7px}.hud-interface-item{gap:3px;padding:7px 0}.hud-interface-item>span{flex-basis:18px;height:18px;font-size:10px}.hud-interface-item em{font-size:6px}.hud-center{min-height:235px}.hud-core{width:min(31vw,190px);min-width:132px}.hud-orbit{width:112%}.hud-platform{height:38px}.hud-caption{font-size:6px;letter-spacing:.08em}.hud-center-caption{font-size:6px;letter-spacing:.08em}}
+@media(max-width:430px){.jarvis-stage{min-height:255px;grid-template-columns:76px minmax(120px,1fr) 76px;gap:3px;padding:14px 4px 30px}.hud-side{padding:7px 4px}.hud-panel-heading{font-size:6px}.hud-interface-item em{display:none}.hud-interface-item>span{flex-basis:15px;height:15px;font-size:8px}.hud-interface-item{gap:2px}.hud-readout b{font-size:6px}.hud-center{min-height:205px}.hud-core{min-width:118px}.hud-caption{letter-spacing:.02em}}
+@media(prefers-reduced-motion:reduce){.hud-orbit-a,.hud-orbit-b,.hud-core:before{animation:none}}
+
 </style>
 </head>
 <body>
@@ -158,11 +207,33 @@ textarea{min-height:90px;resize:vertical}
 <button id="jarvisModeButton" type="button" data-display-mode="jarvis" aria-pressed="true">ALVISモード</button>
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
-<div class="mode-stage jarvis-stage" aria-label="ALVISシステム表示">
+<div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
+<div class="hud-side hud-side-left">
+<div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
 <button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="Qwen3-4Bを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">Qwen3-4B 未起動</span></button>
-<div class="hud-core"><span>ALVIS</span></div>
-<div class="hud-metric"><strong>LOCAL</strong><span>WEBGPU</span></div>
-<div class="hud-caption">PERSONAL AI SYSTEM　/　OFFLINE FIRST</div>
+<div class="hud-readout"><span>INFERENCE</span><b>LOCAL / WEBGPU</b></div>
+<div class="hud-readout"><span>DATA VAULT</span><b>ENCRYPTED</b></div>
+<div class="hud-side-foot"><span class="hud-status-dot"></span> OFFLINE FIRST</div>
+</div>
+<div class="hud-center">
+<div class="hud-projector"><span></span><i></i></div>
+<div class="hud-beam"></div>
+<div class="hud-orbit hud-orbit-a"></div>
+<div class="hud-orbit hud-orbit-b"></div>
+<div class="hud-orbit hud-orbit-c"></div>
+<div class="hud-core"><span>ALVIS</span><small>PERSONAL AI SYSTEM</small></div>
+<div class="hud-platform"><i></i><b></b><span></span></div>
+<div class="hud-center-caption">NEURAL CORE　/　SYSTEM ONLINE</div>
+</div>
+<div class="hud-side hud-side-right">
+<div class="hud-panel-heading"><i></i> INTERFACE</div>
+<div class="hud-interface-item"><span>◉</span><div><b>VOICE</b><small>VOICE INTERFACE</small></div><em>READY</em></div>
+<div class="hud-interface-item"><span>⌕</span><div><b>SEARCH</b><small>KNOWLEDGE ACCESS</small></div><em>READY</em></div>
+<div class="hud-interface-item"><span>◇</span><div><b>MEMORY</b><small>ENCRYPTED VAULT</small></div><em>LOCAL</em></div>
+<div class="hud-interface-item"><span>⌁</span><div><b>GROWTH</b><small>SELF IMPROVEMENT</small></div><em>READY</em></div>
+<div class="hud-side-foot hud-side-foot-right">ALVIS　/　CORE SYSTEM</div>
+</div>
+<div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
 </div>
 <div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
