@@ -571,6 +571,15 @@ let alvisServiceWorkerReady = Promise.resolve(false);
 
 const $ = id => document.getElementById(id);
 
+// iPhone Safariでは4BモデルのGPUメモリ要求が大きいため、端末種別に応じてQwen3を選択する。
+// WebLLM v0.2.87の公式モデル定義: 1.7B 約2037MB / 4B 約3432MB。
+const ALVIS_IS_IPHONE=/iPhone/i.test(navigator.userAgent||"");
+const ALVIS_MODEL_ID=ALVIS_IS_IPHONE?"Qwen3-1.7B-q4f16_1-MLC":"Qwen3-4B-q4f16_1-MLC";
+const ALVIS_MODEL_LABEL=ALVIS_IS_IPHONE?"Qwen3-1.7B":"Qwen3-4B";
+const ALVIS_CONTEXT_WINDOW=ALVIS_IS_IPHONE?1024:2048;
+if($("loadAiModel"))$("loadAiModel").textContent=ALVIS_MODEL_LABEL+"を読み込む";
+
+
 // ログイン操作は他の初期化処理より先に登録し、後続処理の例外で無反応にならないようにする。
 
 function updateHudConversationState(state="idle",elapsedSeconds=null){
@@ -584,22 +593,23 @@ function updateHudAiStatus(value=""){
   const stateNode=$("hudAiState");
   if(!stateNode)return;
   const message=String(value||"");
-  let state="offline",label="OFFLINE",detail="Qwen3-4B 未起動";
+  let state="offline",label="OFFLINE",detail=ALVIS_MODEL_LABEL+" 未起動";
   const progressMatch=message.match(/モデル読み込み中\s+(\d+)%/);
   if(progressMatch)aiLoadProgress=Math.max(0,Math.min(100,Number(progressMatch[1])));
   if(/エラー|失われ|失敗|停止扱い/.test(message)){state="error";label="ERROR";detail="モデル状態を確認してください";}
   else if(/終了して|解放しています/.test(message)){state="stopping";label="STOPPING";detail="メモリ解放中";}
-  else if(aiEngine){state="online";label="ONLINE";detail="Qwen3-4B 稼働中・端末内推論";aiLoadProgress=100;}
-  else if(aiLoading){state="loading";label="LOADING";detail="Qwen3-4B 準備中";}
+  else if(aiEngine){state="online";label="ONLINE";detail=ALVIS_MODEL_LABEL+" 稼働中・端末内推論";aiLoadProgress=100;}
+  else if(aiLoading){state="loading";label="LOADING";detail=ALVIS_MODEL_LABEL+" 準備中";}
   else{aiLoadProgress=0;}
   const percentNode=$("hudAiPercent");if(percentNode)percentNode.textContent=aiLoadProgress+"%";
   stateNode.textContent=label;stateNode.dataset.state=state;
   const detailNode=$("hudAiDetail");if(detailNode)detailNode.textContent=detail;
   const action=$("hudAiAction");
-  if(action){action.dataset.state=state;action.disabled=aiLoading||!!aiEngine||state==="stopping";action.setAttribute("aria-label",state==="error"?"Qwen3-4Bを再読み込み":aiEngine?"Qwen3-4Bは起動中":aiLoading?"Qwen3-4Bを読み込み中":"Qwen3-4Bを起動");}
+  if(action){action.dataset.state=state;action.disabled=aiLoading||!!aiEngine||state==="stopping";action.setAttribute("aria-label",state==="error"?ALVIS_MODEL_LABEL+"を再読み込み":aiEngine?ALVIS_MODEL_LABEL+"は起動中":aiLoading?ALVIS_MODEL_LABEL+"を読み込み中":ALVIS_MODEL_LABEL+"を起動");}
 }
 function setStatus(id,value){
-  const output=typeof value === "string" ? value : JSON.stringify(value,null,2);
+  const rawOutput=typeof value === "string" ? value : JSON.stringify(value,null,2);
+  const output=id==="aiStatus"?rawOutput.replaceAll("Qwen3-4B",ALVIS_MODEL_LABEL):rawOutput;
   $(id).textContent=output;
   if(id==="aiStatus")updateHudAiStatus(output);
 }
@@ -1775,13 +1785,13 @@ $("loadAiModel").addEventListener("click",async()=>{
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
       CreateMLCEngine=webllm.CreateMLCEngine;
     }
-    const loadedEngine=await CreateMLCEngine("Qwen3-4B-q4f16_1-MLC",{
+    const loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
       initProgressCallback:p=>{
         const percent=typeof p.progress==="number"?Math.max(0,Math.min(100,Math.round(p.progress*100))):aiLoadProgress;
         aiLoadProgress=percent;
         setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
       }
-    },{context_window_size:2048});
+    },{context_window_size:ALVIS_CONTEXT_WINDOW});
     const engine=serializeAlvisInference(loadedEngine);
     // 読み込み中にロックされた場合、エンジンを残さず解放する。
     if(!unlocked){
