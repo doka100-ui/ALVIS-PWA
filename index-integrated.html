@@ -1788,9 +1788,21 @@ function analyzeJapaneseOutputQuality(value){
   const repeatedSentence=sentences.some((sentence,index)=>sentences.indexOf(sentence)!==index);
   const awkwardPhrases=["そんなに頑張ってなんていません","頑張ってなんていません","そんなに頑張ってない","そんなに頑張っていない","頑張ってないんですか","頑張っていないんですか","そうyeah","そう yeah"];
   const suspiciousPhrases=awkwardPhrases.filter(phrase=>text.includes(phrase));
-  // 読点の直後に短い断片だけが残る回答（例：「また、富士山」）を未完了として扱う。
-  const incompleteEnding=/[、,]\s*[^。！？!?]{1,12}$/u.test(text);
+  // 読点の直後の断片に加え、「また」「さらに」など接続語で終わる回答も未完了として扱う。
+  const incompleteEnding=/[、,]\s*[^。！？!?]{1,12}$/u.test(text)||/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u.test(text);
   return {hasSuspiciousLatin:suspiciousLatin.length>0,suspiciousLatin,repeatedSentence,suspiciousPhrases,incompleteEnding,needsRepair:suspiciousLatin.length>0||repeatedSentence||suspiciousPhrases.length>0||incompleteEnding};
+}
+
+// 未完了の接続語・読点断片が修復後にも残った場合、最後の未完了部分だけを除き、完結した文を残す。
+function trimIncompleteJapaneseEnding(value){
+  let text=String(value||"").trim();
+  if(!text)return "";
+  text=text.replace(/(?:また|そして|さらに|なお|一方で|そのため|ただし|例えば|特に|加えて|つまり|なぜなら|ですが|けれども|または|あるいは)[、,]?\s*$/u,"");
+  text=text.replace(/[、,]\s*[^。！？!?]{1,12}$/u,"");
+  text=text.trim();
+  if(!text)return "回答が途中で切れてしまったよ。もう一度聞いてね。";
+  if(!/[。！？!?]$/u.test(text))text+="。";
+  return text;
 }
 
 
@@ -2113,6 +2125,10 @@ async function sendToAlvis(){
           reply=buildNonRepeatingEmotionFallback(text,data.history);
           setStatus("aiStatus","日本語の不自然な表現を検出したため、端末内の自然な会話表現に切り替えました。");
         }
+      }
+      if(reply && analyzeJapaneseOutputQuality(reply).incompleteEnding){
+        reply=trimIncompleteJapaneseEnding(reply);
+        setStatus("aiStatus","回答の末尾が未完成だったため、完結した文章だけを表示しました。");
       }
       const totalSeconds=((performance.now()-startedAt)/1000).toFixed(1);
       const finalChoice=result?.choices?.[0]||{};
