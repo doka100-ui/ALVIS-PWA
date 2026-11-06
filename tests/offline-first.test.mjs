@@ -481,3 +481,21 @@ assert.match(app,/ここに3Dアバターを表示する準備をしています
 assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
 assert.match(app,/const CACHE_NAME = "alvis-cache-v105-integrated"/);
+
+
+// v108 HUD progress, compact chat layout, and working quick navigation.
+assert.match(app,/id="hudAiPercent">0%<\/strong>/,"HUD must show the model loading percentage");
+assert.match(app,/let aiLoadProgress = 0/,"model progress state must be initialized");
+assert.match(app,/initProgressCallback:p=>\{[\s\S]*?aiLoadProgress=percent[\s\S]*?setStatus\("aiStatus","モデル読み込み中 "\+percent/,"WebLLM progress must update the HUD percentage");
+assert.match(app,/message\.match\(\/モデル読み込み中\\s\+\(\\d\+\)%\//,"HUD status parser must read the reported percentage");
+assert.match(app,/aiLoadProgress=100/,"successful model load must show 100 percent");
+assert.match(app,/class="hud-shortcuts" aria-label="ALVISクイック機能"/);
+assert.match(app,/data-page="memoryPage"/);
+assert.match(app,/data-page="growthPage"/);
+assert.match(app,/data-scroll="voicePanel"/);
+assert.match(app,/\.hud-shortcut\[data-page\][\s\S]*?nav button\[data-page=/);
+assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
+assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
+assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
+assert.match(app,/id="unloadAiModel"/,"model unload control must remain available");
+assert.match(app,/const CACHE_NAME = "alvis-cache-v108-integrated"/);
