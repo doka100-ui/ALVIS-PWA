@@ -600,7 +600,7 @@ assert.match(app,/async function getKokoroSpeechBlob\(clean,voiceId\)/);
 assert.match(app,/caches\.open\("alvis-voice-cache-v1"\)/);
 assert.match(app,/__alvis_voice_cache__\/welcome-v1/);
 assert.match(app,/async function playWelcomeGreeting\(\)/);
-assert.match(app,/await prepareKokoroTTS\(\);[\s\S]*?await speakKokoro\("おかえりなさい"\)/);
+assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);\nassert.match(app,/const cached=await getCachedKokoroWelcomeBlob\(\);[\s\S]*?await playKokoroBlob\(cached,"おかえりなさい"\)/);\nassert.doesNotMatch(app,/async function playWelcomeGreeting\(\)\{[\s\S]*?await prepareKokoroTTS\(\)/);
 assert.match(app,/welcomeButton\.onclick=async\(\)=>\{[\s\S]*?await playWelcomeGreeting\(\);/);
 assert.match(app,/async function previewKokoroVoice\(voiceId,button\)\{\s*unlockAlvisAudioFromGesture\(\);/);
 assert.match(app,/previewKokoroTuned"\)\?\.addEventListener\("click",async\(\)=>\{unlockAlvisAudioFromGesture\(\)/);
@@ -609,3 +609,12 @@ assert.match(app,/source\.start\(0\)/);
 assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
 assert.match(app,/value="0\.98"/);
 assert.match(sw,/alvis-cache-v120-integrated/);
+
+// v121: Kokoro and Qwen must not be initialized together on memory-constrained phones.
+// Login reuses the cached greeting audio only; it never loads the Kokoro inference runtime.
+assert.match(app,/if\(aiEngine\|\|aiLoading\)\{setStatus\("voiceStatus","Qwen3-4Bの使用中はKokoroを同時に起動できません。/);
+assert.match(app,/if\(kokoroTts\|\|kokoroLoading\)\{[\s\S]*?ページを再読み込みしてからQwen3-4Bだけを起動/);
+assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?端末標準音声で読み上げます/);
+assert.match(app,/async function playKokoroBlob\(blob,clean\)/);
+assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);
+assert.match(sw,/alvis-cache-v121-integrated/);
