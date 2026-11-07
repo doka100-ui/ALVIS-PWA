@@ -1041,6 +1041,26 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   text-shadow:0 0 12px #4bdcff!important;
 }
 /* end v155 */
+ 
+/* v156: restore touch/click hit-testing for the hologram side panels.
+   Legacy reference-scene rules disabled pointer events on .hud-side;
+   making the panels visible again did not restore interaction for children. */
+.display-dock .mode-stage.jarvis-stage>.hud-side{
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side .hud-nav,
+.display-dock .mode-stage.jarvis-stage .hud-side .hud-shortcut{
+  visibility:visible!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-nav .hud-shortcut{
+  position:relative!important;
+  z-index:6!important;
+  cursor:pointer!important;
+}
+
 
 </style>
 </head>
