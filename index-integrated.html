@@ -1438,6 +1438,34 @@ header .status{margin-top:2px}
  .display-dock .alvis-chat-area{gap:6px!important}
  @media(max-width:760px){.display-dock .alvis-chat-area{gap:4px!important}}
  /* end v174 */
+
+ /* v175: unify the hologram and the response/composer inside one outer frame. */
+ .display-dock .alvis-hologram-frame{
+   display:flex!important;flex-direction:column!important;align-items:stretch!important;
+   width:min(100%,420px)!important;max-width:420px!important;min-width:0!important;
+   margin:0 auto 10px!important;padding:8px 8px 10px!important;box-sizing:border-box!important;
+   border:1px solid rgba(56,189,248,.62)!important;border-radius:13px!important;
+   background:linear-gradient(155deg,rgba(7,28,49,.98),rgba(2,10,22,.99))!important;
+   box-shadow:inset 0 0 20px rgba(14,165,233,.10),0 0 18px rgba(2,132,199,.16)!important;
+   overflow:hidden!important;
+ }
+ .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+   width:100%!important;max-width:none!important;margin:0 auto 8px!important;
+   flex:0 0 auto!important;
+ }
+ .display-dock .alvis-hologram-frame>.alvis-chat-area{
+   width:100%!important;max-width:none!important;margin:0!important;padding:0 1px!important;
+   box-sizing:border-box!important;gap:6px!important;
+ }
+ .display-dock .alvis-hologram-frame .alvis-chat-area #alvisLatestReply,
+ .display-dock .alvis-hologram-frame .alvis-chat-area .alvis-chat-composer{width:100%!important;box-sizing:border-box!important}
+ @media(max-width:760px){
+   .display-dock .alvis-hologram-frame{width:100%!important;padding:6px 6px 8px!important;border-radius:11px!important}
+   .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{margin-bottom:6px!important}
+   .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
+ }
+ /* end v175 */
+
  /* end v171 */
  /* end v170 */
 </style>
@@ -1482,6 +1510,7 @@ header .status{margin-top:2px}
 <button id="jarvisModeButton" type="button" data-display-mode="jarvis" aria-pressed="true">ALVISモード</button>
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
+<div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
 
 
@@ -1605,6 +1634,7 @@ header .status{margin-top:2px}
     <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
     <button id="sendChat" type="button" disabled>送信</button>
   </div>
+</div>
 </div>
 <div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
