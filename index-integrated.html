@@ -1504,6 +1504,14 @@ header .status{margin-top:2px}
    .display-dock .alvis-hologram-frame .alvis-chat-area #alvisLatestReply{padding:5px 8px 6px}
  }
  /* end v177 */
+
+ /* v178: the left hologram menu already identifies the current chat page.
+    Hide only the duplicate top navigation item while chat is active; keep it
+    available on every other page so users can return to chat. */
+ #appPanel:has(> main > #chatPage:not(.hidden)) > nav > button[data-page="chatPage"]{
+   display:none!important;
+ }
+ /* end v178 */
  /* end v175 */
 
  /* end v171 */
