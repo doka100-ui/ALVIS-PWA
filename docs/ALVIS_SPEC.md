@@ -1,3 +1,9 @@
+## v158 ホログラム初回モーション起動
+- ログイン後のアプリ表示完了時、チャット画面への復帰時、pageshow/visibilitychange時に中央HUDの3本の軌道アニメーションを再起動する。
+- 再起動は animation:none!important → layout flush → 2回のrequestAnimationFrame後にインライン指定を除去し、既存CSSの回転アニメーションへ復帰させる。
+- prefers-reduced-motion: reduce、アバターモード、非表示のチャット画面では実行しない。
+- 回転の見た目/周期、台座、球体、保存データ、暗号化、同期、バックアップ、AI推論、音声処理は変更しない。Safari実機確認は別途必要。
+ 
 ## v153 リング・AI起動ボタン
 - 中央HUDのリングはCSS個別translateで中心を固定し、rotateのみをアニメーションする。楕円2本は逆方向、円形リング1本は同方向回転。
 - 左HUDの#hudAiActionは実DOMの左パネル内で表示し、旧中央透明オーバーレイ指定を上書きする。既存のローカルAIロード処理へのイベント経路は保持。
