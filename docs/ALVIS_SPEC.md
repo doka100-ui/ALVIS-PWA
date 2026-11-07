@@ -372,3 +372,11 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - ALVISの設計方針「OFFLINE FIRST」と、現在のネットワーク接続状態「ONLINE / OFFLINE」を別々に表示する。接続状態の表示は navigator.onLine に追従する。
 - 全ページ共通ルーターで、ログイン後の歓迎演出に寄せた短いフェード/スケール/光の波を実行。reduced-motion の場合は演出を停止する。
 - Service Worker cache: alvis-cache-v157-integrated。
+
+
+## v160 — ホログラム軌道の回転プロパティ分離
+
+- 中央軌道リングの回転はWeb Animations APIでCSSの個別 `rotate` プロパティを駆動する。
+- `translate:-50% -50%` による位置固定と回転を分離し、`transform:none!important` の固定指定と競合させない。
+- 3本のリングは22秒/31秒/42秒で線形回転。台座と球体SVGの形状・配置は維持する。
+- 動きを減らす設定が有効な場合はアニメーションを開始しない。
