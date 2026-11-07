@@ -830,6 +830,79 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  .display-dock .hud-brand small{font-size:6px;}
  .display-dock .hud-info-card .hud-panel-heading{font-size:6px;}
 }
+
+/* v152: refine motion, translucency, clock alignment and AI launch feedback */
+.display-dock .hud-orbit{
+  transform-box:border-box!important;
+  transform-origin:50% 50%!important;
+  will-change:transform;
+}
+.display-dock .hud-orbit-a{animation:alvisOrbitA152 24s linear infinite!important;}
+.display-dock .hud-orbit-b{animation:alvisOrbitB152 31s linear infinite!important;}
+.display-dock .hud-orbit-c{animation:alvisOrbitC152 38s linear infinite!important;}
+@keyframes alvisOrbitA152{
+  from{transform:translate(-50%,-50%) rotate(-18deg)}
+  to{transform:translate(-50%,-50%) rotate(342deg)}
+}
+@keyframes alvisOrbitB152{
+  from{transform:translate(-50%,-50%) rotate(18deg)}
+  to{transform:translate(-50%,-50%) rotate(-342deg)}
+}
+@keyframes alvisOrbitC152{
+  from{transform:translate(-50%,-50%) rotate(72deg)}
+  to{transform:translate(-50%,-50%) rotate(432deg)}
+}
+/* The globe itself is translucent; the ALVIS wordmark stays crisp and opaque. */
+.display-dock .hud-core{
+  background:radial-gradient(circle at 35% 24%,#b8f8ff42,#167ec82e 36%,#02132f91 79%)!important;
+  box-shadow:0 0 18px #7deaffbb,0 0 52px #079bff77,0 0 110px #087cff44,inset 0 0 32px #7ceaff88!important;
+}
+.display-dock .hud-globe-map{opacity:.82!important;}
+.display-dock .hud-core:before{opacity:.72!important;}
+.display-dock .hud-core:after{opacity:.78!important;}
+/* Keep the date and time in one stable right-aligned column. */
+.display-dock .hud-clock{
+  width:100%!important;min-width:0!important;flex:0 0 auto!important;
+  align-self:stretch!important;align-items:flex-end!important;text-align:right!important;
+  padding:2% 3% 4%!important;font-variant-numeric:tabular-nums lining-nums;
+  font-feature-settings:"tnum" 1;
+}
+.display-dock .hud-clock span,.display-dock .hud-clock strong{
+  display:block!important;width:100%!important;max-width:100%!important;
+  text-align:right!important;white-space:nowrap!important;line-height:1.35!important;
+}
+.display-dock .hud-clock strong{letter-spacing:.06em!important;}
+/* AI launch feedback follows the real model state and measured load progress. */
+.display-dock .hud-ai-launch{
+  position:relative!important;min-height:clamp(52px,6.8vw,82px)!important;
+  pointer-events:auto!important;touch-action:manipulation;
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+.display-dock .hud-ai-launch:disabled{opacity:.94!important;cursor:default!important;}
+.display-dock .hud-ai-ring{
+  position:relative!important;overflow:visible!important;
+  background:conic-gradient(#42e5ff var(--ai-progress,0%),#0b4775 0)!important;
+  border:0!important;padding:4px!important;
+}
+.display-dock .hud-ai-ring:before{
+  content:""!important;position:absolute!important;inset:4px!important;
+  border-radius:50%!important;background:#031a32!important;
+  box-shadow:inset 0 0 10px #0b85c9!important;
+}
+.display-dock .hud-ai-ring strong{position:relative!important;z-index:1!important;}
+.display-dock .hud-ai-launch[data-state="loading"]{
+  border-color:#facc15!important;box-shadow:0 0 16px #facc1555,inset 0 0 20px #facc1518!important;
+}
+.display-dock .hud-ai-launch[data-state="online"]{
+  border-color:#4ade80!important;box-shadow:0 0 14px #22c55e44,inset 0 0 18px #22c55e12!important;
+}
+.display-dock .hud-ai-launch[data-state="error"]{
+  border-color:#fb7185!important;box-shadow:0 0 14px #fb718555!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .display-dock .hud-orbit-a,.display-dock .hud-orbit-b,.display-dock .hud-orbit-c{animation:none!important;}
+}
+
 </style>
 </head>
 <body>
@@ -1333,6 +1406,12 @@ function updateHudAiStatus(value=""){
   else if(aiLoading){state="loading";label="LOADING";detail=ALVIS_MODEL_LABEL+" 準備中";}
   else{aiLoadProgress=0;}
   const percentNode=$("hudAiPercent");if(percentNode)percentNode.textContent=aiLoadProgress+"%";
+  const launch=$("hudAiAction");
+  if(launch){
+    launch.style.setProperty("--ai-progress",aiLoadProgress+"%");
+    launch.setAttribute("aria-live","polite");
+    launch.setAttribute("aria-busy",String(state==="loading"));
+  }
   stateNode.textContent=label;stateNode.dataset.state=state;
   const detailNode=$("hudAiDetail");if(detailNode)detailNode.textContent=detail;
   const action=$("hudAiAction");
@@ -2495,7 +2574,12 @@ function lockApp(){
 
 $("hudAiAction")?.addEventListener("click",()=>{
   if(aiLoading||aiEngine)return;
-  $("loadAiModel").click();
+  const loadButton=$("loadAiModel");
+  if(!loadButton){
+    setStatus("aiStatus","AIモデルの読み込み操作を確認できません。端末診断画面から再試行してください。");
+    return;
+  }
+  loadButton.click();
 });
 $("loadAiModel").addEventListener("click",async()=>{
   if(aiLoading)return;
