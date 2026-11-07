@@ -1180,6 +1180,19 @@ body.alvis-page-transitioning:after{
 /* end v164 */
 
 
+
+/* v165: clearer speaker identity and message separation. */
+.message{position:relative;padding:13px 16px;margin:16px 0;max-width:min(88%,760px);border-radius:16px;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.message-speaker{font-size:11px;font-weight:800;letter-spacing:.12em;margin-bottom:7px;opacity:.95}
+.message-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;font-size:15px}
+.message.alvis{margin-right:auto;background:linear-gradient(145deg,rgba(8,43,78,.96),rgba(13,29,55,.98));border:1px solid rgba(71,190,255,.62);border-left:3px solid #52d8ff;border-radius:5px 17px 17px 17px;color:#e8f8ff;box-shadow:0 0 18px rgba(35,164,255,.12),inset 0 0 22px rgba(45,160,255,.06)}
+.message.alvis .message-speaker{color:#70dcff}
+.message.user{margin-left:auto;background:linear-gradient(145deg,#1855a9,#244b91);border:1px solid rgba(115,174,255,.65);border-right:3px solid #a5caff;border-radius:17px 5px 17px 17px;color:#fff}
+.message.user .message-speaker{text-align:right;color:#d5e8ff}
+#voicePage .panel{max-width:900px;margin:18px auto}
+@media(max-width:600px){.message{max-width:94%;padding:12px 13px;margin:14px 0}.message-body{font-size:15px;line-height:1.7}}
+/* end v165 */
+
 </style>
 </head>
 <body>
@@ -1203,6 +1216,7 @@ body.alvis-page-transitioning:after{
 <div id="appPanel" class="hidden">
 <nav>
 <button data-page="chatPage">チャット</button>
+<button data-page="voicePage">音声会話</button>
 <button data-page="candidatePage">記憶候補</button>
 <button data-page="memoryPage">長期記憶</button>
 <button data-page="historyPage">履歴</button>
@@ -1347,9 +1361,19 @@ body.alvis-page-transitioning:after{
 <div class="hud-shortcuts" aria-label="ALVISクイック機能">
  <button type="button" class="hud-shortcut" data-page="memoryPage"><span>◈</span>記憶</button>
  <button type="button" class="hud-shortcut" data-page="growthPage"><span>⌁</span>成長</button>
- <button type="button" class="hud-shortcut" data-scroll="voicePanel"><span>♫</span>音声</button>
  <button type="button" class="hud-shortcut" data-page="devicePage"><span>⌘</span>端末</button>
  </div>
+
+<label class="inline-option"><input id="useOnlineAi" type="checkbox"> この質問文だけをオンラインAIにも送り、複数の意見を集める</label>
+<p class="small">チェックした1回だけ外部AIを利用します。送信するのは今の質問文だけで、会話履歴・長期記憶は送信しません。未設定・通信失敗時は端末内AIだけで回答します。</p>
+<p class="small">選択したQwen3モデルは端末内で推論します。承認済み長期記憶の内容を会話時にAIへ渡します。</p>
+</div>
+</section>
+
+<section id="voicePage" class="hidden">
+<div class="panel">
+<h2>音声会話</h2>
+<p class="small">ALVISの読み上げ方法や声を設定できます。設定はこれまでどおり保存されます。</p>
 <div class="panel" style="margin:0 0 12px">
 <strong id="voicePanel">音声会話（試作）</strong>
 <label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
@@ -1380,9 +1404,6 @@ body.alvis-page-transitioning:after{
 <audio id="kokoroPlayer" class="hidden" controls playsinline style="width:100%;margin-top:8px"></audio>
 <p class="small">Kokoroは初回オンライン時に音声モデルと日本語辞書を取得します。取得・キャッシュ後は端末内で合成する設計です。初回準備には空き容量と時間が必要です。</p>
 </div>
-<label class="inline-option"><input id="useOnlineAi" type="checkbox"> この質問文だけをオンラインAIにも送り、複数の意見を集める</label>
-<p class="small">チェックした1回だけ外部AIを利用します。送信するのは今の質問文だけで、会話履歴・長期記憶は送信しません。未設定・通信失敗時は端末内AIだけで回答します。</p>
-<p class="small">選択したQwen3モデルは端末内で推論します。承認済み長期記憶の内容を会話時にAIへ渡します。</p>
 </div>
 </section>
 
@@ -2574,7 +2595,12 @@ function renderChat(){
   entries.forEach(item=>{
     const line=document.createElement("div");
     line.className="message "+(item.role==="user"?"user":"alvis");
+    const speaker=document.createElement("div");
+    speaker.className="message-speaker";
+    speaker.textContent=item.role==="user"?"あなた":"ALVIS";
+    line.appendChild(speaker);
     const body=document.createElement("div");
+    body.className="message-body";
     body.textContent=item.text||item.body||item.title||"";
     line.appendChild(body);
     if(item.role==="alvis" && Array.isArray(item.sources)&&item.sources.length){
@@ -4396,8 +4422,7 @@ document.querySelectorAll(".hud-interface-action[data-hud-action], .hud-readout-
     return;
   }
   if(action==="voice"){
-    const target=$("voicePanel");
-    if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+    document.querySelector('nav button[data-page="voicePage"]')?.click();
     return;
   }
   if(action==="process"||action==="search"){
