@@ -3959,6 +3959,15 @@ document.querySelectorAll(".hud-interface-action[data-hud-action], .hud-readout-
 window.addEventListener("online",updateHudSystemStatus);
 window.addEventListener("offline",updateHudSystemStatus);
 updateHudSystemStatus();
+function updateHudClock(){
+  const dateNode=$("hudDate"),timeNode=$("hudTime");
+  if(!dateNode||!timeNode)return;
+  const now=new Date();
+  dateNode.textContent=new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit",weekday:"short"}).format(now);
+  timeNode.textContent=new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",hour12:false}).format(now);
+}
+updateHudClock();
+setInterval(updateHudClock,30000);
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   alvisServiceWorkerReady=(async()=>{
