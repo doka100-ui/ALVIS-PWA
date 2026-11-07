@@ -1,3 +1,12 @@
+## v160 リング回転と位置固定の競合を解消（2026-11-07）
+- v159の実装を再点検し、v153で中央位置維持のために `transform:none!important` を指定しているのに、v159が同じ `transform` をWeb Animations APIで動かそうとしていた競合を確認。
+- 3本の軌道は `transform` ではなく独立したCSS `rotate` プロパティをWAAPIでアニメーション。既存の `translate:-50% -50%` による中心固定を維持しながら回転する。
+- 回転周期は22秒/31秒/42秒。ログイン後、チャット復帰時、pageshow/visibilitychange時の開始経路は維持。
+- prefers-reduced-motion: reduce の場合は動きを強制しない。
+- 記憶、履歴、AES-GCM、同期、バックアップ、AI推論、音声、球体SVG、投影台の見た目は変更なし。
+- Service Worker cache: alvis-cache-v160-integrated。
+- 静的なソース検査のみ。Safari実機での動作確認はユーザー確認待ち。
+
 ## v159 ホログラム軌道をWeb Animations APIで駆動（2026-11-07）
 - v158のCSSアニメーション再起動だけではSafariの初回表示時に動かない問題が残ったため、中央HUDの3軌道をElement.animate()で直接駆動する方式へ変更。
 - 22秒/31秒/42秒の線形無限回転。既存の回転角度、中心位置、楕円/円形形状、色、投影台は維持。
