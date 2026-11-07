@@ -619,6 +619,29 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 .display-dock .mode-stage.jarvis-stage>.alvis-motion-orbit,
 .display-dock .mode-stage.jarvis-stage>.alvis-core-light,
 .display-dock .mode-stage.jarvis-stage>.alvis-projection-scan{display:block!important}
+
+/* v145: responsive hologram stage sizing across desktop, iPad and iPhone */
+.display-dock .mode-stage.jarvis-stage{
+  width:min(100%,520px)!important;
+  max-width:520px!important;
+  aspect-ratio:1397/1126!important;
+  height:auto!important;
+  margin:clamp(6px,1.5vw,14px) auto 14px!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-image{
+  width:100%!important;height:100%!important;object-fit:fill!important;
+  object-position:center!important;image-rendering:auto!important;
+}
+@media(max-width:600px){
+  .display-dock .mode-stage.jarvis-stage{
+    width:100%!important;max-width:520px!important;
+    margin:8px auto 12px!important;
+  }
+}
+@media(min-width:900px){
+  .display-dock .mode-stage.jarvis-stage{width:min(100%,560px)!important;max-width:560px!important}
+}
+/* end v145 */
 </style>
 </head>
 <body>
