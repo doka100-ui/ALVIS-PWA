@@ -4871,7 +4871,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       }
     })().finally(()=>{
       avatarInitPromise=null;
-      if(isActive()&&!avatarInstance)requestAnimationFrame(()=>ensureAvatar());
+      if(token!==generation&&isActive()&&!avatarInstance)requestAnimationFrame(()=>ensureAvatar());
     });
     return avatarInitPromise;
   }
