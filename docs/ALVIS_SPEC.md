@@ -355,3 +355,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 ## v156 画面メニュー操作
 - ホログラム左右パネルはタップ可能（pointer-events:auto）。左ナビの各ボタンは既存の data-page により共通ページルーターへ接続する。
 - Service Worker cache: alvis-cache-v156-integrated。
+
+
+## v157 状態表示とページ遷移
+- ALVISの設計方針「OFFLINE FIRST」と、現在のネットワーク接続状態「ONLINE / OFFLINE」を別々に表示する。接続状態の表示は navigator.onLine に追従する。
+- 全ページ共通ルーターで、ログイン後の歓迎演出に寄せた短いフェード/スケール/光の波を実行。reduced-motion の場合は演出を停止する。
+- Service Worker cache: alvis-cache-v157-integrated。
