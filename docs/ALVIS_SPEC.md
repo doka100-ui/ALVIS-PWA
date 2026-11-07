@@ -350,3 +350,8 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 ### v155 左側ホログラムメニュー
 - メインナビとホログラム内 `data-page` ボタンは共通の直接画面遷移関数を使う。疑似クリックで他のナビボタンへ委譲しない。
 - ページ切替時は対象ページIDを検証し、表示ページ・メインナビ選択状態・ホログラムメニュー選択状態を同期する。
+
+
+## v156 画面メニュー操作
+- ホログラム左右パネルはタップ可能（pointer-events:auto）。左ナビの各ボタンは既存の data-page により共通ページルーターへ接続する。
+- Service Worker cache: alvis-cache-v156-integrated。
