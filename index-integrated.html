@@ -976,6 +976,58 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  .display-dock .hud-center .hud-orbit{animation:none!important;}
 }
 
+
+/* v154: premium precision-machined holographic pedestal.
+   Keep the pedestal static; remove the toy-like hot-pink core and oversized glow. */
+.display-dock .hud-platform{
+  width:84%!important;height:15%!important;bottom:2%!important;
+  border:1px solid #8daec455!important;border-bottom-color:#c5d8e477!important;
+  border-radius:50%!important;
+  background:
+    radial-gradient(ellipse at 50% 22%,#d8f5ff14 0%,transparent 34%),
+    linear-gradient(180deg,#8fb6cb18 0%,#16334b55 42%,#020b19dd 78%,#071a2b88 100%)!important;
+  box-shadow:0 8px 16px -13px #7dd3fc88,inset 0 1px 2px #e5f8ff22,inset 0 -5px 10px #010713aa!important;
+}
+.display-dock .hud-platform:before,
+.display-dock .hud-platform:after,
+.display-dock .hud-platform i{
+  border-radius:50%!important;
+  box-shadow:inset 0 1px 1px #e7f8ff22,0 1px 2px #020b1888!important;
+}
+.display-dock .hud-platform:before{
+  top:9%!important;width:88%!important;height:68%!important;
+  border:1px solid #9bb9c977!important;
+  background:linear-gradient(180deg,#d8f5ff0c,#07172922)!important;
+}
+.display-dock .hud-platform:after{
+  top:23%!important;width:67%!important;height:51%!important;
+  border:1px solid #8fc8df66!important;
+  background:linear-gradient(180deg,#a9eaff0b,#020b1a66)!important;
+}
+.display-dock .hud-platform i{
+  top:34%!important;width:43%!important;height:34%!important;
+  border:1px solid #b9dce955!important;
+  background:radial-gradient(ellipse,#9deaff12 0%,#06162955 72%)!important;
+}
+.display-dock .hud-platform b{
+  left:50%!important;top:49%!important;width:7%!important;height:8%!important;
+  transform:translate(-50%,-50%)!important;border-radius:50%!important;
+  background:radial-gradient(circle,#c8f5ffbb 0%,#4e9fbd77 48%,#071a2b00 75%)!important;
+  box-shadow:0 0 7px 2px #55b7d933!important;
+}
+.display-dock .hud-platform span{
+  left:50%!important;top:8%!important;width:3px!important;height:3px!important;
+  border-radius:50%!important;background:#b9dce9aa!important;
+  box-shadow:0 0 4px 1px #75c9e944!important;
+}
+@media(max-width:760px){
+  .display-dock .hud-platform{width:88%!important;height:14%!important}
+}
+@media(max-width:430px){
+  .display-dock .hud-platform{width:90%!important;height:13%!important}
+}
+/* end v154 */
+
 </style>
 </head>
 <body>
