@@ -521,3 +521,7 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - クイック機能はホログラム枠の外へ移動し、チャット履歴の下に配置する。
 - ホログラム枠のsticky固定を解除し、スクロール時にチャット履歴を覆わないようにする。
 - 既存の chatInput / sendChat / chatLog ID、送信処理、モデル状態制御、保存形式、暗号化、同期、バックアップを維持する。
+
+
+## v183 アバターモードの縦スペース
+- アバターモードのみ3D表示ステージ/キャンバスの最小高さを通常260px、スマートフォン240pxに設定し、チャット欄上の不要な縦空間を抑える。ALVIS（ホログラム）モードには影響させない。
