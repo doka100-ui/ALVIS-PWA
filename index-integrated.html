@@ -1573,6 +1573,15 @@ header .status{margin-top:2px}
 }
 /* end v184 */
 
+/* v185: place the avatar stage at the top of the display dock, before chat. */
+#chatPage[data-display-mode="avatar"] .display-dock>.avatar-stage{
+  order:0;
+}
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame{
+  order:1;
+}
+/* end v185 */
+
 </style>
 <script type="importmap">
 {
@@ -1623,6 +1632,10 @@ header .status{margin-top:2px}
 <div class="mode-switch" role="group" aria-label="ALVIS表示モード">
 <button id="jarvisModeButton" type="button" data-display-mode="jarvis" aria-pressed="true">ALVISモード</button>
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
+</div>
+<div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
+<div id="alvisAvatarCanvas" class="alvis-avatar-canvas" aria-label="ALVISの3Dアバター"></div>
+<div id="alvisAvatarStatus" class="alvis-avatar-status" role="status" aria-live="polite">ALVIS AVATAR / STANDBY</div>
 </div>
 <div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
@@ -1750,10 +1763,7 @@ header .status{margin-top:2px}
   </div>
 </div>
 </div>
-<div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
-<div id="alvisAvatarCanvas" class="alvis-avatar-canvas" aria-label="ALVISの3Dアバター"></div>
-<div id="alvisAvatarStatus" class="alvis-avatar-status" role="status" aria-live="polite">ALVIS AVATAR / STANDBY</div>
-</div>
+
 </div>
 
 <div class="hud-shortcuts" aria-label="ALVISクイック機能">
