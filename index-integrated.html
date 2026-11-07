@@ -1313,6 +1313,58 @@ header .status{margin-top:2px}
   .display-dock .alvis-chat-composer{margin-top:6px}
 }
 /* end v169 */
+
+/* v170: place conversation in the unused lower area of the hologram canvas. */
+.display-dock .jarvis-stage{
+  grid-template-columns:minmax(76px,.82fr) minmax(0,1.5fr) minmax(76px,.82fr);
+  grid-template-rows:auto auto;
+  align-content:stretch;
+  row-gap:4px;
+  padding-bottom:12px;
+}
+.display-dock .jarvis-stage #chatLog{
+  grid-column:1 / -1;
+  grid-row:2;
+  align-self:stretch;
+  min-height:68px;
+  max-height:17vh;
+  margin:0;
+  padding:6px 10px;
+  border:1px solid #38bdf866;
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(2,16,31,.94),rgba(4,26,45,.9));
+  box-shadow:inset 0 1px 0 #dff8ff12,0 0 12px #0284c722;
+  overflow-y:auto;
+}
+.display-dock .jarvis-stage .alvis-chat-composer{
+  grid-column:1 / -1;
+  grid-row:3;
+  margin:0;
+}
+#chatPage[data-display-mode="avatar"] .jarvis-stage{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto auto;
+  min-height:0;
+  padding:8px;
+  background:linear-gradient(145deg,#071a2c,#061426);
+}
+#chatPage[data-display-mode="avatar"] .jarvis-stage>.hud-side,
+#chatPage[data-display-mode="avatar"] .jarvis-stage>.hud-center,
+#chatPage[data-display-mode="avatar"] .jarvis-stage>.hud-caption{display:none!important}
+#chatPage[data-display-mode="avatar"] .jarvis-stage #chatLog{grid-column:1;grid-row:1;max-height:22vh}
+#chatPage[data-display-mode="avatar"] .jarvis-stage .alvis-chat-composer{grid-column:1;grid-row:2}
+@media(max-width:760px){
+  .display-dock .jarvis-stage{grid-template-columns:64px minmax(0,1fr) 64px;row-gap:5px}
+  .display-dock .jarvis-stage #chatLog{min-height:58px;max-height:15vh;padding:5px 7px}
+  .display-dock .jarvis-stage .alvis-chat-composer{gap:6px;padding:6px}
+  .display-dock .jarvis-stage .alvis-chat-composer textarea#chatInput{height:48px;min-height:48px}
+  .display-dock .jarvis-stage .alvis-chat-composer button#sendChat{min-height:48px;flex-basis:66px;min-width:66px}
+}
+@media(max-width:430px){
+  .display-dock .jarvis-stage{grid-template-columns:58px minmax(0,1fr) 58px}
+}
+ /* end v170 */
 </style>
 </head>
 <body>
@@ -1466,16 +1518,16 @@ header .status{margin-top:2px}
   </section>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
-</div>
-<div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
-<div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
-<div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
-</div>
 <div id="chatLog"></div>
 <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
   <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
   <button id="sendChat" type="button" disabled>送信</button>
  </div>
+</div>
+<div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
+<div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
+<div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
+</div>
 </div>
 
 <div class="hud-shortcuts" aria-label="ALVISクイック機能">
