@@ -318,3 +318,12 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - ログイン操作時にAudioContextを解放し、非同期合成後の音声再生を試みる。利用できない場合はプレーヤーを表示する。
 - 「おかえりなさい」の合成音声は声IDごとに端末内キャッシュし、再ログイン時の再合成を避ける。
 - 未設定のKokoro話速は0.98倍。保存済みの話速は維持する。
+
+
+## ALVIS hologram reference layout v151 (2026-11-07)
+- The selected user reference is the visual source of truth: a dark futuristic chamber, large upper projector ring, luminous vertical beam, floating blue Earth-like holographic sphere, orbiting cyan/magenta rings, stationary multi-ring pedestal, and framed left/right HUD panels.
+- Implement the scene as responsive HTML/CSS/SVG, not as a flattened raster screenshot. Keep the globe vector-based and crisp at different display sizes.
+- Left HUD actions navigate to Chat, Memory Candidates, Long-term Memory, History, and Cloud Sync. The local model launch action remains connected to the existing model loader and existing status element IDs.
+- Right HUD retains live network status and links to memory/growth. Existing encrypted data, inference, voice, history, backup, and sync behavior must remain unchanged by presentation work.
+- Reference aspect ratio: 1397:1126. Prioritize iPad landscape; adapt the panels for narrow/mobile screens without removing their underlying app functions.
+- v151 is a presentation/layout rebuild only. Actual Safari/iPad visual and touch verification is still pending.
