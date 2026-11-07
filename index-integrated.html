@@ -1062,6 +1062,50 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 }
 
 
+
+ 
+/* v157: clear distinction between the offline-first design principle and live network state. */
+.display-dock .hud-status-line #hudNetworkState{letter-spacing:.12em;color:#b9edff}
+ 
+/* v157: calm, seamless page hand-off inspired by the login awakening. */
+@keyframes alvisPageEnter{
+  0%{opacity:0;transform:translateY(9px) scale(.992)}
+  42%{opacity:.78;transform:translateY(2px) scale(.997)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes alvisPageAmbient{
+  0%{opacity:0}
+  24%{opacity:.52}
+  100%{opacity:0}
+}
+@keyframes alvisPageWave{
+  0%{opacity:0;transform:scale(.78)}
+  28%{opacity:.48}
+  100%{opacity:0;transform:scale(1.55)}
+}
+main section.alvis-page-enter{
+  animation:alvisPageEnter 680ms cubic-bezier(.2,.72,.2,1) both;
+  transform-origin:50% 42%;
+}
+body.alvis-page-transitioning{overflow-x:hidden}
+body.alvis-page-transitioning:before,
+body.alvis-page-transitioning:after{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;
+}
+body.alvis-page-transitioning:before{
+  background:radial-gradient(ellipse at 50% 44%,#b9f5ff1c 0%,#67e8f912 18%,transparent 58%);
+  animation:alvisPageAmbient 680ms ease-out both;
+}
+body.alvis-page-transitioning:after{
+  background:radial-gradient(circle at 50% 44%,transparent 0%,transparent 22%,#a5f3fc16 22.2%,#67e8f910 22.5%,transparent 23%,transparent 100%);
+  animation:alvisPageWave 680ms cubic-bezier(.16,.68,.22,1) both;
+}
+@media(prefers-reduced-motion:reduce){
+  main section.alvis-page-enter{animation:none!important}
+  body.alvis-page-transitioning:before,
+  body.alvis-page-transitioning:after{animation:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -1200,7 +1244,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   <div class="hud-clock"><span id="hudDate">SYSTEM STATUS</span><strong id="hudTime">ALVIS</strong></div>
   <section class="hud-info-card">
     <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
-    <div class="hud-status-line"><span class="hud-status-gauge">100%</span><div><b id="hudNetworkState">OFFLINE FIRST</b><small>端末内処理を優先</small></div></div>
+    <div class="hud-status-line"><span class="hud-status-gauge">100%</span><div><b id="hudNetworkState">NETWORK CHECK</b><small>端末内処理を優先</small></div></div>
   </section>
   <section class="hud-info-card">
     <div class="hud-panel-heading"><i></i> MEMORY STATUS</div>
@@ -1549,7 +1593,7 @@ function updateHudSystemStatus(){
   if(vault)vault.textContent=(unlocked?"OPEN":"LOCKED")+" / AES-GCM";
   const network=$("hudNetworkState"),dot=$("hudNetworkDot");
   const online=navigator.onLine!==false;
-  if(network)network.textContent="OFFLINE FIRST / "+(online?"ONLINE":"OFFLINE");
+  if(network)network.textContent=online?"ONLINE":"OFFLINE";
   if(dot)dot.dataset.state=online?"online":"offline";
 }
 function updateHudAiStatus(value=""){
@@ -4158,10 +4202,12 @@ let initialDisplayMode="jarvis";
 try{initialDisplayMode=localStorage.getItem(ALVIS_DISPLAY_MODE_KEY)==="avatar"?"avatar":"jarvis";}catch(error){}
 applyAlvisDisplayMode(initialDisplayMode,false);
 
-/* v155: one direct page router for the main menu and hologram shortcuts. */
+/* v157: unified navigation with a cinematic but lightweight page transition. */
 function navigateAlvisPage(pageId){
   const page=$(pageId);
   if(!page || !page.matches("main section[id$='Page']"))return false;
+  const current=document.querySelector("main section[id$='Page']:not(.hidden)");
+  const changed=current!==page;
   document.querySelectorAll("main section[id$='Page']").forEach(section=>{
     section.classList.toggle("hidden",section!==page);
   });
@@ -4176,6 +4222,20 @@ function navigateAlvisPage(pageId){
       else button.removeAttribute("aria-current");
     }
   });
+  if(changed){
+    const previous=document.querySelector("main section.alvis-page-enter");
+    if(previous)previous.classList.remove("alvis-page-enter");
+    document.body.classList.remove("alvis-page-transitioning");
+    page.classList.remove("alvis-page-enter");
+    void page.offsetWidth;
+    document.body.classList.add("alvis-page-transitioning");
+    page.classList.add("alvis-page-enter");
+    page.addEventListener("animationend",event=>{
+      if(event.target!==page || event.animationName!=="alvisPageEnter")return;
+      page.classList.remove("alvis-page-enter");
+      document.body.classList.remove("alvis-page-transitioning");
+    },{once:false});
+  }
   return true;
 }
 document.querySelectorAll("button[data-page]").forEach(button=>{
