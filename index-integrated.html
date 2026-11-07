@@ -1364,6 +1364,33 @@ header .status{margin-top:2px}
 @media(max-width:430px){
   .display-dock .jarvis-stage{grid-template-columns:58px minmax(0,1fr) 58px}
 }
+
+ 
+ /* v171: raise the projector pedestal clear of chat and feature the latest ALVIS reply above history. */
+ .display-dock .hud-center .hud-platform{bottom:12%!important}
+ .display-dock .jarvis-stage{grid-template-rows:auto auto auto auto;row-gap:5px}
+ .display-dock .jarvis-stage #alvisLatestReply{
+   grid-column:1 / -1;grid-row:2;min-width:0;margin:0;padding:7px 11px 9px;
+   border:1px solid rgba(56,189,248,.72);border-left:3px solid #67e8f9;border-radius:9px;
+   background:linear-gradient(110deg,rgba(5,35,58,.97),rgba(7,24,43,.96));
+   box-shadow:inset 0 1px 0 #dff8ff18,0 0 15px #0284c72b;color:#e5f8ff;
+ }
+ .alvis-latest-heading{display:flex;align-items:center;gap:7px;margin-bottom:4px;color:#7dd3fc;font-size:9px;font-weight:800;letter-spacing:.16em}
+ .alvis-latest-indicator{width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 8px #38bdf8}
+ #alvisLatestReplyText{max-height:4.8em;overflow-y:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55;color:#effaff}
+ .display-dock .jarvis-stage #chatLog{grid-row:3}
+ .display-dock .jarvis-stage .alvis-chat-composer{grid-row:4}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage{grid-template-rows:auto auto auto}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage #alvisLatestReply{grid-column:1;grid-row:1}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage #chatLog{grid-column:1;grid-row:2}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage .alvis-chat-composer{grid-column:1;grid-row:3}
+ @media(max-width:760px){
+   .display-dock .jarvis-stage{row-gap:4px}
+   .display-dock .jarvis-stage #alvisLatestReply{padding:6px 8px 7px}
+   .alvis-latest-heading{font-size:8px;margin-bottom:3px}
+   #alvisLatestReplyText{font-size:12px;line-height:1.45;max-height:4.35em}
+ }
+ /* end v171 */
  /* end v170 */
 </style>
 </head>
@@ -1518,6 +1545,10 @@ header .status{margin-top:2px}
   </section>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
+<section id="alvisLatestReply" aria-live="polite" aria-label="ALVISの最新の返答">
+  <div class="alvis-latest-heading"><span class="alvis-latest-indicator"></span> ALVIS RESPONSE</div>
+  <div id="alvisLatestReplyText">こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？</div>
+</section>
 <div id="chatLog"></div>
 <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
   <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
@@ -2764,6 +2795,13 @@ function renderChat(){
   const box=$("chatLog");
   box.replaceChildren();
   const entries=data.history.length?data.history:[{role:"alvis",text:"こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？"}];
+  const latestReply=[...data.history].reverse().find(item=>item.role==="alvis"&&(item.text||item.body||item.title));
+  const latestReplyBox=$("alvisLatestReply");
+  const latestReplyText=$("alvisLatestReplyText");
+  if(latestReplyBox&&latestReplyText){
+    latestReplyText.textContent=latestReply?(latestReply.text||latestReply.body||latestReply.title):entries[0].text;
+    latestReplyBox.classList.toggle("is-empty",!latestReply);
+  }
   entries.forEach(item=>{
     const line=document.createElement("div");
     line.className="message "+(item.role==="user"?"user":"alvis");
