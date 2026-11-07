@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v169-integrated";
+const CACHE_NAME = "alvis-cache-v170-integrated";
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
   "https://esm.run",
