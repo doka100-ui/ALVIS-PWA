@@ -1222,6 +1222,46 @@ body.alvis-page-transitioning:after{
 @media(max-width:360px){.alvis-chat-composer{gap:6px;padding:6px}}
 /* end v166 */
 
+
+/* v167: compact vertical layout so the hologram, recent replies and composer
+   occupy less screen space without changing the approved hologram artwork. */
+.display-dock .hud-center{min-height:clamp(220px,26vh,260px)}
+#chatLog{
+  min-height:96px;
+  max-height:30vh;
+  padding:6px 10px;
+}
+#chatLog .message{margin:8px 0;padding:10px 13px}
+#chatLog .message-speaker{margin-bottom:4px;font-size:10px}
+#chatLog .message-body{font-size:14px;line-height:1.55}
+.alvis-chat-composer{margin:8px 0 10px;padding:8px}
+.alvis-chat-composer textarea#chatInput{height:58px;min-height:58px;padding:9px 12px}
+.alvis-chat-composer button#sendChat{min-height:58px}
+.hud-shortcuts{margin:8px 0 10px}
+@media(max-width:600px){
+  .display-dock .hud-center{min-height:190px}
+  .display-dock .mode-switch{gap:6px;margin-bottom:7px}
+  .display-dock .jarvis-stage{padding-top:6px;padding-bottom:6px}
+  #chatLog{min-height:82px;max-height:28vh;padding:5px 8px}
+  #chatLog .message{margin:6px 0;padding:9px 11px}
+  #chatLog .message-body{font-size:13px;line-height:1.5}
+  .alvis-chat-composer{gap:6px;margin:7px 0 8px;padding:6px}
+  .alvis-chat-composer textarea#chatInput{height:54px;min-height:54px;padding:8px 10px}
+  .alvis-chat-composer button#sendChat{flex-basis:66px;min-width:66px;min-height:54px;padding:7px 6px}
+  .hud-shortcuts{margin:6px 0 8px}
+}
+@media(max-height:720px) and (min-width:601px){
+  .display-dock .hud-center{min-height:205px}
+  #chatLog{max-height:25vh}
+}
+@media(max-height:700px) and (max-width:600px){
+  .display-dock .hud-center{min-height:168px}
+  #chatLog{max-height:24vh;min-height:72px}
+  .alvis-chat-composer textarea#chatInput{height:48px;min-height:48px}
+  .alvis-chat-composer button#sendChat{min-height:48px}
+}
+/* end v167 */
+
 </style>
 </head>
 <body>
