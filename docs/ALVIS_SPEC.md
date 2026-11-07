@@ -1,3 +1,9 @@
+## v187 アバターモードのチャット直結レイアウト
+- アバターモードでは外側display-dockと内側alvis-hologram-frameの背景・枠・影・余白を取り除く。
+- v170で!important指定されていた空のjarvis-stageをdisplay:none!importantで非表示にし、アバター直下にチャット領域のみを表示する。
+- ALVISホログラムモードの表示と全データ/会話機能は維持する。
+- Service Worker cache: alvis-cache-v187-integrated。
+
 ## v182 アバターモード上部余白
 - アバターモード表示時のみページ見出しを隠し、display-dock上部paddingを0にする。ALVISモードや他ページは維持する。
 - 3Dモデルは一時的な試験用を維持し、最終候補はAndroid 18を明確に想起できるモデルとする。別のオリジナル顔に変更しない。
