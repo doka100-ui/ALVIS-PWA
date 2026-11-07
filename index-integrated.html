@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button><!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -672,14 +672,16 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 .display-dock .mode-stage.jarvis-stage>.alvis-reference-image{display:none!important}
 .display-dock .mode-stage.jarvis-stage>.hud-side{display:block!important;visibility:visible!important}
 .display-dock .mode-stage.jarvis-stage>.hud-center{display:grid!important;visibility:visible!important}
-.display-dock .mode-stage.jarvis-stage>#hudAiAction{
-  position:relative!important;inset:auto!important;left:auto!important;top:auto!important;
-  z-index:4!important;width:66px!important;height:66px!important;min-width:66px!important;min-height:66px!important;
-  margin:16px auto 14px!important;padding:0!important;border:1px solid #22d3ee88!important;
-  border-radius:50%!important;background:radial-gradient(circle,#0e749022,#020617aa)!important;
-  box-shadow:inset 0 0 18px #0891b566,0 0 18px #06b6d455!important;
-  color:#cffafe!important;opacity:1!important;overflow:visible!important;cursor:pointer!important;
+.display-dock .hud-center>#hudAiAction{
+  position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;
+  z-index:5!important;width:76%!important;height:76%!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;
+  opacity:0!important;overflow:hidden!important;cursor:pointer!important;
 }
+.display-dock .hud-center>#hudAiAction strong,
+.display-dock .hud-center>#hudAiAction span{color:transparent!important;opacity:0!important;font-size:0!important}
+.display-dock .hud-center>#hudAiAction:focus-visible{opacity:1!important;outline:2px solid #72e6ff!important;background:#36cfff18!important}
 .display-dock .mode-stage.jarvis-stage>#hudAiAction strong,
 .display-dock .mode-stage.jarvis-stage>#hudAiAction span{color:inherit!important;opacity:1!important;font-size:inherit!important}
 .display-dock .mode-stage.jarvis-stage>#hudAiAction strong{font-size:17px!important}
@@ -771,7 +773,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 
 
 
-<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button>
+
 <div class="hud-side hud-side-left">
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
 
