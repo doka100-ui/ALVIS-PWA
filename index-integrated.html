@@ -1431,6 +1431,13 @@ header .status{margin-top:2px}
    .display-dock .alvis-chat-area #alvisLatestReply{padding:6px 8px 7px}
  }
  /* end v173 */
+
+ /* v174: hide only the visible conversation-history panel.
+    Keep #chatLog in the DOM so existing conversation/history logic remains intact. */
+ .display-dock .alvis-chat-area>#chatLog{display:none!important}
+ .display-dock .alvis-chat-area{gap:6px!important}
+ @media(max-width:760px){.display-dock .alvis-chat-area{gap:4px!important}}
+ /* end v174 */
  /* end v171 */
  /* end v170 */
 </style>
