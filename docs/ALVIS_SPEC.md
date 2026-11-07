@@ -1,3 +1,9 @@
+## v188 ALVISモードの軌道リング回転
+- 球体周囲の軌道リング3本はALVIS画面の常時表示演出として、OSのprefers-reduced-motion設定時も低速回転を維持する。
+- ページ遷移などその他の非必須アニメーションは引き続きOSの軽減設定を尊重する。
+- アバターモードおよび既存機能は変更しない。
+- Service Worker cache: alvis-cache-v188-integrated。
+
 ## v187 アバターモードのチャット直結レイアウト
 - アバターモードでは外側display-dockと内側alvis-hologram-frameの背景・枠・影・余白を取り除く。
 - v170で!important指定されていた空のjarvis-stageをdisplay:none!importantで非表示にし、アバター直下にチャット領域のみを表示する。
