@@ -4203,6 +4203,7 @@ try{initialDisplayMode=localStorage.getItem(ALVIS_DISPLAY_MODE_KEY)==="avatar"?"
 applyAlvisDisplayMode(initialDisplayMode,false);
 
 /* v157: unified navigation with a cinematic but lightweight page transition. */
+let alvisPageTransitionCleanup=null;
 function navigateAlvisPage(pageId){
   const page=$(pageId);
   if(!page || !page.matches("main section[id$='Page']"))return false;
@@ -4222,19 +4223,31 @@ function navigateAlvisPage(pageId){
       else button.removeAttribute("aria-current");
     }
   });
-  if(changed){
-    const previous=document.querySelector("main section.alvis-page-enter");
-    if(previous)previous.classList.remove("alvis-page-enter");
-    document.body.classList.remove("alvis-page-transitioning");
+  const reduceMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
+  if(changed && !reduceMotion){
+    if(alvisPageTransitionCleanup)alvisPageTransitionCleanup();
     page.classList.remove("alvis-page-enter");
     void page.offsetWidth;
     document.body.classList.add("alvis-page-transitioning");
     page.classList.add("alvis-page-enter");
-    page.addEventListener("animationend",event=>{
-      if(event.target!==page || event.animationName!=="alvisPageEnter")return;
+    const finish=event=>{
+      if(event && (event.target!==page || event.animationName!=="alvisPageEnter"))return;
+      page.removeEventListener("animationend",finish);
       page.classList.remove("alvis-page-enter");
       document.body.classList.remove("alvis-page-transitioning");
-    },{once:false});
+      if(alvisPageTransitionCleanup===cleanup)alvisPageTransitionCleanup=null;
+    };
+    const cleanup=()=>{
+      page.removeEventListener("animationend",finish);
+      page.classList.remove("alvis-page-enter");
+      document.body.classList.remove("alvis-page-transitioning");
+    };
+    alvisPageTransitionCleanup=cleanup;
+    page.addEventListener("animationend",finish);
+  }else if(changed){
+    if(alvisPageTransitionCleanup)alvisPageTransitionCleanup();
+    page.classList.remove("alvis-page-enter");
+    document.body.classList.remove("alvis-page-transitioning");
   }
   return true;
 }
