@@ -600,6 +600,18 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 @keyframes alvisRefOrbitB{from{transform:translate(-50%,-50%) rotate(27deg)}to{transform:translate(-50%,-50%) rotate(-333deg)}}
 @keyframes alvisRefCorePulse{0%,100%{opacity:.28}50%{opacity:.95}}
 @keyframes alvisProjectionScan{0%,100%{opacity:.16;transform:translateX(-50%) scaleX(.75)}50%{opacity:.68;transform:translateX(-50%) scaleX(1.18)}}
+
+/* v144: make orbital movement legible without changing the selected artwork */
+.display-dock .alvis-motion-orbit::after,
+.display-dock .alvis-motion-orbit::before{content:"";position:absolute;display:block;border-radius:50%;pointer-events:none}
+.display-dock .alvis-motion-orbit-a::after{width:7px;height:7px;left:50%;top:-4px;background:#d9fbff;box-shadow:0 0 5px 2px #8beaff,0 0 13px 5px rgba(40,190,255,.8)}
+.display-dock .alvis-motion-orbit-a::before{width:4px;height:4px;left:12%;bottom:5%;background:#ff9bfa;box-shadow:0 0 5px 2px #ff62dc,0 0 12px 4px rgba(255,65,207,.65)}
+.display-dock .alvis-motion-orbit-b::after{width:6px;height:6px;right:8%;top:48%;background:#e4ffff;box-shadow:0 0 5px 2px #8beaff,0 0 12px 4px rgba(40,190,255,.8)}
+.display-dock .alvis-globe-shimmer{position:absolute;z-index:4;left:32%;top:21%;width:36%;height:42%;border-radius:50%;overflow:hidden;pointer-events:none;clip-path:ellipse(50% 50% at 50% 50%);mix-blend-mode:screen}
+.display-dock .alvis-globe-shimmer::after{content:"";position:absolute;inset:-20% -65%;background:linear-gradient(105deg,transparent 38%,rgba(115,226,255,.02) 44%,rgba(165,245,255,.3) 50%,rgba(94,197,255,.08) 55%,transparent 62%);transform:translateX(-65%) rotate(8deg);animation:alvisGlobeShimmer 7.2s ease-in-out infinite}
+@keyframes alvisGlobeShimmer{0%,12%{transform:translateX(-65%) rotate(8deg);opacity:0}35%{opacity:.8}68%{opacity:.42}88%,100%{transform:translateX(65%) rotate(8deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.display-dock .alvis-globe-shimmer::after{animation:none!important;opacity:0!important}}
+
 @media(prefers-reduced-motion:reduce){.display-dock .alvis-motion-orbit,.display-dock .alvis-core-light,.display-dock .alvis-projection-scan{animation:none!important}}
 /* end v138 */
 /* v143: animated orbital light layers; preserve the selected artwork and keep its native pixel width */
@@ -654,6 +666,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <div class="alvis-motion-orbit alvis-motion-orbit-b" aria-hidden="true"></div>
 <div class="alvis-core-light" aria-hidden="true"></div>
 <div class="alvis-projection-scan" aria-hidden="true"></div>
+<div class="alvis-globe-shimmer" aria-hidden="true"></div>
 <button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button>
 <div class="hud-side hud-side-left">
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
