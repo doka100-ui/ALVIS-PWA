@@ -1543,6 +1543,16 @@ header .status{margin-top:2px}
 #chatPage[data-display-mode="avatar"] .mode-switch{margin-top:0}
 /* end v182 */
 
+/* v183: reduce the oversized empty avatar stage above the chat area.
+   Keep the avatar visible while reclaiming vertical space for conversation. */
+#chatPage[data-display-mode="avatar"] .avatar-stage{min-height:260px}
+#chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:260px}
+@media(max-width:600px){
+  #chatPage[data-display-mode="avatar"] .display-dock .avatar-stage{min-height:240px}
+  #chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:240px}
+}
+/* end v183 */
+
 </style>
 <script type="importmap">
 {
