@@ -525,3 +525,7 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 
 ## v183 アバターモードの縦スペース
 - アバターモードのみ3D表示ステージ/キャンバスの最小高さを通常260px、スマートフォン240pxに設定し、チャット欄上の不要な縦空間を抑える。ALVIS（ホログラム）モードには影響させない。
+
+
+## v184 アバター表示領域
+- Talking Avatar SDKの組み込み女性モデルを `AVATARS.female` で明示指定。アバターモードの表示領域は通常 clamp(340px,52svh,460px)、スマートフォン clamp(300px,46svh,390px) とし、3Dキャンバスを領域全体に表示する。SDKは顔のクローズアップ表示で、全身表示ではない。Android 18風モデルへの変更は別工程。
