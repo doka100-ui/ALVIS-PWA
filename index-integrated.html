@@ -1028,6 +1028,20 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 }
 /* end v154 */
 
+
+/* v155: clear active state for direct hologram menu navigation */
+.display-dock .hud-nav .hud-shortcut.is-active{
+  color:#e2f8ff!important;
+  background:linear-gradient(90deg,#0b568455,#0b568400)!important;
+  box-shadow:inset 2px 0 0 #7deaff,0 0 12px #168bff22!important;
+  text-shadow:0 0 8px #48cfff88!important;
+}
+.display-dock .hud-nav .hud-shortcut.is-active span{
+  color:#b9f2ff!important;
+  text-shadow:0 0 12px #4bdcff!important;
+}
+/* end v155 */
+
 </style>
 </head>
 <body>
@@ -4124,17 +4138,33 @@ let initialDisplayMode="jarvis";
 try{initialDisplayMode=localStorage.getItem(ALVIS_DISPLAY_MODE_KEY)==="avatar"?"avatar":"jarvis";}catch(error){}
 applyAlvisDisplayMode(initialDisplayMode,false);
 
-document.querySelectorAll("nav button[data-page]").forEach(button=>{
-  button.addEventListener("click",()=>{
-    document.querySelectorAll("main section[id$='Page']").forEach(section=>section.classList.add("hidden"));
-    const page=$(button.dataset.page);
-    if(page)page.classList.remove("hidden");
-    document.querySelectorAll("nav button[data-page]").forEach(item=>item.classList.toggle("secondary",item!==button));
+/* v155: one direct page router for the main menu and hologram shortcuts. */
+function navigateAlvisPage(pageId){
+  const page=$(pageId);
+  if(!page || !page.matches("main section[id$='Page']"))return false;
+  document.querySelectorAll("main section[id$='Page']").forEach(section=>{
+    section.classList.toggle("hidden",section!==page);
+  });
+  document.querySelectorAll("button[data-page]").forEach(button=>{
+    const active=button.dataset.page===pageId;
+    if(button.closest("nav") && !button.classList.contains("hud-shortcut")){
+      button.classList.toggle("secondary",!active);
+    }
+    if(button.classList.contains("hud-shortcut")){
+      button.classList.toggle("is-active",active);
+      if(active)button.setAttribute("aria-current","page");
+      else button.removeAttribute("aria-current");
+    }
+  });
+  return true;
+}
+document.querySelectorAll("button[data-page]").forEach(button=>{
+  button.addEventListener("click",event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    navigateAlvisPage(button.dataset.page);
   });
 });
-document.querySelectorAll(".hud-shortcut[data-page]").forEach(button=>button.addEventListener("click",()=>{
-  document.querySelector(`nav button[data-page="${button.dataset.page}"]`)?.click();
-}));
 document.querySelectorAll(".hud-shortcut[data-scroll]").forEach(button=>button.addEventListener("click",()=>{
   const target=$(button.dataset.scroll);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
 }));
