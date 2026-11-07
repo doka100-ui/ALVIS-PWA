@@ -1,3 +1,10 @@
+## v188 ALVISモードの軌道リング常時回転を復旧（2026-11-08）
+- startAlvisHudMotion()内でOSのprefers-reduced-motion設定を検出するとreturnしていたため、軌道リング3本のWeb Animations開始処理が丸ごと中止される問題を修正。
+- 球体周囲の軌道リングはALVIS表示の中核的な常時演出として、端末の視差効果を減らす設定にかかわらず低速・一定速度で回転するようにする。
+- ページ遷移やログイン演出など、その他の動きは引き続きOSの軽減設定を尊重。アバターモード・3Dアバター・チャット・記憶・履歴・音声・暗号化・同期・バックアップは変更なし。
+- Service Worker cache: alvis-cache-v188-integrated。
+- reduced-motionによる早期return削除、3本の回転設定、起動/復帰/ページ遷移からの開始経路、キャッシュ名を静的検証。Safari実機での回転確認はユーザー確認待ち。
+
 ## v187 アバターモードの巨大な外枠と空のホログラム領域を除去（2026-11-08）
 - v186で対象を内側のホログラム枠だけに限定していたため、外側のdisplay-dockの背景・枠・影が残り、さらにv170の!important指定で非表示にできていなかった空のjarvis-stageが残る問題を修正。
 - アバターモードのみdisplay-dockの外観を透明化し、alvis-hologram-frameの装飾/余白を解除。空のjarvis-stageをdisplay:none!importantで完全に非表示にする。
