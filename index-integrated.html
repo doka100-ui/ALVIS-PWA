@@ -179,6 +179,12 @@ textarea{min-height:90px;resize:vertical}
 .hud-thinking-readout[data-state="thinking"] b:before{content:"";width:6px;height:6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 10px #22d3ee;animation:alvisThinkingPulse 1s ease-in-out infinite}
 @keyframes alvisThinkingPulse{50%{opacity:.25;transform:scale(.65)}}
 #hudResponseTime{font-variant-numeric:tabular-nums}
+.hud-readout-action{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;margin:0;padding:7px 0;border:0;border-top:1px solid #38bdf822;border-radius:0;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;transition:background .18s ease,filter .18s ease}
+.hud-readout-action:hover{background:linear-gradient(90deg,#38bdf81b,transparent);filter:brightness(1.16)}
+.hud-readout-action:focus-visible,.hud-side-foot-action:focus-visible{outline:1px solid #8beaff;outline-offset:2px}
+.hud-side-foot-action{width:100%;padding:9px 0 0;margin-top:10px;border:0;border-top:1px solid #38bdf833;border-radius:0;background:transparent;text-align:left;font:inherit;cursor:pointer}
+.hud-status-dot[data-state="offline"]{background:#fbbf24;box-shadow:0 0 8px #f59e0b}
+.hud-status-dot[data-state="online"]{background:#4ade80;box-shadow:0 0 8px #4ade80}
 #lockPanel{position:relative;isolation:isolate;overflow:hidden;max-width:520px;margin:clamp(28px,8vh,90px) auto!important;padding:clamp(22px,5vw,38px)!important;border:1px solid #38bdf866!important;border-radius:20px!important;background:radial-gradient(ellipse at 50% 0%,#07598566,transparent 52%),linear-gradient(155deg,#0b1d35f2,#030914f7 72%)!important;box-shadow:0 0 34px #0284c733,inset 0 1px #dff8ff20!important}
 #lockPanel:before{content:"";position:absolute;z-index:-1;inset:10px;border:1px solid #38bdf822;border-radius:14px;pointer-events:none}
 #lockPanel .login-emblem{width:112px;height:112px;margin:0 auto 18px;display:grid;place-items:center;position:relative;border:1px solid #67e8f988;border-radius:50%;background:radial-gradient(circle,#0e749055 0%,#06172c 65%);box-shadow:0 0 24px #0ea5e955,inset 0 0 22px #38bdf844}
@@ -302,7 +308,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 
 /* v126: rebuild mobile hologram proportions around supplied reference */
 .hud-core{position:relative;isolation:isolate}
-.hud-globe-map{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;z-index:1;filter:drop-shadow(0 0 8px #38bdf866)}
+.hud-globe-map{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;z-index:1;filter:drop-shadow(0 0 10px #38bdf877);shape-rendering:geometricPrecision;text-rendering:geometricPrecision;backface-visibility:hidden}.hud-globe-map .hud-globe-detail{stroke-linecap:round;stroke-linejoin:round}
 .hud-core:before{z-index:2;pointer-events:none}.hud-core:after{z-index:2;pointer-events:none}
 .hud-core span,.hud-core small{z-index:4}
 @media(max-width:760px){
@@ -700,11 +706,11 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <div class="hud-side hud-side-left">
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
 
-<div class="hud-readout"><span>INFERENCE</span><b>LOCAL / WEBGPU</b></div>
-<div class="hud-readout hud-thinking-readout" id="hudThinkingReadout" data-state="idle"><span>PROCESS</span><b id="hudThinkingState">STANDBY</b></div>
+<button type="button" class="hud-readout hud-readout-action" data-hud-action="model" aria-label="AIモデル管理を開く"><span>INFERENCE</span><b id="hudInferenceState">WEBGPU CHECK</b></button>
+<button type="button" class="hud-readout hud-thinking-readout hud-readout-action" id="hudThinkingReadout" data-state="idle" data-hud-action="process" aria-label="チャット入力欄へ移動"><span>PROCESS</span><b id="hudThinkingState">STANDBY</b></button>
 <div class="hud-readout"><span>RESPONSE TIME</span><b id="hudResponseTime">--.- s</b></div>
-<div class="hud-readout"><span>DATA VAULT</span><b>ENCRYPTED</b></div>
-<div class="hud-side-foot"><span class="hud-status-dot"></span> OFFLINE FIRST</div>
+<button type="button" class="hud-readout hud-readout-action" data-hud-action="vault" aria-label="長期記憶を開く"><span>DATA VAULT</span><b id="hudVaultState">LOCKED / AES-GCM</b></button>
+<button type="button" class="hud-side-foot hud-side-foot-action" data-hud-action="diagnostics" aria-label="端末診断を開く"><span class="hud-status-dot" id="hudNetworkDot" data-state="online"></span><span id="hudNetworkState">OFFLINE FIRST / ONLINE</span></button>
 </div>
 <div class="hud-center">
 <div class="hud-projector"><span></span><i></i></div>
@@ -712,7 +718,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <div class="hud-orbit hud-orbit-a"></div>
 <div class="hud-orbit hud-orbit-b"></div>
 <div class="hud-orbit hud-orbit-c"></div>
-<div class="hud-core"><svg class="hud-globe-map" viewBox="0 0 240 240" aria-hidden="true"><defs><clipPath id="alvisGlobeClip"><circle cx="120" cy="120" r="111"/></clipPath><radialGradient id="alvisGlobeShade" cx="35%" cy="28%" r="78%"><stop offset="0" stop-color="#a8efff" stop-opacity=".62"/><stop offset=".38" stop-color="#168bc2" stop-opacity=".28"/><stop offset="1" stop-color="#001329" stop-opacity=".82"/></radialGradient></defs><g clip-path="url(#alvisGlobeClip)"><rect width="240" height="240" fill="url(#alvisGlobeShade)"/><g fill="#9deaff" fill-opacity=".45" stroke="#b8f4ff" stroke-opacity=".5" stroke-width="1.2"><path d="M27 66l13-17 19-7 10 8 18-4 12 12-7 12-17 4-5 13-14 5-5 19-13-5-5-17-13-8z"/><path d="M73 117l16 4 12 17-4 17-10 15-4 24-10 17-9-13 2-19-9-16 4-18-8-13z"/><path d="M117 48l18-12 21 4 8 11 20 2 16 14-6 12-18 2-8 13-17 2-7 15-16-3-9-17-17-5-7-15z"/><path d="M145 113l19-8 17 8 9 17-8 17-4 22-16 22-14-10-4-22-10-15z"/><path d="M190 181l13-5 10 8-6 12-15 2-8-8z"/></g><g fill="none" stroke="#b8f4ff" stroke-opacity=".35" stroke-width="1"><ellipse cx="120" cy="120" rx="39" ry="111"/><ellipse cx="120" cy="120" rx="77" ry="111"/><ellipse cx="120" cy="120" rx="111" ry="39"/><ellipse cx="120" cy="120" rx="111" ry="76"/><path d="M9 120h222M120 9v222"/></g></g></svg><span>ALVIS</span><small>PERSONAL AI SYSTEM</small></div>
+<div class="hud-core"><svg class="hud-globe-map" viewBox="0 0 240 240" aria-hidden="true"><defs><clipPath id="alvisGlobeClip"><circle cx="120" cy="120" r="111"/></clipPath><radialGradient id="alvisGlobeShade" cx="35%" cy="28%" r="78%"><stop offset="0" stop-color="#a8efff" stop-opacity=".62"/><stop offset=".38" stop-color="#168bc2" stop-opacity=".28"/><stop offset="1" stop-color="#001329" stop-opacity=".82"/></radialGradient></defs><g clip-path="url(#alvisGlobeClip)"><rect width="240" height="240" fill="url(#alvisGlobeShade)"/><g fill="#9deaff" fill-opacity=".45" stroke="#b8f4ff" stroke-opacity=".5" stroke-width="1.2"><path d="M27 66l13-17 19-7 10 8 18-4 12 12-7 12-17 4-5 13-14 5-5 19-13-5-5-17-13-8z"/><path d="M73 117l16 4 12 17-4 17-10 15-4 24-10 17-9-13 2-19-9-16 4-18-8-13z"/><path d="M117 48l18-12 21 4 8 11 20 2 16 14-6 12-18 2-8 13-17 2-7 15-16-3-9-17-17-5-7-15z"/><path d="M145 113l19-8 17 8 9 17-8 17-4 22-16 22-14-10-4-22-10-15z"/><path d="M190 181l13-5 10 8-6 12-15 2-8-8z"/></g><g fill="none" stroke="#b8f4ff" stroke-opacity=".35" stroke-width="1"><ellipse cx="120" cy="120" rx="39" ry="111"/><ellipse cx="120" cy="120" rx="77" ry="111"/><ellipse cx="120" cy="120" rx="111" ry="39"/><ellipse cx="120" cy="120" rx="111" ry="76"/><path d="M9 120h222M120 9v222"/></g></g><g class="hud-globe-detail" fill="none" stroke="#c4f5ff" stroke-opacity=".28" stroke-width=".8"><ellipse cx="120" cy="120" rx="18" ry="111"/><ellipse cx="120" cy="120" rx="58" ry="111"/><path d="M12 91 Q120 64 228 91 M10 147 Q120 174 230 147 M23 62 Q120 42 217 62 M24 179 Q120 199 216 179"/><path d="M42 34 Q120 12 198 34 M36 207 Q120 228 204 207"/></g><circle cx="120" cy="120" r="111" fill="none" stroke="#baf4ff" stroke-width="2" stroke-opacity=".72"/><circle cx="120" cy="120" r="115" fill="none" stroke="#38bdf8" stroke-width=".7" stroke-opacity=".28"/></svg><span>ALVIS</span><small>PERSONAL AI SYSTEM</small></div>
 <div class="hud-platform"><i></i><b></b><span></span></div>
 <div class="hud-center-caption">NEURAL CORE　/　HOLOGRAPHIC UI</div>
 </div>
@@ -1053,6 +1059,16 @@ function updateHudConversationState(state="idle",elapsedSeconds=null){
   if(time&&Number.isFinite(elapsedSeconds)&&elapsedSeconds>=0){time.textContent=elapsedSeconds.toFixed(1)+" s";}
   else if(time&&state==="idle"){time.textContent="--.- s";}
 }
+function updateHudSystemStatus(){
+  const inference=$("hudInferenceState");
+  if(inference)inference.textContent=aiEngine?ALVIS_MODEL_LABEL.toUpperCase()+" / ONLINE":aiLoading?"MODEL LOADING":navigator.gpu?"WEBGPU READY":"WEBGPU N/A";
+  const vault=$("hudVaultState");
+  if(vault)vault.textContent=(unlocked?"UNLOCKED":"LOCKED")+" / AES-GCM";
+  const network=$("hudNetworkState"),dot=$("hudNetworkDot");
+  const online=navigator.onLine!==false;
+  if(network)network.textContent="OFFLINE FIRST / "+(online?"ONLINE":"OFFLINE");
+  if(dot)dot.dataset.state=online?"online":"offline";
+}
 function updateHudAiStatus(value=""){
   const stateNode=$("hudAiState");
   if(!stateNode)return;
@@ -1070,6 +1086,7 @@ function updateHudAiStatus(value=""){
   const detailNode=$("hudAiDetail");if(detailNode)detailNode.textContent=detail;
   const action=$("hudAiAction");
   if(action){action.dataset.state=state;action.disabled=aiLoading||!!aiEngine||state==="stopping";action.setAttribute("aria-label",state==="error"?ALVIS_MODEL_LABEL+"を再読み込み":aiEngine?ALVIS_MODEL_LABEL+"は起動中":aiLoading?ALVIS_MODEL_LABEL+"を読み込み中":ALVIS_MODEL_LABEL+"を起動");}
+  updateHudSystemStatus();
 }
 function setStatus(id,value){
   const rawOutput=typeof value === "string" ? value : JSON.stringify(value,null,2);
@@ -2008,6 +2025,7 @@ async function unlock(){
       localStorage.setItem(DB_KEY,JSON.stringify(record));
     }
     unlocked=true;
+    updateHudSystemStatus();
     // 旧保管庫にも現在の音声設定を暗号化して取り込む。ログインだけで同期の未保存フラグは立てない。
     data.voiceSettings=collectVoiceSettings();
     localStorage.setItem(DB_KEY,JSON.stringify(await encryptData()));
@@ -2216,7 +2234,8 @@ function lockApp(){
   updateHudAiStatus("ログアウトしました。モデル未起動");
   cryptoKey=null;encryptionSalt=null;
   data={memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[],learnings:[]};
-  unlocked=false;serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
+  unlocked=false;
+  updateHudSystemStatus();serverRevision=null;autoSyncEnabled=false;localDirty=false;remoteChanged=false;
   $("appPanel").classList.add("hidden");
   $("lockPanel").classList.remove("hidden");
   $("syncToken").value="";$("rememberSyncToken").checked=false;
@@ -3660,10 +3679,16 @@ document.querySelectorAll(".hud-shortcut[data-scroll]").forEach(button=>button.a
   const target=$(button.dataset.scroll);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
 }));
 /* v146: connect hologram interface controls to existing ALVIS screens */
-document.querySelectorAll(".hud-interface-action[data-hud-action]").forEach(button=>button.addEventListener("click",()=>{
+document.querySelectorAll(".hud-interface-action[data-hud-action], .hud-readout-action[data-hud-action], .hud-side-foot-action[data-hud-action]").forEach(button=>button.addEventListener("click",()=>{
   const action=button.dataset.hudAction;
-  if(action==="memory"||action==="growth"){
-    const page=action==="memory"?"memoryPage":"growthPage";
+  if(action==="model"||action==="diagnostics"){
+    document.querySelector('nav button[data-page="devicePage"]')?.click();
+    const target=$(action==="model"?"aiStatus":"runDeviceDiagnostics");
+    if(target)target.scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+  if(action==="vault"||action==="memory"||action==="growth"){
+    const page=action==="growth"?"growthPage":"memoryPage";
     document.querySelector(`nav button[data-page="${page}"]`)?.click();
     return;
   }
@@ -3672,13 +3697,17 @@ document.querySelectorAll(".hud-interface-action[data-hud-action]").forEach(butt
     if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
     return;
   }
-  if(action==="search"){
+  if(action==="process"||action==="search"){
     const chatNav=document.querySelector('nav button[data-page="chatPage"]');
     chatNav?.click();
     const input=$("chatInput");
     if(input){input.focus({preventScroll:true});input.scrollIntoView({behavior:"smooth",block:"center"});}
   }
 }));
+
+window.addEventListener("online",updateHudSystemStatus);
+window.addEventListener("offline",updateHudSystemStatus);
+updateHudSystemStatus();
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   alvisServiceWorkerReady=(async()=>{
