@@ -1582,20 +1582,31 @@ header .status{margin-top:2px}
 }
 /* end v185 */
 
-/* v186: in Avatar mode, remove the unused hologram frame spacing so chat
-   sits directly beneath the avatar display. Keep Jarvis mode unchanged. */
+/* v187: remove both nested hologram shell and the hidden hologram stage in Avatar mode.
+   The chat area remains visible as a normal-flow sibling immediately after the avatar. */
+#chatPage[data-display-mode="avatar"] .display-dock{
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
 #chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame{
-  width:100%!important;max-width:none!important;margin:0!important;
+  display:block!important;width:100%!important;max-width:none!important;
+  min-height:0!important;height:auto!important;margin:0!important;
   padding:0!important;border:0!important;border-radius:0!important;
   background:transparent!important;box-shadow:none!important;overflow:visible!important;
 }
-#chatPage[data-display-mode="avatar"] .display-dock .alvis-hologram-frame>.alvis-chat-area{
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{
+  display:none!important;min-height:0!important;height:0!important;
+  margin:0!important;padding:0!important;border:0!important;
+}
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.alvis-chat-area{
+  display:flex!important;flex-direction:column!important;
+  width:100%!important;max-width:none!important;min-height:0!important;
   margin:0!important;padding:0!important;gap:6px!important;
 }
 @media(max-width:760px){
-  #chatPage[data-display-mode="avatar"] .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
+  #chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
 }
-/* end v186 */
+/* end v187 */
 
 </style>
 <script type="importmap">
