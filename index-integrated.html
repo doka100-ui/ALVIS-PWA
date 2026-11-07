@@ -1193,6 +1193,35 @@ body.alvis-page-transitioning:after{
 @media(max-width:600px){.message{max-width:94%;padding:12px 13px;margin:14px 0}.message-body{font-size:15px;line-height:1.7}}
 /* end v165 */
 
+
+/* v166: conversation flow - history above the message composer. */
+.display-dock .jarvis-stage{padding-bottom:16px}
+.display-dock .avatar-stage{min-height:210px;padding-bottom:12px}
+.alvis-chat-composer{
+  position:relative;left:auto;bottom:auto;transform:none;z-index:1;
+  display:flex;align-items:stretch;gap:10px;width:100%;max-width:100%;
+  margin:12px 0 16px;padding:10px;
+  border:1px solid #38bdf866;border-radius:13px;
+  background:linear-gradient(135deg,#071a2cef,#0b2940ef 55%,#061426f2);
+  box-shadow:inset 0 1px 0 #c5f5ff18,0 0 18px #0284c722,0 8px 18px #02061766;
+}
+.alvis-chat-composer textarea#chatInput{display:block;flex:1 1 auto;min-width:0;width:100%;height:72px;min-height:72px;max-height:150px;margin:0;padding:12px 14px;border:1px solid #287da5;border-radius:9px;background:linear-gradient(145deg,#061426,#0a2035);color:#e8faff;font:inherit;font-size:16px;line-height:1.45;resize:vertical}
+.alvis-chat-composer textarea#chatInput::placeholder{color:#8ebbd0}
+.alvis-chat-composer textarea#chatInput:focus{outline:2px solid #38bdf8aa;outline-offset:1px;border-color:#67e8f9;box-shadow:inset 0 0 14px #02081788,0 0 13px #0ea5e955}
+.alvis-chat-composer button#sendChat{flex:0 0 92px;min-width:92px;min-height:72px;margin:0;padding:10px 12px;border:1px solid #67e8f9;border-radius:9px;background:linear-gradient(145deg,#087eae,#075985 58%,#06365a);color:#f0fdff;font-weight:700;letter-spacing:.06em;box-shadow:inset 0 1px 0 #d9fbff44,0 0 14px #0284c744}
+.alvis-chat-composer button#sendChat:disabled{opacity:.48;filter:saturate(.55)}
+#chatLog{min-height:120px;max-height:42vh;overflow-y:auto;padding:8px 12px;border:1px solid #164e78;border-radius:14px;background:linear-gradient(180deg,rgba(3,15,30,.92),rgba(7,25,44,.82));scroll-behavior:smooth}
+@media(max-width:600px){
+ .display-dock .jarvis-stage{padding-bottom:10px}
+ .display-dock .avatar-stage{min-height:174px;padding-bottom:10px}
+ .alvis-chat-composer{gap:7px;margin:10px 0 14px;padding:7px;border-radius:11px}
+ .alvis-chat-composer textarea#chatInput{height:66px;min-height:66px;padding:10px 11px;font-size:16px}
+ .alvis-chat-composer button#sendChat{flex-basis:72px;min-width:72px;min-height:66px;padding:8px 7px;font-size:13px}
+ #chatLog{max-height:45vh;padding:6px 9px}
+}
+@media(max-width:360px){.alvis-chat-composer{gap:6px;padding:6px}}
+/* end v166 */
+
 </style>
 </head>
 <body>
@@ -1351,13 +1380,15 @@ body.alvis-page-transitioning:after{
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
 <div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
 </div>
- <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
-  <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
-  <button id="sendChat" type="button" disabled>送信</button>
- </div>
+>
  </div>
 
 <div id="chatLog"></div>
+<div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
+  <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
+  <button id="sendChat" type="button" disabled>送信</button>
+ </div
+
 <div class="hud-shortcuts" aria-label="ALVISクイック機能">
  <button type="button" class="hud-shortcut" data-page="memoryPage"><span>◈</span>記憶</button>
  <button type="button" class="hud-shortcut" data-page="growthPage"><span>⌁</span>成長</button>
