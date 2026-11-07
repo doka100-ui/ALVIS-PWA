@@ -642,6 +642,12 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   .display-dock .mode-stage.jarvis-stage{width:min(100%,560px)!important;max-width:560px!important}
 }
 /* end v145 */
+/* v146: hologram interface rows are real controls */
+.hud-interface-action{width:100%;margin:0;border:0;border-radius:0;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;appearance:none;-webkit-appearance:none;transition:background .18s ease,filter .18s ease}
+.hud-interface-action:hover,.hud-interface-action:focus-visible{background:#0b3a5b66;filter:brightness(1.25);outline:none}
+.hud-interface-action:focus-visible{box-shadow:inset 0 0 0 1px #7dd3fc,0 0 10px #38bdf855}
+.hud-interface-action:active{background:#07598566}
+
 </style>
 </head>
 <body>
@@ -712,10 +718,10 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 </div>
 <div class="hud-side hud-side-right">
 <div class="hud-panel-heading"><i></i> INTERFACE</div>
-<div class="hud-interface-item"><span>◉</span><div><b>VOICE</b><small>VOICE INTERFACE</small></div><em>MODULE</em></div>
-<div class="hud-interface-item"><span>⌕</span><div><b>SEARCH</b><small>KNOWLEDGE ACCESS</small></div><em>READY</em></div>
-<div class="hud-interface-item"><span>◇</span><div><b>MEMORY</b><small>ENCRYPTED VAULT</small></div><em>LOCAL</em></div>
-<div class="hud-interface-item"><span>⌁</span><div><b>GROWTH</b><small>SELF IMPROVEMENT</small></div><em>READY</em></div>
+<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="voice" aria-label="音声設定へ移動"><span>◉</span><div><b>VOICE</b><small>VOICE INTERFACE</small></div><em>OPEN</em></button>
+<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="search" aria-label="チャット入力欄へ移動"><span>⌕</span><div><b>SEARCH</b><small>KNOWLEDGE ACCESS</small></div><em>OPEN</em></button>
+<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="memory" aria-label="長期記憶を開く"><span>◇</span><div><b>MEMORY</b><small>ENCRYPTED VAULT</small></div><em>OPEN</em></button>
+<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="growth" aria-label="成長計画を開く"><span>⌁</span><div><b>GROWTH</b><small>SELF IMPROVEMENT</small></div><em>OPEN</em></button>
 <div class="hud-side-foot hud-side-foot-right">ALVIS　/　CORE SYSTEM</div>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
@@ -3652,6 +3658,26 @@ document.querySelectorAll(".hud-shortcut[data-page]").forEach(button=>button.add
 }));
 document.querySelectorAll(".hud-shortcut[data-scroll]").forEach(button=>button.addEventListener("click",()=>{
   const target=$(button.dataset.scroll);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+}));
+/* v146: connect hologram interface controls to existing ALVIS screens */
+document.querySelectorAll(".hud-interface-action[data-hud-action]").forEach(button=>button.addEventListener("click",()=>{
+  const action=button.dataset.hudAction;
+  if(action==="memory"||action==="growth"){
+    const page=action==="memory"?"memoryPage":"growthPage";
+    document.querySelector(`nav button[data-page="${page}"]`)?.click();
+    return;
+  }
+  if(action==="voice"){
+    const target=$("voicePanel");
+    if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+  if(action==="search"){
+    const chatNav=document.querySelector('nav button[data-page="chatPage"]');
+    chatNav?.click();
+    const input=$("chatInput");
+    if(input){input.focus({preventScroll:true});input.scrollIntoView({behavior:"smooth",block:"center"});}
+  }
 }));
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
