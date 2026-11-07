@@ -380,3 +380,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - `translate:-50% -50%` による位置固定と回転を分離し、`transform:none!important` の固定指定と競合させない。
 - 3本のリングは22秒/31秒/42秒で線形回転。台座と球体SVGの形状・配置は維持する。
 - 動きを減らす設定が有効な場合はアニメーションを開始しない。
+
+
+## v161 — 軌道リングの寸法微調整
+
+- 3本のリング寸法を少し縮小: A=108%×40%、B=100%×54%、C=108%×108%。
+- 中心位置・回転周期・回転方式・球体・投影台・既存機能は維持。
