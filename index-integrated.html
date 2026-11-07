@@ -3915,13 +3915,14 @@ async function sendToAlvis(){
     return;
   }
   alvisResponseInProgress=true;
-  alvisResponseStartedAt=performance.now();
-  updateHudConversationState("thinking");
-  $("sendChat").disabled=true;
-  input.value="";
-  data.history.push({role:"user",text,createdAt:new Date().toISOString()});
-  renderAll();
   try{
+    // UI更新や履歴描画で例外が起きても、下のfinallyで必ず送信ロックを解除する。
+    alvisResponseStartedAt=performance.now();
+    updateHudConversationState("thinking");
+    $("sendChat").disabled=true;
+    input.value="";
+    data.history.push({role:"user",text,createdAt:new Date().toISOString()});
+    renderAll();
     await saveLocal();
     // ALVIS自身の固定情報は推論モデルを呼ばず、端末内で即答する。
     if(userIsAlvisNameQuestion){
@@ -4196,8 +4197,8 @@ async function sendToAlvis(){
     updateHudConversationState("ready",elapsed);
     alvisResponseStartedAt=0;
     alvisResponseInProgress=false;
-    updateChatSendButton();
-    renderAll();
+    // 描画が失敗しても、入力内容に応じた送信ボタン状態を必ず再計算する。
+    try{renderAll();}finally{updateChatSendButton();}
   }
 }
 $("sendChat").addEventListener("click",sendToAlvis);
@@ -4419,6 +4420,8 @@ $("saveGrowthProposal").addEventListener("click",async()=>{
   data.improvements.push({title,reason,action,status:"proposed",createdAt:new Date().toISOString()});$("growthTitle").value="";$("growthReason").value="";$("growthAction").value="";setStatus("growthStatus","改善計画に登録しました。実行するかどうかは、計画一覧から選べます。");await saveLocal();renderAll();
 });
 $("chatInput").addEventListener("input",updateChatSendButton);
+$("chatInput").addEventListener("change",updateChatSendButton);
+$("chatInput").addEventListener("compositionend",updateChatSendButton);
 $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("sendChat").click();}});
 $("addMemory").addEventListener("click",async()=>{
   const title=$("memoryTitle").value.trim(),body=$("memoryBody").value.trim();
@@ -4798,5 +4801,6 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   })();
 }
 </script>
+<!-- v180: always release chat send lock after any send attempt, including UI setup failures. -->
 </body>
 </html>
