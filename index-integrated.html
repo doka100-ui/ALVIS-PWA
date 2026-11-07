@@ -600,6 +600,8 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 @keyframes alvisRefCorePulse{0%,100%{opacity:.35}50%{opacity:.9}}
 @media(prefers-reduced-motion:reduce){.display-dock .alvis-motion-orbit,.display-dock .alvis-core-light{animation:none!important}}
 /* end v138 */
+.display-dock .mode-stage.jarvis-stage>.alvis-motion-orbit,
+.display-dock .mode-stage.jarvis-stage>.alvis-core-light{display:none!important}
 </style>
 </head>
 <body>
@@ -642,10 +644,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <button id="avatarModeButton" type="button" data-display-mode="avatar" aria-pressed="false">アバターモード</button>
 </div>
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
-<img class="alvis-reference-image" src="./assets/alvis-reference.jpg" width="406" height="326" alt="ALVIS hologram reference scene" decoding="async" fetchpriority="high">
-<span class="alvis-motion-orbit alvis-motion-orbit-a" aria-hidden="true"></span>
-<span class="alvis-motion-orbit alvis-motion-orbit-b" aria-hidden="true"></span>
-<span class="alvis-core-light" aria-hidden="true"></span>
+<img class="alvis-reference-image" src="./assets/alvis-reference.jpg" width="240" height="194" alt="選択された未来都市のホログラム地球ダッシュボード" decoding="async" fetchpriority="high">
 <button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button>
 <div class="hud-side hud-side-left">
 <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
