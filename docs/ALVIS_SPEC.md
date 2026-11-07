@@ -1,3 +1,8 @@
+## v159 ホログラム軌道モーション
+- 3本の軌道をWeb Animations APIのElement.animate()で直接回転させる。各周期は22秒/31秒/42秒、linear、infinite。
+- ログイン後、チャット画面復帰時、pageshow/visibilitychange時に開始し、再開始時は以前のAnimationインスタンスをcancelする。
+- 既存の軌道位置・サイズ・色・台座は維持。保存データ、暗号化、同期、バックアップ、AI推論、音声処理は変更しない。Safari実機確認は別途必要。
+
 ## v158 ホログラム初回モーション起動
 - ログイン後のアプリ表示完了時、チャット画面への復帰時、pageshow/visibilitychange時に中央HUDの3本の軌道アニメーションを再起動する。
 - 再起動は animation:none!important → layout flush → 2回のrequestAnimationFrame後にインライン指定を除去し、既存CSSの回転アニメーションへ復帰させる。
