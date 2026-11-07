@@ -1392,11 +1392,7 @@ header .status{margin-top:2px}
  }
 
  
- /* v172: place ALVIS's latest reply immediately above the message composer;
-    remove only the outer frames around the left/right HUD columns. */
- .display-dock .jarvis-stage #chatLog{grid-row:2}
- .display-dock .jarvis-stage #alvisLatestReply{grid-row:3}
- .display-dock .jarvis-stage .alvis-chat-composer{grid-row:4}
+ /* v172: remove only the outer frames around the left/right HUD columns. */
  .display-dock .mode-stage.jarvis-stage>.hud-side{
    border-color:transparent!important;
    background:transparent!important;
@@ -1404,10 +1400,37 @@ header .status{margin-top:2px}
    border-radius:0!important;
    clip-path:none!important;
  }
- #chatPage[data-display-mode="avatar"] .jarvis-stage #chatLog{grid-row:1}
- #chatPage[data-display-mode="avatar"] .jarvis-stage #alvisLatestReply{grid-row:2}
- #chatPage[data-display-mode="avatar"] .jarvis-stage .alvis-chat-composer{grid-row:3}
  /* end v172 */
+
+ /* v173: keep the hologram as a separate upper display; put all chat UI below it. */
+ .display-dock .alvis-chat-area{
+   display:flex!important;flex-direction:column!important;gap:6px!important;
+   width:100%!important;max-width:1200px!important;margin:0 auto!important;
+   min-width:0!important;position:relative!important;z-index:2!important;
+ }
+ .display-dock .alvis-chat-area #chatLog{
+   grid-column:auto!important;grid-row:auto!important;
+   width:100%!important;margin:0!important;
+ }
+ .display-dock .alvis-chat-area #alvisLatestReply{
+   display:block!important;position:relative!important;
+   grid-column:auto!important;grid-row:auto!important;
+   width:100%!important;min-width:0!important;margin:0!important;
+   padding:7px 11px 9px;border:1px solid rgba(56,189,248,.72);
+   border-left:3px solid #67e8f9;border-radius:9px;
+   background:linear-gradient(110deg,rgba(5,35,58,.97),rgba(7,24,43,.96));
+   box-shadow:inset 0 1px 0 #dff8ff18,0 0 15px #0284c72b;color:#e5f8ff;
+ }
+ .display-dock .alvis-chat-area .alvis-chat-composer{
+   position:relative!important;left:auto!important;bottom:auto!important;
+   transform:none!important;grid-column:auto!important;grid-row:auto!important;
+   width:100%!important;max-width:100%!important;margin:0!important;
+ }
+ @media(max-width:760px){
+   .display-dock .alvis-chat-area{gap:4px!important}
+   .display-dock .alvis-chat-area #alvisLatestReply{padding:6px 8px 7px}
+ }
+ /* end v173 */
  /* end v171 */
  /* end v170 */
 </style>
@@ -1563,16 +1586,18 @@ header .status{margin-top:2px}
   </section>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
+</div>
 
-<div id="chatLog"></div>
-<section id="alvisLatestReply" aria-live="polite" aria-label="ALVISの最新の返答">
-  <div class="alvis-latest-heading"><span class="alvis-latest-indicator"></span> ALVIS RESPONSE</div>
-  <div id="alvisLatestReplyText">こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？</div>
-</section>
- <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
-  <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
-  <button id="sendChat" type="button" disabled>送信</button>
- </div>
+<div class="alvis-chat-area" aria-label="ALVISチャットエリア">
+  <div id="chatLog"></div>
+  <section id="alvisLatestReply" aria-live="polite" aria-label="ALVISの最新の返答">
+    <div class="alvis-latest-heading"><span class="alvis-latest-indicator"></span> ALVIS RESPONSE</div>
+    <div id="alvisLatestReplyText">こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？</div>
+  </section>
+  <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
+    <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
+    <button id="sendChat" type="button" disabled>送信</button>
+  </div>
 </div>
 <div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
