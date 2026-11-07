@@ -1553,6 +1553,26 @@ header .status{margin-top:2px}
 }
 /* end v183 */
 
+/* v184: make the avatar occupy the previously empty display area.
+   Talking Avatar renders a close-up face, so give its container a real responsive height. */
+#chatPage[data-display-mode="avatar"] .avatar-stage{
+  height:clamp(340px,52svh,460px);
+  min-height:340px;
+}
+#chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{
+  inset:0;width:100%;height:100%;min-height:0;
+}
+#chatPage[data-display-mode="avatar"] .alvis-avatar-canvas canvas{
+  display:block;width:100%!important;height:100%!important;
+}
+@media(max-width:600px){
+  #chatPage[data-display-mode="avatar"] .display-dock .avatar-stage{
+    height:clamp(300px,46svh,390px);min-height:300px;
+  }
+  #chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:0}
+}
+/* end v184 */
+
 </style>
 <script type="importmap">
 {
@@ -4867,10 +4887,11 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     avatarInitPromise=(async()=>{
       let instance=null;
       try{
-        const {TalkingAvatar}=await import("@interviewflowai/talking-avatar");
+        const {TalkingAvatar,AVATARS}=await import("@interviewflowai/talking-avatar");
         if(token!==generation||!isActive())return;
         instance=new TalkingAvatar({
           container:host,
+          avatarUrl:AVATARS.female,
           onError:error=>{if(token===generation)setStatus("AVATAR ERROR / "+(error?.message||"読み込みエラー")); }
         });
         await instance.ready;
