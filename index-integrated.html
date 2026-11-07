@@ -1582,6 +1582,21 @@ header .status{margin-top:2px}
 }
 /* end v185 */
 
+/* v186: in Avatar mode, remove the unused hologram frame spacing so chat
+   sits directly beneath the avatar display. Keep Jarvis mode unchanged. */
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame{
+  width:100%!important;max-width:none!important;margin:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;overflow:visible!important;
+}
+#chatPage[data-display-mode="avatar"] .display-dock .alvis-hologram-frame>.alvis-chat-area{
+  margin:0!important;padding:0!important;gap:6px!important;
+}
+@media(max-width:760px){
+  #chatPage[data-display-mode="avatar"] .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
+}
+/* end v186 */
+
 </style>
 <script type="importmap">
 {
