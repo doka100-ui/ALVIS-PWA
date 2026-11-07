@@ -1061,9 +1061,9 @@ function updateHudConversationState(state="idle",elapsedSeconds=null){
 }
 function updateHudSystemStatus(){
   const inference=$("hudInferenceState");
-  if(inference)inference.textContent=aiEngine?ALVIS_MODEL_LABEL.toUpperCase()+" / ONLINE":aiLoading?"MODEL LOADING":navigator.gpu?"WEBGPU READY":"WEBGPU N/A";
+  if(inference)inference.textContent=aiEngine?"MODEL ONLINE":aiLoading?"MODEL LOADING":navigator.gpu?"WEBGPU READY":"WEBGPU N/A";
   const vault=$("hudVaultState");
-  if(vault)vault.textContent=(unlocked?"UNLOCKED":"LOCKED")+" / AES-GCM";
+  if(vault)vault.textContent=(unlocked?"OPEN":"LOCKED")+" / AES-GCM";
   const network=$("hudNetworkState"),dot=$("hudNetworkDot");
   const online=navigator.onLine!==false;
   if(network)network.textContent="OFFLINE FIRST / "+(online?"ONLINE":"OFFLINE");
