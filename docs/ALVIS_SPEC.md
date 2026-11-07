@@ -529,3 +529,7 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 
 ## v184 アバター表示領域
 - Talking Avatar SDKの組み込み女性モデルを `AVATARS.female` で明示指定。アバターモードの表示領域は通常 clamp(340px,52svh,460px)、スマートフォン clamp(300px,46svh,390px) とし、3Dキャンバスを領域全体に表示する。SDKは顔のクローズアップ表示で、全身表示ではない。Android 18風モデルへの変更は別工程。
+
+
+## v185 アバター表示順
+- アバター表示ステージを表示モード切替の直後、チャット領域より前にDOM配置する。アバターモードではアバターが上、チャットが下。ALVISモードの表示構成は維持。
