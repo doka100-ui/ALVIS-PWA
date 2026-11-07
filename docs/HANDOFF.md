@@ -1266,3 +1266,11 @@
 - 左右HUDパネルと左側ナビ・各ボタンの pointer-events:auto を明示し、タッチ操作を有効化。メニューの既存 data-page と共通ルーターは維持。
 - Service Worker cache: alvis-cache-v156-integrated。
 - ソース上のCSS優先順位・対象要素・遷移先IDを静的確認。iPad/iPhone Safari実機のタップ確認はユーザー確認待ち。
+
+
+## v157 — 状態表示の整理と画面遷移演出（2026-11-07）
+- 「OFFLINE FIRST」はALVISの設計方針を表す表示として扱い、右側のライブ通信状態は ONLINE / OFFLINE のみ表示するよう分離。通信状態を設計方針と混同しない。
+- ページ切替時に、ログイン解除後の演出に合わせた控えめなフェード・微小スケール・中心から広がる淡い光の演出を追加。チャット、記憶候補、長期記憶、履歴、成長、外部AI、AI連携、同期、端末診断の共通ルーターを維持。
+- prefers-reduced-motion を尊重し、動きを抑える設定ではページ遷移アニメーションを無効化。
+- Service Worker cache: alvis-cache-v157-integrated。
+- ソース構造・表示文言・遷移先IDの静的確認のみ。Safari実機の演出とタップ操作は未確認。
