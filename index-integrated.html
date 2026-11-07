@@ -903,6 +903,79 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   .display-dock .hud-orbit-a,.display-dock .hud-orbit-b,.display-dock .hud-orbit-c{animation:none!important;}
 }
 
+
+/* v153: correct the actual orbit transform and restore the left AI control */
+.display-dock .hud-center .hud-orbit{
+  left:50%!important;top:48%!important;
+  translate:-50% -50%!important;
+  transform:none!important;
+  transform-origin:50% 50%!important;
+  will-change:transform;
+}
+.display-dock .hud-center .hud-orbit-a{
+  width:116%!important;height:43%!important;
+  animation:alvisOrbitA153 22s linear infinite!important;
+}
+.display-dock .hud-center .hud-orbit-b{
+  width:108%!important;height:58%!important;
+  animation:alvisOrbitB153 31s linear infinite!important;
+}
+.display-dock .hud-center .hud-orbit-c{
+  width:116%!important;height:116%!important;
+  border-radius:50%!important;
+  border-color:#7dd3fc66!important;
+  animation:alvisOrbitC153 42s linear infinite!important;
+}
+@keyframes alvisOrbitA153{from{transform:rotate(-24deg)}to{transform:rotate(336deg)}}
+@keyframes alvisOrbitB153{from{transform:rotate(58deg)}to{transform:rotate(-302deg)}}
+@keyframes alvisOrbitC153{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* Old v128/v150 rules accidentally treated the left-hand launch button as
+   an invisible globe overlay. Override those exact legacy selectors. */
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction{
+  display:flex!important;visibility:visible!important;
+  position:relative!important;inset:auto!important;
+  left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;
+  z-index:4!important;transform:none!important;
+  width:100%!important;height:auto!important;min-height:58px!important;
+  margin:12px 0 3%!important;padding:4%!important;
+  opacity:1!important;overflow:visible!important;
+  border:1px solid #168bff!important;border-radius:8px!important;
+  background:linear-gradient(120deg,#03152d,#052b50)!important;
+  color:#9feaff!important;box-shadow:inset 0 0 20px #078bff22!important;
+  cursor:pointer!important;pointer-events:auto!important;
+  text-align:left!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction>*{
+  display:flex!important;visibility:visible!important;
+  position:relative!important;opacity:1!important;
+  color:inherit!important;font-size:inherit!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction .hud-ai-ring{
+  display:grid!important;place-items:center!important;flex:0 0 clamp(36px,4vw,54px)!important;
+  width:auto!important;height:auto!important;aspect-ratio:1!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction .hud-ai-copy{
+  display:flex!important;flex:1 1 auto!important;min-width:0!important;
+  flex-direction:column!important;align-items:flex-start!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction:disabled{
+  opacity:.88!important;cursor:default!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction:focus-visible{
+  outline:2px solid #8beaff!important;outline-offset:3px!important;
+}
+@media(max-width:760px){
+ .display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction{
+   min-height:46px!important;gap:5px!important;margin:8px 0 3%!important;padding:3%!important;
+ }
+ .display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction .hud-ai-ring{
+   flex-basis:30px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .display-dock .hud-center .hud-orbit{animation:none!important;}
+}
+
 </style>
 </head>
 <body>
