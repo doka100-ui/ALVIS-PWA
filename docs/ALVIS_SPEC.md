@@ -340,3 +340,8 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - Right HUD retains live network status and links to memory/growth. Existing encrypted data, inference, voice, history, backup, and sync behavior must remain unchanged by presentation work.
 - Reference aspect ratio: 1397:1126. Prioritize iPad landscape; adapt the panels for narrow/mobile screens without removing their underlying app functions.
 - v151 is a presentation/layout rebuild only. Actual Safari/iPad visual and touch verification is still pending.
+
+
+### v154 下部投影台の上質化
+- 球体下の固定投影台は、細いチタン/ガラス調の同心リングと弱いアイスブルー反射で表現する。強いピンク発光・太いネオン縁・過剰な中心グローは禁止。投影台自体は静止。
+- 既存の中央球体、回転軌道、左右HUD、AI/記憶/音声/同期機能は維持する。
