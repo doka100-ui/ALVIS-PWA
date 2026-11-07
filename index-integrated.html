@@ -1466,45 +1466,44 @@ header .status{margin-top:2px}
  }
 
 
- /* v176: adapt the unified hologram/chat frame to portrait and landscape viewports.
-    The approved hologram artwork and its internal proportions remain unchanged. */
+ /* v177: restore full available viewport width in both orientations.
+    Do not cap portrait mode at 420px; let the frame and hologram use the available width. */
  .display-dock .alvis-hologram-frame{
-   transition:width .24s ease,max-width .24s ease,padding .24s ease;
+   width:100%!important;max-width:none!important;box-sizing:border-box!important;
+   transition:width .24s ease,padding .24s ease;
  }
  .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
-   height:auto!important;aspect-ratio:1397/1126!important;
-   transition:width .24s ease,max-width .24s ease;
+   width:100%!important;max-width:none!important;height:auto!important;
+   aspect-ratio:1397/1126!important;transition:width .24s ease;
  }
  @media(orientation:portrait){
    .display-dock .alvis-hologram-frame{
-     width:min(100%,420px)!important;max-width:420px!important;
+     width:100%!important;max-width:none!important;padding:6px 6px 8px!important;
    }
    .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
-     width:min(100%,520px)!important;max-width:520px!important;
-     margin-left:auto!important;margin-right:auto!important;
+     width:100%!important;max-width:none!important;margin:0 auto 6px!important;
    }
  }
  @media(orientation:landscape){
    .display-dock .alvis-hologram-frame{
-     width:min(100%,760px)!important;max-width:760px!important;
-     padding:8px 10px 10px!important;
+     width:100%!important;max-width:none!important;padding:8px 10px 10px!important;
    }
    .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
-     width:min(100%,clamp(220px,68svh,560px))!important;
-     max-width:560px!important;margin:0 auto 8px!important;
+     width:min(100%,clamp(520px,85svh,900px))!important;
+     max-width:900px!important;margin:0 auto 8px!important;
    }
    .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:6px!important}
  }
  @media(orientation:landscape) and (max-height:600px){
    .display-dock .alvis-hologram-frame{padding:5px 8px 7px!important}
    .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
-     width:min(100%,clamp(210px,60svh,420px))!important;
-     margin-bottom:5px!important;
+     width:min(100%,clamp(360px,75svh,700px))!important;
+     max-width:700px!important;margin-bottom:5px!important;
    }
    .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
    .display-dock .alvis-hologram-frame .alvis-chat-area #alvisLatestReply{padding:5px 8px 6px}
  }
- /* end v176 */
+ /* end v177 */
  /* end v175 */
 
  /* end v171 */
