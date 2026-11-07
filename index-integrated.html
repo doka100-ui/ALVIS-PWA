@@ -1537,6 +1537,12 @@ header .status{margin-top:2px}
   .alvis-avatar-status{box-shadow:none}
 }
 /* end v181 */
+/* v182: remove the redundant heading and top gap in Avatar mode only. */
+#chatPage[data-display-mode="avatar"] > .panel > h2{display:none!important}
+#chatPage[data-display-mode="avatar"] .display-dock{padding-top:0}
+#chatPage[data-display-mode="avatar"] .mode-switch{margin-top:0}
+/* end v182 */
+
 </style>
 <script type="importmap">
 {
