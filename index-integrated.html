@@ -1390,6 +1390,24 @@ header .status{margin-top:2px}
    .alvis-latest-heading{font-size:8px;margin-bottom:3px}
    #alvisLatestReplyText{font-size:12px;line-height:1.45;max-height:4.35em}
  }
+
+ 
+ /* v172: place ALVIS's latest reply immediately above the message composer;
+    remove only the outer frames around the left/right HUD columns. */
+ .display-dock .jarvis-stage #chatLog{grid-row:2}
+ .display-dock .jarvis-stage #alvisLatestReply{grid-row:3}
+ .display-dock .jarvis-stage .alvis-chat-composer{grid-row:4}
+ .display-dock .mode-stage.jarvis-stage>.hud-side{
+   border-color:transparent!important;
+   background:transparent!important;
+   box-shadow:none!important;
+   border-radius:0!important;
+   clip-path:none!important;
+ }
+ #chatPage[data-display-mode="avatar"] .jarvis-stage #chatLog{grid-row:1}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage #alvisLatestReply{grid-row:2}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage .alvis-chat-composer{grid-row:3}
+ /* end v172 */
  /* end v171 */
  /* end v170 */
 </style>
@@ -1545,12 +1563,13 @@ header .status{margin-top:2px}
   </section>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
+
+<div id="chatLog"></div>
 <section id="alvisLatestReply" aria-live="polite" aria-label="ALVISの最新の返答">
   <div class="alvis-latest-heading"><span class="alvis-latest-indicator"></span> ALVIS RESPONSE</div>
   <div id="alvisLatestReplyText">こんにちは。ALVISだよ。記憶庫を開けたね。今日は何を一緒に進めようか？</div>
 </section>
-<div id="chatLog"></div>
-<div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
+ <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
   <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
   <button id="sendChat" type="button" disabled>送信</button>
  </div>
