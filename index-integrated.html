@@ -4203,9 +4203,10 @@ let initialDisplayMode="jarvis";
 try{initialDisplayMode=localStorage.getItem(ALVIS_DISPLAY_MODE_KEY)==="avatar"?"avatar":"jarvis";}catch(error){}
 applyAlvisDisplayMode(initialDisplayMode,false);
 
-/* v159: drive hologram orbit motion with the Web Animations API.
-   Safari can defer CSS animations while the authenticated app is first revealed.
-   WAAPI starts each orbit explicitly and keeps the existing visual geometry unchanged. */
+/* v160: animate the independent CSS rotate property, not transform.
+   v153 deliberately locks transform:none!important to preserve the orbit center.
+   Animating transform therefore conflicts with that positioning rule; rotate keeps
+   the translate-based center fixed while the orbital rings turn independently. */
 let alvisHudMotionAnimations=[];
 function startAlvisHudMotion(){
   const chatPage=$("chatPage");
@@ -4216,15 +4217,16 @@ function startAlvisHudMotion(){
   if(orbitNodes.length<3)return;
   alvisHudMotionAnimations.forEach(animation=>{try{animation.cancel();}catch(error){}});
   alvisHudMotionAnimations=[];
+  if(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)return;
   const motions=[
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"rotate(-24deg)",to:"rotate(336deg)",duration:22000},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"rotate(58deg)",to:"rotate(-302deg)",duration:31000},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-c")),from:"rotate(0deg)",to:"rotate(360deg)",duration:42000}
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"-24deg",to:"336deg",duration:22000},
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:31000},
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-c")),from:"0deg",to:"360deg",duration:42000}
   ];
   motions.forEach(motion=>{
     if(!motion.node || typeof motion.node.animate!=="function")return;
     const animation=motion.node.animate(
-      [{transform:motion.from},{transform:motion.to}],
+      [{rotate:motion.from},{rotate:motion.to}],
       {duration:motion.duration,iterations:Infinity,easing:"linear"}
     );
     alvisHudMotionAnimations.push(animation);
