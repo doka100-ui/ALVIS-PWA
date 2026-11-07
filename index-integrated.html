@@ -1516,7 +1516,37 @@ header .status{margin-top:2px}
 
  /* end v171 */
  /* end v170 */
+
+/* v181: lazy-loaded browser-side 3D avatar preview. */
+#chatPage[data-display-mode="avatar"] .avatar-stage{
+  min-height:360px;padding:0;display:block;position:relative;isolation:isolate;
+  overflow:hidden;background:radial-gradient(ellipse at 50% 34%,#254b70 0%,#142b45 48%,#060d19 100%);
+}
+.alvis-avatar-canvas{position:absolute;inset:0;width:100%;height:100%;min-height:320px;overflow:hidden}
+.alvis-avatar-canvas canvas{display:block;width:100%!important;height:100%!important;outline:none}
+.alvis-avatar-status{
+  position:absolute;z-index:4;top:10px;left:12px;padding:5px 9px;border:1px solid #7dd3fc55;
+  border-radius:999px;background:#061426bb;color:#bae6fd;font-size:10px;letter-spacing:.12em;
+  box-shadow:0 0 12px #0284c722;pointer-events:none
+}
+@media(max-width:600px){
+  #chatPage[data-display-mode="avatar"] .display-dock .avatar-stage{min-height:340px;padding:0}
+  #chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:300px}
+}
+@media(prefers-reduced-motion:reduce){
+  .alvis-avatar-status{box-shadow:none}
+}
+/* end v181 */
 </style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+    "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/",
+    "@interviewflowai/talking-avatar": "https://cdn.jsdelivr.net/npm/@interviewflowai/talking-avatar@0.3.0/dist/index.js"
+  }
+}
+</script>
 </head>
 <body>
 <header>
@@ -1685,8 +1715,8 @@ header .status{margin-top:2px}
 </div>
 </div>
 <div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
-<div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
-<div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
+<div id="alvisAvatarCanvas" class="alvis-avatar-canvas" aria-label="ALVISの3Dアバター"></div>
+<div id="alvisAvatarStatus" class="alvis-avatar-status" role="status" aria-live="polite">ALVIS AVATAR / STANDBY</div>
 </div>
 </div>
 
@@ -4802,5 +4832,69 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 }
 </script>
 <!-- v180: always release chat send lock after any send attempt, including UI setup failures. -->
+<script type="module">
+/* v181: load the 3D avatar only while Avatar mode is active to limit GPU use. */
+(() => {
+  const chatPage=document.getElementById("chatPage");
+  const host=document.getElementById("alvisAvatarCanvas");
+  const status=document.getElementById("alvisAvatarStatus");
+  if(!chatPage||!host||!status)return;
+  let avatarInstance=null;
+  let avatarInitPromise=null;
+  let generation=0;
+  const isActive=()=>!chatPage.classList.contains("hidden")&&chatPage.dataset.displayMode==="avatar";
+  const setStatus=value=>{status.textContent=value;};
+  async function ensureAvatar(){
+    if(avatarInstance||avatarInitPromise||!isActive())return avatarInitPromise;
+    const token=++generation;
+    setStatus("3D MODEL / LOADING");
+    avatarInitPromise=(async()=>{
+      let instance=null;
+      try{
+        const {TalkingAvatar}=await import("@interviewflowai/talking-avatar");
+        if(token!==generation||!isActive())return;
+        instance=new TalkingAvatar({
+          container:host,
+          onError:error=>{if(token===generation)setStatus("AVATAR ERROR / "+(error?.message||"読み込みエラー")); }
+        });
+        await instance.ready;
+        if(token!==generation||!isActive()){
+          instance.dispose();
+          return;
+        }
+        avatarInstance=instance;
+        avatarInstance.setStatus("listening");
+        setStatus("ALVIS AVATAR / LISTENING");
+      }catch(error){
+        if(instance){try{instance.dispose();}catch(disposeError){}}
+        if(token===generation)setStatus("3D MODEL / LOAD FAILED — オンラインで再読み込みしてください");
+      }
+    })().finally(()=>{
+      avatarInitPromise=null;
+      if(isActive()&&!avatarInstance)requestAnimationFrame(()=>ensureAvatar());
+    });
+    return avatarInitPromise;
+  }
+  function releaseAvatar(){
+    generation++;
+    if(avatarInstance){
+      try{avatarInstance.dispose();}catch(error){}
+      avatarInstance=null;
+    }
+    host.replaceChildren();
+    setStatus("ALVIS AVATAR / STANDBY");
+  }
+  const observer=new MutationObserver(()=>{
+    if(isActive())ensureAvatar();
+    else releaseAvatar();
+  });
+  observer.observe(chatPage,{attributes:true,attributeFilter:["class","data-display-mode"]});
+  window.ALVISSetAvatarStatus=state=>{
+    if(!avatarInstance)return;
+    avatarInstance.setStatus(state==="thinking"?"thinking":"listening");
+  };
+  if(isActive())ensureAvatar();
+})();
+</script>
 </body>
 </html>
