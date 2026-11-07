@@ -1295,6 +1295,24 @@ header .status{margin-top:2px}
 }
 /* end v168 */
 
+
+/* v169: keep conversation history and composer inside the unified hologram frame. */
+.display-dock{padding:8px 10px 10px}
+.display-dock #chatLog{
+  margin:8px 0 0;
+  border:1px solid #287da566;
+  border-top:1px solid #38bdf888;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(3,18,34,.96),rgba(5,25,43,.92));
+  box-shadow:inset 0 1px 0 #c5f5ff12,0 0 14px #0284c71a;
+}
+.display-dock .alvis-chat-composer{margin:8px 0 0}
+@media(max-width:600px){
+  .display-dock{padding:6px 7px 8px}
+  .display-dock #chatLog{margin-top:6px}
+  .display-dock .alvis-chat-composer{margin-top:6px}
+}
+/* end v169 */
 </style>
 </head>
 <body>
@@ -1453,13 +1471,12 @@ header .status{margin-top:2px}
 <div class="avatar-placeholder" aria-hidden="true"><span class="avatar-eyes"></span></div>
 <div class="avatar-copy"><strong>ALVIS AVATAR</strong><p>ここに3Dアバターを表示する準備をしています。次の段階で3Dモデル、表情、視線、音声連動を追加します。</p></div>
 </div>
-</div>
-
 <div id="chatLog"></div>
 <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
   <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
   <button id="sendChat" type="button" disabled>送信</button>
  </div>
+</div>
 
 <div class="hud-shortcuts" aria-label="ALVISクイック機能">
  <button type="button" class="hud-shortcut" data-page="memoryPage"><span>◈</span>記憶</button>
