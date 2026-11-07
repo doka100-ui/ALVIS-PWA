@@ -1262,6 +1262,39 @@ body.alvis-page-transitioning:after{
 }
 /* end v167 */
 
+
+/* v168: pull the chat experience and top navigation closer to the viewport.
+   Keep the approved hologram artwork, controls and interaction logic intact. */
+header{padding:7px 12px}
+header .status{margin-top:2px}
+#appPanel>nav{gap:6px;padding:4px 8px}
+#appPanel>nav button{padding:8px 11px;font-size:13px}
+#appPanel>main{padding:5px 9px 10px}
+#chatPage>.panel{margin:4px 0;padding:8px}
+#chatPage>.panel>h2{margin:0 0 5px;font-size:16px}
+#chatPage .display-dock{padding:4px 0 2px;box-shadow:0 5px 10px #0f172a55}
+#chatPage .mode-switch{gap:6px;margin:0 0 4px}
+#chatPage .mode-switch button{padding:8px 10px;font-size:13px}
+#chatPage .display-dock .jarvis-stage{padding-top:4px;padding-bottom:4px}
+#chatPage #chatLog{margin-top:3px}
+#chatPage .alvis-chat-composer{margin-top:5px;margin-bottom:6px}
+@media(max-width:600px){
+  header{padding:5px 9px}
+  header h1{font-size:20px;letter-spacing:2px}
+  #appPanel>nav{gap:5px;padding:3px 6px}
+  #appPanel>nav button{padding:7px 9px;font-size:12px}
+  #appPanel>main{padding:3px 6px 8px}
+  #chatPage>.panel{margin:3px 0;padding:6px}
+  #chatPage>.panel>h2{margin-bottom:4px;font-size:15px}
+  #chatPage .display-dock{padding:3px 0 1px}
+  #chatPage .mode-switch{gap:5px;margin-bottom:3px}
+  #chatPage .mode-switch button{padding:7px 8px;font-size:12px}
+  #chatPage .display-dock .jarvis-stage{padding-top:2px;padding-bottom:2px}
+  #chatPage #chatLog{margin-top:2px}
+  #chatPage .alvis-chat-composer{margin-top:4px;margin-bottom:5px}
+}
+/* end v168 */
+
 </style>
 </head>
 <body>
