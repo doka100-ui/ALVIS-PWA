@@ -1113,6 +1113,49 @@ body.alvis-page-transitioning:after{
 .display-dock .hud-center .hud-orbit-b{width:100%!important;height:54%!important;}
 .display-dock .hud-center .hud-orbit-c{width:108%!important;height:108%!important;}
 /* end v161 */
+
+
+/* v162: full-width holographic chat composer attached to the ALVIS display dock.
+   Keep the input outside the artwork itself so the globe, orbit rings and pedestal
+   remain fully visible; the composer is part of the same glass control surface. */
+.display-dock .alvis-chat-composer{
+  display:flex;align-items:stretch;gap:10px;width:100%;max-width:100%;
+  margin:10px 0 2px;padding:9px;
+  border:1px solid #38bdf866;border-radius:13px;
+  background:linear-gradient(135deg,#071a2ceF,#0b2940eF 55%,#061426f2);
+  box-shadow:inset 0 1px 0 #c5f5ff18,0 0 18px #0284c722,0 8px 18px #02061766;
+}
+.display-dock .alvis-chat-composer textarea#chatInput{
+  display:block;flex:1 1 auto;min-width:0;width:100%;height:66px;min-height:66px;max-height:150px;
+  margin:0;padding:12px 14px;border:1px solid #287da5;border-radius:9px;
+  background:linear-gradient(145deg,#061426,#0a2035);color:#e8faff;
+  font:inherit;font-size:16px;line-height:1.45;resize:vertical;
+  box-shadow:inset 0 0 14px #02081788;
+}
+.display-dock .alvis-chat-composer textarea#chatInput::placeholder{color:#8ebbd0}
+.display-dock .alvis-chat-composer textarea#chatInput:focus{
+  outline:2px solid #38bdf8aa;outline-offset:1px;border-color:#67e8f9;
+  box-shadow:inset 0 0 14px #02081788,0 0 13px #0ea5e955;
+}
+.display-dock .alvis-chat-composer button#sendChat{
+  flex:0 0 92px;min-width:92px;min-height:66px;margin:0;padding:10px 12px;
+  border:1px solid #67e8f9;border-radius:9px;
+  background:linear-gradient(145deg,#087eae,#075985 58%,#06365a);
+  color:#f0fdff;font-weight:700;letter-spacing:.06em;
+  box-shadow:inset 0 1px 0 #d9fbff44,0 0 14px #0284c744;
+}
+.display-dock .alvis-chat-composer button#sendChat:disabled{opacity:.48;filter:saturate(.55)}
+@media(max-width:600px){
+  .display-dock .alvis-chat-composer{gap:7px;margin:8px 0 1px;padding:7px;border-radius:11px}
+  .display-dock .alvis-chat-composer textarea#chatInput{height:62px;min-height:62px;padding:10px 11px;font-size:16px}
+  .display-dock .alvis-chat-composer button#sendChat{flex-basis:72px;min-width:72px;min-height:62px;padding:8px 7px;font-size:13px}
+}
+@media(max-width:360px){
+  .display-dock .alvis-chat-composer{gap:6px;padding:6px}
+  .display-dock .alvis-chat-composer button#sendChat{flex-basis:64px;min-width:64px}
+}
+/* end v162 */
+
 </style>
 </head>
 <body>
@@ -1276,8 +1319,13 @@ body.alvis-page-transitioning:after{
  <button type="button" class="hud-shortcut" data-scroll="voicePanel"><span>♫</span>音声</button>
  <button type="button" class="hud-shortcut" data-page="devicePage"><span>⌘</span>端末</button>
  </div>
+ <div class="alvis-chat-composer" role="group" aria-label="ALVISチャット入力">
+  <textarea id="chatInput" rows="2" placeholder="ALVISにメッセージを送る" aria-label="ALVISにメッセージを入力"></textarea>
+  <button id="sendChat" type="button" disabled>送信</button>
+ </div>
  </div>
 
+<div id="chatLog"></div>
 <div class="panel" style="margin:0 0 12px">
 <strong id="voicePanel">音声会話（試作）</strong>
 <label class="inline-option"><input id="autoSpeak" type="checkbox" checked> ALVISの返事を自動で読み上げる</label>
@@ -1308,9 +1356,6 @@ body.alvis-page-transitioning:after{
 <audio id="kokoroPlayer" class="hidden" controls playsinline style="width:100%;margin-top:8px"></audio>
 <p class="small">Kokoroは初回オンライン時に音声モデルと日本語辞書を取得します。取得・キャッシュ後は端末内で合成する設計です。初回準備には空き容量と時間が必要です。</p>
 </div>
-<div id="chatLog"></div>
-<textarea id="chatInput" placeholder="ALVISにメッセージを送る"></textarea>
-<button id="sendChat" disabled>送信</button>
 <label class="inline-option"><input id="useOnlineAi" type="checkbox"> この質問文だけをオンラインAIにも送り、複数の意見を集める</label>
 <p class="small">チェックした1回だけ外部AIを利用します。送信するのは今の質問文だけで、会話履歴・長期記憶は送信しません。未設定・通信失敗時は端末内AIだけで回答します。</p>
 <p class="small">選択したQwen3モデルは端末内で推論します。承認済み長期記憶の内容を会話時にAIへ渡します。</p>
