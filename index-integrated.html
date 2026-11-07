@@ -725,6 +725,111 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   .display-dock .hud-center{min-height:270px!important}
 }
 
+
+
+/* v151 — rebuild the live hologram layout to match the approved reference composition */
+.display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:block!important;isolation:isolate!important;
+  width:100%!important;max-width:1200px!important;min-height:0!important;height:auto!important;
+  aspect-ratio:1397/1126!important;padding:0!important;margin:10px auto 14px!important;
+  overflow:hidden!important;border:1px solid #073d70!important;border-radius:16px!important;
+  background:radial-gradient(ellipse at 50% 43%,#063b75 0%,#031d43 36%,#010d23 70%,#010611 100%)!important;
+  box-shadow:inset 0 0 90px #00091c,0 0 34px #007dff35!important;
+}
+.display-dock .mode-stage.jarvis-stage:before{
+  content:""!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;
+  background-image:radial-gradient(circle at 4% 17%,#72dfff 0 1px,transparent 1.8px),radial-gradient(circle at 16% 61%,#2e9cff 0 1px,transparent 1.8px),radial-gradient(circle at 34% 12%,#b5f5ff 0 1px,transparent 1.8px),radial-gradient(circle at 68% 18%,#5edaff 0 1px,transparent 1.8px),radial-gradient(circle at 92% 38%,#42aaff 0 1px,transparent 1.8px),radial-gradient(circle at 82% 74%,#a3eaff 0 1px,transparent 1.8px),linear-gradient(180deg,#03142b22,#02091655);
+  background-size:100% 100%;opacity:.85;
+}
+.display-dock .mode-stage.jarvis-stage:after{content:""!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:27%!important;z-index:0!important;pointer-events:none!important;background:repeating-linear-gradient(90deg,transparent 0 8%,#168fff0b 8.1% 8.2%),linear-gradient(180deg,transparent,#061b35a8)!important;transform:perspective(260px) rotateX(58deg);transform-origin:bottom;}
+.display-dock .hud-center{position:absolute!important;inset:0!important;min-height:0!important;display:block!important;z-index:1!important;pointer-events:none!important;}
+.display-dock .hud-projector{position:absolute!important;left:50%!important;top:-4%!important;transform:translateX(-50%)!important;width:67%!important;height:15%!important;border-radius:50%!important;border:2px solid #1a9cff!important;background:radial-gradient(ellipse,#8af7ff 0%,#0878db 13%,#06295a 42%,#010b21 73%)!important;box-shadow:0 0 18px #14baff,0 0 46px #087cff,inset 0 0 26px #52eaff!important;z-index:3!important;}
+.display-dock .hud-projector:before,.display-dock .hud-projector:after{content:"";position:absolute;inset:9% 4%;border:2px solid #ff4caa;border-radius:50%;box-shadow:0 0 12px #ff4caa;}
+.display-dock .hud-projector:after{inset:18% 9%;border-color:#56eaff;box-shadow:0 0 16px #56eaff;}
+.display-dock .hud-projector span{inset:28% 37%!important;border:0!important;background:radial-gradient(ellipse,#eaffff,#2beaff 35%,#0874db 75%,transparent)!important;box-shadow:0 0 24px 12px #32eaff!important;}
+.display-dock .hud-projector i{top:12%!important;height:82%!important;border-left:2px solid #8af8ff!important;box-shadow:0 0 15px #37cfff!important;}
+.display-dock .hud-beam{position:absolute!important;left:50%!important;top:8%!important;bottom:13%!important;height:auto!important;width:38%!important;z-index:0!important;opacity:.9!important;background:linear-gradient(180deg,#16cfff00 0%,#18bfff1f 15%,#37cfff28 52%,#ff56c51b 86%,#18cfff00 100%)!important;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%)!important;}
+.display-dock .hud-orbit{left:50%!important;top:43%!important;width:72%!important;height:23%!important;border:2px solid #3acbff!important;border-radius:50%!important;box-shadow:0 0 12px #16aaff,0 0 30px #0c7dff55!important;z-index:2!important;}
+.display-dock .hud-orbit-a{transform:translate(-50%,-50%) rotate(-18deg)!important;border-color:#ff4cb5!important;animation:alvisHudSpin 24s linear infinite!important;}
+.display-dock .hud-orbit-b{width:77%!important;height:27%!important;transform:translate(-50%,-50%) rotate(18deg)!important;border-color:#32cfff!important;animation:alvisHudSpin 31s linear infinite reverse!important;}
+.display-dock .hud-orbit-c{width:68%!important;height:19%!important;transform:translate(-50%,-50%) rotate(72deg)!important;border-color:#168bff!important;}
+.display-dock .hud-core{position:absolute!important;left:50%!important;top:42%!important;transform:translate(-50%,-50%)!important;width:min(36%,470px)!important;min-width:0!important;aspect-ratio:1!important;overflow:visible!important;border:1px solid #a9f5ff!important;background:radial-gradient(circle at 35% 24%,#b8f8ff88,#167ec855 36%,#02132feF 79%)!important;box-shadow:0 0 18px #7deaff,0 0 52px #079bffbb,0 0 110px #087cff66,inset 0 0 32px #7ceaff!important;z-index:2!important;}
+.display-dock .hud-core:before{inset:2%!important;border:1px solid #c9faff!important;border-style:solid!important;background:repeating-linear-gradient(0deg,transparent 0 8px,#b5f5ff12 9px 10px),repeating-linear-gradient(90deg,transparent 0 8px,#b5f5ff12 9px 10px)!important;box-shadow:0 0 18px #37dfff!important;}
+.display-dock .hud-core:after{inset:7%!important;border:1px solid #68eaffaa!important;background:radial-gradient(circle at 30% 24%,#ffffff22,transparent 42%)!important;}
+.display-dock .hud-globe-map{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;filter:none!important;overflow:visible!important;shape-rendering:geometricPrecision!important;}
+.display-dock .hud-core>span{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;font-size:clamp(20px,3.4vw,42px)!important;letter-spacing:.34em!important;text-shadow:0 0 10px #fff,0 0 26px #35dfff,0 0 48px #168cff!important;white-space:nowrap!important;}
+.display-dock .hud-core>small{top:62%!important;left:50%!important;transform:translateX(-50%)!important;font-size:clamp(6px,.65vw,9px)!important;white-space:nowrap!important;}
+.display-dock .hud-platform{position:absolute!important;left:50%!important;bottom:2%!important;transform:translateX(-50%)!important;width:70%!important;height:17%!important;border:2px solid #168fff!important;border-radius:50%!important;background:radial-gradient(ellipse,#49eaff33 0%,#0869c944 28%,#03112b 65%,transparent 72%)!important;box-shadow:0 0 20px #0c9fff,inset 0 0 22px #0b8cff!important;z-index:2!important;}
+.display-dock .hud-platform:before,.display-dock .hud-platform:after,.display-dock .hud-platform i{top:12%!important;width:90%!important;height:70%!important;border:3px solid #1b9eff!important;box-shadow:0 0 16px #159fff,inset 0 0 12px #168cff!important;}
+.display-dock .hud-platform:after{top:22%!important;width:70%!important;height:56%!important;border-color:#ff4aa9!important;box-shadow:0 0 15px #ff4aa9!important;}
+.display-dock .hud-platform i{top:31%!important;width:48%!important;height:42%!important;border-color:#58eaff!important;}
+.display-dock .hud-platform b{position:absolute!important;left:50%!important;top:48%!important;width:18%!important;height:10%!important;transform:translate(-50%,-50%)!important;border-radius:50%!important;background:#baffff!important;box-shadow:0 0 25px 14px #29dfff!important;}
+.display-dock .hud-center-caption{position:absolute!important;bottom:19%!important;left:50%!important;transform:translateX(-50%)!important;font-size:clamp(6px,.7vw,9px)!important;letter-spacing:.2em!important;color:#77dfff!important;white-space:nowrap!important;}
+.display-dock .hud-side{position:absolute!important;top:12%!important;bottom:12%!important;width:25.5%!important;z-index:4!important;padding:2.2%!important;border:1px solid #087bd8!important;border-radius:12px!important;background:linear-gradient(145deg,#03132feF,#041d3de8 65%,#020d22f2)!important;box-shadow:inset 0 0 24px #087fff22,0 0 18px #008dff22!important;clip-path:polygon(0 14px,14px 0,calc(100% - 18px) 0,100% 18px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px))!important;}
+.display-dock .hud-side-left{left:2.2%!important;display:flex!important;flex-direction:column!important;}
+.display-dock .hud-side-right{right:2.2%!important;display:flex!important;flex-direction:column!important;gap:1.5%!important;}
+.display-dock .hud-brand{display:flex;align-items:center;gap:12px;padding:2% 1% 5%;border-bottom:1px solid #168bff55;color:#b9edff;}
+.display-dock .hud-brand>div{display:flex;flex-direction:column;gap:4px;}
+.display-dock .hud-brand strong{font-size:clamp(16px,2vw,27px);font-weight:400;letter-spacing:.08em;color:#c8f7ff;text-shadow:0 0 12px #28bfff;}
+.display-dock .hud-brand small{font-size:clamp(7px,.8vw,11px);line-height:1.45;color:#8acfff;}
+.display-dock .hud-brand-emblem{position:relative;display:grid;place-items:center;flex:0 0 clamp(36px,5vw,68px);aspect-ratio:1;border:1px solid #179eff;border-radius:50%;box-shadow:0 0 16px #128cff,inset 0 0 14px #128cff66;}
+.display-dock .hud-brand-emblem:before,.display-dock .hud-brand-emblem:after{content:"";position:absolute;inset:15%;border:1px solid #31cfff;border-radius:50%;}
+.display-dock .hud-brand-emblem:after{inset:34%;background:#7ef5ff;box-shadow:0 0 15px 5px #25cfff;}
+.display-dock .hud-nav{display:flex;flex-direction:column;margin:5% 0;padding:0 3%;border:1px solid #1179c5;border-radius:8px;background:#03142b88;}
+.display-dock .hud-nav .hud-shortcut{display:flex;align-items:center;gap:12px;min-height:0;padding:4.2% 3%;border:0;border-bottom:1px solid #168bff33;border-radius:0;background:transparent;color:#9bdcff;text-align:left;font-size:clamp(9px,1.05vw,15px);cursor:pointer;}
+.display-dock .hud-nav .hud-shortcut:last-child{border-bottom:0;}
+.display-dock .hud-nav .hud-shortcut span{width:24px;color:#62cfff;font-size:clamp(16px,1.8vw,24px);text-align:center;text-shadow:0 0 10px #168cff;}
+.display-dock .hud-nav .hud-shortcut:focus-visible,.display-dock .hud-nav .hud-shortcut:hover{outline:1px solid #54dfff;background:#0a4d7b66;}
+.display-dock .hud-ai-launch{display:flex;align-items:center;gap:12px;width:100%;margin:auto 0 3%;padding:4%;border:1px solid #168bff;border-radius:8px;background:linear-gradient(120deg,#03152d,#052b50);color:#9feaff;text-align:left;cursor:pointer;box-shadow:inset 0 0 20px #078bff22;}
+.display-dock .hud-ai-ring{display:grid;place-items:center;flex:0 0 clamp(42px,6vw,76px);aspect-ratio:1;border:4px solid #0d9cf3;border-right-color:#07528f;border-radius:50%;box-shadow:0 0 14px #168fff;}
+.display-dock .hud-ai-ring strong{font-size:clamp(11px,1.25vw,17px);color:#d8faff;}
+.display-dock .hud-ai-copy{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.display-dock .hud-ai-copy b{font-size:clamp(8px,.95vw,13px);font-weight:500;}
+.display-dock .hud-ai-copy small{font-size:clamp(6px,.7vw,10px);line-height:1.35;}
+.display-dock .hud-left-foot{margin:0;padding-top:3%;border-top:1px solid #168bff44;}
+.display-dock .hud-left-foot span{font-size:clamp(6px,.65vw,9px);}
+.display-dock .hud-left-foot b{font-size:clamp(7px,.8vw,11px);}
+.display-dock .hud-clock{display:flex;flex-direction:column;align-items:flex-end;padding:0 2% 4%;border-bottom:1px solid #168bff55;color:#9edfff;}
+.display-dock .hud-clock span{font-size:clamp(8px,.9vw,12px);}
+.display-dock .hud-clock strong{font-size:clamp(18px,2.2vw,30px);font-weight:400;letter-spacing:.04em;color:#c7f4ff;text-shadow:0 0 12px #169cff;}
+.display-dock .hud-info-card{padding:4%;border:1px solid #1179c5;border-radius:8px;background:linear-gradient(145deg,#03142b,#052247aa);box-shadow:inset 0 0 18px #078bff1c;}
+.display-dock .hud-info-card .hud-panel-heading{font-size:clamp(8px,.9vw,12px);padding-bottom:3%;letter-spacing:.08em;}
+.display-dock .hud-status-line{display:flex;align-items:center;gap:12px;padding:3% 0;}
+.display-dock .hud-status-gauge{display:grid;place-items:center;flex:0 0 clamp(48px,6.8vw,86px);aspect-ratio:1;border:5px solid #0d9cf3;border-right-color:#07528f;border-radius:50%;color:#d8faff;font-size:clamp(10px,1.1vw,15px);box-shadow:0 0 12px #168fff;}
+.display-dock .hud-status-line div{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.display-dock .hud-status-line b{font-size:clamp(8px,.95vw,13px);color:#b9efff;}
+.display-dock .hud-status-line small{font-size:clamp(6px,.7vw,10px);color:#7dbfe8;}
+.display-dock .hud-info-action{display:flex;align-items:center;gap:10px;width:100%;padding:4% 0;border:0;border-top:1px solid #168bff33;background:transparent;color:#a9dfff;text-align:left;cursor:pointer;}
+.display-dock .hud-info-action span{font-size:clamp(16px,1.8vw,24px);color:#55d8ff;}
+.display-dock .hud-info-action b{font-size:clamp(8px,.9vw,12px);font-weight:500;}
+.display-dock .hud-info-action em{margin-left:auto;font-size:clamp(6px,.65vw,9px);font-style:normal;color:#6ecbff;}
+.display-dock .hud-info-action:hover,.display-dock .hud-info-action:focus-visible{outline:1px solid #51dfff;background:#0a4d7b55;}
+.display-dock .hud-growth-card{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;padding:6%;}
+.display-dock .hud-growth-card p{margin:3% 0 4% 20%;font-size:clamp(9px,1.05vw,14px);line-height:1.8;color:#b7eaff;}
+.display-dock .hud-growth-card small{align-self:flex-end;font-size:clamp(7px,.8vw,11px);color:#70caff;}
+.display-dock .hud-growth-symbol{position:absolute;left:6%;top:22%;font-size:clamp(22px,3vw,38px);color:#55dcff;text-shadow:0 0 16px #078fff;}
+.display-dock .hud-caption{position:absolute!important;left:50%!important;bottom:1%!important;transform:translateX(-50%)!important;z-index:5!important;font-size:clamp(5px,.6vw,8px)!important;letter-spacing:.15em!important;color:#4da9e8!important;white-space:nowrap!important;}
+@media(max-width:760px){
+ .display-dock .mode-stage.jarvis-stage{aspect-ratio:1/1.18!important;max-width:100%!important;}
+ .display-dock .hud-side{top:8%!important;bottom:8%!important;width:29%!important;padding:2%!important;}
+ .display-dock .hud-side-left{left:1.5%!important}.display-dock .hud-side-right{right:1.5%!important}
+ .display-dock .hud-core{width:38%!important;top:42%!important;}
+ .display-dock .hud-projector{width:68%!important;height:11%!important;}
+ .display-dock .hud-platform{width:72%!important;height:14%!important;}
+ .display-dock .hud-nav .hud-shortcut{gap:3px;padding:8% 1%;font-size:clamp(7px,1.6vw,10px);}
+ .display-dock .hud-nav .hud-shortcut span{width:16px;font-size:14px;}
+ .display-dock .hud-brand{gap:5px}.display-dock .hud-brand-emblem{flex-basis:26px}
+ .display-dock .hud-ai-launch{gap:5px;padding:3%}.display-dock .hud-ai-ring{flex-basis:32px;border-width:2px}
+ .display-dock .hud-info-card{padding:3%}.display-dock .hud-info-action{gap:4px}
+ .display-dock .hud-growth-symbol{font-size:18px}.display-dock .hud-growth-card p{margin-left:20%;}
+}
+@media(max-width:390px){
+ .display-dock .mode-stage.jarvis-stage{aspect-ratio:1/1.25!important;}
+ .display-dock .hud-side{width:30%!important;}
+ .display-dock .hud-core{width:36%!important;}
+ .display-dock .hud-brand small{font-size:6px;}
+ .display-dock .hud-info-card .hud-panel-heading{font-size:6px;}
+}
 </style>
 </head>
 <body>
@@ -775,32 +880,106 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 
 
 <div class="hud-side hud-side-left">
-<div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
-
-<button type="button" class="hud-readout hud-readout-action" data-hud-action="model" aria-label="AIモデル管理を開く"><span>INFERENCE</span><b id="hudInferenceState">WEBGPU CHECK</b></button>
-<button type="button" class="hud-readout hud-thinking-readout hud-readout-action" id="hudThinkingReadout" data-state="idle" data-hud-action="process" aria-label="チャット入力欄へ移動"><span>PROCESS</span><b id="hudThinkingState">STANDBY</b></button>
-<div class="hud-readout"><span>RESPONSE TIME</span><b id="hudResponseTime">--.- s</b></div>
-<button type="button" class="hud-readout hud-readout-action" data-hud-action="vault" aria-label="長期記憶を開く"><span>DATA VAULT</span><b id="hudVaultState">LOCKED / AES-GCM</b></button>
-<button type="button" class="hud-side-foot hud-side-foot-action" data-hud-action="diagnostics" aria-label="端末診断を開く"><span class="hud-status-dot" id="hudNetworkDot" data-state="online"></span><span id="hudNetworkState">OFFLINE FIRST / ONLINE</span></button>
+  <div class="hud-brand">
+    <span class="hud-brand-emblem" aria-hidden="true"><i></i></span>
+    <div><strong>ALVIS</strong><small>Your AI Partner<br>Always with you</small></div>
+  </div>
+  <nav class="hud-nav" aria-label="ALVISメニュー">
+    <button type="button" class="hud-shortcut" data-page="chatPage"><span aria-hidden="true">▤</span>チャット</button>
+    <button type="button" class="hud-shortcut" data-page="candidatePage"><span aria-hidden="true">✧</span>記憶候補</button>
+    <button type="button" class="hud-shortcut" data-page="memoryPage"><span aria-hidden="true">▤</span>長期記憶</button>
+    <button type="button" class="hud-shortcut" data-page="historyPage"><span aria-hidden="true">◷</span>履歴</button>
+    <button type="button" class="hud-shortcut" data-page="syncPage"><span aria-hidden="true">☁</span>クラウド同期</button>
+  </nav>
+  <button id="hudAiAction" class="hud-ai-launch" type="button" data-state="offline" aria-label="ローカルAIを起動">
+    <span class="hud-ai-ring"><strong id="hudAiPercent">0%</strong></span>
+    <span class="hud-ai-copy"><b id="hudAiState">OFFLINE</b><small id="hudAiDetail">LOCAL AI 未起動</small></span>
+  </button>
+  <div class="hud-readout hud-left-foot"><span>LOCAL AI MODEL</span><b id="hudInferenceState">WEBGPU CHECK</b></div>
 </div>
 <div class="hud-center">
-<button id="hudAiAction" class="hud-metric hud-ai-metric" type="button" data-state="offline" aria-label="ローカルAIを起動"><strong id="hudAiPercent">0%</strong><span id="hudAiState">OFFLINE</span><span id="hudAiDetail">LOCAL AI 未起動</span></button>
-<div class="hud-projector"><span></span><i></i></div>
-<div class="hud-beam"></div>
-<div class="hud-orbit hud-orbit-a"></div>
-<div class="hud-orbit hud-orbit-b"></div>
-<div class="hud-orbit hud-orbit-c"></div>
-<div class="hud-core"><svg class="hud-globe-map" viewBox="0 0 240 240" aria-hidden="true"><defs><clipPath id="alvisGlobeClip"><circle cx="120" cy="120" r="111"/></clipPath><radialGradient id="alvisGlobeShade" cx="35%" cy="28%" r="78%"><stop offset="0" stop-color="#a8efff" stop-opacity=".62"/><stop offset=".38" stop-color="#168bc2" stop-opacity=".28"/><stop offset="1" stop-color="#001329" stop-opacity=".82"/></radialGradient></defs><g clip-path="url(#alvisGlobeClip)"><rect width="240" height="240" fill="url(#alvisGlobeShade)"/><g fill="#9deaff" fill-opacity=".45" stroke="#b8f4ff" stroke-opacity=".5" stroke-width="1.2"><path d="M27 66l13-17 19-7 10 8 18-4 12 12-7 12-17 4-5 13-14 5-5 19-13-5-5-17-13-8z"/><path d="M73 117l16 4 12 17-4 17-10 15-4 24-10 17-9-13 2-19-9-16 4-18-8-13z"/><path d="M117 48l18-12 21 4 8 11 20 2 16 14-6 12-18 2-8 13-17 2-7 15-16-3-9-17-17-5-7-15z"/><path d="M145 113l19-8 17 8 9 17-8 17-4 22-16 22-14-10-4-22-10-15z"/><path d="M190 181l13-5 10 8-6 12-15 2-8-8z"/></g><g fill="none" stroke="#b8f4ff" stroke-opacity=".35" stroke-width="1"><ellipse cx="120" cy="120" rx="39" ry="111"/><ellipse cx="120" cy="120" rx="77" ry="111"/><ellipse cx="120" cy="120" rx="111" ry="39"/><ellipse cx="120" cy="120" rx="111" ry="76"/><path d="M9 120h222M120 9v222"/></g></g><g class="hud-globe-detail" fill="none" stroke="#c4f5ff" stroke-opacity=".28" stroke-width=".8"><ellipse cx="120" cy="120" rx="18" ry="111"/><ellipse cx="120" cy="120" rx="58" ry="111"/><path d="M12 91 Q120 64 228 91 M10 147 Q120 174 230 147 M23 62 Q120 42 217 62 M24 179 Q120 199 216 179"/><path d="M42 34 Q120 12 198 34 M36 207 Q120 228 204 207"/></g><circle cx="120" cy="120" r="111" fill="none" stroke="#baf4ff" stroke-width="2" stroke-opacity=".72"/><circle cx="120" cy="120" r="115" fill="none" stroke="#38bdf8" stroke-width=".7" stroke-opacity=".28"/></svg><span>ALVIS</span><small>PERSONAL AI SYSTEM</small></div>
-<div class="hud-platform"><i></i><b></b><span></span></div>
-<div class="hud-center-caption">NEURAL CORE　/　HOLOGRAPHIC UI</div>
+  <div class="hud-projector"><span></span><i></i></div>
+  <div class="hud-beam"></div>
+  <div class="hud-orbit hud-orbit-a"></div>
+  <div class="hud-orbit hud-orbit-b"></div>
+  <div class="hud-orbit hud-orbit-c"></div>
+  <div class="hud-core">
+    <svg class="hud-globe-map" viewBox="0 0 420 420" role="img" aria-label="青く輝くホログラム球体">
+      <defs>
+        <clipPath id="alvisGlobeClip"><circle cx="210" cy="210" r="196"/></clipPath>
+        <radialGradient id="alvisGlobeShade" cx="34%" cy="25%" r="82%">
+          <stop offset="0" stop-color="#f1ffff" stop-opacity=".98"/>
+          <stop offset=".12" stop-color="#72eaff" stop-opacity=".88"/>
+          <stop offset=".34" stop-color="#168fd0" stop-opacity=".78"/>
+          <stop offset=".68" stop-color="#06427f" stop-opacity=".92"/>
+          <stop offset="1" stop-color="#010c27" stop-opacity="1"/>
+        </radialGradient>
+        <linearGradient id="alvisLand" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#e8ffff"/><stop offset=".32" stop-color="#8cf4ff"/>
+          <stop offset=".68" stop-color="#43caff"/><stop offset="1" stop-color="#1674bd"/>
+        </linearGradient>
+        <radialGradient id="alvisGlobeGlint" cx="26%" cy="18%" r="48%">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".88"/>
+          <stop offset=".28" stop-color="#c5faff" stop-opacity=".35"/>
+          <stop offset="1" stop-color="#b7f8ff" stop-opacity="0"/>
+        </radialGradient>
+        <pattern id="alvisGlobeDots" width="8" height="8" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r=".8" fill="#d8fbff" opacity=".38"/>
+        </pattern>
+      </defs>
+      <g clip-path="url(#alvisGlobeClip)">
+        <circle cx="210" cy="210" r="196" fill="#031b49"/>
+        <circle cx="210" cy="210" r="196" fill="url(#alvisGlobeShade)"/>
+        <path d="M22 145 Q90 104 160 124 T300 116 T420 135 M10 270 Q95 236 165 252 T310 245 T430 270" fill="none" stroke="#6ceaff" stroke-width="2" opacity=".34"/>
+        <g fill="url(#alvisLand)" stroke="#e0ffff" stroke-width="1.5" stroke-opacity=".78">
+          <path d="M42 107l20-28 24-11 18 5 12-15 28 5 16 19 26 4 15 17-8 17-26 8-8 18-24 8-11 20-22 1-8 19-17-4-8-20-17-9-14-21-17-8z"/>
+          <path d="M118 222l22-13 25 10 13 22-5 25-14 24-6 34-17 35-17-10-8-28-18-24 2-26-10-22z"/>
+          <path d="M210 72l24-18 33 5 16 16 33 1 25 20-5 22-24 10-9 22-23 6-10 25-24-3-15-19-24-9-13-21-16-6z"/>
+          <path d="M248 205l25-14 29 7 21 21 5 28-16 19-8 34-21 30-18-8-12-26-22-19-3-29-15-20z"/>
+          <path d="M324 321l22-12 24 9 12 18-12 18-28 3-20-14z"/>
+          <path d="M30 214l14-13 17 5 8 14-12 15-18-4z"/>
+          <path d="M166 48l11-12 18 4 5 13-13 11-16-5z"/>
+        </g>
+        <g fill="none" stroke="#e5fdff" stroke-width="1.2" stroke-opacity=".48">
+          <path d="M47 105q36-35 72-16t48 31m-92 14q28 22 58 5m-8 105q25 13 34 42m-7 45q22-16 30-42"/>
+          <path d="M216 84q30-20 64 2t46 27m-91 8q38 16 71-1m-43 97q30 12 50 42m-44 18q18 4 32-10"/>
+        </g>
+        <rect x="14" y="14" width="392" height="392" fill="url(#alvisGlobeDots)" opacity=".62"/>
+        <g fill="none" stroke="#9beeff" stroke-width="1.5" opacity=".38">
+          <ellipse cx="210" cy="210" rx="72" ry="196"/>
+          <ellipse cx="210" cy="210" rx="139" ry="196"/>
+          <ellipse cx="210" cy="210" rx="196" ry="70"/>
+          <ellipse cx="210" cy="210" rx="196" ry="132"/>
+          <path d="M14 210h392M210 14v392"/>
+          <path d="M28 143q182 68 364 0M28 278q182-68 364 0"/>
+        </g>
+        <circle cx="210" cy="210" r="196" fill="url(#alvisGlobeGlint)"/>
+      </g>
+      <circle cx="210" cy="210" r="196" fill="none" stroke="#e1ffff" stroke-width="3" opacity=".9"/>
+      <circle cx="210" cy="210" r="202" fill="none" stroke="#38d9ff" stroke-width="1.4" opacity=".72"/>
+      <circle cx="210" cy="210" r="207" fill="none" stroke="#178dff" stroke-width="1" opacity=".3"/>
+    </svg>
+    <span>ALVIS</span><small>PERSONAL AI SYSTEM</small>
+  </div>
+  <div class="hud-platform"><i></i><b></b><span></span></div>
+  <div class="hud-center-caption">NEURAL CORE　/　HOLOGRAPHIC UI</div>
 </div>
 <div class="hud-side hud-side-right">
-<div class="hud-panel-heading"><i></i> INTERFACE</div>
-<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="voice" aria-label="音声設定へ移動"><span>◉</span><div><b>VOICE</b><small>VOICE INTERFACE</small></div><em>OPEN</em></button>
-<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="search" aria-label="チャット入力欄へ移動"><span>⌕</span><div><b>SEARCH</b><small>KNOWLEDGE ACCESS</small></div><em>OPEN</em></button>
-<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="memory" aria-label="長期記憶を開く"><span>◇</span><div><b>MEMORY</b><small>ENCRYPTED VAULT</small></div><em>OPEN</em></button>
-<button type="button" class="hud-interface-item hud-interface-action" data-hud-action="growth" aria-label="成長計画を開く"><span>⌁</span><div><b>GROWTH</b><small>SELF IMPROVEMENT</small></div><em>OPEN</em></button>
-<div class="hud-side-foot hud-side-foot-right">ALVIS　/　CORE SYSTEM</div>
+  <div class="hud-clock"><span id="hudDate">SYSTEM STATUS</span><strong id="hudTime">ALVIS</strong></div>
+  <section class="hud-info-card">
+    <div class="hud-panel-heading"><i></i> SYSTEM STATUS</div>
+    <div class="hud-status-line"><span class="hud-status-gauge">100%</span><div><b id="hudNetworkState">OFFLINE FIRST</b><small>端末内処理を優先</small></div></div>
+  </section>
+  <section class="hud-info-card">
+    <div class="hud-panel-heading"><i></i> MEMORY STATUS</div>
+    <button type="button" class="hud-info-action" data-hud-action="memory"><span>♡</span><b>好み・長期記憶</b><em>OPEN</em></button>
+    <button type="button" class="hud-info-action" data-hud-action="growth"><span>▱</span><b>プロジェクト・成長</b><em>OPEN</em></button>
+  </section>
+  <section class="hud-info-card hud-growth-card">
+    <div class="hud-growth-symbol" aria-hidden="true">✧</div>
+    <p>あなたの成長が<br>私の喜びです</p>
+    <small>— ALVIS</small>
+  </section>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
 </div>
