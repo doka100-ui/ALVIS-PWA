@@ -1,3 +1,12 @@
+## v147 ホログラム高精細化とSYSTEM STATUS実連動（2026-11-07）
+- 画像の貼り付け・拡大には頼らず、中央グローブをインラインSVGのまま精細化。球面グリッド、緯度ライン、外周の大気光をベクターで追加し、幾何学描画を指定。
+- 左側SYSTEM STATUSのINFERENCEをWebGPU/モデル状態、PROCESSを会話状態、RESPONSE TIMEを実測応答時間、DATA VAULTを保管庫ロック状態（AES-GCM）へ連動。
+- ネットワーク状態をonline/offlineイベントで更新。OFFLINE FIRSTは設計ラベルを保ちつつ、現在の接続状態を併記。
+- INFERENCE / PROCESS / DATA VAULT / OFFLINE FIRSTを実際の操作ボタンにし、AIモデル管理・チャット入力・長期記憶・端末診断へ移動可能にした。
+- 既存の記憶データ形式、暗号化処理、同期、バックアップ、AI推論、音声処理は変更しない。
+- Service Worker cache: `alvis-cache-v147-integrated`。
+- コードはdevelopmentブランチ。ブラウザ実機での描画品質・タップ操作・online/offline切替は未確認。
+
 ## v146 ホログラム右側パネルを実操作へ接続（2026-11-07）
 - 参考デザイン右側のVOICE / SEARCH / MEMORY / GROWTHを、見た目だけの情報行から実際に押せる操作ボタンへ変更。
 - VOICEは既存の音声設定へスクロール、SEARCHはチャット画面を開いて入力欄へフォーカス、MEMORYは長期記憶画面、GROWTHは成長計画画面へ遷移する。
