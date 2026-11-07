@@ -2565,6 +2565,7 @@ async function unlock(){
     await restoreRememberedSyncToken();
     $("password").value="";
     const transitionDuration=transitionIntoAlvis();
+    window.setTimeout(restartAlvisHudMotion,Math.max(transitionDuration,0)+100);
     renderAll();
     // 選択済みエンジンとKokoro音声を使う。固定の歓迎フレーズは初回生成後に端末内保存する。
     const welcomeButton=$("welcomeVoiceButton");
@@ -4202,6 +4203,27 @@ let initialDisplayMode="jarvis";
 try{initialDisplayMode=localStorage.getItem(ALVIS_DISPLAY_MODE_KEY)==="avatar"?"avatar":"jarvis";}catch(error){}
 applyAlvisDisplayMode(initialDisplayMode,false);
 
+/* v158: explicitly restart hologram orbit animations after Safari reveals the initially hidden app panel.
+   This avoids the first-render WebKit animation stall; reduced-motion preferences remain respected. */
+function restartAlvisHudMotion(){
+  const chatPage=$("chatPage");
+  if(!chatPage || chatPage.classList.contains("hidden") || chatPage.dataset.displayMode==="avatar")return;
+  if(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)return;
+  const stage=chatPage.querySelector(".display-dock .jarvis-stage");
+  if(!stage || getComputedStyle(stage).display==="none")return;
+  const orbitNodes=Array.from(stage.querySelectorAll(".hud-center .hud-orbit"));
+  if(!orbitNodes.length)return;
+  orbitNodes.forEach(node=>node.style.setProperty("animation","none","important"));
+  void stage.offsetWidth;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    orbitNodes.forEach(node=>node.style.removeProperty("animation"));
+  }));
+}
+window.addEventListener("pageshow",()=>requestAnimationFrame(restartAlvisHudMotion));
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible")requestAnimationFrame(restartAlvisHudMotion);
+});
+
 /* v157: unified navigation with a cinematic but lightweight page transition. */
 let alvisPageTransitionCleanup=null;
 function navigateAlvisPage(pageId){
@@ -4249,6 +4271,7 @@ function navigateAlvisPage(pageId){
     page.classList.remove("alvis-page-enter");
     document.body.classList.remove("alvis-page-transitioning");
   }
+  if(pageId==="chatPage")requestAnimationFrame(restartAlvisHudMotion);
   return true;
 }
 document.querySelectorAll("button[data-page]").forEach(button=>{
