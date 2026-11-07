@@ -1156,6 +1156,10 @@ body.alvis-page-transitioning:after{
 }
 /* end v162 */
 
+/* v163: enable Send when text is entered; keep it disabled only while empty/busy. */
+.display-dock .alvis-chat-composer button#sendChat:not(:disabled){cursor:pointer;opacity:1}
+/* end v163 */
+
 </style>
 </head>
 <body>
@@ -2893,6 +2897,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     setStatus("aiStatus","モデル読み込みエラー: "+detail+"\n"+guidance);
   }finally{
     aiLoading=false;
+    updateChatSendButton();
     $("loadAiModel").disabled=false;
     $("unloadAiModel").disabled=!aiEngine;
     updateHudAiStatus($("aiStatus")?.textContent||"");
@@ -2914,7 +2919,7 @@ $("unloadAiModel").addEventListener("click",async()=>{
     // unload失敗時は参照を保持し、状態を偽って再ロードさせない。
     setStatus("aiStatus","終了エラー: "+(error?.message||String(error))+"\nモデルの状態を保持しています。ページを再読み込みしてから再試行してください。");
   }finally{
-    $("sendChat").disabled=!!aiEngine;
+    updateChatSendButton();
     $("loadAiModel").disabled=!!aiEngine;
     $("unloadAiModel").disabled=!aiEngine;
     updateHudAiStatus($("aiStatus")?.textContent||"");
@@ -3495,6 +3500,12 @@ function isAlvisNameQuestion(value){
   return /^(?:(?:(?:あなた|君|きみ|ALVIS|アルヴィス)(?:の)?名前(?:は)?(?:何|なに|なん|誰|だれ)?(?:ですか)?|名前(?:は)?(?:何|なに|なん|誰|だれ)?(?:ですか)?|(?:あなた|君|きみ|ALVIS|アルヴィス)(?:は)?(?:誰|だれ|何者)(?:ですか)?|名前を教えて(?:ください)?|(?:あなた|君|きみ|ALVIS|アルヴィス)の名前を教えて(?:ください)?))$/iu.test(text);
 }
 
+function updateChatSendButton(){
+  const input=$("chatInput"),button=$("sendChat");
+  if(!input||!button)return;
+  button.disabled=!input.value.trim()||alvisResponseInProgress||aiLoading;
+}
+
 async function sendToAlvis(){
   // Enterキー連打などによる複数ターンの重複開始を防ぐ。
   if(alvisResponseInProgress)return;
@@ -3800,7 +3811,7 @@ async function sendToAlvis(){
     updateHudConversationState("ready",elapsed);
     alvisResponseStartedAt=0;
     alvisResponseInProgress=false;
-    $("sendChat").disabled=false;
+    updateChatSendButton();
     renderAll();
   }
 }
@@ -4022,6 +4033,7 @@ $("saveGrowthProposal").addEventListener("click",async()=>{
   if(data.improvements.some(item=>String(item.title||"").trim()===title&&String(item.action||"").trim()===action)){alert("同じ改善計画がすでに登録されています。");return;}
   data.improvements.push({title,reason,action,status:"proposed",createdAt:new Date().toISOString()});$("growthTitle").value="";$("growthReason").value="";$("growthAction").value="";setStatus("growthStatus","改善計画に登録しました。実行するかどうかは、計画一覧から選べます。");await saveLocal();renderAll();
 });
+$("chatInput").addEventListener("input",updateChatSendButton);
 $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("sendChat").click();}});
 $("addMemory").addEventListener("click",async()=>{
   const title=$("memoryTitle").value.trim(),body=$("memoryBody").value.trim();
