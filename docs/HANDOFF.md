@@ -1259,3 +1259,10 @@
 - 左メニューで選択中の項目に控えめなアイスブルーのアクティブ表示を追加。
 - Service Worker cache: `alvis-cache-v155-integrated`。
 - ソース構造の確認のみ。iPad/iPhone Safariでのタップ実機確認はユーザー確認待ち。
+
+
+## v156 — 左側ホログラムメニューのタップ操作を復旧（2026-11-07）
+- v155の画面遷移処理だけでは解決しなかった原因を特定。過去の参考画像レイヤー調整で .hud-side に pointer-events:none!important が残り、表示されていても左側メニューのタップが親要素で遮断されていた。
+- 左右HUDパネルと左側ナビ・各ボタンの pointer-events:auto を明示し、タッチ操作を有効化。メニューの既存 data-page と共通ルーターは維持。
+- Service Worker cache: alvis-cache-v156-integrated。
+- ソース上のCSS優先順位・対象要素・遷移先IDを静的確認。iPad/iPhone Safari実機のタップ確認はユーザー確認待ち。
