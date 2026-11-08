@@ -5000,6 +5000,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     vrmBlob=blob;modelBlob=null;modelFailed=false;
     if(!isActive())return;
     setStatus("ALVIS / VRM AVATAR LOADING");
+    if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
     try{
       const runtime=await import("./assets/alvis-vrm-runtime.js");
       if(!isActive())return;
@@ -5076,7 +5077,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       else if(modelBlob&&!modelFailed){if(!host.querySelector("model-viewer"))showModel(modelBlob);}
       else showPortrait(true);
     }else{
-      if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+      if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;host.querySelector("model-viewer")?.remove();}
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
     }
   });
