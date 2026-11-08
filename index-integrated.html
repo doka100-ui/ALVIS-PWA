@@ -1549,6 +1549,9 @@ header .status{margin-top:2px}
 .alvis-avatar-tools{position:absolute;z-index:5;right:12px;top:10px;display:flex;gap:8px}
 .alvis-avatar-tools button{border:1px solid #67baf0aa;border-radius:999px;padding:7px 11px;background:#07182bdc;color:#d8f1ff;font:inherit;font-size:11px;cursor:pointer}
 .alvis-avatar-tools button:focus-visible{outline:2px solid #7dd3fc;outline-offset:2px}
+.alvis-avatar-diagnostics{position:absolute;z-index:6;right:12px;top:48px;max-width:min(280px,78%);padding:10px 12px;border:1px solid #67baf088;border-radius:12px;background:#07182bf2;color:#d8f1ff;font-size:11px;line-height:1.65;white-space:pre-line;box-shadow:0 8px 24px #0008;pointer-events:none}
+.alvis-avatar-diagnostics[hidden]{display:none}
+@media(max-width:600px){.alvis-avatar-diagnostics{right:8px;top:43px;font-size:10px;max-width:82%}}
 .alvis-avatar-model{display:block;width:100%;height:100%;min-height:260px;--poster-color:transparent;background:transparent}
 @media(max-width:600px){.alvis-avatar-tools{right:8px;top:8px}.alvis-avatar-tools button{font-size:10px;padding:6px 9px}}
 
@@ -1721,7 +1724,7 @@ header .status{margin-top:2px}
 <div id="alvisAvatarCanvas" class="alvis-avatar-canvas" aria-label="ALVISの3Dアバター">
 <img class="alvis-avatar-preview" src="./assets/alvis-18-preview-clean-hq.jpg" alt="ALVIS 18号アバター（顔の詳細参照プレビュー）" decoding="async" fetchpriority="high"></div>
 <div id="alvisAvatarStatus" class="alvis-avatar-status" role="status" aria-live="polite">ALVIS AVATAR / STANDBY</div>
-<div class="alvis-avatar-tools"><button id="alvisLoadGlbButton" type="button">3D / VRMモデルを読み込む</button><input id="alvisGlbInput" type="file" accept=".glb,.vrm,model/gltf-binary,model/gltf+json" hidden></div>
+<div class="alvis-avatar-tools"><button id="alvisLoadGlbButton" type="button">3D / VRMモデルを読み込む</button><button id="alvisAvatarDiagnosticsButton" type="button" aria-expanded="false">モデル診断</button><input id="alvisGlbInput" type="file" accept=".glb,.vrm,model/gltf-binary,model/gltf+json" hidden></div><div id="alvisAvatarDiagnostics" class="alvis-avatar-diagnostics" hidden aria-live="polite"></div>
 </div>
 <div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
@@ -5014,11 +5017,28 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   const status=document.getElementById("alvisAvatarStatus");
   const loadButton=document.getElementById("alvisLoadGlbButton");
   const fileInput=document.getElementById("alvisGlbInput");
+  const diagnosticsButton=document.getElementById("alvisAvatarDiagnosticsButton");
+  const diagnosticsPanel=document.getElementById("alvisAvatarDiagnostics");
   if(!chatPage||!host||!status||!loadButton||!fileInput)return;
   const DB_NAME="ALVISAvatarAssets",STORE="models",MODEL_KEY="android18",VRM_KEY="android18-vrm";
   let currentUrl=null,modelBlob=null,vrmBlob=null,viewerReady=null,vrmRuntime=null,modelFailed=false;
   const isActive=()=>!chatPage.classList.contains("hidden")&&chatPage.dataset.displayMode==="avatar";
   const setStatus=value=>{status.textContent=value;};
+  const renderDiagnostics=report=>{
+    if(!diagnosticsPanel)return;
+    const mark=value=>value?"✓":"—";
+    diagnosticsPanel.textContent=[
+      "VRM MODEL CHECK",
+      "名前: "+(report?.name||"名称なし"),
+      "頭部ボーン: "+mark(report?.humanoidHead),
+      "まばたき: "+mark(report?.blink),
+      "口パク (aa / oh): "+mark(report?.aa&&report?.oh),
+      "視線制御: "+mark(report?.lookAt),
+      "表情 (happy / sad): "+mark(report?.happy&&report?.sad),
+      "",
+      "— はモデル側に対応データがありません"
+    ].join("\\n");
+  };
   const portraitTemplate=host.querySelector(".alvis-avatar-preview");
   if(!portraitTemplate)return;
   portraitTemplate.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
@@ -5041,7 +5061,11 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarSetMouthOpen=mounted.setMouthOpen;
       window.ALVISAvatarSetExpression=mounted.setExpression;
       window.ALVISAvatarSetLookAt=mounted.setLookAt;
-      setStatus("ALVIS / VRM AVATAR READY — IDLE MOTION + BLINK");
+      window.ALVISAvatarGetDiagnostics=mounted.getDiagnostics;
+      const report=mounted.getDiagnostics();
+      renderDiagnostics(report);
+      const features=[report.blink&&"BLINK",report.aa&&report.oh&&"LIP SYNC",report.lookAt&&"LOOK AT"].filter(Boolean);
+      setStatus("ALVIS / VRM READY"+(features.length?" — "+features.join(" · "):" — BASIC MODEL"));
     }catch(error){
       modelFailed=true;
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
@@ -5080,6 +5104,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     window.ALVISAvatarSetMouthOpen=null;
     window.ALVISAvatarSetExpression=null;
     window.ALVISAvatarSetLookAt=null;
+    window.ALVISAvatarGetDiagnostics=null;
     if(!host.querySelector(".alvis-avatar-preview")){
       const image=portraitTemplate.cloneNode(true);
       image.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
@@ -5087,6 +5112,16 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     }
     setStatus("ALVIS / 18号 FACE REFERENCE — VRM MODEL NOT INSTALLED");
   }
+  diagnosticsButton?.addEventListener("click",()=>{
+    const opening=diagnosticsPanel?.hidden!==false;
+    if(diagnosticsPanel)diagnosticsPanel.hidden=!opening;
+    diagnosticsButton.setAttribute("aria-expanded",String(opening));
+    if(opening){
+      const report=window.ALVISAvatarGetDiagnostics?.();
+      if(report)renderDiagnostics(report);
+      else if(diagnosticsPanel)diagnosticsPanel.textContent="VRMモデルを読み込むと、対応機能をここで確認できます。\\nGLB形式は表示専用のため、VRM形式で読み込んでください。";
+    }
+  });
   loadButton.addEventListener("click",()=>fileInput.click());
   fileInput.addEventListener("change",async()=>{
     const file=fileInput.files&&fileInput.files[0];if(!file)return;
@@ -5118,6 +5153,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarSetMouthOpen=null;
       window.ALVISAvatarSetExpression=null;
       window.ALVISAvatarSetLookAt=null;
+    window.ALVISAvatarGetDiagnostics=null;
     }
   });
   observer.observe(chatPage,{attributes:true,attributeFilter:["class","data-display-mode"]});
