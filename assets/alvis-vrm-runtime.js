@@ -51,6 +51,10 @@ export async function mountVrmAvatar(host, blob) {
   let disposed = false;
   let frameId = 0;
   let blinkAvailable = !!vrm.expressionManager;
+  // Randomized blink timing avoids a mechanical, metronomic appearance.
+  let blinkStartedAt = -1;
+  let blinkDuration = 0.14;
+  let nextBlinkAt = 2.8 + Math.random() * 2.8;
   let mouthOpen = 0;
   let mouthTarget = 0;
   let idleEnabled = true;
@@ -124,11 +128,18 @@ export async function mountVrmAvatar(host, blob) {
     const delta = Math.min(clock.getDelta(), 0.05);
     const elapsed = clock.elapsedTime;
 
-    // Natural idle blink, when the supplied VRM contains the standard blink expression.
+    // Natural, irregular idle blink, when the supplied VRM has the standard expression.
     if (blinkAvailable) {
-      const phase = elapsed % 4.6;
-      const blink = phase < 0.16
-        ? Math.sin((phase / 0.16) * Math.PI)
+      if (elapsed >= nextBlinkAt) {
+        blinkStartedAt = elapsed;
+        blinkDuration = 0.12 + Math.random() * 0.06;
+        // Occasionally add a soft second blink; otherwise wait a varied interval.
+        nextBlinkAt = elapsed + blinkDuration +
+          (Math.random() < 0.12 ? 0.20 : 3.0 + Math.random() * 3.5);
+      }
+      const blinkProgress = (elapsed - blinkStartedAt) / blinkDuration;
+      const blink = blinkProgress >= 0 && blinkProgress <= 1
+        ? Math.sin(blinkProgress * Math.PI)
         : 0;
       try {
         vrm.expressionManager.setValue("blink", blink);
