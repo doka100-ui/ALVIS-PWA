@@ -2886,6 +2886,30 @@ let kokoroAudio=null;
 let kokoroObjectUrl=null;
 let kokoroAudioSource=null;
 let alvisAudioContext=null;
+let alvisLipSyncFrame=0;
+function stopAlvisLipSync(){
+  if(alvisLipSyncFrame)cancelAnimationFrame(alvisLipSyncFrame);
+  alvisLipSyncFrame=0;
+  window.ALVISAvatarSetMouthOpen?.(0);
+}
+function startAlvisLipSync(analyser){
+  stopAlvisLipSync();
+  if(!analyser)return;
+  const samples=new Uint8Array(analyser.fftSize);
+  const tick=()=>{
+    analyser.getByteTimeDomainData(samples);
+    let sum=0;
+    for(let i=0;i<samples.length;i++){
+      const v=(samples[i]-128)/128;
+      sum+=v*v;
+    }
+    const rms=Math.sqrt(sum/samples.length);
+    const amount=Math.max(0,Math.min(1,(rms-0.018)*5.2));
+    window.ALVISAvatarSetMouthOpen?.(amount);
+    alvisLipSyncFrame=requestAnimationFrame(tick);
+  };
+  tick();
+}
 // 読み上げ時だけ ALVIS の英字読みを日本語名に置き換える（画面表示・保存内容は変更しない）
 function unlockAlvisAudioFromGesture(){
   const AudioContextClass=window.AudioContext||window.webkitAudioContext;
@@ -2956,6 +2980,7 @@ async function getKokoroSpeechBlob(clean,voiceId){
 async function playKokoroBlob(blob,clean){
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
+    stopAlvisLipSync();
     if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
     const player=$("kokoroPlayer");
     if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
@@ -2969,13 +2994,18 @@ async function playKokoroBlob(blob,clean){
         const source=alvisAudioContext.createBufferSource();
         source.buffer=audioBuffer;
         source.playbackRate.value=rate;
-        source.connect(alvisAudioContext.destination);
+        const lipAnalyser=alvisAudioContext.createAnalyser();
+        lipAnalyser.fftSize=256;
+        source.connect(lipAnalyser);
+        lipAnalyser.connect(alvisAudioContext.destination);
         source.onended=()=>{
           if(kokoroAudioSource===source)kokoroAudioSource=null;
+          stopAlvisLipSync();
           setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
           if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");
         };
         kokoroAudioSource=source;
+        startAlvisLipSync(lipAnalyser);
         source.start(0);
         setStatus("voiceStatus","Kokoroが話しています…");
         return;
