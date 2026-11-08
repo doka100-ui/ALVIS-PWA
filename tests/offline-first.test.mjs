@@ -657,3 +657,17 @@ assert.match(app, /@media\(prefers-reduced-motion:reduce\).*alvis-motion-orbit/s
 assert.match(app, /aspect-ratio:406\/326/);
 assert.match(sw, /alvis-cache-v138-integrated/);
 assert.match(sw, /\.\/assets\/alvis-reference\.jpg/);
+
+
+// v201: VRM capability diagnostics must be read-only and visible in avatar mode.
+const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
+assert.match(vrmRuntime,/const getDiagnostics = \(\) =>/,"VRM runtime must expose model capability diagnostics");
+assert.match(vrmRuntime,/humanoidHead: !!vrm\.humanoid\?\.getNormalizedBoneNode\?\.\("head"\)/,"diagnostics must check the humanoid head bone");
+assert.match(vrmRuntime,/blink: hasExpression\("blink"\)/,"diagnostics must check blink expression support");
+assert.match(vrmRuntime,/aa: hasExpression\("aa"\)/,"diagnostics must check mouth expression support");
+assert.match(vrmRuntime,/lookAt: !!vrm\.lookAt\?\.target/,"diagnostics must check look-at support");
+assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by the runtime");
+assert.match(app,/id="alvisAvatarDiagnosticsButton"/,"avatar UI must expose the diagnostics button");
+assert.match(app,/window\.ALVISAvatarGetDiagnostics=mounted\.getDiagnostics/,"loaded VRM diagnostics must be connected to the UI");
+assert.match(app,/VRM MODEL CHECK/,"diagnostics panel must explain the inspected model");
+assert.match(sw,/alvis-cache-v201-integrated/,"service worker cache must be bumped for v201");
