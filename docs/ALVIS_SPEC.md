@@ -581,3 +581,8 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 ## v193 アバター表示修正
 - ページ移動時にプレビューDOMを消去しないよう修正し、18号画像を安定表示する。GLB未導入時は静止画、GLB導入後は3D表示。
 - Service Worker cache v193。既存の会話/記憶/履歴/暗号化/同期/バックアップは維持。
+
+
+## v194 3Dモデル失敗時のフォールバック
+- 保存済みGLBの読み込み失敗時は18号の参照画像を表示する。モデルデータはユーザーの許可なく削除しない。
+- 同一画面内での自動再試行ループを防ぎ、次回起動時は再確認可能とする。Service Worker cache v194。
