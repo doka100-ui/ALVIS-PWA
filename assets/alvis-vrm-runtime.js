@@ -51,7 +51,30 @@ export async function mountVrmAvatar(host, blob) {
   let disposed = false;
   let frameId = 0;
   let blinkAvailable = !!vrm.expressionManager;
+  let mouthOpen = 0;
+  let mouthTarget = 0;
+  let idleEnabled = true;
+  const idleBaseY = vrm.scene.position.y;
+  const idleBaseRotY = vrm.scene.rotation.y;
   const clock = new THREE.Clock();
+
+  const setExpression = (name, weight = 1) => {
+    if (!vrm.expressionManager || !name) return false;
+    try {
+      vrm.expressionManager.setValue(name, THREE.MathUtils.clamp(Number(weight) || 0, 0, 1));
+      return true;
+    } catch (_) { return false; }
+  };
+
+  const setMouthOpen = (amount = 0) => {
+    mouthTarget = THREE.MathUtils.clamp(Number(amount) || 0, 0, 1);
+  };
+
+  const setLookAt = (x = 0, y = 1.35, z = 2.5) => {
+    if (!vrm.lookAt?.target) return false;
+    vrm.lookAt.target.position.set(Number(x) || 0, Number(y) || 1.35, Number(z) || 2.5);
+    return true;
+  };
 
   const resize = () => {
     if (disposed) return;
@@ -86,6 +109,19 @@ export async function mountVrmAvatar(host, blob) {
       }
     }
 
+    // Smoothly follow audio amplitude so the mouth does not snap between frames.
+    mouthOpen += (mouthTarget - mouthOpen) * Math.min(1, delta * 18);
+    if (vrm.expressionManager) {
+      setExpression("aa", mouthOpen);
+      setExpression("oh", mouthOpen * 0.18);
+    }
+
+    // Very subtle idle breathing/sway; disableable by the host.
+    if (idleEnabled) {
+      vrm.scene.position.y = idleBaseY + Math.sin(elapsed * 1.25) * 0.008;
+      vrm.scene.rotation.y = idleBaseRotY + Math.sin(elapsed * 0.42) * 0.018;
+    }
+
     vrm.update(delta);
     renderer.render(scene, camera);
   };
@@ -93,6 +129,10 @@ export async function mountVrmAvatar(host, blob) {
 
   return {
     vrm,
+    setMouthOpen,
+    setExpression,
+    setLookAt,
+    setIdleEnabled(value) { idleEnabled = !!value; },
     dispose() {
       if (disposed) return;
       disposed = true;
