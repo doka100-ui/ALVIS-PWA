@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v197-integrated";
+const CACHE_NAME = "alvis-cache-v198-integrated";
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
   "https://esm.run",
@@ -13,7 +13,8 @@ const FILES_TO_CACHE = [
   "./manifest-integrated.json",
   "./assets/alvis-reference.jpg",
   "./assets/alvis-18-preview.jpg",
-  "./assets/alvis-18-preview-clean-400.jpg"
+  "./assets/alvis-18-preview-clean-400.jpg",
+  "./assets/alvis-18-preview-clean-hq.jpg"
 ];
 
 self.addEventListener("install", (event) => {
