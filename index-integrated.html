@@ -5038,7 +5038,10 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       const mounted=await runtime.mountVrmAvatar(host,blob);
       if(!isActive()){mounted.dispose();return;}
       vrmRuntime=mounted;
-      setStatus("ALVIS / VRM AVATAR READY — IDLE BLINK");
+      window.ALVISAvatarSetMouthOpen=mounted.setMouthOpen;
+      window.ALVISAvatarSetExpression=mounted.setExpression;
+      window.ALVISAvatarSetLookAt=mounted.setLookAt;
+      setStatus("ALVIS / VRM AVATAR READY — IDLE MOTION + BLINK");
     }catch(error){
       modelFailed=true;
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
@@ -5074,6 +5077,9 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   function showPortrait(force=false){
     if(modelBlob&&!force)return;
     if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
+    window.ALVISAvatarSetMouthOpen=null;
+    window.ALVISAvatarSetExpression=null;
+    window.ALVISAvatarSetLookAt=null;
     if(!host.querySelector(".alvis-avatar-preview")){
       const image=portraitTemplate.cloneNode(true);
       image.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
@@ -5109,6 +5115,9 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     }else{
       if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;host.querySelector("model-viewer")?.remove();}
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
+      window.ALVISAvatarSetMouthOpen=null;
+      window.ALVISAvatarSetExpression=null;
+      window.ALVISAvatarSetLookAt=null;
     }
   });
   observer.observe(chatPage,{attributes:true,attributeFilter:["class","data-display-mode"]});
