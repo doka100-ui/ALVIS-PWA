@@ -81,6 +81,29 @@ export async function mountVrmAvatar(host, blob) {
     return true;
   };
 
+  const hasExpression = (name) => {
+    try {
+      return !!vrm.expressionManager?.getExpression?.(name);
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const getDiagnostics = () => {
+    const metaName = String(vrm.meta?.name || vrm.meta?.title || "").trim();
+    return {
+      format: "VRM",
+      name: metaName || "名称なし",
+      humanoidHead: !!vrm.humanoid?.getNormalizedBoneNode?.("head"),
+      lookAt: !!vrm.lookAt?.target,
+      blink: hasExpression("blink"),
+      aa: hasExpression("aa"),
+      oh: hasExpression("oh"),
+      happy: hasExpression("happy"),
+      sad: hasExpression("sad")
+    };
+  };
+
   const resize = () => {
     if (disposed) return;
     const width = Math.max(1, host.clientWidth);
@@ -137,6 +160,7 @@ export async function mountVrmAvatar(host, blob) {
     setMouthOpen,
     setExpression,
     setLookAt,
+    getDiagnostics,
     setIdleEnabled(value) { idleEnabled = !!value; },
     dispose() {
       if (disposed) return;
