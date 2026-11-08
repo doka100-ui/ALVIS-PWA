@@ -54,16 +54,21 @@ export async function mountVrmAvatar(host, blob) {
   let mouthOpen = 0;
   let mouthTarget = 0;
   let idleEnabled = true;
+  const expressionAvailability = new Map();
   const idleBaseY = vrm.scene.position.y;
   const idleBaseRotY = vrm.scene.rotation.y;
   const clock = new THREE.Clock();
 
   const setExpression = (name, weight = 1) => {
-    if (!vrm.expressionManager || !name) return false;
+    if (!vrm.expressionManager || !name || expressionAvailability.get(name) === false) return false;
     try {
       vrm.expressionManager.setValue(name, THREE.MathUtils.clamp(Number(weight) || 0, 0, 1));
+      expressionAvailability.set(name, true);
       return true;
-    } catch (_) { return false; }
+    } catch (_) {
+      expressionAvailability.set(name, false);
+      return false;
+    }
   };
 
   const setMouthOpen = (amount = 0) => {
