@@ -4845,6 +4845,12 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
 
 
 const ALVIS_DISPLAY_MODE_KEY="ALVIS_DISPLAY_MODE";
+/* Keep the JARVIS hologram animation lifecycle independent from avatar rendering. */
+let alvisHudMotionAnimations=[];
+function stopAlvisHudMotion(){
+  alvisHudMotionAnimations.forEach(animation=>{try{animation.cancel();}catch(error){}});
+  alvisHudMotionAnimations=[];
+}
 function applyAlvisDisplayMode(mode,save=true){
   const safeMode=mode==="avatar"?"avatar":"jarvis";
   const chatPage=$("chatPage");
@@ -4853,6 +4859,11 @@ function applyAlvisDisplayMode(mode,save=true){
   $("jarvisModeButton")?.setAttribute("aria-pressed",String(safeMode==="jarvis"));
   $("avatarModeButton")?.setAttribute("aria-pressed",String(safeMode==="avatar"));
   if(save){try{localStorage.setItem(ALVIS_DISPLAY_MODE_KEY,safeMode);}catch(error){}}
+  if(safeMode==="jarvis"){
+    requestAnimationFrame(startAlvisHudMotion);
+  }else{
+    stopAlvisHudMotion();
+  }
 }
 $("jarvisModeButton")?.addEventListener("click",()=>applyAlvisDisplayMode("jarvis"));
 $("avatarModeButton")?.addEventListener("click",()=>applyAlvisDisplayMode("avatar"));
@@ -4864,16 +4875,20 @@ applyAlvisDisplayMode(initialDisplayMode,false);
    v153 deliberately locks transform:none!important to preserve the orbit center.
    Animating transform therefore conflicts with that positioning rule; rotate keeps
    the translate-based center fixed while the orbital rings turn independently. */
-let alvisHudMotionAnimations=[];
 function startAlvisHudMotion(){
   const chatPage=$("chatPage");
-  if(!chatPage || chatPage.classList.contains("hidden") || chatPage.dataset.displayMode==="avatar")return;
+  if(!chatPage || chatPage.classList.contains("hidden") || chatPage.dataset.displayMode==="avatar"){
+    stopAlvisHudMotion();
+    return;
+  }
   const stage=chatPage.querySelector(".display-dock .jarvis-stage");
-  if(!stage || getComputedStyle(stage).display==="none")return;
+  if(!stage || getComputedStyle(stage).display==="none"){
+    stopAlvisHudMotion();
+    return;
+  }
   const orbitNodes=Array.from(stage.querySelectorAll(".hud-center .hud-orbit"));
   if(orbitNodes.length<3)return;
-  alvisHudMotionAnimations.forEach(animation=>{try{animation.cancel();}catch(error){}});
-  alvisHudMotionAnimations=[];
+  stopAlvisHudMotion();
   // The orbital rings are a defining, always-on ALVIS display element.
   // Keep their gentle continuous rotation even when the OS requests reduced motion;
   // page transitions and other non-essential effects still respect that preference.
