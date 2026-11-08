@@ -154,3 +154,14 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
   - Scan Reconstruction OFF: ばらばらの撮影条件の通常参照画像に対応するが、fal.ai経由でOpenAI等の第三者AI事業者へ画像を送信し、前処理・スクリーニングする。学習利用しない規約はあるが、第三者処理を伴う。
 - 判定: 無料枠と顔メッシュ/ARKit表情の両面で有力。まだ18号資料はアップロードしていない。無料枠を超える課金はしない。登録時に支払い情報が必要なら中止。APIキー等の秘密情報をチャットへ貼らない。
 - 参考: https://keenface.ai/pricing ; https://keenface.ai/docs/reference ; https://keenface.ai/legal/terms-of-service ; https://keenface.ai/legal/privacy-policy
+
+
+## 2026-11-09 KeenFace公式入力条件の確定
+- Defaultモード: 同一人物の1〜15枚。撮影日、カメラ、背景、照明が異なる通常写真・Web参照画像も可。18号の既存多方向参照資料はこのモードの入力候補。
+- Scan Reconstruction: 同一撮影セッションで撮影した2〜15枚の一貫した写真セットが必要。今回の既存資料には適さない可能性が高い。ON時のみ第三者AIサービス事業者への画像送信を回避できる。
+- Defaultモードでは写真が第三者AI事業者へ送信され、スクリーニングと前処理に使用される。アップロード写真・生成モデルをML学習に使わないと規約に記載。
+- 料金: 新規登録450 credits、1 head 150 credits。GLB/OBJ、テクスチャ、Expression/ARKit blendshapesを含み、ダウンロード追加料金なし。無料枠内限定。クレジット購入は行わない。
+- 保管: 元画像・生成モデルはユーザー削除までクラウド保存。取得後にHeadを削除すること。
+- iPad Safari Studio対応は公式記載を確認できず、ログイン後画面も調査では取得不可。APIはキー管理を伴うため、iPadのみのユーザー操作フローには採用しない。
+- 未実施: アカウント登録、規約同意、18号画像アップロード、課金。登録時に支払い情報が必須なら中止。アップロード前に第三者AI事業者への送信を再説明する。
+- 参考: https://keenface.ai/docs/reference ; https://keenface.ai/pricing ; https://keenface.ai/guidelines ; https://keenface.ai/legal/privacy-policy ; https://keenface.ai/legal/terms-of-service
