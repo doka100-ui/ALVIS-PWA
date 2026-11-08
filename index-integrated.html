@@ -1554,8 +1554,10 @@ header .status{margin-top:2px}
   will-change:transform;
 }
 @keyframes alvisPortraitBreathing{
-  0%,100%{transform:translate3d(0,0,0) scale(1)}
-  50%{transform:translate3d(0,-3px,0) scale(1.012)}
+  0%,100%{transform:translate3d(0,0,0) scale(1) rotate(0deg)}
+  25%{transform:translate3d(-1px,-1px,0) scale(1.006) rotate(-.12deg)}
+  50%{transform:translate3d(0,-3px,0) scale(1.012) rotate(0deg)}
+  75%{transform:translate3d(1px,-1px,0) scale(1.006) rotate(.12deg)}
 }
 @media(prefers-reduced-motion:reduce){
   #chatPage[data-display-mode="avatar"] .alvis-avatar-preview{
