@@ -4948,6 +4948,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   async function loadViewer(){if(!viewerReady){viewerReady=import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js").catch(error=>{viewerReady=null;throw error;});}return viewerReady;}
   async function showModel(blob){
     modelBlob=blob;
+    modelFailed=false;
     if(!isActive())return;
     setStatus("ALVIS / 3D MODEL LOADING");
     try{
@@ -4966,12 +4967,12 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       viewer.setAttribute("exposure","1");
       viewer.setAttribute("alt","ALVIS 18号 3Dアバター");
       viewer.addEventListener("load",()=>setStatus("ALVIS / 18号 3D MODEL READY"),{once:true});
-      viewer.addEventListener("error",()=>setStatus("3D MODEL LOAD ERROR — GLBを確認してください"),{once:true});
+      viewer.addEventListener("error",()=>{modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3Dモデルを読み込めないため、18号の画像を表示中");},{once:true});
       host.replaceChildren(viewer);
-    }catch(error){setStatus("3D VIEWER LOAD FAILED — オンライン接続を確認");}
+    }catch(error){modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3D表示に失敗したため、18号の画像を表示中");}
   }
-  function showPortrait(){
-    if(modelBlob)return;
+  function showPortrait(force=false){
+    if(modelBlob&&!force)return;
     if(host.querySelector(".alvis-avatar-preview"))return;
     host.replaceChildren();
     const image=document.createElement("img");
