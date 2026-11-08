@@ -1558,11 +1558,11 @@ header .status{margin-top:2px}
 .alvis-lid-line{fill:none;stroke:#533b3b;stroke-width:5;stroke-linecap:round;opacity:.9}
 .alvis-lid-lashes{fill:none;stroke:#342629;stroke-width:2.6;stroke-linecap:round;opacity:.8}
 @keyframes alvisNaturalBlink{
-  0%,91%,100%{transform:scaleY(.015)}
-  93%{transform:scaleY(.42)}
-  94.2%{transform:scaleY(1)}
-  95.2%{transform:scaleY(.12)}
-  96.5%{transform:scaleY(.015)}
+  0%,91%,100%{transform:scaleY(.015);opacity:0}
+  92.5%{transform:scaleY(.42);opacity:.82}
+  93.8%{transform:scaleY(1);opacity:1}
+  94.8%{transform:scaleY(.12);opacity:.7}
+  96%{transform:scaleY(.015);opacity:0}
 }
 .alvis-avatar-canvas:has(canvas) .alvis-blink-overlay{display:none}
 @media(prefers-reduced-motion:reduce){.alvis-blink-eye{animation:none;transform:scaleY(.015)}}
