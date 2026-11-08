@@ -1,3 +1,14 @@
+## v217 複数画像3D生成・無料GPU候補の実行条件を再評価（2026-11-08）
+- OpenNexus3DStudioの公開READMEと `docs/AVATAR_PIPELINE.md` を確認。公開VercelデモはVRMアップロード/表示UIで、AI生成には別途3DAIGC-APIバックエンド（DGX Spark等のGPUサーバー）が必要。iPad単体では生成不可。
+- 同プロジェクトのAvatar pipelineは Photo → TRELLIS API → GLB → template rig API → rigged GLB → VRM export。bones-only template rigでは顔のmesh morphがなく、表情プリセット名を埋め込むだけでは顔が動かない。顔表情にはtemplate_wrap等の追加処理が必要。
+- TencentARC/Pixal3D公式READMEを確認。2026-09にmulti-view推論コードを公開しており、複数ビューからGLBを作れる。ただし `transforms.json` に各カメラの4×4 camera-to-world行列とFOVが必要。標準の正面/90度間隔4ビューなら同梱transformを再利用できるが、18号の参考資料は正面・斜め・左右横顔・背面など任意角度の資料なので、そのままの投入はできず、カメラ姿勢の推定・整列が必要。実行はTRELLIS.2ベースのGPU推論で、iPad Safari内では動かせない。
+- AssetFurnace（image-to-3dlab）はApple Silicon対応だが、必要なのはMシリーズMac（32GB推奨）または対応NVIDIA/AMD Linux環境。ユーザーのiPad Pro M1 1TBは対象外。
+- Virmiiは写真→Tripo生成→Humanoid rig→VRMの一貫サービス候補。ただしAI生成は顔/服/体型の完全一致を保証せず、追加表情セットは20 credits、さらに表情はダウンロードVRMに埋め込まれないため、無料・高精度・ALVIS移植の条件を満たさない。
+- Google Colab無料GPUは利用可能性・上限が動的で保証されず、無料枠のウェブUI生成は終了されることがある。安定した生成環境としては扱わない。
+- 3dai.devは現時点のページに無料・複数ビュー・GLB・24時間後自動削除の表示がある一方、privacy/terms URLを確認できず、画像の学習利用・運営主体・生成物ライセンスを確認できない。18号画像は未送信のまま保留。
+- 結論: 現在確認できた範囲では「iPadのみ・無料・規約/画像取扱い明確・複数画像の顔一致・VRM表情付き」を同時に満たすサービスは見つかっていない。顔の一致を妥協して単一画像生成を完成扱いにしない。
+- 変更範囲: HANDOFFと18号制作仕様書のみ。ALVISアプリ本体、VRMランタイム、ユーザーデータ、画像アップロード、外部生成、課金は未実施。
+
 ## v216 3DAI Studio候補の料金・プライバシー再確認（2026-11-08）
 - 先行候補の3dai.dev/enは「登録不要・無料」「単一画像/複数ビュー」「テクスチャ付きGLB」「画像とモデルは24時間後自動削除」とページ上で表示。
 - ただし、3dai.dev上では運営主体の詳細、完全なプライバシーポリシー、画像のAI学習利用条件、生成物ライセンスを確認できていない。24時間後の削除表示だけで機密性を保証しない。
