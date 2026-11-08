@@ -558,3 +558,8 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - 完成物はTalking Avatar SDK対応のカスタムGLB。リグ、瞬き、表情、viseme/morph targetsによる口パクを検証して採用する。画像表示だけの代用や別デザインの正式採用は禁止。
 - 現行AVATARS.femaleは汎用Rocketbox女性モデルで、正式モデルではない。カスタムGLB完成まで維持し、完成後にavatarUrlをローカルアセットへ置換する。既存の遅延ロード/破棄、会話・音声・記憶・履歴・暗号化・同期・バックアップを壊さない。
 - 2026-11-08時点で3D生成・リギング・GLB化は未完了。画像内の仕様数値は完成モデルの保証値ではない。
+
+## v190 第1段階：ALVIS内の18号画像プレビュー
+- アバターモードに正式参照画像のメイン肖像プレビュー（assets/alvis-18-preview.jpg）を表示する。これは3Dモデルではなく第1段階の静止画表示。
+- この段階では汎用Rocketboxモデルを起動しない。ステータス表示は「ALVIS / 18号 IMAGE PREVIEW — 3D MODEL IN PROGRESS」。Service Worker v190で画像をキャッシュする。
+- 既存の会話・記憶・履歴・暗号化・同期・バックアップ機能は維持。次段階でカスタムGLB、リグ、表情、viseme口パクを実装する。

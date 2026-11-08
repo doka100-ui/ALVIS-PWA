@@ -1536,7 +1536,11 @@ header .status{margin-top:2px}
 @media(prefers-reduced-motion:reduce){
   .alvis-avatar-status{box-shadow:none}
 }
-/* end v181 */
+
+/* v190: stage-one faithful 18号 reference portrait shown in ALVIS avatar mode. */
+.alvis-avatar-preview{display:block;width:100%;height:100%;min-height:260px;object-fit:contain;object-position:center center;background:radial-gradient(ellipse at 50% 35%,#203b56 0%,#081321 72%);}
+/* end v190 */
+\n/* end v181 */
 /* v182: remove the redundant heading and top gap in Avatar mode only. */
 #chatPage[data-display-mode="avatar"] > .panel > h2{display:none!important}
 #chatPage[data-display-mode="avatar"] .display-dock{padding-top:0}
@@ -4919,49 +4923,24 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   const host=document.getElementById("alvisAvatarCanvas");
   const status=document.getElementById("alvisAvatarStatus");
   if(!chatPage||!host||!status)return;
-  let avatarInstance=null;
-  let avatarInitPromise=null;
   let generation=0;
   const isActive=()=>!chatPage.classList.contains("hidden")&&chatPage.dataset.displayMode==="avatar";
   const setStatus=value=>{status.textContent=value;};
-  async function ensureAvatar(){
-    if(avatarInstance||avatarInitPromise||!isActive())return avatarInitPromise;
-    const token=++generation;
-    setStatus("3D MODEL / LOADING");
-    avatarInitPromise=(async()=>{
-      let instance=null;
-      try{
-        const {TalkingAvatar,AVATARS}=await import("@interviewflowai/talking-avatar");
-        if(token!==generation||!isActive())return;
-        instance=new TalkingAvatar({
-          container:host,
-          avatarUrl:AVATARS.female,
-          onError:error=>{if(token===generation)setStatus("AVATAR ERROR / "+(error?.message||"読み込みエラー")); }
-        });
-        await instance.ready;
-        if(token!==generation||!isActive()){
-          instance.dispose();
-          return;
-        }
-        avatarInstance=instance;
-        avatarInstance.setStatus("listening");
-        setStatus("ALVIS AVATAR / LISTENING");
-      }catch(error){
-        if(instance){try{instance.dispose();}catch(disposeError){}}
-        if(token===generation)setStatus("3D MODEL / LOAD FAILED — オンラインで再読み込みしてください");
-      }
-    })().finally(()=>{
-      avatarInitPromise=null;
-      if(token!==generation&&isActive()&&!avatarInstance)requestAnimationFrame(()=>ensureAvatar());
-    });
-    return avatarInitPromise;
+  function ensureAvatar(){
+    if(!isActive()||host.querySelector(".alvis-avatar-preview"))return;
+    host.replaceChildren();
+    const image=document.createElement("img");
+    image.className="alvis-avatar-preview";
+    image.src="./assets/alvis-18-preview.jpg";
+    image.alt="ALVIS 18号アバター（第1段階・参照画像プレビュー）";
+    image.decoding="async";
+    image.loading="eager";
+    image.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
+    host.append(image);
+    setStatus("ALVIS / 18号 IMAGE PREVIEW — 3D MODEL IN PROGRESS");
   }
   function releaseAvatar(){
     generation++;
-    if(avatarInstance){
-      try{avatarInstance.dispose();}catch(error){}
-      avatarInstance=null;
-    }
     host.replaceChildren();
     setStatus("ALVIS AVATAR / STANDBY");
   }
@@ -4970,10 +4949,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     else releaseAvatar();
   });
   observer.observe(chatPage,{attributes:true,attributeFilter:["class","data-display-mode"]});
-  window.ALVISSetAvatarStatus=state=>{
-    if(!avatarInstance)return;
-    avatarInstance.setStatus(state==="thinking"?"thinking":"listening");
-  };
+  window.ALVISSetAvatarStatus=()=>{};
   if(isActive())ensureAvatar();
 })();
 </script>
