@@ -678,13 +678,13 @@ assert.match(app,/function stopAlvisHudMotion\(\)[\s\S]*?alvisHudMotionAnimation
 assert.match(app,/if\(safeMode==="jarvis"\)\{\s*requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
 assert.match(app,/function startAlvisHudMotion\(\)[\s\S]*?if\(!chatPage \|\| chatPage\.classList\.contains\("hidden"\) \|\| chatPage\.dataset\.displayMode==="avatar"\)\{\s*stopAlvisHudMotion\(\);/,"hidden or avatar mode must not leave JARVIS ring animations running");
 assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/,"three JARVIS orbital ring speeds must remain unchanged");
-assert.match(sw,/alvis-cache-v203-integrated/,"service worker cache must be bumped for v203");
+assert.match(sw,/alvis-cache-v204-integrated/,"service worker cache must be bumped for v203");
 
 
-// v203: animate the visible overlay above the static approved artwork, not hidden legacy HUD rings.
-assert.match(app,/class="alvis-motion-layer" aria-hidden="true"/,"visible hologram must have an independent motion layer");
-assert.equal((app.match(/class="alvis-motion-orbit alvis-motion-orbit-[abc]"/g)||[]).length,3,"visible hologram motion layer must have three orbit markers");
-assert.match(app,/stage\.querySelectorAll\("\.alvis-motion-layer \.alvis-motion-orbit"\)/,"motion lifecycle must target visible overlay markers");
-assert.doesNotMatch(app,/stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/,"motion lifecycle must not target hidden legacy HUD rings");
-assert.match(app,/class="alvis-motion-glow"/,"visible hologram must include a subtle independent light pulse");
-assert.match(sw,/alvis-cache-v203-integrated/,"service worker must use the v203 cache");
+// v204: restore the v188 live HUD instead of a static image/overlay.
+assert.doesNotMatch(app, /class="alvis-motion-layer"/, "the v203 image overlay must be removed");
+assert.doesNotMatch(app, /<img class="alvis-reference-scene"/, "ALVIS mode must not use the static dashboard image");
+assert.match(app, /stage\\.querySelectorAll\\("\\.hud-center \\.hud-orbit"\\)/, "ring motion must target the original live HUD orbits");
+assert.match(app, /classList\\.contains\\("\\hud-orbit-a"\\)/, "first original HUD orbit must be animated");
+assert.match(app, /class="hud-side hud-side-left"[\\s\\S]*?id="hudAiAction"[\\s\\S]*?class="hud-center"/, "AI launch control must remain in the left HUD panel");
+assert.match(sw, /alvis-cache-v204-integrated/, "service worker must use the v204 cache");
