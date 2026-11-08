@@ -684,7 +684,7 @@ assert.match(sw,/alvis-cache-v204-integrated/,"service worker cache must be bump
 // v204: restore the v188 live HUD instead of a static image/overlay.
 assert.doesNotMatch(app, /class="alvis-motion-layer"/, "the v203 image overlay must be removed");
 assert.doesNotMatch(app, /<img class="alvis-reference-scene"/, "ALVIS mode must not use the static dashboard image");
-assert.match(app, /stage\\.querySelectorAll\\("\\.hud-center \\.hud-orbit"\\)/, "ring motion must target the original live HUD orbits");
-assert.match(app, /classList\\.contains\\("\\hud-orbit-a"\\)/, "first original HUD orbit must be animated");
-assert.match(app, /class="hud-side hud-side-left"[\\s\\S]*?id="hudAiAction"[\\s\\S]*?class="hud-center"/, "AI launch control must remain in the left HUD panel");
+assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "ring motion must target the original live HUD orbits");
+assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "first original HUD orbit must be animated");
+assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI launch control must remain in the left HUD panel");
 assert.match(sw, /alvis-cache-v204-integrated/, "service worker must use the v204 cache");
