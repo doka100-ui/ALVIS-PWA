@@ -1745,3 +1745,14 @@
 - 判定: 無料枠と出力形式の面で有力候補。18号画像はまだ送信していない。ユーザーの「費用が発生しなければ送信可」という条件は維持し、無料枠を超える場合は中止。画像と生成物は取得後にサービス側から削除する方針。
 - 次: iPad SafariでKeenFace Studioが操作可能か、アカウント登録時に支払い情報が要求されないかを確認する必要がある。登録・規約同意・画像送信は未実施。APIキーや認証情報をチャットで共有しない。
 - 参考: https://keenface.ai/pricing ; https://keenface.ai/docs/reference ; https://keenface.ai/legal/terms-of-service ; https://keenface.ai/legal/privacy-policy
+
+
+## 2026-11-09 — KeenFaceの入力条件・無料枠を再確認（v208）
+- 公式API Docsを再確認。Defaultモードは同一人物の1〜15枚で、撮影日・カメラ・背景・照明が異なる通常写真やWeb参照画像を許容。Scan Reconstructionのみ同一撮影セッションの2〜15枚が必要。したがって18号の既存参照シートはDefaultモードの対象になり得る。前回の「通常モードが必要そう」という判断を公式仕様で確定。
+- Defaultは正面・左右斜め・プロフィール等の異なる角度を推奨。鮮明で顔が大きく、目が開き、同じ年齢・中立表情・過度な補正なしの画像が望ましい。参照シートから各方向の高解像度パネルを個別に用意する方針。
+- 公式Pricingは新規登録450 credits、頭部生成150 credits、Studio/APIとも同料金、GLB/OBJとテクスチャ・Expression/ARKit blendshapesが含まれ、ダウンロード追加料金なし。クレジット購入は別操作。無料枠内だけを使い、残高不足/購入画面では停止する。
+- Defaultの写真は第三者AI事業者に送られ、前処理・スクリーニングされる。Scan Reconstruction ONなら第三者AI事業者へ送信されないが、同一撮影セッション要件を満たさないため今回の資料には適さない。学習利用はしないと規約に明記。
+- アップロード画像と生成モデルは自動24時間削除ではなく、ユーザーが削除するまでクラウド保存。完成データ取得後にStudioから元画像/Headを削除する必要がある。
+- Studioのログイン先はcloud.keentools.ioへリダイレクトされ、閲覧調査ではログイン後UIを取得できなかった。公式にiPad Safari対応の明記も見つからず、iPadでの操作性は未確認。API経由はAPIキー発行・秘密情報管理・ファイル送受信が必要なため、現状のiPad Safariのみの作業フローには不向き。
+- 判定: 技術的な顔頭部候補としては引き続き有力。ただし登録時の支払い情報要否とiPad SafariでのStudio操作性は未確認。ユーザーの無償条件を守り、画像アップロード・登録・規約同意・課金は未実施。実際のアップロード前にユーザーへ第三者AI処理を再度明示し、無料残高を確認する。
+- 参考: https://keenface.ai/docs/reference ; https://keenface.ai/pricing ; https://keenface.ai/guidelines ; https://keenface.ai/legal/privacy-policy ; https://keenface.ai/legal/terms-of-service
