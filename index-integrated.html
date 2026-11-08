@@ -1721,7 +1721,7 @@ header .status{margin-top:2px}
 <div id="alvisAvatarCanvas" class="alvis-avatar-canvas" aria-label="ALVISの3Dアバター">
 <img class="alvis-avatar-preview" src="./assets/alvis-18-preview-clean-hq.jpg" alt="ALVIS 18号アバター（顔の詳細参照プレビュー）" decoding="async" fetchpriority="high"></div>
 <div id="alvisAvatarStatus" class="alvis-avatar-status" role="status" aria-live="polite">ALVIS AVATAR / STANDBY</div>
-<div class="alvis-avatar-tools"><button id="alvisLoadGlbButton" type="button">3Dモデルを読み込む</button><input id="alvisGlbInput" type="file" accept=".glb,model/gltf-binary" hidden></div>
+<div class="alvis-avatar-tools"><button id="alvisLoadGlbButton" type="button">3D / VRMモデルを読み込む</button><input id="alvisGlbInput" type="file" accept=".glb,.vrm,model/gltf-binary,model/gltf+json" hidden></div>
 </div>
 <div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
@@ -2080,6 +2080,15 @@ header .status{margin-top:2px}
 </main>
 </div>
 
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"
+  }
+}
+</script>
 <script type="module">
 // WebLLMはService Worker登録後に遅延importし、依存コードを端末キャッシュへ保存できるようにする。
 
@@ -4976,21 +4985,40 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   const loadButton=document.getElementById("alvisLoadGlbButton");
   const fileInput=document.getElementById("alvisGlbInput");
   if(!chatPage||!host||!status||!loadButton||!fileInput)return;
-  const DB_NAME="ALVISAvatarAssets",STORE="models",MODEL_KEY="android18";
-  let currentUrl=null,modelBlob=null,viewerReady=null,modelFailed=false;
+  const DB_NAME="ALVISAvatarAssets",STORE="models",MODEL_KEY="android18",VRM_KEY="android18-vrm";
+  let currentUrl=null,modelBlob=null,vrmBlob=null,viewerReady=null,vrmRuntime=null,modelFailed=false;
   const isActive=()=>!chatPage.classList.contains("hidden")&&chatPage.dataset.displayMode==="avatar";
   const setStatus=value=>{status.textContent=value;};
   const portraitTemplate=host.querySelector(".alvis-avatar-preview");
   if(!portraitTemplate)return;
   portraitTemplate.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
   function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
-  async function saveModel(blob){const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(blob,MODEL_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}
-  async function readModel(){const db=await openDb();const blob=await new Promise((resolve,reject)=>{const req=db.transaction(STORE).objectStore(STORE).get(MODEL_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});db.close();return blob;}
+  async function saveModel(blob,key=MODEL_KEY){const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(blob,key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}
+  async function readModel(key=MODEL_KEY){const db=await openDb();const blob=await new Promise((resolve,reject)=>{const req=db.transaction(STORE).objectStore(STORE).get(key);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});db.close();return blob;}
   async function loadViewer(){if(!viewerReady){viewerReady=import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js").catch(error=>{viewerReady=null;throw error;});}return viewerReady;}
-  async function showModel(blob){
-    modelBlob=blob;
-    modelFailed=false;
+  async function showVrm(blob){
+    vrmBlob=blob;modelBlob=null;modelFailed=false;
     if(!isActive())return;
+    setStatus("ALVIS / VRM AVATAR LOADING");
+    try{
+      const runtime=await import("./assets/alvis-vrm-runtime.js");
+      if(!isActive())return;
+      if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
+      const mounted=await runtime.mountVrmAvatar(host,blob);
+      if(!isActive()){mounted.dispose();return;}
+      vrmRuntime=mounted;
+      setStatus("ALVIS / VRM AVATAR READY — IDLE BLINK");
+    }catch(error){
+      modelFailed=true;
+      if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
+      showPortrait(true);
+      setStatus("VRM表示に失敗しました。対応VRMモデルを確認してください。");
+    }
+  }
+  async function showModel(blob){
+    modelBlob=blob;vrmBlob=null;modelFailed=false;
+    if(!isActive())return;
+    if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
     setStatus("ALVIS / 3D MODEL LOADING");
     try{
       await loadViewer();
@@ -5007,30 +5035,51 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       viewer.setAttribute("shadow-intensity","0.8");
       viewer.setAttribute("exposure","1");
       viewer.setAttribute("alt","ALVIS 18号 3Dアバター");
-      viewer.addEventListener("load",()=>setStatus("ALVIS / 18号 3D MODEL READY"),{once:true});
+      viewer.addEventListener("load",()=>setStatus("ALVIS / 3D MODEL READY"),{once:true});
       viewer.addEventListener("error",()=>{modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3Dモデルを読み込めないため、18号の画像を表示中");},{once:true});
       host.replaceChildren(viewer);
     }catch(error){modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3D表示に失敗したため、18号の画像を表示中");}
   }
   function showPortrait(force=false){
     if(modelBlob&&!force)return;
+    if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
     if(!host.querySelector(".alvis-avatar-preview")){
       const image=portraitTemplate.cloneNode(true);
       image.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
       host.replaceChildren(image);
     }
-    setStatus("ALVIS / 18号 FACE REFERENCE — GLB NOT INSTALLED");
+    setStatus("ALVIS / 18号 FACE REFERENCE — VRM MODEL NOT INSTALLED");
   }
   loadButton.addEventListener("click",()=>fileInput.click());
   fileInput.addEventListener("change",async()=>{
     const file=fileInput.files&&fileInput.files[0];if(!file)return;
-    if(!file.name.toLowerCase().endsWith(".glb")){setStatus("GLB形式のファイルを選択してください");return;}
-    try{await saveModel(file);await showModel(file);setStatus("ALVIS / 18号 3D MODEL SAVED ON DEVICE");}
-    catch(error){setStatus("MODEL SAVE FAILED — 端末の空き容量を確認");}
+    const extension=file.name.toLowerCase().split(".").pop();
+    if(extension!=="glb"&&extension!=="vrm"){setStatus("GLBまたはVRM形式のファイルを選択してください");return;}
+    try{
+      if(extension==="vrm"){await saveModel(file,VRM_KEY);await showVrm(file);setStatus("ALVIS / VRM MODEL SAVED ON DEVICE");}
+      else{await saveModel(file,MODEL_KEY);await showModel(file);setStatus("ALVIS / 3D MODEL SAVED ON DEVICE");}
+    }catch(error){setStatus("MODEL SAVE FAILED — 端末の空き容量を確認");}
     fileInput.value="";
   });
-  (async()=>{try{modelBlob=await readModel();if(modelBlob){if(isActive())await showModel(modelBlob);}else showPortrait();}catch(error){showPortrait();}})();
-  const observer=new MutationObserver(()=>{if(isActive()){if(modelBlob&&!modelFailed)showModel(modelBlob);else showPortrait(true);}else if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}});
+  (async()=>{
+    try{
+      vrmBlob=await readModel(VRM_KEY);
+      if(vrmBlob){if(isActive())await showVrm(vrmBlob);return;}
+      modelBlob=await readModel(MODEL_KEY);
+      if(modelBlob){if(isActive())await showModel(modelBlob);}
+      else showPortrait();
+    }catch(error){showPortrait();}
+  })();
+  const observer=new MutationObserver(()=>{
+    if(isActive()){
+      if(vrmBlob&&!modelFailed){if(!host.querySelector("canvas"))showVrm(vrmBlob);}
+      else if(modelBlob&&!modelFailed){if(!host.querySelector("model-viewer"))showModel(modelBlob);}
+      else showPortrait(true);
+    }else{
+      if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+      if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
+    }
+  });
   observer.observe(chatPage,{attributes:true,attributeFilter:["class","data-display-mode"]});
   window.ALVISSetAvatarStatus=setStatus;
 })();
