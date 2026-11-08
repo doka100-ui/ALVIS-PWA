@@ -576,3 +576,8 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - GLB導入時はmodel-viewerでユーザー操作による回転/ズームと自動回転を提供。表示ライブラリの初回取得にはオンライン接続が必要。
 - GLB未導入時は18号参照画像を維持し、3D未導入状態を明示する。実GLBの生成/顔一致/リギング/visemeは別工程。
 - Service Workerキャッシュv192。既存の会話・記憶・履歴・暗号化・同期・バックアップは維持。
+
+
+## v193 アバター表示修正
+- ページ移動時にプレビューDOMを消去しないよう修正し、18号画像を安定表示する。GLB未導入時は静止画、GLB導入後は3D表示。
+- Service Worker cache v193。既存の会話/記憶/履歴/暗号化/同期/バックアップは維持。

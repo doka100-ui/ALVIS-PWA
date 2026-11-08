@@ -1541,6 +1541,10 @@ header .status{margin-top:2px}
 .alvis-avatar-preview{display:block;width:100%;height:100%;min-height:260px;object-fit:contain;object-position:center center;background:radial-gradient(ellipse at 50% 35%,#203b56 0%,#081321 72%);}
 /* end v190 */
 
+/* v193: keep the avatar preview visible across page navigation. */
+#chatPage .avatar-stage{position:relative}
+#chatPage .alvis-avatar-canvas{display:block;visibility:visible;opacity:1}
+#chatPage .alvis-avatar-preview{display:block!important;visibility:visible!important;opacity:1!important;width:100%;height:100%;min-height:260px;object-fit:contain;object-position:center;background:#081321}
 /* v192: persistent GLB import and interactive 3D viewer slot. */
 .alvis-avatar-tools{position:absolute;z-index:5;right:12px;top:10px;display:flex;gap:8px}
 .alvis-avatar-tools button{border:1px solid #67baf0aa;border-radius:999px;padding:7px 11px;background:#07182bdc;color:#d8f1ff;font:inherit;font-size:11px;cursor:pointer}
@@ -4967,7 +4971,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     }catch(error){setStatus("3D VIEWER LOAD FAILED — オンライン接続を確認");}
   }
   function showPortrait(){
-    if(!isActive()||modelBlob)return;
+    if(modelBlob)return;
     if(host.querySelector(".alvis-avatar-preview"))return;
     host.replaceChildren();
     const image=document.createElement("img");
@@ -4988,7 +4992,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     fileInput.value="";
   });
   (async()=>{try{modelBlob=await readModel();if(modelBlob){if(isActive())await showModel(modelBlob);}else showPortrait();}catch(error){showPortrait();}})();
-  const observer=new MutationObserver(()=>{if(isActive()){if(modelBlob)showModel(modelBlob);else showPortrait();}else{host.replaceChildren();if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}}});
+  const observer=new MutationObserver(()=>{if(isActive()){if(modelBlob)showModel(modelBlob);else showPortrait();}else if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}});
   observer.observe(chatPage,{attributes:true,attributeFilter:["class","data-display-mode"]});
   window.ALVISSetAvatarStatus=setStatus;
 })();
