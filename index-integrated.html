@@ -1547,26 +1547,8 @@ header .status{margin-top:2px}
 #chatPage .alvis-avatar-preview{display:block!important;visibility:visible!important;opacity:1!important;width:100%;height:100%;min-height:260px;object-fit:contain;object-position:center;background:#081321}
 
 
-/* v211: first 2D eyelid animation prototype for the approved 18号 portrait.
-   The overlay is constrained to the portrait's own aspect-ratio box and never moves the photograph. */
-.alvis-blink-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
-.alvis-blink-eye{transform-box:fill-box;transform-origin:center;transform:scaleY(.015);animation:alvisNaturalBlink 5.4s ease-in-out infinite}
-.alvis-blink-eye-right{animation-delay:.035s}
-.alvis-lid-fill{fill:url(#alvisLidSkin);stroke:#9b746c;stroke-width:2;stroke-linejoin:round}
-.alvis-blink-eye-right .alvis-lid-fill{fill:url(#alvisLidSkinRight)}
-.alvis-lid-crease{fill:none;stroke:#8e6862;stroke-width:3;stroke-linecap:round;opacity:.42;filter:url(#alvisLidSoft)}
-.alvis-lid-line{fill:none;stroke:#533b3b;stroke-width:5;stroke-linecap:round;opacity:.9}
-.alvis-lid-lashes{fill:none;stroke:#342629;stroke-width:2.6;stroke-linecap:round;opacity:.8}
-@keyframes alvisNaturalBlink{
-  0%,91%,100%{transform:scaleY(.015);opacity:0}
-  92.5%{transform:scaleY(.42);opacity:.82}
-  93.8%{transform:scaleY(1);opacity:1}
-  94.8%{transform:scaleY(.12);opacity:.7}
-  96%{transform:scaleY(.015);opacity:0}
-}
-.alvis-avatar-canvas:has(canvas) .alvis-blink-overlay{display:none}
-@media(prefers-reduced-motion:reduce){.alvis-blink-eye{animation:none;transform:scaleY(.015)}}
-/* end v211 */
+/* v213: remove the rejected 2D eyelid overlay; keep the approved portrait as a still reference. */
+
 
 /* v210: keep the approved 18号 portrait still.
    Do not simulate avatar movement by translating/scaling the whole photograph.
@@ -1717,31 +1699,7 @@ header .status{margin-top:2px}
 <div class="mode-stage avatar-stage" aria-label="アバター表示エリア">
 <div id="alvisAvatarCanvas" class="alvis-avatar-canvas" aria-label="ALVISの3Dアバター">
 <img class="alvis-avatar-preview" src="./assets/alvis-18-preview-clean-hq.jpg" alt="ALVIS 18号アバター（顔の詳細参照プレビュー）" decoding="async" fetchpriority="high">
-<svg class="alvis-blink-overlay" viewBox="0 0 1115 1400" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
- <defs>
-  <linearGradient id="alvisLidSkin" x1="0" y1="0" x2="0" y2="1">
-   <stop offset="0" stop-color="#9b716b"/><stop offset=".22" stop-color="#c29b91"/>
-   <stop offset=".62" stop-color="#d1afa4"/><stop offset="1" stop-color="#a77e76"/>
-  </linearGradient>
-  <linearGradient id="alvisLidSkinRight" x1="0" y1="0" x2="0" y2="1">
-   <stop offset="0" stop-color="#8d6863"/><stop offset=".28" stop-color="#bd958b"/>
-   <stop offset=".7" stop-color="#cba99e"/><stop offset="1" stop-color="#9d766f"/>
-  </linearGradient>
-  <filter id="alvisLidSoft"><feGaussianBlur stdDeviation="2.2"/></filter>
- </defs>
- <g class="alvis-blink-eye alvis-blink-eye-left">
-  <path class="alvis-lid-fill" d="M558 231 C594 198 655 187 703 211 C724 222 738 243 735 261 C710 283 668 293 625 281 C592 272 568 253 558 231Z"/>
-  <path class="alvis-lid-crease" d="M567 226 C608 194 671 189 711 216" />
-  <path class="alvis-lid-line" d="M558 231 C596 259 676 288 735 261" />
-  <path class="alvis-lid-lashes" d="M572 239 l-8 5 M588 249 l-7 7 M609 258 l-5 8 M633 265 l-3 8 M660 270 l0 8 M689 270 l3 7 M714 264 l6 5"/>
- </g>
- <g class="alvis-blink-eye alvis-blink-eye-right">
-  <path class="alvis-lid-fill" d="M855 345 C884 318 938 310 978 328 C997 336 1008 350 1007 363 C979 383 929 389 890 373 C871 365 859 355 855 345Z"/>
-  <path class="alvis-lid-crease" d="M864 340 C899 315 951 314 987 334" />
-  <path class="alvis-lid-line" d="M855 345 C892 366 954 383 1007 363" />
-  <path class="alvis-lid-lashes" d="M869 350 l-7 4 M887 359 l-5 6 M908 366 l-3 7 M932 370 l0 7 M956 370 l3 6 M979 365 l6 4 M994 359 l7 3"/>
- </g>
-</svg></div>
+</div>
 <div id="alvisAvatarStatus" class="alvis-avatar-status" role="status" aria-live="polite">ALVIS AVATAR / STANDBY</div>
 <div class="alvis-avatar-tools"><button id="alvisLoadGlbButton" type="button">3D / VRMモデルを読み込む</button><button id="alvisAvatarDiagnosticsButton" type="button" aria-expanded="false">モデル診断</button><input id="alvisGlbInput" type="file" accept=".glb,.vrm,model/gltf-binary,model/gltf+json" hidden></div><div id="alvisAvatarDiagnostics" class="alvis-avatar-diagnostics" hidden aria-live="polite"></div>
 </div>
