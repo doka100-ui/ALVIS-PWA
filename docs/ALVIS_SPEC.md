@@ -1,3 +1,9 @@
+## v201 VRMモデル診断
+- VRM読み込み時にメタ情報名、Humanoid頭部ボーン、lookAt、blink/aa/oh/happy/sad表情プリセットの有無を読み取り専用で診断。
+- アバター画面の「モデル診断」で各機能の対応状況を表示。未対応は「—」。VRMデータ・保存データは変更しない。
+- GLBは従来どおり表示のみ。診断と表情制御はVRM専用。
+- Service Worker cache: alvis-cache-v201-integrated。
+
 ## v200 VRMアバターの動作・音声同期
 - VRMの待機微動、標準blink、標準表情プリセット、口開閉、視線ターゲットを制御するランタイムAPIを用意する。
 - KokoroがAudioContext経由で再生される場合に限り、音量包絡で「aa」「oh」表情を駆動する。音素推定による高精度リップシンクではない。
