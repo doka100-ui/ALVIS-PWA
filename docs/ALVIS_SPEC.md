@@ -563,3 +563,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - アバターモードに正式参照画像のメイン肖像プレビュー（assets/alvis-18-preview.jpg）を表示する。これは3Dモデルではなく第1段階の静止画表示。
 - この段階では汎用Rocketboxモデルを起動しない。ステータス表示は「ALVIS / 18号 IMAGE PREVIEW — 3D MODEL IN PROGRESS」。Service Worker v190で画像をキャッシュする。
 - 既存の会話・記憶・履歴・暗号化・同期・バックアップ機能は維持。次段階でカスタムGLB、リグ、表情、viseme口パクを実装する。
+
+
+## v191 顔詳細参照プレビュー
+- ALVISのアバターモードで、正式参照画像から切り出した顔詳細プレビューを表示する。元画像の切り出しであり、再生成・補正・意匠変更なし。
+- 静止画プレビューであり、3Dモデル・表情・口パクの完成を意味しない。実GLBを生成・検証後に差し替える。
+- Service Workerキャッシュはv191。既存の会話/記憶/履歴/暗号化/同期/バックアップは変更しない。

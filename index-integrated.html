@@ -4932,12 +4932,12 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     const image=document.createElement("img");
     image.className="alvis-avatar-preview";
     image.src="./assets/alvis-18-preview.jpg";
-    image.alt="ALVIS 18号アバター（第1段階・参照画像プレビュー）";
+    image.alt="ALVIS 18号アバター（顔の詳細参照プレビュー）";
     image.decoding="async";
     image.loading="eager";
     image.onerror=()=>setStatus("18号 IMAGE / LOAD FAILED");
     host.append(image);
-    setStatus("ALVIS / 18号 IMAGE PREVIEW — 3D MODEL IN PROGRESS");
+    setStatus("ALVIS / 18号 FACE DETAIL — 3D MODEL IN PROGRESS");
   }
   function releaseAvatar(){
     generation++;
