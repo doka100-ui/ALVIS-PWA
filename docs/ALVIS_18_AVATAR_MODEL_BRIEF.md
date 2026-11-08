@@ -130,3 +130,12 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 - 3dai.devは無料・複数ビュー・GLB・24時間削除を表示するが、privacy/termsの詳細、学習利用、運営主体、生成物ライセンスが確認できず、アップロード保留を継続。
 - 現時点で「iPadのみ・無料・画像取扱い明確・複数画像の高い顔一致・表情付きVRM」をすべて満たす方法は未確認。条件を満たさない生成を完成扱いにしない。
 - 参考URL: https://github.com/AlfaOmegaGrafx/OpenNexus3DStudio / https://github.com/TencentARC/Pixal3D / https://virmii.com/ / https://research.google.com/colaboratory/faq.html?hl=ja
+
+
+## 2026-11-08 ローカル生成・ブラウザリギング候補の検証
+- Presidium Shape Studio: 無料Apache-2.0のローカル画像→3D。CPUでTripoSRを実行する構成だが、実重みでの完全な生成成功はまだ報告されていない。高品質TRELLISは16GB NVIDIA GPU必須かつ未統合。デスクトップ向け、単一画像入力のためiPad Safariと複数視点の顔一致には適さない。
+- Modly: 無料MIT・ローカル・GLB出力だがWindows/Linuxデスクトップ＋NVIDIA GPU向け。iPadでは実行不可。
+- Ekza Studio v0.6: ブラウザ内ローカルでGLB/VRM入出力、Humanoid Auto-Rig、VRM 1.0書き出しが可能。ただしChrome/Edge正式対応、Safari未対応。iPad用タッチUIは将来予定。low-poly palette shading中心で写実的な顔生成や顔モーフ作成ツールではないため、既存モデルの身体リグ後工程候補。
+- 3dai.art規約: アップロード画像にサービス提供・モデレーション・不正検知・サービス改善のライセンスを付与する条項、ゲストコンテンツの短期保持がある。無料/有料機能混在。18号画像は送信しない。
+- 総合: 現在も「iPad Safari・無料・多視点・写実的な顔の同一性・表情付きVRM」を満たす制作経路は確認できず。外部送信・課金・アプリ本体変更は未実施。
+- 参考: https://pypi.org/project/presidium-shapestudio/ ; https://modly3d.app/ ; https://www.ekza.io/studio ; https://www.3dai.art/ja/terms-of-use
