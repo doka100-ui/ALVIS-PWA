@@ -1,3 +1,10 @@
+## v199 VRMアバター表示基盤
+- VRM 0.x/1.0をThree.js + @pixiv/three-vrmでブラウザー内表示する。既存GLB表示は互換維持。
+- VRMはIndexedDBの独立キーへ保存し、既存GLBを上書きしない。標準blink表情が含まれるVRMでは待機中に自動まばたきを行う。
+- Three.js / three-vrmはjsDelivrから初回取得し、Service Worker依存キャッシュで再利用。初回取得にはオンライン接続が必要。
+- 18号の3Dモデル、顔一致、表情切替、視線、口パク、音声同期は未完成。静止画表示やVRM読み込み基盤を完成モデルと扱わない。
+- Service Worker cache: alvis-cache-v199-integrated。
+
 ## v197 18号参照画像の配信修正
 - HTML内の破損したdata URIを廃止し、検証済みJPEGアセット ./assets/alvis-18-preview-clean-400.jpg を相対パスで読み込む。
 - Service Workerのプリキャッシュ対象へ追加し、アプリキャッシュ名を alvis-cache-v197-integrated に更新。
