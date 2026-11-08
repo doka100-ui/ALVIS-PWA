@@ -1,3 +1,10 @@
+## v200 VRMアバターの動作・音声同期
+- VRMの待機微動、標準blink、標準表情プリセット、口開閉、視線ターゲットを制御するランタイムAPIを用意する。
+- KokoroがAudioContext経由で再生される場合に限り、音量包絡で「aa」「oh」表情を駆動する。音素推定による高精度リップシンクではない。
+- VRM側に対応する表情プリセットが必要。標準音声やHTMLAudioElementフォールバックは現状同期対象外。
+- iPad/iPhone Safariでの実機確認と18号固有モデル制作は未完了。
+- Service Worker cache: alvis-cache-v200-integrated。
+
 ## v199 VRMアバター表示基盤
 - VRM 0.x/1.0をThree.js + @pixiv/three-vrmでブラウザー内表示する。既存GLB表示は互換維持。
 - VRMはIndexedDBの独立キーへ保存し、既存GLBを上書きしない。標準blink表情が含まれるVRMでは待機中に自動まばたきを行う。
