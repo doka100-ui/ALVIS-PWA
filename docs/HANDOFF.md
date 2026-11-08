@@ -1,3 +1,11 @@
+## v200 VRMアバターの待機動作・表情・Kokoro口パク制御（2026-11-08）
+- VRMランタイムに待機中の微細な上下動・左右スウェイを追加。標準blink表情による自動まばたきは継続。
+- VRM標準表情プリセットを操作するAPI（setExpression）、口の開き量を滑らかに反映するAPI（setMouthOpen）、視線ターゲットAPI（setLookAt）、待機動作のON/OFF API（setIdleEnabled）を追加。
+- Kokoro音声がAudioContext経由で再生される場合、AnalyserNodeで音量包絡を取得し、VRMの「aa」「oh」表情へ口の開き量を反映する。HTMLAudioElementへのフォールバック再生および標準speechSynthesisでは口パク同期しない。
+- VRMモデルに対象の表情プリセットが含まれない場合、その表情は動作しない。口パクは音量ベースの簡易同期で、音素単位のリップシンクではない。
+- Service Worker cache: alvis-cache-v200-integrated。
+- 18号の3Dモデル自体は未作成。実機（特にiPad/iPhone Safari）での動作・GPU負荷・表情対応は未検証。既存の会話・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。
+
 ## v199 VRM形式の3Dアバター表示エンジンを追加（2026-11-08）
 - 既存の静止画プレビューとGLB表示を維持したまま、VRM 0.x/1.0モデルをThree.js + @pixiv/three-vrmで表示するブラウザー内ランタイムを追加。
 - VRMファイルは既存のALVISAvatarAssets IndexedDB内の別キーへ保存し、従来のGLBデータを上書きしない。読み込みはユーザーが選択したローカルファイルから行う。
