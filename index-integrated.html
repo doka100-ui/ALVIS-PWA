@@ -468,6 +468,20 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  background:#01040b!important;box-shadow:0 0 28px #0b6b9b33!important;
 }
 .alvis-reference-scene{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;image-rendering:auto}
+/* v203: animate only the visible hologram image layer; legacy HUD DOM stays hidden. */
+.alvis-motion-layer{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
+.alvis-motion-orbit{position:absolute;left:50.5%;top:47.5%;border:1px solid rgba(125,211,252,.12);border-radius:50%;transform-origin:center;will-change:transform}
+.alvis-motion-orbit:after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:#e8fcff;box-shadow:0 0 7px 2px #38bdf8,0 0 16px 3px #0ea5e9}
+.alvis-motion-orbit-a{width:75%;height:31%;transform:translate(-50%,-50%) rotate(-24deg)}
+.alvis-motion-orbit-a:after{left:17%;top:7%}
+.alvis-motion-orbit-b{width:82%;height:44%;transform:translate(-50%,-50%) rotate(58deg);border-color:rgba(56,189,248,.10)}
+.alvis-motion-orbit-b:after{left:81%;top:18%;width:3px;height:3px}
+.alvis-motion-orbit-c{width:67%;height:23%;transform:translate(-50%,-50%) rotate(9deg);border-color:rgba(165,243,252,.10)}
+.alvis-motion-orbit-c:after{left:48%;top:-2%;width:3px;height:3px}
+.alvis-motion-glow{position:absolute;left:50.5%;top:47%;width:43%;height:54%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 46%,rgba(125,240,255,.16),rgba(56,189,248,.05) 48%,transparent 72%);mix-blend-mode:screen;animation:alvisMotionGlow 4.8s ease-in-out infinite}
+@keyframes alvisMotionGlow{0%,100%{opacity:.28;filter:brightness(.9)}50%{opacity:.72;filter:brightness(1.25)}}
+@media(prefers-reduced-motion:reduce){.alvis-motion-glow{animation:none;opacity:.4}}
+
 .display-dock .mode-stage.jarvis-stage>.hud-side,
 .display-dock .mode-stage.jarvis-stage>.hud-center,
 .display-dock .mode-stage.jarvis-stage>.hud-caption{visibility:hidden!important;pointer-events:none!important}
@@ -1729,6 +1743,7 @@ header .status{margin-top:2px}
 <div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
 <img class="alvis-reference-scene" src="./assets/alvis-reference.jpg" width="400" height="323" alt="未来都市のホログラム地球ダッシュボード" decoding="async" fetchpriority="high">
+<div class="alvis-motion-layer" aria-hidden="true"><span class="alvis-motion-orbit alvis-motion-orbit-a"></span><span class="alvis-motion-orbit alvis-motion-orbit-b"></span><span class="alvis-motion-orbit alvis-motion-orbit-c"></span><span class="alvis-motion-glow"></span></div>
 
 
 
@@ -4886,16 +4901,16 @@ function startAlvisHudMotion(){
     stopAlvisHudMotion();
     return;
   }
-  const orbitNodes=Array.from(stage.querySelectorAll(".hud-center .hud-orbit"));
+  const orbitNodes=Array.from(stage.querySelectorAll(".alvis-motion-layer .alvis-motion-orbit"));
   if(orbitNodes.length<3)return;
   stopAlvisHudMotion();
   // The orbital rings are a defining, always-on ALVIS display element.
   // Keep their gentle continuous rotation even when the OS requests reduced motion;
   // page transitions and other non-essential effects still respect that preference.
   const motions=[
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"-24deg",to:"336deg",duration:22000},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:31000},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-c")),from:"0deg",to:"360deg",duration:42000}
+    {node:orbitNodes.find(node=>node.classList.contains("alvis-motion-orbit-a")),from:"translate(-50%,-50%) rotate(-24deg)",to:"translate(-50%,-50%) rotate(336deg)",duration:22000},
+    {node:orbitNodes.find(node=>node.classList.contains("alvis-motion-orbit-b")),from:"translate(-50%,-50%) rotate(58deg)",to:"translate(-50%,-50%) rotate(418deg)",duration:31000},
+    {node:orbitNodes.find(node=>node.classList.contains("alvis-motion-orbit-c")),from:"translate(-50%,-50%) rotate(9deg)",to:"translate(-50%,-50%) rotate(369deg)",duration:42000}
   ];
   motions.forEach(motion=>{
     if(!motion.node || typeof motion.node.animate!=="function")return;
