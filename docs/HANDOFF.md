@@ -1,3 +1,10 @@
+## v218 ローカル生成・ブラウザリギング候補の再検証（2026-11-08）
+- Presidium Shape Studio（PyPI presidium-shapestudio 0.1.6）を確認。無料/Apache-2.0のローカル画像→3DツールでGLB/OBJ出力、CPUでTripoSRを動かす構想。TRELLIS image-largeは16GB NVIDIA GPU必須で未統合。実TripoSR checkpointはユーザーのGTX 1660 Ti laptopでロード確認まで、完全な実生成結果はまだ報告されていない。アプリはWindows/macOS/Linuxデスクトップ向け。iPad Safariで動くものではなく、単一画像入力なので18号の多視点一致にも不十分。候補として参考に留める。
+- Modly（modly3d.app）を確認。無料・MIT・ローカル生成・GLB出力だが、公式仕様はWindows/LinuxのデスクトップアプリでNVIDIA GPU推論。iPad/iPhoneでは実行できない。個人画像をクラウドへ送らない点は良いが、端末条件不適合。
+- Ekza Studio v0.6を確認。ブラウザ内ローカル処理、GLB/VRM 0.x/1.0読み込みとVRM 1.0出力、Humanoid rig、基本アニメーションに対応。ただし現時点の正式サポートはChrome/Edgeで、Safariは対象外。iPad用タッチファーストUIは将来予定。基本シェーディングはlow-poly palette中心で、18号の写実的顔・顔モーフ/表情リグを生成するものではない。既存モデルに身体骨格を付ける後工程候補としてのみ扱う。
+- 3D AI（3dai.art）の規約を確認。アップロード画像/プロンプトにサービス提供・モデレーション・不正検知・サービス改善のライセンスを与える条項があり、ゲストコンテンツは安全/不正検知のため短期間保持。無料/有料混在。画像学習の明確な否定がないため、18号画像のアップロード候補から除外。
+- 結論: 新候補も単独で「iPad Safari・無料・複数画像・写実的な顔の同一性・表情付きVRM」を満たさない。既存EkzaはGLB/VRMの後工程検証に限る。外部画像送信・課金・アプリ本体変更は未実施。
+
 ## v217 複数画像3D生成・無料GPU候補の実行条件を再評価（2026-11-08）
 - OpenNexus3DStudioの公開READMEと `docs/AVATAR_PIPELINE.md` を確認。公開VercelデモはVRMアップロード/表示UIで、AI生成には別途3DAIGC-APIバックエンド（DGX Spark等のGPUサーバー）が必要。iPad単体では生成不可。
 - 同プロジェクトのAvatar pipelineは Photo → TRELLIS API → GLB → template rig API → rigged GLB → VRM export。bones-only template rigでは顔のmesh morphがなく、表情プリセット名を埋め込むだけでは顔が動かない。顔表情にはtemplate_wrap等の追加処理が必要。
