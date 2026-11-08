@@ -119,3 +119,14 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 - 3dai.devは技術的候補として残すが、18号の画像はまだアップロードしない。
 - 24時間後自動削除というページ表示だけでは、画像の保存・学習利用・運営者の透明性に関する十分な保証にならない。
 - 無料、プライバシー、ライセンス条件が明確な別経路を優先調査する。
+
+
+## 2026-11-08 複数画像生成・無料GPU候補の追加検証
+- OpenNexus3DStudioは公開デモだけではAI生成できず、3DAIGC-APIとDGX等のGPUバックエンドが必要。Avatar pipelineはTRELLISでGLBを生成後、別APIでtemplate rigを行いVRM出力する。bones-only rigでは顔のmesh morphがなく、表情用の顔形状は別工程。
+- TencentARC/Pixal3Dは2026-09公開のmulti-view推論に対応。ただし各ビューのカメラ姿勢を示す4×4 transform行列とFOVが必須。標準の90度4ビュー以外の任意角度の参照画像ではカメラ姿勢の推定/整列が必要。GPU実行環境が必要で、iPad Safari内では実行不可。
+- AssetFurnaceのApple Silicon対応はMシリーズMac向け（32GB推奨）。iPad Pro M1は対象外。
+- VirmiiはTripoによる画像→3Dと自動Humanoid rig/VRMを提供するが、顔・服・体型の完全一致を保証しない。表情セットは20 creditsで、表情データはダウンロードVRMへ埋め込まれない。無料かつALVIS移植可能な完成手段とは判定しない。
+- Colab無料GPUは可用性/上限が変動し、無料枠のウェブUI生成は終了される場合があるため、安定経路とはしない。
+- 3dai.devは無料・複数ビュー・GLB・24時間削除を表示するが、privacy/termsの詳細、学習利用、運営主体、生成物ライセンスが確認できず、アップロード保留を継続。
+- 現時点で「iPadのみ・無料・画像取扱い明確・複数画像の高い顔一致・表情付きVRM」をすべて満たす方法は未確認。条件を満たさない生成を完成扱いにしない。
+- 参考URL: https://github.com/AlfaOmegaGrafx/OpenNexus3DStudio / https://github.com/TencentARC/Pixal3D / https://virmii.com/ / https://research.google.com/colaboratory/faq.html?hl=ja
