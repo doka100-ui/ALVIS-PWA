@@ -139,3 +139,18 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 - 3dai.art規約: アップロード画像にサービス提供・モデレーション・不正検知・サービス改善のライセンスを付与する条項、ゲストコンテンツの短期保持がある。無料/有料機能混在。18号画像は送信しない。
 - 総合: 現在も「iPad Safari・無料・多視点・写実的な顔の同一性・表情付きVRM」を満たす制作経路は確認できず。外部送信・課金・アプリ本体変更は未実施。
 - 参考: https://pypi.org/project/presidium-shapestudio/ ; https://modly3d.app/ ; https://www.ekza.io/studio ; https://www.3dai.art/ja/terms-of-use
+
+
+## 2026-11-08 追加候補: KeenFace（頭部メッシュ＋表情）
+- 公式: https://keenface.ai/
+- Pricing: 新規登録時450 credits、頭部生成150 credits。初期無料枠で最大3回分。購入は任意の別操作。無料枠だけを使い、購入・課金・自動従量課金はしない。
+- 入力: Defaultは同一人物の通常写真/参照画像1〜15枚。別撮影・異なる背景の参照も受け付ける。顔の一致向上には正面、左右斜め、左右プロフィール等の鮮明な画像を推奨。
+- 出力: GLB/OBJ等の頭部モデル。GLBにはオプションでARKit 51 blendshapeを含められる。Studio価格表はExpression blendshapes/ARKit blendshapesを含むと記載。顔の表情・口形状をALVISへ接続する中間素材として有望。
+- 制約: 全身モデル、Humanoid body rig、VRM完成品ではない。首/頭部と全身モデルの接合、髪・身体の制作、Humanoidリグ、VRM 1.0化は別途必要。実生成・顔一致度は未検証。
+- 利用条件: Terms（2026-10-14更新）はCustomerがOutputを所有すると規定。ただし入力画像の権利・被写体の必要な同意は利用者側で確保する。アップロード写真/生成モデルはML学習に使わないと明記。
+- 保存: 写真はCloudflare R2上にユーザーが削除するまで保存。生成モデルも削除依頼まで保存。取得後、KeenFace側でHeadを削除する。アカウント閉鎖時は原則30日以内削除。
+- プライバシー上の重要差異:
+  - Scan Reconstruction ON: 画像をfal.ai等の第三者AI処理事業者へ送らず、原画像から再構成。ただし同一撮影セッションで撮った一貫した多視点2〜15枚が必要。異なる条件で作成された参考画像には適さない可能性がある。
+  - Scan Reconstruction OFF: ばらばらの撮影条件の通常参照画像に対応するが、fal.ai経由でOpenAI等の第三者AI事業者へ画像を送信し、前処理・スクリーニングする。学習利用しない規約はあるが、第三者処理を伴う。
+- 判定: 無料枠と顔メッシュ/ARKit表情の両面で有力。まだ18号資料はアップロードしていない。無料枠を超える課金はしない。登録時に支払い情報が必要なら中止。APIキー等の秘密情報をチャットへ貼らない。
+- 参考: https://keenface.ai/pricing ; https://keenface.ai/docs/reference ; https://keenface.ai/legal/terms-of-service ; https://keenface.ai/legal/privacy-policy
