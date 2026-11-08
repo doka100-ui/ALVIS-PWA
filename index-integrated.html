@@ -1630,6 +1630,42 @@ header .status{margin-top:2px}
 /* end v188 */
 
 
+
+/* v196: show the user's selected hologram dashboard image without recreating or layering its artwork. */
+.display-dock .mode-stage.jarvis-stage{
+  display:block!important;position:relative!important;isolation:isolate!important;
+  box-sizing:border-box!important;width:100%!important;max-width:none!important;
+  aspect-ratio:1397/1126!important;min-height:0!important;height:auto!important;
+  margin:0 auto 8px!important;padding:0!important;overflow:hidden!important;
+  border:0!important;border-radius:0!important;background:#01040b!important;box-shadow:none!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-scene{
+  display:block!important;position:absolute!important;inset:0!important;z-index:1!important;
+  width:100%!important;height:100%!important;max-width:none!important;
+  object-fit:fill!important;object-position:center!important;image-rendering:auto!important;
+  pointer-events:none!important;
+}
+.display-dock .mode-stage.jarvis-stage>.hud-side,
+.display-dock .mode-stage.jarvis-stage>.hud-center,
+.display-dock .mode-stage.jarvis-stage>.hud-caption{
+  display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction{
+  display:flex!important;visibility:visible!important;position:absolute!important;z-index:6!important;
+  left:50%!important;top:41.2%!important;transform:translate(-50%,-50%)!important;
+  width:36%!important;height:42%!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;
+  opacity:.001!important;overflow:hidden!important;cursor:pointer!important;pointer-events:auto!important;
+}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction>*{
+  visibility:hidden!important;opacity:0!important;color:transparent!important;font-size:0!important;
+}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction:focus-visible{
+  visibility:visible!important;opacity:.18!important;outline:2px solid #8beaff!important;
+  background:#36cfff18!important;
+}
+/* end v196 */
 </style>
 <script type="importmap">
 {
@@ -1689,6 +1725,7 @@ header .status{margin-top:2px}
 </div>
 <div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
+<img class="alvis-reference-scene" src="./assets/alvis-reference.jpg" width="400" height="323" alt="未来都市のホログラム地球ダッシュボード" decoding="async" fetchpriority="high">
 
 
 
@@ -1708,11 +1745,7 @@ header .status{margin-top:2px}
     <button type="button" class="hud-shortcut" data-page="historyPage"><span aria-hidden="true">◷</span>履歴</button>
     <button type="button" class="hud-shortcut" data-page="syncPage"><span aria-hidden="true">☁</span>クラウド同期</button>
   </nav>
-  <button id="hudAiAction" class="hud-ai-launch" type="button" data-state="offline" aria-label="ローカルAIを起動">
-    <span class="hud-ai-ring"><strong id="hudAiPercent">0%</strong></span>
-    <span class="hud-ai-copy"><b id="hudAiState">OFFLINE</b><small id="hudAiDetail">LOCAL AI 未起動</small></span>
-  </button>
-  <div class="hud-readout hud-left-foot"><span>LOCAL AI MODEL</span><b id="hudInferenceState">WEBGPU CHECK</b></div>
+<div class="hud-readout hud-left-foot"><span>LOCAL AI MODEL</span><b id="hudInferenceState">WEBGPU CHECK</b></div>
 </div>
 <div class="hud-center">
   <div class="hud-projector"><span></span><i></i></div>
@@ -1798,6 +1831,10 @@ header .status{margin-top:2px}
     <small>— ALVIS</small>
   </section>
 </div>
+  <button id="hudAiAction" class="hud-ai-launch" type="button" data-state="offline" aria-label="ローカルAIを起動">
+    <span class="hud-ai-ring"><strong id="hudAiPercent">0%</strong></span>
+    <span class="hud-ai-copy"><b id="hudAiState">OFFLINE</b><small id="hudAiDetail">LOCAL AI 未起動</small></span>
+  </button>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
 </div>
 
