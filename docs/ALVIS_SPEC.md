@@ -653,3 +653,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - VRM/GLB表示時は既存の3Dランタイムの動作を維持し、画像アニメーションは適用しない。ALVISモードのホログラムには影響させない。
 - prefers-reduced-motion が有効な場合は画像アニメーションを停止。
 - Service Worker cache: alvis-cache-v205-integrated。
+
+
+## v206 微細な頭部スウェイ
+- v205の画像待機モーションに最大±0.12度の左右スウェイを追加。約6.5秒周期で上下の呼吸動作と同期させる。
+- アバターモードの画像プレビュー限定。画像素材、3Dランタイム、ALVISホログラムモードは変更しない。
+- prefers-reduced-motion では停止。Service Worker cache: alvis-cache-v206-integrated。
