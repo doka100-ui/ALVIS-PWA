@@ -645,3 +645,11 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - アバターモードの静止画プレビューを assets/alvis-18-preview-clean-hq.jpg（1800×2220）へ変更。既存の400px版はロールバック用として保持する。
 - Service Workerキャッシュをv198へ更新し、高解像度画像をキャッシュ対象に含める。
 - 静止画の解像度向上であり、3Dモデル/リギング/表情/口パクの完成を意味しない。既存の会話・記憶・履歴・暗号化・同期・バックアップ機能は維持する。
+
+
+## v205 アバター画像の待機モーション
+- 3Dモデル未導入時の18号高解像度画像に、アバターモード限定で微細な上下移動と呼吸感のある拡大縮小（約6.5秒周期）を付与する。
+- 顔の瞬き・視線・口の動きを画像だけで再現したとは扱わない。これらはVRM等の表情/ボーン/viseme対応モデルで実装する。
+- VRM/GLB表示時は既存の3Dランタイムの動作を維持し、画像アニメーションは適用しない。ALVISモードのホログラムには影響させない。
+- prefers-reduced-motion が有効な場合は画像アニメーションを停止。
+- Service Worker cache: alvis-cache-v205-integrated。
