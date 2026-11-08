@@ -50,7 +50,7 @@ export async function mountVrmAvatar(host, blob) {
 
   let disposed = false;
   let frameId = 0;
-  let blinkAvailable = !!vrm.expressionManager;
+  let blinkAvailable = false;
   // Randomized blink timing avoids a mechanical, metronomic appearance.
   let blinkStartedAt = -1;
   let blinkDuration = 0.14;
@@ -92,6 +92,10 @@ export async function mountVrmAvatar(host, blob) {
       return false;
     }
   };
+
+  // Do not report or animate blink merely because an expression manager exists.
+  // A model must actually contain the standard blink preset.
+  blinkAvailable = hasExpression("blink");
 
   const getDiagnostics = () => {
     const metaName = String(vrm.meta?.name || vrm.meta?.title || "").trim();
