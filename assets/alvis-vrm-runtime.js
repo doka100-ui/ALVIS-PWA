@@ -95,7 +95,9 @@ export async function mountVrmAvatar(host, blob) {
 
   // Do not report or animate blink merely because an expression manager exists.
   // A model must actually contain the standard blink preset.
-  blinkAvailable = hasExpression("blink");
+  const hasSingleBlink = hasExpression("blink");
+  const hasSplitBlink = hasExpression("blinkLeft") && hasExpression("blinkRight");
+  blinkAvailable = hasSingleBlink || hasSplitBlink;
 
   const getDiagnostics = () => {
     const metaName = String(vrm.meta?.name || vrm.meta?.title || "").trim();
@@ -104,7 +106,9 @@ export async function mountVrmAvatar(host, blob) {
       name: metaName || "名称なし",
       humanoidHead: !!vrm.humanoid?.getNormalizedBoneNode?.("head"),
       lookAt: !!vrm.lookAt?.target,
-      blink: hasExpression("blink"),
+      blink: hasExpression("blink") || (hasExpression("blinkLeft") && hasExpression("blinkRight")),
+      blinkLeft: hasExpression("blinkLeft"),
+      blinkRight: hasExpression("blinkRight"),
       aa: hasExpression("aa"),
       oh: hasExpression("oh"),
       happy: hasExpression("happy"),
@@ -146,7 +150,12 @@ export async function mountVrmAvatar(host, blob) {
         ? Math.sin(blinkProgress * Math.PI)
         : 0;
       try {
-        vrm.expressionManager.setValue("blink", blink);
+        if (hasExpression("blink")) {
+          vrm.expressionManager.setValue("blink", blink);
+        } else {
+          vrm.expressionManager.setValue("blinkLeft", blink);
+          vrm.expressionManager.setValue("blinkRight", blink);
+        }
       } catch (_) {
         blinkAvailable = false;
       }
