@@ -4359,14 +4359,14 @@ async function sendToAlvis(){
       : candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）"+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":"") : "Qwen3-4B 接続中・準備完了"+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":""));
   }catch(error){
     const detail=String(error?.message||error||"不明なエラー");
-    const engineStateLost=/map async was not successful|model not loaded before trying to complete|device was lost|device lost|gpu.*lost|webgpu.*lost/i.test(detail);
+    const engineStateLost=/map async was not successful|model not loaded before trying to complete|device was lost|device lost|gpu.*lost|webgpu.*lost|object has already been disposed|already been disposed|object.*disposed|disposed.*object/i.test(detail);
     let message="AI生成エラー: "+detail;
     if(engineStateLost){
       // WebLLM内部でモデル状態が失われた場合、古いengine参照を再利用しない。
       const failedEngine=aiEngine;
       aiEngine=null;
       if(failedEngine){try{await failedEngine.unload();}catch(unloadError){}}
-      message+="\nQwen3-4Bの実行状態が失われたため、モデルを停止扱いにしました。「Qwen3-4Bを読み込む」を押して再起動してください。記憶庫や会話履歴はそのままです。";
+      message+="\n"+ALVIS_MODEL_LABEL+"の実行状態が失われたため、古い実行エンジンを切り離しました。「"+ALVIS_MODEL_LABEL+"を読み込む」を押して再起動してください。記憶庫や会話履歴、保存済みモデルキャッシュは変更していません。";
       $("loadAiModel").disabled=false;
       $("unloadAiModel").disabled=true;
     }
