@@ -1836,3 +1836,10 @@
 - キャッシュの削除/移動/再取得、モデル設定、記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
 - Service Worker cache: `alvis-cache-v224-integrated`。
 - 静的検査を追加。Safari実機で許可されたか、ストレージ保持が実際に継続するかは未確認。
+
+
+## v230 — 永続化要求の同期例外対策（2026-11-09）
+- v229で追加した `navigator.storage.persist()` は通常Promiseを返すが、API呼び出し自体が同期例外を投げる環境も想定し、呼び出し前後をtry/catchで保護。
+- 同期例外・Promise rejectionのどちらでも診断へ失敗状態を記録し、モデル起動処理は継続できるようにした。
+- 保存領域、WebLLMキャッシュ、モデル設定、記憶・履歴・暗号化・同期・バックアップは変更しない。
+- Service Worker cache: `alvis-cache-v225-integrated`。静的回帰ガード追加。実機検証待ち。
