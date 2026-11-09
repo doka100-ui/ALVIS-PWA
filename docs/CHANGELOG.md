@@ -1,3 +1,10 @@
+## v221 WebLLM破棄済みShapeTuple不具合の回避（2026-11-09）
+- iPhone SafariでQwen3-1.7Bの初回推論が `Object has already been disposed` になる問題を調査。
+- WebLLM issue #844に、0.2.83以降で同エラーが発生し、Qwen3-1.7Bを含む複数モデルで再現、0.2.82では同条件で再現しなかったという報告がある。
+- ALVISのCDN importを `@mlc-ai/web-llm@0.2.82` に固定し、既知の不具合を回避する暫定措置。モデル選択・端末別設定は変更しない。
+- 既存Cache Storageや記憶・履歴・暗号化・同期・バックアップは削除しない。0.2.82固有のランタイム資材は別URLのため、必要に応じて追加取得される可能性がある。
+- Service Worker cacheをv216へ更新。静的チェックと回帰テストを追加。Safari実機での推論成功は未確認。
+
 ## v220 破棄済みWebLLMエンジンの復旧（2026-11-09）
 - iPhoneでQwen3-1.7B読み込み後、初回推論が `Object has already been disposed` で失敗した報告を受け、チャット送信時の異常エンジン判定を確認。
 - 既存判定はWebGPU device lost等のみを対象とし、disposedエラーを拾わず古い `aiEngine` 参照が残る可能性があった。
