@@ -756,5 +756,5 @@ assert.match(app,/modelDeviceCreateCount\+\+/);
 assert.match(app,/alvisGpuDiagnostics\.captureModelDevices=true;[\s\S]*?await CreateMLCEngine[\s\S]*?alvisGpuDiagnostics\.captureModelDevices=false;/);
 assert.match(app,/originalRequestDevice\?originalRequestDevice\.call\(defaultAdapter\)/,"standard GPU diagnostic must bypass model-device monitor");
 assert.match(app,/originalRequestDevice\?originalRequestDevice\.call\(adapter,/,"WebLLM-like GPU diagnostic must bypass model-device monitor");
-assert.ok(app.includes('"（model device "+d.modelDeviceCreateCount+"回）"'),"diagnostic summary must label model device count explicitly");
+assert.ok(app.includes('"（model device "+d.modelDeviceCreateCount+"回） / visibility "'),"diagnostic summary must label model device count explicitly");
 assert.match(sw,/alvis-cache-v221-integrated/,"v226 app shell must use refreshed cache");
