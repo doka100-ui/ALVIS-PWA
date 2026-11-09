@@ -827,7 +827,7 @@ const normalContext=buildBoundedContextForTest([
 assert.deepEqual(normalContext.map(item=>item.role),["assistant","user"],"ordinary questions must retain only one previous message");
 assert.equal(normalContext[1].content,"富士山の高さは？","ordinary current question must remain complete");
 const ellipticalHelperStart=app.indexOf("function isEllipticalFollowUpMessage(text,priorTurns=[]){");
-const ellipticalHelperEnd=app.indexOf("\\nfunction ",ellipticalHelperStart+20);
+const ellipticalHelperEnd=app.indexOf("\nfunction ",ellipticalHelperStart+20);
 assert.ok(ellipticalHelperStart>=0&&ellipticalHelperEnd>ellipticalHelperStart,"elliptical follow-up classifier must exist");
 const isEllipticalFollowUpForTest=new Function(app.slice(ellipticalHelperStart,ellipticalHelperEnd)+"; return isEllipticalFollowUpMessage;")();
 const priorTopic=[{role:"user",content:"タイの空港で何をする？"},{role:"assistant",content:"出国手続きと保安検査をするよ。"}];
