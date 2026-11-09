@@ -703,3 +703,9 @@ assert.match(send,/const failedEngine=aiEngine;[\s\S]*?aiEngine=null;[\s\S]*?fai
 assert.match(send,/ALVIS_MODEL_LABEL\+"の実行状態が失われたため/,"recovery guidance must use the active device model label");
 assert.match(sw,/alvis-cache-v215-integrated/,"service worker must serve the updated disposed-engine recovery code");
 
+
+ 
+// v221: pin WebLLM to the last reported working version for disposed ShapeTuple regression.
+assert.match(app,/@mlc-ai\/web-llm@0\.2\.82/,"WebLLM must use the 0.2.82 workaround for the disposed-object regression");
+assert.doesNotMatch(app,/@mlc-ai\/web-llm@0\.2\.(?:83|84|85|86|87)/,"known affected WebLLM versions must not be loaded");
+assert.match(sw,/alvis-cache-v216-integrated/,"service worker must serve the pinned WebLLM version");
