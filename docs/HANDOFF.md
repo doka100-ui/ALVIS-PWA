@@ -1827,3 +1827,12 @@
 - Studioのログイン先はcloud.keentools.ioへリダイレクトされ、閲覧調査ではログイン後UIを取得できなかった。公式にiPad Safari対応の明記も見つからず、iPadでの操作性は未確認。API経由はAPIキー発行・秘密情報管理・ファイル送受信が必要なため、現状のiPad Safariのみの作業フローには不向き。
 - 判定: 技術的な顔頭部候補としては引き続き有力。ただし登録時の支払い情報要否とiPad SafariでのStudio操作性は未確認。ユーザーの無償条件を守り、画像アップロード・登録・規約同意・課金は未実施。実際のアップロード前にユーザーへ第三者AI処理を再度明示し、無料残高を確認する。
 - 参考: https://keenface.ai/docs/reference ; https://keenface.ai/pricing ; https://keenface.ai/guidelines ; https://keenface.ai/legal/privacy-policy ; https://keenface.ai/legal/terms-of-service
+
+
+## v229 — モデル起動時の保存領域永続化要求（2026-11-09）
+- Qwenモデル起動ボタンの直接操作時、最初のawaitより前に `navigator.storage.persist()` を呼び出し、Safariへオリジン保存領域の永続化を要求する。
+- ブラウザが許可・拒否・非対応・例外のいずれでもモデル読み込みは継続し、要求失敗で推論を止めない。
+- 端末診断に要求結果を追加。`persisted()` の現在状態と、モデル起動時に要求した結果を区別して表示する。
+- キャッシュの削除/移動/再取得、モデル設定、記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
+- Service Worker cache: `alvis-cache-v224-integrated`。
+- 静的検査を追加。Safari実機で許可されたか、ストレージ保持が実際に継続するかは未確認。
