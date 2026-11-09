@@ -2124,7 +2124,7 @@ function serializeAlvisInference(engine){
 }
 // WebGPU device lifecycle diagnostics. This observes device creation/loss without changing model execution.
 const alvisGpuDiagnostics={
-  deviceState:"未観測",deviceCreateCount:0,deviceLostReason:"",deviceLostReasonCode:"",deviceLostAt:"",
+  deviceState:"未観測",deviceCreateCount:0,modelDeviceCreateCount:0,captureModelDevices:false,deviceLostReason:"",deviceLostReasonCode:"",deviceLostAt:"",
   uncapturedError:"",visibilityState:document.visibilityState||"unknown",
   visibilityChangedAt:"",pageShowCount:0,pageHideCount:0,lastPageEvent:""
 };
@@ -2135,9 +2135,12 @@ function installAlvisWebGpuDiagnostics(){
     alvisGpuDiagnostics.deviceState="requestDevice監視非対応";
   }else if(!originalRequestDevice.__alvisGpuMonitor){
     const monitoredRequestDevice=function(...args){
+      // GPU tests and unrelated WebGPU users must not contaminate model lifecycle diagnostics.
+      if(!alvisGpuDiagnostics.captureModelDevices)return originalRequestDevice.apply(this,args);
       const pending=originalRequestDevice.apply(this,args);
       return Promise.resolve(pending).then(device=>{
         alvisGpuDiagnostics.deviceCreateCount++;
+        alvisGpuDiagnostics.modelDeviceCreateCount++;
         alvisGpuDiagnostics.deviceState="active";
         alvisGpuDiagnostics.deviceLostReason="";
         alvisGpuDiagnostics.deviceLostReasonCode="";
@@ -3501,13 +3504,21 @@ $("loadAiModel").addEventListener("click",async()=>{
       alvisWebLLMVersion="0.2.87（CDN指定）";
       CreateMLCEngine=webllm.CreateMLCEngine;
     }
-    const loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
-      initProgressCallback:p=>{
-        const percent=typeof p.progress==="number"?Math.max(0,Math.min(100,Math.round(p.progress*100))):aiLoadProgress;
-        aiLoadProgress=percent;
-        setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
-      }
-    },{context_window_size:ALVIS_CONTEXT_WINDOW});
+    let loadedEngine;
+    // WebLLM engine initialization may create its GPUDevice asynchronously.
+    // Observe only devices requested during this window; diagnostics use the original unwrapped API.
+    alvisGpuDiagnostics.captureModelDevices=true;
+    try{
+      loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
+        initProgressCallback:p=>{
+          const percent=typeof p.progress==="number"?Math.max(0,Math.min(100,Math.round(p.progress*100))):aiLoadProgress;
+          aiLoadProgress=percent;
+          setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
+        }
+      },{context_window_size:ALVIS_CONTEXT_WINDOW});
+    }finally{
+      alvisGpuDiagnostics.captureModelDevices=false;
+    }
     const engine=serializeAlvisInference(loadedEngine);
     // 読み込み中にロックされた場合、エンジンを残さず解放する。
     if(!unlocked){
@@ -4816,7 +4827,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
         lines.push("標準GPU情報："+(adapterName||"詳細はSafariから非公開"));
         lines.push("標準GPU最大バッファ："+(defaultAdapter.limits?.maxBufferSize?Math.round(defaultAdapter.limits.maxBufferSize/1024/1024)+" MB":"取得不可"));
         try{
-          const device=await defaultAdapter.requestDevice();
+          const device=await (originalRequestDevice?originalRequestDevice.call(defaultAdapter):defaultAdapter.requestDevice());
           lines.push("標準GPUデバイス作成：成功");
           device.destroy();
         }catch(deviceError){
@@ -4849,7 +4860,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
           lines.push("WebLLM要求 maxStorageBuffersPerShaderStage："+requiredLimits.maxStorageBuffersPerShaderStage);
           lines.push("WebLLM対応GPU機能："+(requiredFeatures.join(", ")||"追加機能なし"));
           try{
-            const device=await adapter.requestDevice({requiredLimits,requiredFeatures});
+            const device=await (originalRequestDevice?originalRequestDevice.call(adapter,{requiredLimits,requiredFeatures}):adapter.requestDevice({requiredLimits,requiredFeatures}));
             lines.push("WebLLM相当GPUデバイス作成：成功");
             device.destroy();
           }catch(deviceError){
