@@ -42,10 +42,10 @@ assert.match(send,/userIsSimpleFatigueShare=text\.length<=80/,"short fatigue sha
 assert.match(send,/if\(userIsSimpleFatigueShare\)[\s\S]*?Qwen3未使用・オフライン対応/,"simple fatigue sharing must bypass slow model inference");
 
 assert.match(send,/const responseTokenLimit=isBriefConversationalTurn\?64:192/,"local inference output is capped to reduce iPad latency and GPU pressure");
-assert.match(app,/function buildBoundedGenerationMessages\\(recent,currentText\\)/,"bounded generation context helper must exist");
-assert.match(app,/const selected=followUp\\?prior\\.slice\\(-2\\):prior\\.slice\\(-1\\)/,"normal questions use one prior turn and follow-ups use the last two");
-assert.match(app,/const perMessageLimit=followUp\\?300:240/,"prior turns are bounded before local inference");
-assert.match(app,/return \\[\\.\\.\\.bounded,latest\\]/,"the current question must be preserved separately from prior context");
+assert.ok(app.includes("function buildBoundedGenerationMessages(recent,currentText){"),"bounded generation context helper must exist");
+assert.ok(app.includes("const selected=followUp?prior.slice(-2):prior.slice(-1);"),"normal questions use one prior turn and follow-ups use the last two");
+assert.ok(app.includes("const perMessageLimit=followUp?300:240;"),"prior turns are bounded before local inference");
+assert.ok(app.includes("return [...bounded,latest];"),"the current question must be preserved separately from prior context");
 
 
 
