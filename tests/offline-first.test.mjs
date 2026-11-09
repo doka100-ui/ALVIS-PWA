@@ -758,3 +758,13 @@ assert.match(app,/originalRequestDevice\?originalRequestDevice\.call\(defaultAda
 assert.match(app,/originalRequestDevice\?originalRequestDevice\.call\(adapter,/,"WebLLM-like GPU diagnostic must bypass model-device monitor");
 assert.ok(app.includes('"（model device "+d.modelDeviceCreateCount+"回） / visibility "'),"diagnostic summary must label model device count explicitly");
 assert.match(sw,/alvis-cache-v221-integrated/,"v226 app shell must use refreshed cache");
+
+
+// v227: inspect the actual WebLLM tensor cache without deleting or changing cached artifacts.
+assert.match(app,/alvisHasModelInCache/);
+assert.match(app,/webllm\.hasModelInCache/);
+assert.match(app,/alvisHasModelInCache\(ALVIS_MODEL_ID\)/);
+assert.match(app,/WebLLMモデル重みキャッシュ：/);
+assert.match(app,/model tensors only/);
+assert.match(sw,/alvis-cache-v222-integrated/,"v227 app shell must use refreshed cache");
+assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/,"cache diagnostic must never delete model artifacts");
