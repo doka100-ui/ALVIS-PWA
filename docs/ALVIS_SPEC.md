@@ -1,8 +1,16 @@
+## v223 WebLLMのTVMオブジェクト寿命修正を採用（2026-11-09）
+- ユーザーのiPhone Safari実機でWebLLM 0.2.82でも `Object has already been disposed` が再現。診断はQwen3-1.7B / context 1024 / system 472文字 / conversation 105文字 / external 0 / max_tokens 192。
+- 上流Issue mlc-ai/web-llm#844の根本修正PR apache/tvm#20501は2026-10-02にマージ。shape tupleの呼び出し元参照を独立させ、GPU device loss時の自動破棄を所有側で制御する修正。
+- WebLLM v0.2.87は `@mlc-ai/web-runtime@0.28.0-dev1` を同梱するため、ALVISの遅延importを0.2.87へ戻す。端末別モデルIDとcontext設定、推論キュー、診断機能は維持。
+- v0.2.87はモデルバイナリもv0_2_87へ更新している。過去のALVIS 0.2.87利用時のキャッシュが再利用される可能性はあるが、実機では未確認。キャッシュは消去しない。未キャッシュ資材があれば追加ダウンロードされるため、モデル再読込はWi-Fi接続時を推奨。
+- Service Worker cacheをv218へ更新。モデルキャッシュ、記憶庫、会話履歴、AES-GCM、同期、バックアップは削除・変更しない。
+- 静的検査のみ。Cloudflare反映・Safari実機での再推論は未確認。
+
 ## v222 推論エラーの実行環境診断（2026-11-09）
 - v221でWebLLMを0.2.82へ固定した後もiPhone Safariで `Object has already been disposed` が継続したため、0.2.82への固定だけでは解決しないと判断。
 - WebLLM issue #844は2026-10-04に上流修正済み。v0.2.87はその後にWeb runtimeを0.28.0-dev1へ更新しているため、同issueだけを今回の原因と断定しない。
 - 次回のdisposedエラー時に、ALVISが指定したWebLLMバージョン、モデルID、context、system/会話入力文字数、メッセージ数、max_tokens、例外名と先頭スタックをチャット履歴へ表示する。質問文やプロンプト本文は診断に含めない。
-- WebLLMは原因切り分け中のため0.2.82指定を維持。実際に読み込まれたHTML/バージョンが一致するか確認してから、必要なバージョン変更を判断する。
+- 当時は0.2.82指定を維持したが、実機で同エラーが継続。後続のv223で、修正済みTVM runtimeを含む0.2.87へ更新。
 - Service Worker cacheをv217へ更新。モデルキャッシュ、記憶庫、履歴、AES-GCM、同期、バックアップは削除・変更しない。モデル選択とコンテキスト設定も維持。
 - 静的検査のみ。Cloudflare Pages反映とSafari実機再現は未確認。
 
