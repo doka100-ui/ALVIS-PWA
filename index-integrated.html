@@ -3691,12 +3691,22 @@ function buildConversationMessages(history,currentText){
 }
 
 
+function isEllipticalFollowUpMessage(text,priorTurns=[]){
+  const value=String(text||"").normalize("NFKC").trim();
+  // 「妻は？」「料金は？」のような名詞句だけの追加質問を補足する。
+  // 疑問詞・独立した質問語を含む通常の質問は対象外にする。
+  if(!value||value.length>14||/(?:何|なに|どこ|いつ|誰|だれ|どれ|どっち|どう|なぜ|どうして|いくら|高さ|意味|理由|方法)/u.test(value))return false;
+  if(!/^[\p{L}\p{N}ー・]{1,12}(?:は|なら|については|の方は|の場合は)[?？。！!]*$/u.test(value))return false;
+  const turns=Array.isArray(priorTurns)?priorTurns.slice(-4):[];
+  return turns.some(item=>item?.role==="user")&&turns.some(item=>item?.role==="assistant");
+}
+
 function buildBoundedGenerationMessages(recent,currentText){
   // 保存履歴はそのまま保持し、推論に渡す過去文脈だけを厳しく制限する。
   const turns=Array.isArray(recent)?recent:[];
   const latest={role:"user",content:String(currentText??"")};
   const prior=turns.slice(0,-1);
-  const followUp=isFollowUpMessage(currentText);
+  const followUp=isFollowUpMessage(currentText)||isEllipticalFollowUpMessage(currentText,prior);
   // 追加質問では直前のユーザー質問とALVIS回答をセットで残し、指示対象を失わない。
   const selected=followUp?prior.slice(-2):prior.slice(-1);
   let remaining=followUp?600:240;
@@ -3718,6 +3728,7 @@ function buildCompactAlvisSystemPrompt(date,time,hasResearch=false,weatherQuesti
   const lines=[
     "あなたはALVIS。ユーザー専用AI。自然で簡潔な日本語を使い、一人称は「私」。",
     "質問には直接答え、複数の質問を漏らさず、直近の話題を引き継ぐ。短い雑談は1〜3文。必要な場合だけ一つ確認する。",
+    "「妻は？」「料金は？」のような短い名詞句の追加質問は直前の話題と照合する。指す対象が曖昧なら決めつけず、一つだけ確認する。",
     "事実を捏造せず、不明は不明と伝える。引用・確認・冗談・反語を本人の主張と混同しない。ユーザーが言っていない経験・感情・意見を勝手に補わない。承認済み記憶だけを本人の事実として扱う。"
   ];
   if(date&&time)lines.push("現在の日本時間："+date+" "+time+"。日付・時刻の質問はこれを使う。");
