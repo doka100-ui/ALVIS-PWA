@@ -797,3 +797,33 @@ assert.match(serializedInferenceSource,/if\(unloadPromise\)return unloadPromise/
 assert.match(serializedInferenceSource,/unloadRequested=true;[\s\S]*?await inferenceQueue\.catch/,"shutdown must stop new inference and wait for active inference");
 assert.match(serializedInferenceSource,/if\(unloadRequested\)throw new Error/,"queued inference must not run after shutdown begins");
 assert.match(sw,/alvis-cache-v226-integrated/,"v231 app shell must use refreshed cache");
+
+
+// v232: keep the referenced user question and assistant answer for follow-ups with a strict context budget.
+const contextHelperStart=app.indexOf("function buildBoundedGenerationMessages(recent,currentText){");
+const contextHelperEnd=app.indexOf("\nfunction ",contextHelperStart+20);
+assert.ok(contextHelperStart>=0&&contextHelperEnd>contextHelperStart,"bounded generation context helper must exist");
+const contextHelperSource=app.slice(contextHelperStart,contextHelperEnd);
+const isFollowUpStart=app.indexOf("function isFollowUpMessage(text){");
+const isFollowUpEnd=app.indexOf("\nfunction ",isFollowUpStart+20);
+const isFollowUpSource=app.slice(isFollowUpStart,isFollowUpEnd);
+const isFollowUpForTest=new Function(isFollowUpSource+"; return isFollowUpMessage;")();
+const buildBoundedContextForTest=new Function("isFollowUpMessage",contextHelperSource+"; return buildBoundedGenerationMessages;")(isFollowUpForTest);
+const followUpContext=buildBoundedContextForTest([
+  {role:"user",content:"前の質問です。"+("あ".repeat(500))},
+  {role:"assistant",content:"前の回答です。"+("い".repeat(500))},
+  {role:"user",content:"それはどういう意味？"}
+],"それはどういう意味？");
+assert.deepEqual(followUpContext.map(item=>item.role),["user","assistant","user"],"follow-up must retain the prior user/assistant pair and current question");
+assert.equal(followUpContext[0].content.slice(0,7),"前の質問です。","prior user context must retain its opening");
+assert.ok(followUpContext[1].content.endsWith("い".repeat(20)),"prior assistant context must retain its ending");
+assert.equal(followUpContext[2].content,"それはどういう意味？","current question must never be truncated");
+assert.ok(followUpContext.slice(0,-1).reduce((sum,item)=>sum+item.content.length,0)<=600,"follow-up history must stay within 600 characters");
+const normalContext=buildBoundedContextForTest([
+  {role:"user",content:"以前の話題"},
+  {role:"assistant",content:"短い前回回答"}
+],"富士山の高さは？");
+assert.deepEqual(normalContext.map(item=>item.role),["assistant","user"],"ordinary questions must retain only one previous message");
+assert.equal(normalContext[1].content,"富士山の高さは？","ordinary current question must remain complete");
+assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\(recent,text\)/,"generation must use the bounded context builder");
+assert.match(sw,/alvis-cache-v227-integrated/,"v232 app shell must use refreshed cache");
