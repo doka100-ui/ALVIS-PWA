@@ -299,7 +299,7 @@ assert.equal((app.match(/max_tokens:64/g)||[]).length, 4);
 assert.equal((app.match(/max_tokens:512/g)||[]).length, 0);
 assert.match(app,/function buildCompactConversationVariationGuidance\(/);
 assert.match(app,/直近の返答：/);
-assert.match(app,/const priorMessageLimit=isFollowUpMessage\(text\)\?2:1/);
+assert.ok(app.includes("const selected=followUp?prior.slice(-2):prior.slice(-1);"),"bounded generation context must keep the correct prior turns");
 assert.match(app,/slice\(-100\)/);
 assert.match(app,/const activeSystemPrompt=systemPrompt/);
 assert.match(app,/const hasUntrustedReferences=numberedResearchSources\.length>0\|\|relevantLearnings\.some\(item=>item\.sourceType==="external_ai"\)\|\|!!onlineReferenceText/,"approved external AI references must retain untrusted-source safeguards");
