@@ -777,3 +777,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 ## v230 — 永続化要求の例外処理
 - Storage API `persist()` の同期例外と非同期rejectionを両方捕捉し、診断状態へ記録する。
 - 永続化要求が失敗してもモデル起動・推論の処理を中断しない。
+
+
+## v231 — ローカル推論エンジンの終了ライフサイクル
+- 同一WebLLM engineへの複数の終了要求は1つのunload Promiseへ集約し、元のunloadを一度だけ呼び出す。
+- 終了要求後は新しい推論と待機列に残る推論を開始せず、現在実行中の推論が終了してから解放する。
+- これによりロック・推論失敗・ユーザー終了操作が重なった場合の二重解放と、終了後の待機推論による再利用を防ぐ。
