@@ -2186,7 +2186,7 @@ function installAlvisWebGpuDiagnostics(){
 }
 function getAlvisGpuDiagnosticSummary(){
   const d=alvisGpuDiagnostics;
-  return " / GPU "+d.deviceState+"（device "+d.deviceCreateCount+"回） / visibility "+d.visibilityState+" / page "+d.lastPageEvent+"（show "+d.pageShowCount+"・hide "+d.pageHideCount+"）"+
+  return " / GPU "+d.deviceState+"（model device "+d.modelDeviceCreateCount+"回） / visibility "+d.visibilityState+" / page "+d.lastPageEvent+"（show "+d.pageShowCount+"・hide "+d.pageHideCount+"）"+
     (d.deviceLostReasonCode?" / GPU lost reason code: "+d.deviceLostReasonCode:"")+
     (d.deviceLostReason?" / GPU lost: "+d.deviceLostReason:"")+
     (d.uncapturedError?" / GPU error: "+d.uncapturedError:"")+
