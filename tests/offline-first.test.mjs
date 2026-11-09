@@ -696,3 +696,10 @@ assert.match(app,/caches\.open\(key\)[\s\S]*?await cache\.keys\(\)/);
 assert.match(app,/navigator\.storage\?\.persisted/);
 assert.match(app,/ALVIS以外のキャッシュ/);
 assert.match(sw,/\.filter\(\(key\)[\s\S]*?key\.startsWith\("alvis-cache-"\)[\s\S]*?key\.startsWith\("alvis-deps-"\)/);
+
+// v220: a disposed WebLLM runtime must be treated as a lost engine, not retained.
+assert.match(send,/object has already been disposed|already been disposed|object\.\*disposed|disposed\.\*object/i,"disposed WebLLM runtime errors must invalidate the stale engine reference");
+assert.match(send,/const failedEngine=aiEngine;[\s\S]*?aiEngine=null;[\s\S]*?failedEngine\.unload\(\)/,"lost engine recovery must detach the stale reference and attempt best-effort cleanup");
+assert.match(send,/ALVIS_MODEL_LABEL\+"の実行状態が失われたため/,"recovery guidance must use the active device model label");
+assert.match(sw,/alvis-cache-v215-integrated/,"service worker must serve the updated disposed-engine recovery code");
+
