@@ -2122,6 +2122,71 @@ function serializeAlvisInference(engine){
   }
   return engine;
 }
+// WebGPU device lifecycle diagnostics. This observes device creation/loss without changing model execution.
+const alvisGpuDiagnostics={
+  deviceState:"未観測",deviceCreateCount:0,deviceLostReason:"",deviceLostAt:"",
+  uncapturedError:"",visibilityState:document.visibilityState||"unknown",
+  visibilityChangedAt:"",pageShowCount:0,pageHideCount:0,lastPageEvent:""
+};
+function installAlvisWebGpuDiagnostics(){
+  const adapterPrototype=globalThis.GPUAdapter?.prototype;
+  const originalRequestDevice=adapterPrototype?.requestDevice;
+  if(typeof originalRequestDevice!=="function"){
+    alvisGpuDiagnostics.deviceState="requestDevice監視非対応";
+  }else if(!originalRequestDevice.__alvisGpuMonitor){
+    const monitoredRequestDevice=function(...args){
+      const pending=originalRequestDevice.apply(this,args);
+      return Promise.resolve(pending).then(device=>{
+        alvisGpuDiagnostics.deviceCreateCount++;
+        alvisGpuDiagnostics.deviceState="active";
+        alvisGpuDiagnostics.deviceLostReason="";
+        alvisGpuDiagnostics.deviceLostAt="";
+        if(device?.lost&&typeof device.lost.then==="function"){
+          device.lost.then(info=>{
+            alvisGpuDiagnostics.deviceState="lost";
+            alvisGpuDiagnostics.deviceLostReason=String(info?.message||"理由なし").slice(0,180);
+            alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
+          },error=>{
+            alvisGpuDiagnostics.deviceState="lost";
+            alvisGpuDiagnostics.deviceLostReason=String(error?.message||error||"lost promise rejected").slice(0,180);
+            alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
+          });
+        }
+        if(device&&typeof device.addEventListener==="function"){
+          device.addEventListener("uncapturederror",event=>{
+            alvisGpuDiagnostics.uncapturedError=String(event?.error?.message||event?.message||"WebGPU uncaptured error").slice(0,180);
+          });
+        }
+        return device;
+      });
+    };
+    try{
+      Object.defineProperty(monitoredRequestDevice,"__alvisGpuMonitor",{value:true});
+      adapterPrototype.requestDevice=monitoredRequestDevice;
+      if(adapterPrototype.requestDevice!==monitoredRequestDevice)alvisGpuDiagnostics.deviceState="requestDevice監視設定不可";
+    }catch(error){alvisGpuDiagnostics.deviceState="requestDevice監視設定不可";}
+  }
+  document.addEventListener("visibilitychange",()=>{
+    alvisGpuDiagnostics.visibilityState=document.visibilityState||"unknown";
+    alvisGpuDiagnostics.visibilityChangedAt=new Date().toISOString();
+  });
+  window.addEventListener("pageshow",()=>{
+    alvisGpuDiagnostics.pageShowCount++;alvisGpuDiagnostics.lastPageEvent="pageshow";
+  });
+  window.addEventListener("pagehide",()=>{
+    alvisGpuDiagnostics.pageHideCount++;alvisGpuDiagnostics.lastPageEvent="pagehide";
+  });
+}
+function getAlvisGpuDiagnosticSummary(){
+  const d=alvisGpuDiagnostics;
+  return " / GPU "+d.deviceState+"（device "+d.deviceCreateCount+"回） / visibility "+d.visibilityState+" / page "+d.lastPageEvent+"（show "+d.pageShowCount+"・hide "+d.pageHideCount+"）"+
+    (d.deviceLostReason?" / GPU lost: "+d.deviceLostReason:"")+
+    (d.uncapturedError?" / GPU error: "+d.uncapturedError:"")+
+    (d.deviceLostAt?" / lostAt "+d.deviceLostAt:"")+
+    (d.visibilityChangedAt?" / visibilityAt "+d.visibilityChangedAt:"");
+}
+installAlvisWebGpuDiagnostics();
+
 let CreateMLCEngine = null;
 let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
@@ -4369,6 +4434,7 @@ async function sendToAlvis(){
     let message="AI生成エラー: "+errorName+": "+detail;
     if(engineStateLost){
       const diagnosticSummary="\n診断: WebLLM "+inferenceDiagnostic.webllmVersion+" / "+inferenceDiagnostic.model+" / context "+inferenceDiagnostic.contextWindow+" / system "+inferenceDiagnostic.systemChars+"文字 / conversation "+inferenceDiagnostic.conversationChars+"文字 / external "+inferenceDiagnostic.externalReferenceChars+"文字 / messages "+inferenceDiagnostic.messageCount+" / user "+inferenceDiagnostic.userChars+"文字 / max_tokens "+inferenceDiagnostic.maxTokens;
+      message+=getAlvisGpuDiagnosticSummary();
       message+=diagnosticSummary+(stackPreview?"\nstack: "+stackPreview:"");
       // WebLLM内部でモデル状態が失われた場合、古いengine参照を再利用しない。
       const failedEngine=aiEngine;
