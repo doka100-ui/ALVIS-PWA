@@ -1,3 +1,9 @@
+## v226 GPU診断をWebLLMモデル用デバイスに限定（2026-11-09）
+- v225のiPhone Safari診断でGPU lost reason codeが `destroyed` と報告されたが、端末診断機能自身が標準GPUテスト/WebLLM相当テストのためにGPUDeviceを作成し、直後に `destroy()` していた。従来監視はこれらの診断用デバイスも同じGPU喪失として数えるため、モデル用GPU喪失と誤認する可能性があった。
+- GPUDevice監視をWebLLMの `CreateMLCEngine` 初期化中に要求されたデバイスだけに限定。端末診断の2つのGPUテストは監視ラッパーを迂回して元の `requestDevice` を呼び、診断用デバイスの意図的破棄をモデルGPU喪失へ混入させない。
+- 診断表示のデバイス件数を「model device」と明記。モデル生成・推論・モデルID・context・WebLLM 0.2.87・既存キャッシュ・記憶庫・履歴・暗号化・同期・バックアップは変更しない。
+- Service Worker cacheをv221へ更新。静的コード検査と回帰テストを追加。実テスト・Cloudflare Pages反映・Safari実機確認は未実施。
+
 ## v225 WebGPU喪失理由コードを記録（2026-11-09）
 - v224のiPhone Safari診断でGPUデバイス喪失が1回観測されたが、既存診断はGPUDeviceLostInfo.messageのみを記録し、標準のreasonコードを表示していなかった。
 - GPUDeviceLostInfo.reason（destroyed / unknown等）を読み取り、lost promiseがrejectされた場合はpromise-rejectedとして診断に追加。既存のメッセージ・時刻・uncaptured errorも維持。
