@@ -1,3 +1,10 @@
+## v220 破棄済みWebLLMエンジンの復旧（2026-11-09）
+- iPhoneでQwen3-1.7B読み込み後、初回推論が `Object has already been disposed` で失敗した報告を受け、チャット送信時の異常エンジン判定を確認。
+- 既存判定はWebGPU device lost等のみを対象とし、disposedエラーを拾わず古い `aiEngine` 参照が残る可能性があった。
+- disposedエラーも実行状態喪失として扱い、古い参照を切り離してbest-effort unloadし、端末プロファイルに応じたモデル名で再読み込みを案内する。
+- 記憶・履歴・暗号化・同期・バックアップ・モデルキャッシュの削除/変更なし。Service Worker cacheをv215へ更新。
+- 静的検査と回帰テストを追加。Safari実機での再読み込み後の再推論確認はユーザー確認待ち。
+
 ## v219 キャッシュ診断の可視化（2026-11-09）
 - 開発ブランチ: `development`。
 - 既存のWebLLM 0.2.87は既定のCache APIをモデル成果物の保存先に使用する。Service WorkerはALVIS自身の旧キャッシュだけを削除し、他ライブラリのキャッシュを保持する設計。
