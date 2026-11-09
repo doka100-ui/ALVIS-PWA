@@ -732,6 +732,8 @@ assert.ok(gpuMonitorStart>=0&&gpuMonitorEnd>gpuMonitorStart,"WebGPU lifecycle mo
 const gpuMonitorSource=app.slice(gpuMonitorStart,gpuMonitorEnd);
 assert.match(gpuMonitorSource,/adapterPrototype\?\.requestDevice/);
 assert.match(gpuMonitorSource,/device\?\.lost/);
+assert.match(gpuMonitorSource,/info\?\.reason/,"GPU lost diagnostics must retain the WebGPU loss reason code");
+assert.match(gpuMonitorSource,/deviceLostReasonCode/);
 assert.match(gpuMonitorSource,/uncapturederror/);
 assert.match(gpuMonitorSource,/visibilitychange/);
 assert.match(gpuMonitorSource,/pageshow/);
