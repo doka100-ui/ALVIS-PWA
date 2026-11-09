@@ -2123,6 +2123,7 @@ function serializeAlvisInference(engine){
   return engine;
 }
 let CreateMLCEngine = null;
+let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
 
 const $ = id => document.getElementById(id);
@@ -3427,6 +3428,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     await alvisServiceWorkerReady;
     if(!CreateMLCEngine){
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.82");
+      alvisWebLLMVersion="0.2.82（CDN指定）";
       CreateMLCEngine=webllm.CreateMLCEngine;
     }
     const loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
@@ -4078,6 +4080,7 @@ async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
   if(!text)return;
+  let inferenceDiagnostic={webllmVersion:alvisWebLLMVersion,model:ALVIS_MODEL_ID,contextWindow:ALVIS_CONTEXT_WINDOW,userChars:text.length,systemChars:0,conversationChars:0,externalReferenceChars:0,messageCount:0,maxTokens:0};
   // 送信操作中に音声出力を解放し、推論完了後のKokoro読み上げに備える。
   unlockAlvisAudioFromGesture();
   const priorConversationCount=data.history.filter(item=>item.role==="user"||item.role==="alvis").length;
@@ -4164,6 +4167,7 @@ async function sendToAlvis(){
     const systemPrompt=buildCompactAlvisSystemPrompt(japanDateTime.date,japanDateTime.time,hasUntrustedReferences,isWeatherQuestion(text));
     const activeSystemPrompt=systemPrompt;
     const activePromptWithJapanesePack=activeSystemPrompt+"\n"+buildJapaneseLanguageGuidance(text,true)+"\n"+buildCompactConversationVariationGuidance(text,data.history)+"\n【承認済み記憶】"+(memoryText||"なし")+"\n【承認済み学び・参考資料】"+(learningContext||"なし");
+    inferenceDiagnostic={webllmVersion:alvisWebLLMVersion,model:ALVIS_MODEL_ID,contextWindow:ALVIS_CONTEXT_WINDOW,userChars:text.length,systemChars:activePromptWithJapanesePack.length,conversationChars:conversationForGeneration.reduce((total,item)=>total+String(item.content||"").length,0),externalReferenceChars:onlineReferenceText.length,messageCount:1+conversationForGeneration.length+(onlineReferenceText?1:0),maxTokens:responseTokenLimit};
     // 単独の挨拶はモデルに任せず、短く自然に返す。
     // Qwen3が履歴や長期記憶に引っ張られて話題を広げるのを防ぐ。
     let reply;
@@ -4359,9 +4363,13 @@ async function sendToAlvis(){
       : candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）"+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":"") : "Qwen3-4B 接続中・準備完了"+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":""));
   }catch(error){
     const detail=String(error?.message||error||"不明なエラー");
+    const errorName=String(error?.name||"Error");
+    const stackPreview=String(error?.stack||"").split("\\n").slice(0,5).join(" | ").slice(0,700);
     const engineStateLost=/map async was not successful|model not loaded before trying to complete|device was lost|device lost|gpu.*lost|webgpu.*lost|object has already been disposed|already been disposed|object.*disposed|disposed.*object/i.test(detail);
-    let message="AI生成エラー: "+detail;
+    let message="AI生成エラー: "+errorName+": "+detail;
     if(engineStateLost){
+      const diagnosticSummary="\\n診断: WebLLM "+inferenceDiagnostic.webllmVersion+" / "+inferenceDiagnostic.model+" / context "+inferenceDiagnostic.contextWindow+" / system "+inferenceDiagnostic.systemChars+"文字 / conversation "+inferenceDiagnostic.conversationChars+"文字 / external "+inferenceDiagnostic.externalReferenceChars+"文字 / messages "+inferenceDiagnostic.messageCount+" / user "+inferenceDiagnostic.userChars+"文字 / max_tokens "+inferenceDiagnostic.maxTokens;
+      message+=diagnosticSummary+(stackPreview?"\\nstack: "+stackPreview:"");
       // WebLLM内部でモデル状態が失われた場合、古いengine参照を再利用しない。
       const failedEngine=aiEngine;
       aiEngine=null;
