@@ -725,6 +725,22 @@ assert.match(send,/stack: /);
 assert.match(sw,/alvis-cache-v218-integrated/);
 
 
+// v224: observe WebGPU device loss and Safari page lifecycle without clearing caches or user data.
+const gpuMonitorStart=app.indexOf("function installAlvisWebGpuDiagnostics()");
+const gpuMonitorEnd=app.indexOf("\nfunction getAlvisGpuDiagnosticSummary()",gpuMonitorStart);
+assert.ok(gpuMonitorStart>=0&&gpuMonitorEnd>gpuMonitorStart,"WebGPU lifecycle monitor must exist");
+const gpuMonitorSource=app.slice(gpuMonitorStart,gpuMonitorEnd);
+assert.match(gpuMonitorSource,/adapterPrototype\?\.requestDevice/);
+assert.match(gpuMonitorSource,/device\?\.lost/);
+assert.match(gpuMonitorSource,/uncapturederror/);
+assert.match(gpuMonitorSource,/visibilitychange/);
+assert.match(gpuMonitorSource,/pageshow/);
+assert.match(gpuMonitorSource,/pagehide/);
+assert.match(app,/message\+=getAlvisGpuDiagnosticSummary\(\)/,"GPU lifecycle details must be attached to inference failures");
+assert.match(sw,/alvis-cache-v219-integrated/,"app shell cache must be versioned for v224");
+assert.doesNotMatch(sw,/caches\.delete\([^)]*webllm/i,"service worker must not delete WebLLM model caches");
+
+
 // v223: use the first WebLLM release bundling the TVM runtime lifetime fix.
 assert.match(app,/web-llm@0\.2\.87/);
 assert.match(app,/alvisWebLLMVersion="0\.2\.87（CDN指定）"/);
