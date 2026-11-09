@@ -1,3 +1,10 @@
+## v228 iPhone SafariのGPU診断変数スコープ修正（2026-11-09）
+- ユーザーのiPhone Safari実機診断で、標準GPUデバイス作成/WebLLM相当GPUデバイス作成がともに `Can't find variable: originalRequestDevice` で失敗。
+- 原因は、元の `GPUAdapter.requestDevice` を保持する変数が監視関数内のローカル変数であり、別の端末診断イベントから参照できなかったこと。GPU機能の故障を示す結果ではない。
+- 元のrequestDevice関数を診断状態オブジェクトに保持し、2つの診断テストから安全に呼び出すよう修正。GPUモデル監視のcapture windowは維持し、診断用デバイスをモデルGPU喪失へ混入させない。
+- モデルID/context/WebLLM版/モデルキャッシュ/記憶庫/履歴/AES-GCM/同期/バックアップは変更なし。モデルのダウンロード・キャッシュ削除も行わない。
+- Service Worker cacheをv223へ更新し、スコープ参照の回帰テストを追加。静的確認・テストスイート・Cloudflare Pages反映・Safari実機再確認は未確認。
+
 ## v227 WebLLMモデル重みキャッシュの読み取り専用確認（2026-11-09）
 - WebLLM 0.2.87が公開する `hasModelInCache` を端末診断へ追加し、現在の端末プロファイルで選ばれたモデルIDのtensor/model重みキャッシュを直接確認する。
 - 表示は「保存あり（再利用候補）」「未検出（読み込み時に取得の可能性）」「確認不可」を区別。APIが確認するのはモデルtensorキャッシュであり、tokenizer/config/WASMを含む全資材の完全性までは保証しない。CDNモジュールを取得できないオフライン時などは「確認不可」となる。
