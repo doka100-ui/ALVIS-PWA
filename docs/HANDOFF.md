@@ -3,7 +3,7 @@
 - ALVISモードのステージは完成見本画像1枚を表示。旧ベクターHUDは既存の状態更新互換のためDOMに残して非表示。画像上に追加したのは、既存のページ遷移とAI起動ボタンへ接続する透明なタップ領域のみ。
 - チャット入力/送信、モード切替、アバターステージ、ローカルAI推論、記憶候補/長期記憶、会話履歴、AES-GCM、同期、バックアップ/復元、音声/TTSの処理コードは変更しない。
 - Service Worker cacheをv234へ更新し、画像をプリキャッシュへ追加。更新対象はALVISアプリキャッシュのみ。WebLLM/Kokoro等のモデル・依存キャッシュは保持。
-- 画像バイナリSHA-256: `0d511dbe92fe6132709a1c4edbe2fe919a1071edbe4b2a8a1f669f82eb9731ac`。静的DOM/CSS/Service Worker検査と既存スクリプト不変更チェックを実施。GitHub Actions、Cloudflare Pages配信、Safari実機での表示/タップはコミット後に確認する。
+- 画像バイナリSHA-256: `0d511dbe92fe6132709a1c4edbe2fe919a1071edbe4b2a8a1f669f82eb9731ac`。`dashboard-image` GitHub Actionsは12/12成功。Cloudflare Pagesはcommit `c8be4d2` でデプロイ成功（Preview: `https://eb4b9152.alvis-pwa.pages.dev`、Branch Preview: `https://development.alvis-pwa.pages.dev`）。一方、既存 `offline-first` job は22/22ポリシー検査通過後、テスト側の `document is not defined`（`tests/offline-first.test.mjs:424`）で失敗。Cloudflare URLはこの実行環境から取得できず、Safariでの実画像表示・タップ・オフライン再読込は未確認。ここは完了扱いにせず、実機確認待ち。
 
 ## v233 省略された短い追加質問の文脈判定（2026-11-09）
 - 「妻は？」「料金は？」のような短い名詞句の追加質問を、直前にユーザー発言とALVIS回答の両方がある場合に限り、フォローアップとして扱う。
