@@ -2196,6 +2196,7 @@ function getAlvisGpuDiagnosticSummary(){
 installAlvisWebGpuDiagnostics();
 
 let CreateMLCEngine = null;
+let alvisHasModelInCache = null;
 let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
 
@@ -3503,6 +3504,7 @@ $("loadAiModel").addEventListener("click",async()=>{
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
       alvisWebLLMVersion="0.2.87（CDN指定）";
       CreateMLCEngine=webllm.CreateMLCEngine;
+      alvisHasModelInCache=typeof webllm.hasModelInCache==="function"?webllm.hasModelInCache:null;
     }
     let loadedEngine;
     // WebLLM engine initialization may create its GPUDevice asynchronously.
@@ -4878,6 +4880,19 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
       lines.push("Service Worker登録："+(registration?"登録あり":"登録なし"));
       lines.push("Service Worker制御："+(navigator.serviceWorker.controller?"制御中":"まだ制御していない"));
       lines.push("Service Worker状態："+(registration?.active?.state||registration?.waiting?.state||registration?.installing?.state||"状態不明"));
+    }
+    // Read-only check of WebLLM's tensor cache for this device's active model.
+    // hasModelInCache checks model tensors only; it does not prove config/tokenizer/WASM are all cached.
+    try{
+      if(!alvisHasModelInCache){
+        const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
+        alvisHasModelInCache=typeof webllm.hasModelInCache==="function"?webllm.hasModelInCache:null;
+      }
+      if(typeof alvisHasModelInCache!=="function")throw new Error("WebLLM cache inspection API unavailable");
+      const modelTensorCached=await alvisHasModelInCache(ALVIS_MODEL_ID);
+      lines.push("WebLLMモデル重みキャッシュ："+(modelTensorCached?"保存あり（再利用候補）":"未検出（読み込み時に取得の可能性）"));
+    }catch(modelCacheCheckError){
+      lines.push("WebLLMモデル重みキャッシュ：確認不可（"+String(modelCacheCheckError?.message||modelCacheCheckError||"不明").slice(0,120)+"）");
     }
     let otherCaches=[];
     if("caches" in window){
