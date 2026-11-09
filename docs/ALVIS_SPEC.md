@@ -741,3 +741,7 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - v205の画像待機モーションに最大±0.12度の左右スウェイを追加。約6.5秒周期で上下の呼吸動作と同期させる。
 - アバターモードの画像プレビュー限定。画像素材、3Dランタイム、ALVISホログラムモードは変更しない。
 - prefers-reduced-motion では停止。Service Worker cache: alvis-cache-v206-integrated。
+
+
+## GPU喪失診断
+- WebGPUデバイスのlost promiseではGPUDeviceLostInfo.reasonとmessageを記録し、明示的破棄と予期しない喪失の切り分けに使う。診断は読み取り専用とし、モデル/データの自動削除や再初期化は行わない。
