@@ -2210,13 +2210,19 @@ function requestAlvisStoragePersistence(){
     return Promise.resolve(false);
   }
   alvisStoragePersistenceStatus="要求中";
-  return navigator.storage.persist().then(granted=>{
-    alvisStoragePersistenceStatus=granted?"ブラウザから許可済み":"ブラウザが未許可";
-    return granted;
-  }).catch(error=>{
+  try{
+    return Promise.resolve(navigator.storage.persist()).then(granted=>{
+      alvisStoragePersistenceStatus=granted?"ブラウザから許可済み":"ブラウザが未許可";
+      return granted;
+    }).catch(error=>{
+      alvisStoragePersistenceStatus="要求失敗（"+String(error?.message||error||"不明").slice(0,100)+"）";
+      return false;
+    });
+  }catch(error){
+    // persist()がPromiseを返す前に同期例外を投げても、AIモデルの起動を止めない。
     alvisStoragePersistenceStatus="要求失敗（"+String(error?.message||error||"不明").slice(0,100)+"）";
-    return false;
-  });
+    return Promise.resolve(false);
+  }
 }
 
 const $ = id => document.getElementById(id);
