@@ -1,3 +1,7 @@
+## v225（2026-11-09）
+- WebGPU lost reason codeを診断出力に追加し、destroyed / unknown等を区別できるようにした。
+- 推論・モデル・保存データの挙動は変更なし。Service Worker cache v220。
+
 ## v224 WebGPU失効・Safariライフサイクル診断（2026-11-09）
 - v223適用後もiPhone Safariで `Object has already been disposed` が継続したため、推論コードの変更前にGPUデバイス状態とページ表示ライフサイクルを観測する診断を追加。
 - `GPUAdapter.requestDevice` を透過的に監視し、生成されたGPUDeviceの `lost` Promiseと `uncapturederror` を記録。Safariの `visibilitychange` / `pageshow` / `pagehide` も時刻・回数・状態のみ記録する。
