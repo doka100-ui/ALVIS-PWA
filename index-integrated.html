@@ -2200,6 +2200,24 @@ let CreateMLCEngine = null;
 let alvisHasModelInCache = null;
 let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
+let alvisStoragePersistenceStatus = "未要求";
+
+// モデル起動ボタンの直接操作中に、ブラウザへ保存領域の永続化を要求する。
+// 拒否・非対応でもモデル起動を妨げず、既存キャッシュやユーザーデータには触れない。
+function requestAlvisStoragePersistence(){
+  if(typeof navigator.storage?.persist!=="function"){
+    alvisStoragePersistenceStatus="このブラウザでは要求非対応";
+    return Promise.resolve(false);
+  }
+  alvisStoragePersistenceStatus="要求中";
+  return navigator.storage.persist().then(granted=>{
+    alvisStoragePersistenceStatus=granted?"ブラウザから許可済み":"ブラウザが未許可";
+    return granted;
+  }).catch(error=>{
+    alvisStoragePersistenceStatus="要求失敗（"+String(error?.message||error||"不明").slice(0,100)+"）";
+    return false;
+  });
+}
 
 const $ = id => document.getElementById(id);
 
@@ -3497,6 +3515,9 @@ $("loadAiModel").addEventListener("click",async()=>{
   $("loadAiModel").disabled=true;
   $("unloadAiModel").disabled=true;
   $("sendChat").disabled=true;
+  // 呼び出しは最初のawaitより前。Safariのユーザー操作中に永続化を要求する。
+  // 拒否されてもQwenの読み込み・推論は続行する。
+  requestAlvisStoragePersistence();
   try{
     setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
     // Service Workerが利用可能なら先に起動を待ち、WebLLMのJavaScript依存コードをキャッシュできる状態にする。
@@ -4934,6 +4955,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     }else{
       lines.push("保存領域の永続化：このブラウザでは状態を確認できません");
     }
+    lines.push("モデル起動時の永続化要求："+alvisStoragePersistenceStatus);
     lines.push("AIモデルの保存状態：ALVIS以外のキャッシュ名・件数を上に表示。個別のモデルファイル確認は未対応");
     lines.push("Kokoroモデルの保存状態：この画面から個別判定できません");
     lines.push("");
