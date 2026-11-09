@@ -1843,3 +1843,10 @@
 - 同期例外・Promise rejectionのどちらでも診断へ失敗状態を記録し、モデル起動処理は継続できるようにした。
 - 保存領域、WebLLMキャッシュ、モデル設定、記憶・履歴・暗号化・同期・バックアップは変更しない。
 - Service Worker cache: `alvis-cache-v225-integrated`。静的回帰ガード追加。実機検証待ち。
+
+
+## v231 — WebLLM終了処理の重複防止（2026-11-09）
+- `serializeAlvisInference()` の終了処理を冪等化。ロック処理と推論エラー処理等から同じengineへ複数回unloadが要求されても、元のWebLLM unloadは一度だけ実行し、同じPromiseを返す。
+- 終了要求が始まった後の新規/待機中推論を拒否し、実行中の推論キューがsettleしてからGPUリソースを解放する。
+- モデルキャッシュ、モデルID、context、記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
+- Service Worker cache: `alvis-cache-v226-integrated`。静的回帰ガード追加。実機でのGPU安定性は未確認。
