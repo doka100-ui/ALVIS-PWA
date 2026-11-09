@@ -808,6 +808,10 @@ const isFollowUpStart=app.indexOf("function isFollowUpMessage(text){");
 const isFollowUpEnd=app.indexOf("\nfunction ",isFollowUpStart+20);
 const isFollowUpSource=app.slice(isFollowUpStart,isFollowUpEnd);
 const isFollowUpForTest=new Function(isFollowUpSource+"; return isFollowUpMessage;")();
+const ellipticalHelperStart=app.indexOf("function isEllipticalFollowUpMessage(text,priorTurns=[]){");
+const ellipticalHelperEnd=app.indexOf("\nfunction ",ellipticalHelperStart+20);
+assert.ok(ellipticalHelperStart>=0&&ellipticalHelperEnd>ellipticalHelperStart,"elliptical follow-up classifier must exist");
+const isEllipticalFollowUpForTest=new Function(app.slice(ellipticalHelperStart,ellipticalHelperEnd)+"; return isEllipticalFollowUpMessage;")();
 const buildBoundedContextForTest=new Function("isFollowUpMessage","isEllipticalFollowUpMessage",contextHelperSource+"; return buildBoundedGenerationMessages;")(isFollowUpForTest,isEllipticalFollowUpForTest);
 const followUpContext=buildBoundedContextForTest([
   {role:"user",content:"前の質問です。"+("あ".repeat(500))},
@@ -826,10 +830,6 @@ const normalContext=buildBoundedContextForTest([
 ],"富士山の高さは？");
 assert.deepEqual(normalContext.map(item=>item.role),["assistant","user"],"ordinary questions must retain only one previous message");
 assert.equal(normalContext[1].content,"富士山の高さは？","ordinary current question must remain complete");
-const ellipticalHelperStart=app.indexOf("function isEllipticalFollowUpMessage(text,priorTurns=[]){");
-const ellipticalHelperEnd=app.indexOf("\nfunction ",ellipticalHelperStart+20);
-assert.ok(ellipticalHelperStart>=0&&ellipticalHelperEnd>ellipticalHelperStart,"elliptical follow-up classifier must exist");
-const isEllipticalFollowUpForTest=new Function(app.slice(ellipticalHelperStart,ellipticalHelperEnd)+"; return isEllipticalFollowUpMessage;")();
 const priorTopic=[{role:"user",content:"タイの空港で何をする？"},{role:"assistant",content:"出国手続きと保安検査をするよ。"}];
 assert.equal(isEllipticalFollowUpForTest("妻は？",priorTopic),true,"short topic-only questions must be recognized as follow-ups");
 assert.equal(isEllipticalFollowUpForTest("料金は？",priorTopic),true,"short noun-plus-particle questions must retain their topic");
