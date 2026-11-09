@@ -2108,16 +2108,29 @@ function serializeAlvisInference(engine){
   if(!completions||typeof completions.create!=="function")throw new Error("ローカルAIモデルの生成機能を確認できません。");
   const originalCreate=completions.create.bind(completions);
   let inferenceQueue=Promise.resolve();
+  let unloadRequested=false;
+  let unloadPromise=null;
   completions.create=(...args)=>{
-    const request=inferenceQueue.then(()=>originalCreate(...args));
+    if(unloadRequested)return Promise.reject(new Error("ローカルAIモデルは終了処理中です。"));
+    const request=inferenceQueue.then(()=>{
+      // 終了要求後に待機列へ残っていた推論は実行せず、GPU解放を優先する。
+      if(unloadRequested)throw new Error("ローカルAIモデルは終了処理中です。");
+      return originalCreate(...args);
+    });
     inferenceQueue=request.then(()=>undefined,()=>undefined);
     return request;
   };
   if(typeof engine.unload==="function"){
     const originalUnload=engine.unload.bind(engine);
-    engine.unload=async(...args)=>{
-      await inferenceQueue.catch(()=>{});
-      return originalUnload(...args);
+    engine.unload=(...args)=>{
+      // ロック・推論エラー等から同時に終了要求されても、元のunloadは一度だけ呼ぶ。
+      if(unloadPromise)return unloadPromise;
+      unloadRequested=true;
+      unloadPromise=(async()=>{
+        await inferenceQueue.catch(()=>{});
+        return originalUnload(...args);
+      })();
+      return unloadPromise;
     };
   }
   return engine;
