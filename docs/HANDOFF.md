@@ -1,3 +1,9 @@
+## v227 WebLLMモデル重みキャッシュの読み取り専用確認（2026-11-09）
+- WebLLM 0.2.87が公開する `hasModelInCache` を端末診断へ追加し、現在の端末プロファイルで選ばれたモデルIDのtensor/model重みキャッシュを直接確認する。
+- 表示は「保存あり（再利用候補）」「未検出（読み込み時に取得の可能性）」「確認不可」を区別。APIが確認するのはモデルtensorキャッシュであり、tokenizer/config/WASMを含む全資材の完全性までは保証しない。CDNモジュールを取得できないオフライン時などは「確認不可」となる。
+- 診断は読み取り専用。モデルのダウンロード開始、キャッシュ削除/移動、キャッシュ方式変更、モデルID/context変更は行わない。WebLLM標準Cache API、既存キャッシュ、記憶庫、履歴、暗号化、同期、バックアップは維持。
+- Service Worker cacheをv222へ更新し、回帰テストを追加。実ブラウザでの確認、テストスイート実行、Cloudflare Pages反映は未確認。
+ 
 ## v226 GPU診断をWebLLMモデル用デバイスに限定（2026-11-09）
 - v225のiPhone Safari診断でGPU lost reason codeが `destroyed` と報告されたが、端末診断機能自身が標準GPUテスト/WebLLM相当テストのためにGPUDeviceを作成し、直後に `destroy()` していた。従来監視はこれらの診断用デバイスも同じGPU喪失として数えるため、モデル用GPU喪失と誤認する可能性があった。
 - GPUDevice監視をWebLLMの `CreateMLCEngine` 初期化中に要求されたデバイスだけに限定。端末診断の2つのGPUテストは監視ラッパーを迂回して元の `requestDevice` を呼び、診断用デバイスの意図的破棄をモデルGPU喪失へ混入させない。
