@@ -4372,7 +4372,7 @@ async function sendToAlvis(){
     }
     data.history.push({role:"alvis",text:message,createdAt:new Date().toISOString()});
     try{await saveLocal();}catch(saveError){}
-    setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。Qwen3-4Bを再読み込みしてください。":message);
+    setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。"+ALVIS_MODEL_LABEL+"を再読み込みしてください。":message);
   }finally{
     const elapsed=alvisResponseStartedAt?Math.max(0,(performance.now()-alvisResponseStartedAt)/1000):0;
     updateHudConversationState("ready",elapsed);
