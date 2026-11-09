@@ -779,3 +779,9 @@ assert.match(app,/モデル起動時の永続化要求：/,"diagnostics must exp
 assert.match(app,/alvisStoragePersistenceStatus=granted\?"ブラウザから許可済み":"ブラウザが未許可"/,"browser denial must be reported without blocking model loading");
 assert.doesNotMatch(app,/caches\.delete\([^)]*webllm|deleteModelAllInfoInCache|deleteModelInCache\(/i,"persistence request must not clear model caches");
 assert.match(sw,/alvis-cache-v224-integrated/,"v229 app shell must use refreshed cache");
+
+
+// v230: StorageManager.persist may reject or throw synchronously; neither path may block model startup.
+assert.match(app,/try\{\s*return Promise\.resolve\(navigator\.storage\.persist\(\)\)/,"persistent storage request must handle synchronous exceptions");
+assert.match(app,/catch\(error\)\{[\s\S]*?alvisStoragePersistenceStatus="要求失敗（"/,"synchronous persistence errors must be reported");
+assert.match(sw,/alvis-cache-v225-integrated/,"v230 app shell must use refreshed cache");
