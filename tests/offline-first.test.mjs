@@ -709,3 +709,15 @@ assert.match(sw,/alvis-cache-v215-integrated/,"service worker must serve the upd
 assert.match(app,/@mlc-ai\/web-llm@0\.2\.82/,"WebLLM must use the 0.2.82 workaround for the disposed-object regression");
 assert.doesNotMatch(app,/@mlc-ai\/web-llm@0\.2\.(?:83|84|85|86|87)/,"known affected WebLLM versions must not be loaded");
 assert.match(sw,/alvis-cache-v216-integrated/,"service worker must serve the pinned WebLLM version");
+
+
+// v222: disposed-engine failures expose version, prompt-size, and stack diagnostics without prompt contents.
+assert.match(app,/let alvisWebLLMVersion = \"未読み込み\"/);
+assert.match(app,/alvisWebLLMVersion=\"0\.2\.82（CDN指定）\"/);
+assert.match(send,/let inferenceDiagnostic=\{/);
+assert.match(send,/systemChars:activePromptWithJapanesePack\.length/);
+assert.match(send,/conversationChars:conversationForGeneration\.reduce/);
+assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)/);
+assert.match(send,/診断: WebLLM /);
+assert.match(send,/stack: /);
+assert.match(sw,/alvis-cache-v217-integrated/);
