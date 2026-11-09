@@ -870,3 +870,11 @@ Safari等でログイン後の遅延音声再生が拒否される場合に備�
 ## v137 ホログラム構図
 - SVG内のglobeAssemblyグループに平行移動を適用し、地球・大気圏・緯度経度線・軌道をまとめて上方へ25単位配置。タイトル文字・上下プロジェクター基準・下部静止台は独立して維持。
 - 中央光柱は上部装置から下部投影台へ連続するSVG線で表現。外部画像や追加ライブラリは不要。
+
+
+## Reference-image ALVIS dashboard (v234)
+
+- The ALVIS display stage uses the user-approved dashboard artwork as one AVIF image at the original 1397:1126 aspect ratio. The image is an optimized 700×564 derivative; its globe, orbit rings, projector pedestal, side panels, labels, colors, and spacing are not redrawn by CSS or SVG.
+- Existing ALVIS navigation and model-start actions remain functional through transparent, image-aligned hit areas. The legacy HUD DOM remains in place for existing status bindings but is not visually rendered over the artwork.
+- The image is included in the Service Worker app-shell precache for offline display. Updating the ALVIS app cache does not delete WebLLM/Kokoro model caches or change encrypted memory, history, synchronization, or backup data.
+- Avatar mode and the existing chat composer remain separate and unchanged.

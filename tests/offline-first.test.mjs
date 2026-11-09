@@ -28,7 +28,7 @@ assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAl
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 // v116: restrained cinematic awakening replaces the game-like radial starburst.
 assert.match(app,/#appPanel\.auth-enter\{[^}]*animation:alvisWorkspaceAwake/,"workspace must fade into focus without a circular game-like wipe");
-assert.match(app,/@keyframes alvisWorkspaceAwake[\s\S]*?filter:blur\(0\) brightness\(1\)/,"workspace must resolve softly into focus");
+assert.match(app,/@keyframes alvisWorkspaceAwake\{0%\{opacity:0;filter:none\}45%\{opacity:\.82;filter:none\}100%\{opacity:1;filter:none\}\}/,"workspace must resolve without blur or brightness filters");
 assert.match(app,/radial-gradient\(ellipse at 50% 46%/,"a restrained central ambient glow must remain");
 assert.match(app,/@keyframes alvisQuietWave[\s\S]*?transform:scale\(1\.85\)/,"one subtle expanding light wave must originate at the center");
 assert.doesNotMatch(app,/conic-gradient\(from 0deg at 50% 46%/,"no starburst rays");
@@ -646,18 +646,20 @@ assert.match(sw,/alvis-cache-v\\d+-integrated/);
 
 
 
-// v138: use the exact supplied reference image instead of the hand-drawn SVG scene.
-assert.match(app, /class="alvis-reference-image" src="\.\/assets\/alvis-reference\.jpg"/);
-assert.match(app, /class="alvis-motion-orbit alvis-motion-orbit-a"/);
-assert.match(app, /class="alvis-motion-orbit alvis-motion-orbit-b"/);
-assert.match(app, /id="hudAiAction"/);
-assert.match(app, /@keyframes alvisRefOrbitA/);
-assert.match(app, /@keyframes alvisRefOrbitB/);
-assert.match(app, /@media\(prefers-reduced-motion:reduce\).*alvis-motion-orbit/s);
-assert.match(app, /aspect-ratio:406\/326/);
-assert.match(sw, /alvis-cache-v\\d+-integrated/);
-assert.match(sw, /\.\/assets\/alvis-reference\.jpg/);
-
+// v234: render the user-selected dashboard image without redrawing or duplicate orbit overlays.
+assert.match(app,/class="alvis-reference-image" src="\.\/assets\/alvis-dashboard-reference\.avif" width="700" height="564"/);
+assert.match(app,/aspect-ratio:1397\/1126/);
+assert.match(app,/class="alvis-reference-right-hotspots"/);
+assert.match(app,/class="hud-shortcut" data-page="chatPage"/);
+for(const page of ["candidatePage","memoryPage","historyPage","syncPage","devicePage","growthPage"]) assert.ok(app.includes(\`data-page="\${page}"\`),\`reference hotspot must preserve \${page} navigation\`);
+assert.match(app,/id="hudAiAction"/);
+assert.doesNotMatch(app,/class="alvis-motion-orbit/,"the reference artwork must not receive duplicate orbit overlays");
+assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center")&&app.includes("display:none!important"),"the hand-drawn vector globe must stay hidden behind the selected image");
+assert.match(sw,/alvis-cache-v234-integrated/);
+assert.match(sw,/\.\/assets\/alvis-dashboard-reference\.avif/);
+const dashboardImage=await readFile(new URL("../assets/alvis-dashboard-reference.avif",import.meta.url));
+assert.equal(dashboardImage.subarray(4,12).toString("ascii"),"ftypavif","the registered dashboard asset must be an AVIF binary");
+assert.ok(dashboardImage.length>20000,"the dashboard image must be a real optimized image asset");
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
@@ -681,15 +683,15 @@ assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\
 assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker cache must be bumped for v204");
 
 
-// v204: restore the v188 live HUD instead of a static image/overlay.
-assert.doesNotMatch(app, /class="alvis-motion-layer"/, "the v203 image overlay must be removed");
-assert.doesNotMatch(app, /<img class="alvis-reference-scene"/, "ALVIS mode must not use the static dashboard image");
-assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "ring motion must target the original live HUD orbits");
-assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "first original HUD orbit must be animated");
-assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI launch control must remain in the left HUD panel");
-assert.match(sw, /alvis-cache-v\\d+-integrated/, "service worker must use the v204 cache");
-
-
+// v204 legacy HUD nodes remain for status bindings; v234 displays the selected image above them.
+assert.doesNotMatch(app, /class="alvis-motion-layer"/, "the old image overlay must not be reintroduced");
+assert.match(app, /class="alvis-reference-image"/, "ALVIS mode must use the selected dashboard image");
+assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "legacy HUD motion code remains isolated from the image layer");
+assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
+assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI launch control remains connected to its existing button");
+assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center")&&app.includes("display:none!important"), "legacy vector HUD must not cover the selected artwork");
+assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker must use the v204 cache");
+ 
 // v219: model-cache diagnostics must inspect non-ALVIS caches without deleting them.
 assert.match(app,/otherCaches=keys\.filter\(key=>!key\.startsWith\("alvis-cache-"\)&&!key\.startsWith\("alvis-deps-"\)\)/);
 assert.match(app,/caches\.open\(key\)[\s\S]*?await cache\.keys\(\)/);

@@ -1645,6 +1645,87 @@ header .status{margin-top:2px}
 
 
 
+
+/* v234: use the exact user-selected dashboard artwork; only invisible hit areas sit above it. */
+.display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:block!important;isolation:isolate!important;box-sizing:border-box!important;
+  width:min(100%,560px)!important;max-width:560px!important;min-height:0!important;height:auto!important;
+  aspect-ratio:1397/1126!important;margin:clamp(6px,1.5vw,14px) auto 14px!important;padding:0!important;
+  overflow:hidden!important;border:0!important;border-radius:0!important;background:#01040b!important;box-shadow:none!important;
+}
+.display-dock .mode-stage.jarvis-stage::before,
+.display-dock .mode-stage.jarvis-stage::after{content:none!important;display:none!important}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-image{
+  position:absolute!important;inset:0!important;z-index:1!important;display:block!important;
+  width:100%!important;height:100%!important;object-fit:fill!important;object-position:center!important;
+  filter:none!important;transform:none!important;pointer-events:none!important;user-select:none!important;
+  -webkit-user-drag:none!important;
+}
+.display-dock .mode-stage.jarvis-stage>.hud-side-left{display:contents!important}
+.display-dock .mode-stage.jarvis-stage>.hud-side-right,
+.display-dock .mode-stage.jarvis-stage>.hud-center,
+.display-dock .mode-stage.jarvis-stage>.hud-caption{display:none!important}
+.display-dock .mode-stage.jarvis-stage>.hud-side-left::before,
+.display-dock .mode-stage.jarvis-stage>.hud-side-left::after{content:none!important;display:none!important}
+.display-dock .mode-stage.jarvis-stage>.hud-side-left>.hud-brand,
+.display-dock .mode-stage.jarvis-stage>.hud-side-left>.hud-left-foot{display:none!important}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>.hud-nav{
+  position:absolute!important;z-index:5!important;left:3.4%!important;top:22.3%!important;
+  width:20.6%!important;height:31.2%!important;display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:stretch!important;gap:0!important;margin:0!important;padding:0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>.hud-nav>.hud-shortcut{
+  position:relative!important;z-index:6!important;display:block!important;flex:1 1 20%!important;
+  width:100%!important;height:20%!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;
+  opacity:.001!important;font-size:0!important;line-height:0!important;text-shadow:none!important;
+  overflow:hidden!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>.hud-nav>.hud-shortcut span{opacity:0!important;font-size:0!important}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>.hud-nav>.hud-shortcut.is-active{
+  color:transparent!important;background:transparent!important;box-shadow:none!important;text-shadow:none!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>.hud-nav>.hud-shortcut:focus-visible{
+  opacity:.24!important;outline:2px solid #72e6ff!important;background:#36cfff18!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction{
+  position:absolute!important;z-index:6!important;left:3.4%!important;top:56.1%!important;
+  width:20.6%!important;height:15.1%!important;min-width:0!important;min-height:0!important;
+  display:block!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;opacity:.001!important;
+  overflow:hidden!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction>*{
+  opacity:0!important;color:transparent!important;font-size:0!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction:focus-visible{
+  opacity:.24!important;outline:2px solid #72e6ff!important;background:#36cfff18!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-right-hotspots{
+  position:absolute!important;inset:0!important;z-index:6!important;pointer-events:none!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-right-hotspots>button{
+  position:absolute!important;display:block!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;opacity:.001!important;
+  cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-right-hotspots>.hotspot-device{
+  left:76.4%!important;top:21.5%!important;width:20.2%!important;height:16%!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-right-hotspots>.hotspot-memory{
+  left:76.4%!important;top:42%!important;width:20.2%!important;height:5.2%!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-right-hotspots>.hotspot-growth{
+  left:76.4%!important;top:47.1%!important;width:20.2%!important;height:5.2%!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-right-hotspots>button:focus-visible{
+  opacity:.24!important;outline:2px solid #72e6ff!important;background:#36cfff18!important;
+}
+#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}
+/* end v234 */
 </style>
 <script type="importmap">
 {
@@ -1705,6 +1786,7 @@ header .status{margin-top:2px}
 </div>
 <div class="alvis-hologram-frame" aria-label="ALVISホログラム・チャット表示枠">
 <div class="mode-stage jarvis-stage" aria-label="ALVIS立体ホログラム管制画面">
+<img class="alvis-reference-image" src="./assets/alvis-dashboard-reference.avif" width="700" height="564" alt="ALVISのホログラム地球ダッシュボード" decoding="async" fetchpriority="high" draggable="false">
 
 
 
@@ -1717,8 +1799,9 @@ header .status{margin-top:2px}
     <span class="hud-brand-emblem" aria-hidden="true"><i></i></span>
     <div><strong>ALVIS</strong><small>Your AI Partner<br>Always with you</small></div>
   </div>
-  <!-- v179: duplicate chat shortcut removed; remaining HUD menu items retained. -->
+  <!-- v234: transparent image-aligned hotspots keep the selected dashboard connected to existing ALVIS pages. -->
   <nav class="hud-nav" aria-label="ALVISメニュー">
+    <button type="button" class="hud-shortcut" data-page="chatPage" aria-label="チャット">チャット</button>
     <button type="button" class="hud-shortcut" data-page="candidatePage"><span aria-hidden="true">✧</span>記憶候補</button>
     <button type="button" class="hud-shortcut" data-page="memoryPage"><span aria-hidden="true">▤</span>長期記憶</button>
     <button type="button" class="hud-shortcut" data-page="historyPage"><span aria-hidden="true">◷</span>履歴</button>
@@ -1815,6 +1898,11 @@ header .status{margin-top:2px}
   </section>
 </div>
 <div class="hud-caption">ALVIS HOLOGRAPHIC INTERFACE　•　LOCAL INTELLIGENCE SYSTEM</div>
+<nav class="alvis-reference-right-hotspots" aria-label="システムと記憶">
+  <button type="button" class="hotspot-device" data-page="devicePage" aria-label="端末診断を開く"></button>
+  <button type="button" class="hotspot-memory" data-page="memoryPage" aria-label="長期記憶を開く"></button>
+  <button type="button" class="hotspot-growth" data-page="growthPage" aria-label="成長プロジェクトを開く"></button>
+</nav>
 </div>
 
 <div class="alvis-chat-area" aria-label="ALVISチャットエリア">
