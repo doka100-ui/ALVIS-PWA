@@ -655,7 +655,7 @@ assert.match(app, /@keyframes alvisRefOrbitA/);
 assert.match(app, /@keyframes alvisRefOrbitB/);
 assert.match(app, /@media\(prefers-reduced-motion:reduce\).*alvis-motion-orbit/s);
 assert.match(app, /aspect-ratio:406\/326/);
-assert.match(sw, /alvis-cache-v138-integrated/);
+assert.match(sw, /alvis-cache-v\\d+-integrated/);
 assert.match(sw, /\.\/assets\/alvis-reference\.jpg/);
 
 
@@ -670,7 +670,7 @@ assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by t
 assert.match(app,/id="alvisAvatarDiagnosticsButton"/,"avatar UI must expose the diagnostics button");
 assert.match(app,/window\.ALVISAvatarGetDiagnostics=mounted\.getDiagnostics/,"loaded VRM diagnostics must be connected to the UI");
 assert.match(app,/VRM MODEL CHECK/,"diagnostics panel must explain the inspected model");
-assert.match(sw,/alvis-cache-v201-integrated/,"service worker cache must be bumped for v201");
+assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker cache must be bumped for v201");
 
 
 // v202: switching display modes must explicitly restart/stop only JARVIS hologram motion.
@@ -678,7 +678,7 @@ assert.match(app,/function stopAlvisHudMotion\(\)[\s\S]*?alvisHudMotionAnimation
 assert.match(app,/if\(safeMode==="jarvis"\)\{\s*requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
 assert.match(app,/function startAlvisHudMotion\(\)[\s\S]*?if\(!chatPage \|\| chatPage\.classList\.contains\("hidden"\) \|\| chatPage\.dataset\.displayMode==="avatar"\)\{\s*stopAlvisHudMotion\(\);/,"hidden or avatar mode must not leave JARVIS ring animations running");
 assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/,"three JARVIS orbital ring speeds must remain unchanged");
-assert.match(sw,/alvis-cache-v204-integrated/,"service worker cache must be bumped for v204");
+assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker cache must be bumped for v204");
 
 
 // v204: restore the v188 live HUD instead of a static image/overlay.
@@ -687,7 +687,7 @@ assert.doesNotMatch(app, /<img class="alvis-reference-scene"/, "ALVIS mode must 
 assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "ring motion must target the original live HUD orbits");
 assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "first original HUD orbit must be animated");
 assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI launch control must remain in the left HUD panel");
-assert.match(sw, /alvis-cache-v204-integrated/, "service worker must use the v204 cache");
+assert.match(sw, /alvis-cache-v\\d+-integrated/, "service worker must use the v204 cache");
 
 
 // v219: model-cache diagnostics must inspect non-ALVIS caches without deleting them.
@@ -701,14 +701,14 @@ assert.match(sw,/\.filter\(\(key\)[\s\S]*?key\.startsWith\("alvis-cache-"\)[\s\S
 assert.match(send,/object has already been disposed|already been disposed|object\.\*disposed|disposed\.\*object/i,"disposed WebLLM runtime errors must invalidate the stale engine reference");
 assert.match(send,/const failedEngine=aiEngine;[\s\S]*?aiEngine=null;[\s\S]*?failedEngine\.unload\(\)/,"lost engine recovery must detach the stale reference and attempt best-effort cleanup");
 assert.match(send,/ALVIS_MODEL_LABEL\+"の実行状態が失われたため/,"recovery guidance must use the active device model label");
-assert.match(sw,/alvis-cache-v215-integrated/,"service worker must serve the updated disposed-engine recovery code");
+assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the updated disposed-engine recovery code");
 
 
  
 // v221: pin WebLLM to the last reported working version for disposed ShapeTuple regression.
 assert.match(app,/@mlc-ai\/web-llm@0\.2\.82/,"WebLLM must use the 0.2.82 workaround for the disposed-object regression");
 assert.doesNotMatch(app,/@mlc-ai\/web-llm@0\.2\.(?:83|84|85|86|87)/,"known affected WebLLM versions must not be loaded");
-assert.match(sw,/alvis-cache-v216-integrated/,"service worker must serve the pinned WebLLM version");
+assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the pinned WebLLM version");
 
 
 // v222: disposed-engine failures expose version, prompt-size, and stack diagnostics without prompt contents.
@@ -718,6 +718,8 @@ assert.match(send,/let inferenceDiagnostic=\{/);
 assert.match(send,/systemChars:activePromptWithJapanesePack\.length/);
 assert.match(send,/conversationChars:conversationForGeneration\.reduce/);
 assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)/);
+assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)\.split\("\\\\n"\)/);
+assert.match(send,/diagnosticSummary="\\\\n診断: WebLLM /);
 assert.match(send,/診断: WebLLM /);
 assert.match(send,/stack: /);
 assert.match(sw,/alvis-cache-v217-integrated/);
