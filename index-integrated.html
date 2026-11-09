@@ -2129,7 +2129,7 @@ let alvisServiceWorkerReady = Promise.resolve(false);
 const $ = id => document.getElementById(id);
 
 // 端末判定とモデル設定を一か所に集約する。iPadOSのデスクトップUAもタッチ情報で識別する。
-// WebLLM v0.2.82の公式モデル定義: 1.7B 約2037MB / 4B 約3432MB。
+// WebLLM v0.2.87の公式モデル定義: 1.7B 約2037MB / 4B 約3432MB。
 function resolveAlvisDeviceProfile({userAgent="",platform="",maxTouchPoints=0}={}){
   const ua=String(userAgent||"");
   const platformName=String(platform||"");
@@ -3427,8 +3427,8 @@ $("loadAiModel").addEventListener("click",async()=>{
     // Service Workerが利用可能なら先に起動を待ち、WebLLMのJavaScript依存コードをキャッシュできる状態にする。
     await alvisServiceWorkerReady;
     if(!CreateMLCEngine){
-      const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.82");
-      alvisWebLLMVersion="0.2.82（CDN指定）";
+      const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
+      alvisWebLLMVersion="0.2.87（CDN指定）";
       CreateMLCEngine=webllm.CreateMLCEngine;
     }
     const loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
