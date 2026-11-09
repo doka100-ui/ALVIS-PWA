@@ -3690,6 +3690,30 @@ function buildConversationMessages(history,currentText){
   return selected;
 }
 
+
+function buildBoundedGenerationMessages(recent,currentText){
+  // 保存履歴はそのまま保持し、推論に渡す過去文脈だけを厳しく制限する。
+  const turns=Array.isArray(recent)?recent:[];
+  const latest={role:"user",content:String(currentText??"")};
+  const prior=turns.slice(0,-1);
+  const followUp=isFollowUpMessage(currentText);
+  // 追加質問では直前のユーザー質問とALVIS回答をセットで残し、指示対象を失わない。
+  const selected=followUp?prior.slice(-2):prior.slice(-1);
+  let remaining=followUp?600:240;
+  const bounded=selected.map((item,index)=>{
+    const role=item?.role==="assistant"?"assistant":"user";
+    const original=String(item?.content||"");
+    const perMessageLimit=followUp?300:240;
+    const limit=Math.max(0,Math.min(perMessageLimit,remaining));
+    const content=original.length>limit
+      ?(role==="assistant"?original.slice(-limit):original.slice(0,limit))
+      :original;
+    remaining=Math.max(0,remaining-content.length);
+    return {role,content};
+  }).filter(item=>item.content);
+  return [...bounded,latest];
+}
+
 function buildCompactAlvisSystemPrompt(date,time,hasResearch=false,weatherQuestion=false){
   const lines=[
     "あなたはALVIS。ユーザー専用AI。自然で簡潔な日本語を使い、一人称は「私」。",
@@ -4282,11 +4306,7 @@ async function sendToAlvis(){
     const isBriefConversationalTurn=text.length<=180&&(conversationalMarkers||/^(?:はい|うん|そう|いや|でも|それで|じゃあ|なるほど|たしかに|ありがとう|了解|わかった)[。！!？?、\s　]*$/u.test(text));
     const responseTokenLimit=isBriefConversationalTurn?64:192;
     // iPad Safariの一括prefill負荷を抑える。現在の質問は省略せず、過去文脈だけを小さく保つ。
-    const priorMessageLimit=isFollowUpMessage(text)?2:1;
-    const conversationForGeneration=[
-      ...recent.slice(0,-1).slice(-priorMessageLimit).map(item=>({...item,content:String(item.content||"").slice(-100)})),
-      {role:"user",content:text}
-    ];
+    const conversationForGeneration=buildBoundedGenerationMessages(recent,text);
     const hasUntrustedReferences=numberedResearchSources.length>0||relevantLearnings.some(item=>item.sourceType==="external_ai")||!!onlineReferenceText;
     const systemPrompt=buildCompactAlvisSystemPrompt(japanDateTime.date,japanDateTime.time,hasUntrustedReferences,isWeatherQuestion(text));
     const activeSystemPrompt=systemPrompt;
