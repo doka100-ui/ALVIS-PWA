@@ -49,7 +49,7 @@ check("the chat composer and send control remain in the page",
 check("avatar mode continues to hide the ALVIS image stage",
   app.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}'));
 check("Service Worker v234 precaches the dashboard for offline use",
-  app.includes('const CACHE_NAME = "alvis-cache-v234-integrated";') &&
+  sw.includes('const CACHE_NAME = "alvis-cache-v234-integrated";') &&
   sw.includes('./assets/alvis-dashboard-reference.avif'));
 const openScripts = (app.match(/<script\b/gi) || []).length;
 const closeScripts = (app.match(/<\/script\s*>/gi) || []).length;
