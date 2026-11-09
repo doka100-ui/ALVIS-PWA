@@ -300,7 +300,7 @@ assert.equal((app.match(/max_tokens:512/g)||[]).length, 0);
 assert.match(app,/function buildCompactConversationVariationGuidance\(/);
 assert.match(app,/直近の返答：/);
 assert.ok(app.includes("const selected=followUp?prior.slice(-2):prior.slice(-1);"),"bounded generation context must keep the correct prior turns");
-assert.match(app,/slice\(-100\)/);
+assert.ok(app.includes("original.slice(-limit)"),"bounded prior assistant context keeps the most recent relevant text");
 assert.match(app,/const activeSystemPrompt=systemPrompt/);
 assert.match(app,/const hasUntrustedReferences=numberedResearchSources\.length>0\|\|relevantLearnings\.some\(item=>item\.sourceType==="external_ai"\)\|\|!!onlineReferenceText/,"approved external AI references must retain untrusted-source safeguards");
 assert.match(app,/context_window_size:ALVIS_CONTEXT_WINDOW/);
