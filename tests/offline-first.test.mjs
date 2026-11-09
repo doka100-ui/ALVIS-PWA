@@ -706,8 +706,8 @@ assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the up
 
  
 // v221: pin WebLLM to the last reported working version for disposed ShapeTuple regression.
-assert.match(app,/@mlc-ai\/web-llm@0\.2\.82/,"WebLLM must use the 0.2.82 workaround for the disposed-object regression");
-assert.doesNotMatch(app,/@mlc-ai\/web-llm@0\.2\.(?:83|84|85|86|87)/,"known affected WebLLM versions must not be loaded");
+assert.match(app,/@mlc-ai\/web-llm@0\.2\.87/,"WebLLM must include the TVM runtime lifetime fix from 0.28.0-dev1");
+assert.doesNotMatch(app,/@mlc-ai\/web-llm@0\.2\.(?:82|83|84|85|86)(?!\d)/,"obsolete WebLLM runtime versions must not be loaded");
 assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the pinned WebLLM version");
 
 
@@ -722,4 +722,10 @@ assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)\.split\("\\\\n"
 assert.match(send,/diagnosticSummary="\\\\n診断: WebLLM /);
 assert.match(send,/診断: WebLLM /);
 assert.match(send,/stack: /);
-assert.match(sw,/alvis-cache-v217-integrated/);
+assert.match(sw,/alvis-cache-v218-integrated/);
+
+
+// v223: use the first WebLLM release bundling the TVM runtime lifetime fix.
+assert.match(app,/web-llm@0\.2\.87/);
+assert.match(app,/alvisWebLLMVersion="0\.2\.87（CDN指定）"/);
+assert.match(sw,/alvis-cache-v218-integrated/);
