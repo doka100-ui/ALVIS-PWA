@@ -4789,13 +4789,24 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
       lines.push("Service Worker制御："+(navigator.serviceWorker.controller?"制御中":"まだ制御していない"));
       lines.push("Service Worker状態："+(registration?.active?.state||registration?.waiting?.state||registration?.installing?.state||"状態不明"));
     }
+    let otherCaches=[];
     if("caches" in window){
       const keys=await caches.keys();
       const appCaches=keys.filter(key=>key.startsWith("alvis-cache-"));
       const dependencyCaches=keys.filter(key=>key.startsWith("alvis-deps-"));
+      otherCaches=keys.filter(key=>!key.startsWith("alvis-cache-")&&!key.startsWith("alvis-deps-"));
       lines.push("ALVISアプリキャッシュ："+(appCaches.join(", ")||"見つかりません"));
       lines.push("依存コードキャッシュ："+(dependencyCaches.join(", ")||"見つかりません"));
-      lines.push("その他のキャッシュ："+keys.filter(key=>!key.startsWith("alvis-cache-")&&!key.startsWith("alvis-deps-")).length+"件");
+      lines.push("ALVIS以外のキャッシュ："+(otherCaches.length?otherCaches.length+"種類":"見つかりません"));
+      for(const key of otherCaches){
+        try{
+          const cache=await caches.open(key);
+          const entries=await cache.keys();
+          lines.push("  "+key+"："+entries.length+"件");
+        }catch(cacheError){
+          lines.push("  "+key+"：内容を確認できません");
+        }
+      }
     }else{
       lines.push("Cache Storage：利用不可");
     }
@@ -4807,7 +4818,17 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     }else{
       lines.push("ブラウザ保存領域：容量情報を取得できません");
     }
-    lines.push("AIモデルの保存状態：この画面から個別判定できません");
+    if(typeof navigator.storage?.persisted==="function"){
+      try{
+        const persisted=await navigator.storage.persisted();
+        lines.push("保存領域の永続化："+(persisted?"ブラウザから許可済み":"未許可（ブラウザの判断で消去される可能性あり）"));
+      }catch(persistError){
+        lines.push("保存領域の永続化：状態を取得できません");
+      }
+    }else{
+      lines.push("保存領域の永続化：このブラウザでは状態を確認できません");
+    }
+    lines.push("AIモデルの保存状態：ALVIS以外のキャッシュ名・件数を上に表示。個別のモデルファイル確認は未対応");
     lines.push("Kokoroモデルの保存状態：この画面から個別判定できません");
     lines.push("");
     lines.push("注意：オンライン/オフライン表示やキャッシュ件数だけでは、モデルの再利用・完全オフライン動作は証明できません。機内モードで実際に試してください。");
