@@ -1,3 +1,11 @@
+## v224 WebGPU失効・Safariライフサイクル診断（2026-11-09）
+- v223適用後もiPhone Safariで `Object has already been disposed` が継続したため、推論コードの変更前にGPUデバイス状態とページ表示ライフサイクルを観測する診断を追加。
+- `GPUAdapter.requestDevice` を透過的に監視し、生成されたGPUDeviceの `lost` Promiseと `uncapturederror` を記録。Safariの `visibilitychange` / `pageshow` / `pagehide` も時刻・回数・状態のみ記録する。
+- エラー診断へGPU状態、デバイス生成回数、ページ可視状態、ページイベント、GPU失効理由/未捕捉エラーを追加。プロンプト本文、個人データ、記憶内容は記録しない。
+- これは原因切り分け用の読み取り専用診断であり、GPU失効の修復や推論成功を保証しない。GPUAdapter監視APIがSafariで利用できない場合は、その旨を診断表示する。
+- Service Worker cacheをv219へ更新。既存WebLLMモデルキャッシュ、記憶庫、会話履歴、AES-GCM、同期、バックアップは削除・変更しない。モデルID・context・WebLLM 0.2.87は維持。
+- 静的検査のみ。テスト実行・Cloudflare Pages反映・Safari実機での診断確認は未実施。
+
 ## v223 WebLLMのTVMオブジェクト寿命修正を採用（2026-11-09）
 - ユーザーのiPhone Safari実機でWebLLM 0.2.82でも `Object has already been disposed` が再現。診断はQwen3-1.7B / context 1024 / system 472文字 / conversation 105文字 / external 0 / max_tokens 192。
 - 上流Issue mlc-ai/web-llm#844の根本修正PR apache/tvm#20501は2026-10-02にマージ。shape tupleの呼び出し元参照を独立させ、GPU device loss時の自動破棄を所有側で制御する修正。
