@@ -821,7 +821,8 @@ assert.equal(followUpContext[2].content,"それはどういう意味？","curren
 assert.ok(followUpContext.slice(0,-1).reduce((sum,item)=>sum+item.content.length,0)<=600,"follow-up history must stay within 600 characters");
 const normalContext=buildBoundedContextForTest([
   {role:"user",content:"以前の話題"},
-  {role:"assistant",content:"短い前回回答"}
+  {role:"assistant",content:"短い前回回答"},
+  {role:"user",content:"富士山の高さは？"}
 ],"富士山の高さは？");
 assert.deepEqual(normalContext.map(item=>item.role),["assistant","user"],"ordinary questions must retain only one previous message");
 assert.equal(normalContext[1].content,"富士山の高さは？","ordinary current question must remain complete");
