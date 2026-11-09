@@ -747,3 +747,14 @@ assert.doesNotMatch(sw,/caches\.delete\([^)]*webllm/i,"service worker must not d
 assert.match(app,/web-llm@0\.2\.87/);
 assert.match(app,/alvisWebLLMVersion="0\.2\.87（CDN指定）"/);
 assert.match(sw,/alvis-cache-v218-integrated/);
+
+ 
+// v226: only WebLLM initialization devices contribute to GPU-loss diagnostics.
+assert.match(app,/captureModelDevices:false/);
+assert.match(app,/if\(!alvisGpuDiagnostics\.captureModelDevices\)return originalRequestDevice\.apply\(this,args\)/);
+assert.match(app,/modelDeviceCreateCount\+\+/);
+assert.match(app,/alvisGpuDiagnostics\.captureModelDevices=true;[\s\S]*?await CreateMLCEngine[\s\S]*?alvisGpuDiagnostics\.captureModelDevices=false;/);
+assert.match(app,/originalRequestDevice\?originalRequestDevice\.call\(defaultAdapter\)/,"standard GPU diagnostic must bypass model-device monitor");
+assert.match(app,/originalRequestDevice\?originalRequestDevice\.call\(adapter,/,"WebLLM-like GPU diagnostic must bypass model-device monitor");
+assert.match(app,/model device \+d\.modelDeviceCreateCount/,"diagnostic summary must label model device count explicitly");
+assert.match(sw,/alvis-cache-v221-integrated/,"v226 app shell must use refreshed cache");
