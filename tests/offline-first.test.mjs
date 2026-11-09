@@ -808,7 +808,7 @@ const isFollowUpStart=app.indexOf("function isFollowUpMessage(text){");
 const isFollowUpEnd=app.indexOf("\nfunction ",isFollowUpStart+20);
 const isFollowUpSource=app.slice(isFollowUpStart,isFollowUpEnd);
 const isFollowUpForTest=new Function(isFollowUpSource+"; return isFollowUpMessage;")();
-const buildBoundedContextForTest=new Function("isFollowUpMessage",contextHelperSource+"; return buildBoundedGenerationMessages;")(isFollowUpForTest);
+const buildBoundedContextForTest=new Function("isFollowUpMessage","isEllipticalFollowUpMessage",contextHelperSource+"; return buildBoundedGenerationMessages;")(isFollowUpForTest,isEllipticalFollowUpForTest);
 const followUpContext=buildBoundedContextForTest([
   {role:"user",content:"前の質問です。"+("あ".repeat(500))},
   {role:"assistant",content:"前の回答です。"+("い".repeat(500))},
@@ -839,5 +839,5 @@ const ellipticalContext=buildBoundedContextForTest([...priorTopic,{role:"user",c
 assert.deepEqual(ellipticalContext.map(item=>item.role),["user","assistant","user"],"elliptical follow-up must retain the prior exchange");
 assert.equal(ellipticalContext[2].content,"妻は？","elliptical current question must remain complete");
 assert.match(app,/「妻は？」「料金は？」のような短い名詞句の追加質問は直前の話題と照合する/,"system prompt must guide resolution of elliptical follow-ups");
-assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\\(recent,text\\)/,"generation must use the bounded context builder");
+assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\(recent,text\)/,"generation must use the bounded context builder");
 assert.match(sw,/alvis-cache-v228-integrated/,"v233 app shell must use refreshed cache");
