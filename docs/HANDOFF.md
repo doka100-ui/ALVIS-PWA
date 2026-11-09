@@ -1,3 +1,11 @@
+## v219 キャッシュ診断の可視化（2026-11-09）
+- 開発ブランチ: `development`。
+- 既存のWebLLM 0.2.87は既定のCache APIをモデル成果物の保存先に使用する。Service WorkerはALVIS自身の旧キャッシュだけを削除し、他ライブラリのキャッシュを保持する設計。
+- 端末診断にALVIS以外のCache Storage名と各キャッシュのエントリー数、ブラウザ保存領域の永続化許可状態を追加。モデルキャッシュを名称・件数だけで断定しない。
+- Service Workerのアプリキャッシュを `alvis-cache-v214-integrated` へ更新。
+- 既存の記憶庫、会話履歴、AES-GCM暗号化、バックアップ、同期、モデルID、モデルキャッシュの保存方式は変更しない。キャッシュ削除や永続化要求は行わない。
+- iPhone Safariで診断表示を確認し、モデル読み込み後・ページ再読み込み後のキャッシュ名/件数/保存容量を比較する。iPad実機確認は21日以降。Safariによる保存データ保持は保証されない。
+
 ## v218 ローカル生成・ブラウザリギング候補の再検証（2026-11-08）
 - Presidium Shape Studio（PyPI presidium-shapestudio 0.1.6）を確認。無料/Apache-2.0のローカル画像→3DツールでGLB/OBJ出力、CPUでTripoSRを動かす構想。TRELLIS image-largeは16GB NVIDIA GPU必須で未統合。実TripoSR checkpointはユーザーのGTX 1660 Ti laptopでロード確認まで、完全な実生成結果はまだ報告されていない。アプリはWindows/macOS/Linuxデスクトップ向け。iPad Safariで動くものではなく、単一画像入力なので18号の多視点一致にも不十分。候補として参考に留める。
 - Modly（modly3d.app）を確認。無料・MIT・ローカル生成・GLB出力だが、公式仕様はWindows/LinuxのデスクトップアプリでNVIDIA GPU推論。iPad/iPhoneでは実行できない。個人画像をクラウドへ送らない点は良いが、端末条件不適合。
