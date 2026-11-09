@@ -651,7 +651,7 @@ assert.match(app,/class="alvis-reference-image" src="\.\/assets\/alvis-dashboard
 assert.match(app,/aspect-ratio:1397\/1126/);
 assert.match(app,/class="alvis-reference-right-hotspots"/);
 assert.match(app,/class="hud-shortcut" data-page="chatPage"/);
-for(const page of ["candidatePage","memoryPage","historyPage","syncPage","devicePage","growthPage"]) assert.ok(app.includes(\`data-page="\${page}"\`),\`reference hotspot must preserve \${page} navigation\`);
+for(const page of ["candidatePage","memoryPage","historyPage","syncPage","devicePage","growthPage"]) assert.ok(app.includes('data-page="'+page+'"'),"reference hotspot must preserve "+page+" navigation");
 assert.match(app,/id="hudAiAction"/);
 assert.doesNotMatch(app,/class="alvis-motion-orbit/,"the reference artwork must not receive duplicate orbit overlays");
 assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center")&&app.includes("display:none!important"),"the hand-drawn vector globe must stay hidden behind the selected image");
