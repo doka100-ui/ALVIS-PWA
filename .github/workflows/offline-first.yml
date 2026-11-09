@@ -7,6 +7,8 @@ on:
       - "index-integrated.html"
       - "service-worker.js"
       - "tests/offline-first.test.mjs"
+      - "tests/alvis-dashboard.test.mjs"
+      - "assets/alvis-dashboard-reference.avif"
       - ".github/workflows/offline-first.yml"
   pull_request:
     branches: [development]
@@ -31,3 +33,14 @@ jobs:
           node-version: 22
       - name: Run offline-first regression tests
         run: node tests/offline-first.test.mjs
+  dashboard-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify approved ALVIS dashboard image and offline integration
+        run: node tests/alvis-dashboard.test.mjs
