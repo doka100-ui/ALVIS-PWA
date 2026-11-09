@@ -4364,12 +4364,12 @@ async function sendToAlvis(){
   }catch(error){
     const detail=String(error?.message||error||"不明なエラー");
     const errorName=String(error?.name||"Error");
-    const stackPreview=String(error?.stack||"").split("\\n").slice(0,5).join(" | ").slice(0,700);
+    const stackPreview=String(error?.stack||"").split("\n").slice(0,5).join(" | ").slice(0,700);
     const engineStateLost=/map async was not successful|model not loaded before trying to complete|device was lost|device lost|gpu.*lost|webgpu.*lost|object has already been disposed|already been disposed|object.*disposed|disposed.*object/i.test(detail);
     let message="AI生成エラー: "+errorName+": "+detail;
     if(engineStateLost){
-      const diagnosticSummary="\\n診断: WebLLM "+inferenceDiagnostic.webllmVersion+" / "+inferenceDiagnostic.model+" / context "+inferenceDiagnostic.contextWindow+" / system "+inferenceDiagnostic.systemChars+"文字 / conversation "+inferenceDiagnostic.conversationChars+"文字 / external "+inferenceDiagnostic.externalReferenceChars+"文字 / messages "+inferenceDiagnostic.messageCount+" / user "+inferenceDiagnostic.userChars+"文字 / max_tokens "+inferenceDiagnostic.maxTokens;
-      message+=diagnosticSummary+(stackPreview?"\\nstack: "+stackPreview:"");
+      const diagnosticSummary="\n診断: WebLLM "+inferenceDiagnostic.webllmVersion+" / "+inferenceDiagnostic.model+" / context "+inferenceDiagnostic.contextWindow+" / system "+inferenceDiagnostic.systemChars+"文字 / conversation "+inferenceDiagnostic.conversationChars+"文字 / external "+inferenceDiagnostic.externalReferenceChars+"文字 / messages "+inferenceDiagnostic.messageCount+" / user "+inferenceDiagnostic.userChars+"文字 / max_tokens "+inferenceDiagnostic.maxTokens;
+      message+=diagnosticSummary+(stackPreview?"\nstack: "+stackPreview:"");
       // WebLLM内部でモデル状態が失われた場合、古いengine参照を再利用しない。
       const failedEngine=aiEngine;
       aiEngine=null;
