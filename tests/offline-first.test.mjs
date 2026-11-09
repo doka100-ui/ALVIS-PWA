@@ -785,3 +785,15 @@ assert.match(sw,/alvis-cache-v224-integrated/,"v229 app shell must use refreshed
 assert.match(app,/try\{\s*return Promise\.resolve\(navigator\.storage\.persist\(\)\)/,"persistent storage request must handle synchronous exceptions");
 assert.match(app,/catch\(error\)\{[\s\S]*?alvisStoragePersistenceStatus="要求失敗（"/,"synchronous persistence errors must be reported");
 assert.match(sw,/alvis-cache-v225-integrated/,"v230 app shell must use refreshed cache");
+
+
+// v231: make engine shutdown idempotent and reject queued inference after shutdown begins.
+const serializedInferenceStart=app.indexOf("function serializeAlvisInference(engine){");
+const serializedInferenceEnd=app.indexOf("\n// WebGPU device lifecycle diagnostics.",serializedInferenceStart);
+const serializedInferenceSource=app.slice(serializedInferenceStart,serializedInferenceEnd);
+assert.match(serializedInferenceSource,/let unloadRequested=false/,"serialized engine must track shutdown state");
+assert.match(serializedInferenceSource,/let unloadPromise=null/,"serialized engine must retain a single shutdown promise");
+assert.match(serializedInferenceSource,/if\(unloadPromise\)return unloadPromise/,"concurrent unload requests must share one promise");
+assert.match(serializedInferenceSource,/unloadRequested=true;[\s\S]*?await inferenceQueue\.catch/,"shutdown must stop new inference and wait for active inference");
+assert.match(serializedInferenceSource,/if\(unloadRequested\)throw new Error/,"queued inference must not run after shutdown begins");
+assert.match(sw,/alvis-cache-v226-integrated/,"v231 app shell must use refreshed cache");
