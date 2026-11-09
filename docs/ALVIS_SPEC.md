@@ -1,3 +1,11 @@
+## v222 推論エラーの実行環境診断（2026-11-09）
+- v221でWebLLMを0.2.82へ固定した後もiPhone Safariで `Object has already been disposed` が継続したため、0.2.82への固定だけでは解決しないと判断。
+- WebLLM issue #844は2026-10-04に上流修正済み。v0.2.87はその後にWeb runtimeを0.28.0-dev1へ更新しているため、同issueだけを今回の原因と断定しない。
+- 次回のdisposedエラー時に、ALVISが指定したWebLLMバージョン、モデルID、context、system/会話入力文字数、メッセージ数、max_tokens、例外名と先頭スタックをチャット履歴へ表示する。質問文やプロンプト本文は診断に含めない。
+- WebLLMは原因切り分け中のため0.2.82指定を維持。実際に読み込まれたHTML/バージョンが一致するか確認してから、必要なバージョン変更を判断する。
+- Service Worker cacheをv217へ更新。モデルキャッシュ、記憶庫、履歴、AES-GCM、同期、バックアップは削除・変更しない。モデル選択とコンテキスト設定も維持。
+- 静的検査のみ。Cloudflare Pages反映とSafari実機再現は未確認。
+
 ## v221 WebLLM破棄済みShapeTuple不具合の回避（2026-11-09）
 - iPhone SafariでQwen3-1.7Bの初回推論が `Object has already been disposed` になる問題を調査。
 - WebLLM issue #844に、0.2.83以降で同エラーが発生し、Qwen3-1.7Bを含む複数モデルで再現、0.2.82では同条件で再現しなかったという報告がある。
