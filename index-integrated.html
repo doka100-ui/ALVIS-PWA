@@ -2138,6 +2138,31 @@ function serializeAlvisInference(engine){
   }
   return engine;
 }
+// Unexpected GPU loss recovery: detach the unusable engine only after serialized inference settles.
+let alvisGpuRecoveryPromise=null;
+async function handleAlvisUnexpectedGpuLoss(info={}){
+  const engine=aiEngine;
+  if(!engine||alvisGpuRecoveryPromise)return;
+  alvisGpuRecoveryPromise=(async()=>{
+    $("sendChat").disabled=true;
+    $("loadAiModel").disabled=true;
+    $("unloadAiModel").disabled=true;
+    setStatus("aiStatus","WebGPUが予期せず停止しました。実行中の処理を安全に終了しています…");
+    try{await engine.unload();}catch(unloadError){}
+    if(aiEngine===engine)aiEngine=null;
+    aiLoadProgress=0;
+    if(unlocked){
+      $("loadAiModel").disabled=false;
+      $("unloadAiModel").disabled=true;
+      updateChatSendButton();
+      const reason=String(info?.message||"GPU device lost").slice(0,160);
+      setStatus("aiStatus","GPUが停止したため、古い実行エンジンを安全に切り離しました。保存済みモデルキャッシュと記憶・会話履歴は変更していません。「"+ALVIS_MODEL_LABEL+"を読み込む」から再起動できます。"+(reason?"\n詳細："+reason:""));
+    }
+    updateHudAiStatus($("aiStatus")?.textContent||"");
+  })().finally(()=>{alvisGpuRecoveryPromise=null;});
+  return alvisGpuRecoveryPromise;
+}
+
 // WebGPU device lifecycle diagnostics. This observes device creation/loss without changing model execution.
 const alvisGpuDiagnostics={
   originalRequestDevice:null,deviceState:"未観測",deviceCreateCount:0,modelDeviceCreateCount:0,captureModelDevices:false,deviceLostReason:"",deviceLostReasonCode:"",deviceLostAt:"",
@@ -2169,11 +2194,14 @@ function installAlvisWebGpuDiagnostics(){
             alvisGpuDiagnostics.deviceLostReasonCode=String(info?.reason||"unknown").slice(0,40);
             alvisGpuDiagnostics.deviceLostReason=String(info?.message||"理由なし").slice(0,180);
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
+            // Explicit engine unload also destroys its GPUDevice; do not treat that as a crash.
+            if(info?.reason!=="destroyed")void handleAlvisUnexpectedGpuLoss(info);
           },error=>{
             alvisGpuDiagnostics.deviceState="lost";
             alvisGpuDiagnostics.deviceLostReasonCode="promise-rejected";
             alvisGpuDiagnostics.deviceLostReason=String(error?.message||error||"lost promise rejected").slice(0,180);
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
+            void handleAlvisUnexpectedGpuLoss({reason:"promise-rejected",message:error?.message||String(error)});
           });
         }
         if(device&&typeof device.addEventListener==="function"){
@@ -3549,6 +3577,18 @@ $("loadAiModel").addEventListener("click",async()=>{
       alvisWebLLMVersion="0.2.87（CDN指定）";
       CreateMLCEngine=webllm.CreateMLCEngine;
       alvisHasModelInCache=typeof webllm.hasModelInCache==="function"?webllm.hasModelInCache:null;
+    }
+    // Read-only preflight: WebLLM's tensor cache is reused by CreateMLCEngine when present.
+    // This check does not fetch, clear, migrate, or rewrite model artifacts.
+    if(typeof alvisHasModelInCache==="function"){
+      try{
+        const cachedWeights=await alvisHasModelInCache(ALVIS_MODEL_ID);
+        setStatus("aiStatus",cachedWeights
+          ?"保存済みモデル重みを確認しました。既存キャッシュを使って起動します…"
+          :"モデル重みキャッシュは未検出です。初回取得または再取得が必要な場合があります…");
+      }catch(cacheCheckError){
+        setStatus("aiStatus","モデル重みキャッシュの状態を確認できません。既存キャッシュを保持したまま起動を試します…");
+      }
     }
     let loadedEngine;
     // WebLLM engine initialization may create its GPUDevice asynchronously.
