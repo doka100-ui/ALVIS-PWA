@@ -688,15 +688,14 @@ assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\
 assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker cache must be bumped for v204");
 
 
-// v204 legacy HUD nodes remain for status bindings; v234 displays the selected image above them.
-assert.doesNotMatch(app, /class="alvis-motion-layer"/, "the old image overlay must not be reintroduced");
-assert.match(app, /class="alvis-reference-image"/, "ALVIS mode must use the selected dashboard image");
-assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "legacy HUD motion code remains isolated from the image layer");
-assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
+// v204/v235: restored live HUD and orbit motion remain present and visible.
+assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer must not be reintroduced");
+assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "HUD motion code targets the live orbital rings");
+assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "orbit state bindings remain available");
 assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI launch control remains connected to its existing button");
-assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center")&&app.includes("display:none!important"), "legacy vector HUD must not cover the selected artwork");
-assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker must use the v204 cache");
- 
+assert.match(app, /class="hud-globe-map"/, "live hologram sphere remains present");
+assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker cache is versioned");
+
 // v219: model-cache diagnostics must inspect non-ALVIS caches without deleting them.
 assert.match(app,/otherCaches=keys\.filter\(key=>!key\.startsWith\("alvis-cache-"\)&&!key\.startsWith\("alvis-deps-"\)\)/);
 assert.match(app,/caches\.open\(key\)[\s\S]*?await cache\.keys\(\)/);
