@@ -3142,6 +3142,7 @@ async function playKokoroBlob(blob,clean){
         source.connect(lipAnalyser);
         lipAnalyser.connect(alvisAudioContext.destination);
         source.onended=()=>{
+          if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
           if(kokoroAudioSource===source)kokoroAudioSource=null;
           stopAlvisLipSync();
           setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
@@ -3165,16 +3166,19 @@ async function playKokoroBlob(blob,clean){
     if("preservesPitch" in kokoroAudio)kokoroAudio.preservesPitch=false;
     if("webkitPreservesPitch" in kokoroAudio)kokoroAudio.webkitPreservesPitch=false;
     if(player){player.classList.remove("hidden");player.load();}
-    kokoroAudio.onended=()=>{setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
-    kokoroAudio.onerror=()=>{setStatus("voiceStatus","Kokoro音声の再生に失敗しました。プレーヤーの再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
+    kokoroAudio.onended=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
+    kokoroAudio.onerror=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;setStatus("voiceStatus","Kokoro音声の再生に失敗しました。プレーヤーの再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
     try{
       await kokoroAudio.play();
+      if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
       setStatus("voiceStatus","Kokoroが話しています…");
     }catch(playError){
+      if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
       setStatus("voiceStatus","音声を準備しました。下のプレーヤーの再生ボタンを押してください。");
       if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
     }
   }catch(error){
+    if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
     setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error)));
     if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
   }
@@ -3191,6 +3195,7 @@ async function speakKokoro(text){
     if(!unlocked||speechSessionGeneration!==alvisSessionGeneration)return;
     await playKokoroBlob(blob,clean);
   }catch(error){
+    if(!unlocked||speechSessionGeneration!==alvisSessionGeneration)return;
     setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error)));
     if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
   }
