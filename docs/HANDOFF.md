@@ -1,3 +1,9 @@
+## v236 offline-firstテストのブラウザ依存コード混入を修正（2026-11-10）
+- 推論直列化テストが `serializeAlvisInference()` だけでなく、その直後にあるブラウザ専用GPU診断初期化まで `new Function()` で評価していたため、Node.js環境に `document` がなく `document is not defined` で停止していた。
+- テストの抽出終端を `// WebGPU device lifecycle diagnostics` の直前へ変更し、推論直列化関数だけを分離して検証する。
+- アプリ本体、WebGPU診断の実行時動作、WebLLM/WebGPU設定、モデル/モデルキャッシュ、Service Worker、画面デザイン、記憶・履歴・暗号化・同期・バックアップには変更なし。
+- 変更はテストコードのみ。GitHub Actionsでの再実行結果は未確認。iPhone/iPad Safariの実機動作にも変更なし。
+
 ## v235 ALVISモードをv188ライブHUDへ復元（2026-11-10）
 - v196以降の単一画像表示・HUD非表示CSS・画像上の透明ホットスポットを撤去し、v204で確認済みのv188ライブHUD構成へ復元。中央のSVGホログラム球体、左右の情報パネル、3本の軌道リング、投影光/台座、既存のAI起動ボタンとメニューを再表示。
 - 軌道リングは既存のWeb Animations APIによる独立回転（22秒/31秒/42秒）を利用。アバターモードは従来どおり独立。
