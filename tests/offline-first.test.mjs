@@ -699,7 +699,7 @@ assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
 assert.match(vrmRuntime,/const getDiagnostics = \(\) =>/,"VRM runtime must expose model capability diagnostics");
-assert.match(vrmRuntime,/humanoidHead: !!vrm\.humanoid\?\.getNormalizedBoneNode\?\.\("head"\)/,"diagnostics must check the humanoid head bone");
+assert.match(vrmRuntime,/humanoidHead: !!headBone/,"diagnostics must check the cached humanoid head bone");
 assert.match(vrmRuntime,/blink: hasExpression\("blink"\)/,"diagnostics must check blink expression support");
 assert.match(vrmRuntime,/aa: hasExpression\("aa"\)/,"diagnostics must check mouth expression support");
 assert.match(vrmRuntime,/lookAt: !!vrm\.lookAt\?\.target/,"diagnostics must check look-at support");
