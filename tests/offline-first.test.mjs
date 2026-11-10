@@ -638,8 +638,8 @@ const deviceProfileEnd=app.indexOf("\nconst ALVIS_DEVICE_PROFILE",deviceProfileS
 assert.ok(deviceProfileStart>=0&&deviceProfileEnd>deviceProfileStart,"device profile resolver must exist");
 const resolveAlvisDeviceProfile=new Function(app.slice(deviceProfileStart,deviceProfileEnd)+"; return resolveAlvisDeviceProfile;")();
 assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)"}),{deviceType:"iPhone",isMobile:true,modelId:"Qwen3-1.7B-q4f16_1-MLC",modelLabel:"Qwen3-1.7B",contextWindow:1024});
-assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)"}),{deviceType:"iPad",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:2048});
-assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15",platform:"MacIntel",maxTouchPoints:5}),{deviceType:"iPad",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:2048},"iPadOS desktop-class Safari UA must retain the tablet profile");
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)"}),{deviceType:"iPad",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:1024});
+assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15",platform:"MacIntel",maxTouchPoints:5}),{deviceType:"iPad",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:1024},"iPadOS desktop-class Safari UA must retain the tablet profile");
 assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Mobile Safari/537.36"}),{deviceType:"Androidスマートフォン",isMobile:true,modelId:"Qwen3-1.7B-q4f16_1-MLC",modelLabel:"Qwen3-1.7B",contextWindow:1024});
 assert.deepEqual(resolveAlvisDeviceProfile({userAgent:"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15",platform:"MacIntel",maxTouchPoints:0}),{deviceType:"その他",isMobile:false,modelId:"Qwen3-4B-q4f16_1-MLC",modelLabel:"Qwen3-4B",contextWindow:2048});
 assert.match(app,/const ALVIS_MODEL_ID=ALVIS_DEVICE_PROFILE\.modelId/);
@@ -652,20 +652,19 @@ assert.match(sw,/alvis-cache-v\\d+-integrated/);
 
 
 
-// v234: render the user-selected dashboard image without redrawing or duplicate orbit overlays.
-assert.match(app,/class="alvis-reference-image" src="\.\/assets\/alvis-dashboard-reference\.avif" width="700" height="564"/);
-assert.match(app,/aspect-ratio:1397\/1126/);
-assert.match(app,/class="alvis-reference-right-hotspots"/);
-assert.match(app,/class="hud-shortcut" data-page="chatPage"/);
-for(const page of ["candidatePage","memoryPage","historyPage","syncPage","devicePage","growthPage"]) assert.ok(app.includes('data-page="'+page+'"'),"reference hotspot must preserve "+page+" navigation");
+// v235: ALVIS mode restores the original live hologram HUD; no full-screen reference image overlay.
+assert.match(app,/class="alvis-hologram-frame"/);
+assert.match(app,/class="mode-stage jarvis-stage"/);
+assert.match(app,/class="hud-center"/);
+assert.match(app,/class="hud-globe-map"/);
+assert.match(app,/class="hud-orbit hud-orbit-a"/);
+assert.match(app,/class="hud-orbit hud-orbit-b"/);
+assert.match(app,/class="hud-orbit hud-orbit-c"/);
+assert.match(app,/class="hud-projector"/);
 assert.match(app,/id="hudAiAction"/);
-assert.doesNotMatch(app,/class="alvis-motion-orbit/,"the reference artwork must not receive duplicate orbit overlays");
-assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center")&&app.includes("display:none!important"),"the hand-drawn vector globe must stay hidden behind the selected image");
-assert.match(sw,/alvis-cache-v234-integrated/);
-assert.match(sw,/\.\/assets\/alvis-dashboard-reference\.avif/);
-const dashboardImage=await readFile(new URL("../assets/alvis-dashboard-reference.avif",import.meta.url));
-assert.equal(dashboardImage.subarray(4,12).toString("ascii"),"ftypavif","the registered dashboard asset must be an AVIF binary");
-assert.ok(dashboardImage.length>20000,"the dashboard image must be a real optimized image asset");
+assert.doesNotMatch(app,/class="alvis-reference-image"/);
+assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
+assert.match(sw,/alvis-cache-v\\d+-integrated/);
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
