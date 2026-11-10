@@ -2100,6 +2100,9 @@ let syncBusy = false;
 let lastLocalChange = 0;
 let aiEngine = null;
 let aiLoading = false;
+// Prevent a new WebGPU engine from starting before a previous logout cleanup finishes.
+let alvisEngineCleanupPromise=Promise.resolve();
+let alvisEngineCleanupError=null;
 let aiLoadProgress = 0;
 let alvisResponseInProgress = false;
 let alvisResponseStartedAt = 0;
@@ -3536,7 +3539,15 @@ function stopPolling(){
 
 function lockApp(){
   stopPolling();
-  if(aiEngine){aiEngine.unload().catch(()=>{});aiEngine=null;}
+  if(aiEngine){
+    const engine=aiEngine;
+    aiEngine=null;
+    alvisEngineCleanupPromise=alvisEngineCleanupPromise.then(()=>engine.unload()).then(()=>{
+      alvisEngineCleanupError=null;
+    },error=>{
+      alvisEngineCleanupError=String(error?.message||error||"モデル解放に失敗しました").slice(0,180);
+    });
+  }
   updateHudAiStatus("ログアウトしました。モデル未起動");
   cryptoKey=null;encryptionSalt=null;
   data={memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[],learnings:[]};
@@ -3575,6 +3586,12 @@ $("loadAiModel").addEventListener("click",async()=>{
   // 拒否されてもQwenの読み込み・推論は続行する。
   requestAlvisStoragePersistence();
   try{
+    if(alvisEngineCleanupError)throw new Error("前回のモデル解放に失敗しています。GPUメモリの二重確保を避けるため、ページを再読み込みしてから再試行してください。詳細："+alvisEngineCleanupError);
+    if(alvisEngineCleanupPromise){
+      setStatus("aiStatus","前回のモデル終了処理を待っています…");
+      await alvisEngineCleanupPromise;
+      if(alvisEngineCleanupError)throw new Error("前回のモデル解放に失敗しています。ページを再読み込みしてから再試行してください。詳細："+alvisEngineCleanupError);
+    }
     setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
     // Service Workerが利用可能なら先に起動を待ち、WebLLMのJavaScript依存コードをキャッシュできる状態にする。
     await alvisServiceWorkerReady;
