@@ -17,8 +17,12 @@ const stageStart = app.indexOf('<div class="mode-stage jarvis-stage"');
 const stageEnd = app.indexOf('<div class="alvis-chat-area"', stageStart);
 const stage = stageStart >= 0 && stageEnd > stageStart ? app.slice(stageStart, stageEnd) : "";
 const imageTag = stage.match(/<img class="alvis-reference-image"[^>]+>/)?.[0] || "";
-const nav = stage.match(/<nav class="hud-nav" aria-label="ALVISメニュー">([\\s\\S]*?)<\\/nav>/)?.[1] || "";
-const hotspots = stage.match(/<div class="alvis-reference-right-hotspots"[^>]*>([\\s\\S]*?)<\\/div>/)?.[1] || "";
+const navStart = stage.indexOf('<nav class="hud-nav" aria-label="ALVISメニュー">');
+const navEnd = stage.indexOf("</nav>", navStart);
+const nav = navStart >= 0 && navEnd > navStart ? stage.slice(navStart, navEnd) : "";
+const hotspotStart = stage.indexOf('<div class="alvis-reference-right-hotspots"');
+const hotspotEnd = stage.indexOf("</div>", hotspotStart);
+const hotspots = hotspotStart >= 0 && hotspotEnd > hotspotStart ? stage.slice(hotspotStart, hotspotEnd) : "";
 const imageCssStart = app.lastIndexOf("/* v245: show the approved dashboard artwork");
 const imageCssEnd = app.lastIndexOf("</style>");
 const imageCss = imageCssStart >= 0 && imageCssEnd > imageCssStart ? app.slice(imageCssStart, imageCssEnd) : "";
@@ -84,8 +88,8 @@ check("Service Worker v245 precaches the approved artwork and preserves dependen
 check("Service Worker activation preserves non-ALVIS model and user-data caches",
   sw.includes('key.startsWith("alvis-cache-")') &&
   sw.includes('key.startsWith("alvis-deps-")'));
-const openScripts = (app.match(/<script\\b/gi) || []).length;
-const closeScripts = (app.match(/<\\/script\\s*>/gi) || []).length;
+const openScripts = app.split("<script").length - 1;
+const closeScripts = app.split("</script>").length - 1;
 check("the HTML script tags remain balanced", openScripts === closeScripts);
 
 for (const name of checks) console.log("PASS " + name);
