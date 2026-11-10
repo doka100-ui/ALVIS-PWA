@@ -712,7 +712,7 @@ assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bump
 
 // v202: switching display modes must explicitly restart/stop only JARVIS hologram motion.
 assert.match(app,/function stopAlvisHudMotion\(\)[\s\S]*?alvisHudMotionAnimations=\[\]/,"JARVIS ring animations must have an isolated stop lifecycle");
-assert.match(app,/if\(safeMode==="jarvis"\)\{\s*requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
+assert.match(app,/if\(safeMode==="jarvis"\)\{[\s\S]*?requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
 assert.match(app,/function startAlvisHudMotion\(\)[\s\S]*?if\(!chatPage \|\| chatPage\.classList\.contains\("hidden"\) \|\| chatPage\.dataset\.displayMode==="avatar"\)\{\s*stopAlvisHudMotion\(\);/,"hidden or avatar mode must not leave JARVIS ring animations running");
 assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/,"three JARVIS orbital ring speeds must remain unchanged");
 assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v204");
