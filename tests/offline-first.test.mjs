@@ -419,7 +419,7 @@ assert.equal(selectedLearning.sourceQuestion,"富士山");
 
 // Every Qwen inference request must be serialized, and unload must wait for active inference.
 const inferenceGuardStart=app.indexOf("function serializeAlvisInference(");
-const inferenceGuardEnd=app.indexOf("\nlet CreateMLCEngine",inferenceGuardStart);
+const inferenceGuardEnd=app.indexOf("\n// WebGPU device lifecycle diagnostics",inferenceGuardStart);
 assert.ok(inferenceGuardStart>=0&&inferenceGuardEnd>inferenceGuardStart,"inference serializer must exist before model setup");
 const serializeInference=new Function(app.slice(inferenceGuardStart,inferenceGuardEnd)+"; return serializeAlvisInference;")();
 let activeInferenceCount=0;
