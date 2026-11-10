@@ -945,3 +945,20 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"gener
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
 assert.ok(sw.includes("alvis-cache-v246-integrated"),"v246 app shell cache must be refreshed");
+
+
+// v247: gentle head/neck motion is confined to supported VRM humanoid bones.
+const avatarRuntimeV247 = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
+assert.match(avatarRuntimeV247,/getNormalizedBoneNode\?\.\("neck"\)/,"neck motion must use the optional normalized neck bone");
+assert.match(avatarRuntimeV247,/getNormalizedBoneNode\?\.\("head"\)/,"head motion must use the optional normalized head bone");
+assert.match(avatarRuntimeV247,/const setHeadGesture = \(name = "nod"\) =>/,"VRM runtime must expose a bounded nod gesture");
+assert.match(avatarRuntimeV247,/Math\.sin\(gestureProgress \* Math\.PI\) \* 0\.055/,"nod gesture must be low amplitude and smoothly eased");
+assert.match(avatarRuntimeV247,/headMotionCurrent\.lerp\(/,"head motion must interpolate instead of snapping");
+assert.match(avatarRuntimeV247,/neckBone\.quaternion\.copy\(neckBaseQuaternion\)\.multiply\(neckOffsetQuaternion\)/,"neck rotation must be applied relative to the original pose");
+assert.match(avatarRuntimeV247,/headBone\.quaternion\.copy\(headBaseQuaternion\)\.multiply\(headOffsetQuaternion\)/,"head rotation must be applied relative to the original pose");
+assert.match(avatarRuntimeV247,/setHeadGesture,/,"head gesture API must be exported by the VRM runtime");
+assert.match(avatarRuntimeV247,/headMotion: !!\(neckBone \|\| headBone\)/,"diagnostics must report available head motion");
+assert.match(app,/window\.ALVISAvatarSetHeadGesture=mounted\.setHeadGesture/,"head gesture must be exposed through the avatar-only bridge");
+assert.match(app,/window\.ALVISAvatarSetHeadGesture\?\.\("nod"\)/,"avatar replies must trigger a gentle nod");
+assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge must be cleared when avatar runtime is disposed");
+assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
