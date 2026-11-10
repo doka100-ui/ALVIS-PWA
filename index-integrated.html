@@ -3170,12 +3170,15 @@ async function playKokoroBlob(blob,clean){
   }
 }
 async function speakKokoro(text){
+  const speechSessionGeneration=alvisSessionGeneration;
+  if(!unlocked)return;
   const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();if(!clean)return;
   if(!kokoroTts){setStatus("voiceStatus","Kokoroの準備が必要です。音声設定の「Kokoroを準備」を一度実行してください。");return;}
   try{
     setStatus("voiceStatus","Kokoroで音声を準備しています…");
     const voiceId=$("kokoroVoice").value||"jf_alpha";
     const blob=await getKokoroSpeechBlob(clean,voiceId);
+    if(!unlocked||speechSessionGeneration!==alvisSessionGeneration)return;
     await playKokoroBlob(blob,clean);
   }catch(error){
     setStatus("voiceStatus","Kokoro音声エラー: "+(error?.message||String(error)));
@@ -3206,6 +3209,8 @@ async function playWelcomeGreeting(){
   speakAlvis("おかえりなさい");
 }
 function speakAlvis(text,options={}){
+  const speechSessionGeneration=alvisSessionGeneration;
+  if(!unlocked)return;
   // 明示的な標準音声指定は、Kokoroの選択/ロード状態より優先する。
   if($("ttsEngine")?.value==="kokoro"&&!options.fallbackToStandard){
     if(aiEngine||aiLoading){
@@ -3213,7 +3218,7 @@ function speakAlvis(text,options={}){
       options={...options,fallbackToStandard:true};
     }else if(kokoroTts){speakKokoro(text);return;}
     else{
-      prepareKokoroTTS().then(engine=>{if(engine)speakKokoro(text);});
+      prepareKokoroTTS().then(engine=>{if(engine&&unlocked&&speechSessionGeneration===alvisSessionGeneration)speakKokoro(text);});
       return;
     }
   }
@@ -3544,6 +3549,12 @@ function lockApp(){
   alvisSessionGeneration++;
   alvisResponseInProgress=false;
   alvisResponseStartedAt=0;
+  if("speechSynthesis" in window)window.speechSynthesis.cancel();
+  stopAlvisLipSync();
+  if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
+  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;}
+  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
+  const voicePlayer=$("kokoroPlayer");if(voicePlayer){voicePlayer.pause();voicePlayer.removeAttribute("src");voicePlayer.classList.add("hidden");}
   stopPolling();
   if(aiEngine){
     const engine=aiEngine;
@@ -4600,7 +4611,7 @@ async function sendToAlvis(){
     const attachedResearchSources=citationResult.sources.length?citationResult.sources:numberedResearchSources;
     const sourceLabel=citationResult.sources.length?"参考にした情報源：":"関連する承認済み資料：";
     data.history.push({role:"alvis",text:reply,...(attachedResearchSources.length?{sources:attachedResearchSources,sourceLabel}:{}),createdAt:new Date().toISOString()});
-    if($("autoSpeak").checked)setTimeout(()=>speakAlvis(reply),80);
+    if($("autoSpeak").checked)setTimeout(()=>{if(isCurrentSession())speakAlvis(reply);},80);
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
