@@ -5348,7 +5348,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       "まばたき: "+mark(report?.blink),
       "口パク (aa / oh): "+mark(report?.aa&&report?.oh),
       "視線制御: "+mark(report?.lookAt),
-      "表情 (happy / sad): "+mark(report?.happy&&report?.sad),
+      "表情 (happy / sad / angry / relaxed / surprised): "+(report?.emotionPresets?.length?report.emotionPresets.join(" / "):"—"),
       "",
       "— はモデル側に対応データがありません"
     ].join("\\n");
@@ -5375,6 +5375,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarSetMouthOpen=mounted.setMouthOpen;
       window.ALVISAvatarSetExpression=mounted.setExpression;
       window.ALVISAvatarSetLookAt=mounted.setLookAt;
+      window.ALVISAvatarSetEmotion=mounted.setEmotion;
       window.ALVISAvatarGetDiagnostics=mounted.getDiagnostics;
       const report=mounted.getDiagnostics();
       renderDiagnostics(report);
@@ -5418,6 +5419,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     window.ALVISAvatarSetMouthOpen=null;
     window.ALVISAvatarSetExpression=null;
     window.ALVISAvatarSetLookAt=null;
+     window.ALVISAvatarSetEmotion=null;
     window.ALVISAvatarGetDiagnostics=null;
     if(!host.querySelector(".alvis-avatar-preview")){
       const image=portraitTemplate.cloneNode(true);
@@ -5467,6 +5469,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarSetMouthOpen=null;
       window.ALVISAvatarSetExpression=null;
       window.ALVISAvatarSetLookAt=null;
+     window.ALVISAvatarSetEmotion=null;
     window.ALVISAvatarGetDiagnostics=null;
     }
   });
