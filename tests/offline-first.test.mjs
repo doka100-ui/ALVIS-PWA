@@ -19,7 +19,7 @@ assert.match(app,/const engine=serializeAlvisInference\(loadedEngine\);[\s\S]*?i
 // v238: cached model weights are checked read-only before engine startup; unexpected GPU loss detaches the stale engine.
 assert.match(app,/alvisHasModelInCache\(ALVIS_MODEL_ID\)[\s\S]*?保存済みモデル重みを確認しました/);
 assert.match(app,/async function handleAlvisUnexpectedGpuLoss\(info=\{\}\)/);
-assert.match(app,/if\(info\?\.reason!=="destroyed"\)void handleAlvisUnexpectedGpuLoss\(info\)/);
+assert.match(app,/if\(info\?\.reason!=="destroyed"\)\{[\s\S]*?void handleAlvisUnexpectedGpuLoss\(info\);[\s\S]*?\}/);
 assert.match(app,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngine=null/);
 assert.match(app,/保存済みモデルキャッシュと記憶・会話履歴は変更していません/);
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/);
