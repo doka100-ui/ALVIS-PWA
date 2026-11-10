@@ -3112,6 +3112,8 @@ async function getKokoroSpeechBlob(clean,voiceId){
   return blob;
 }
 async function playKokoroBlob(blob,clean){
+  const playbackSessionGeneration=alvisSessionGeneration;
+  if(!unlocked)return;
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
     stopAlvisLipSync();
@@ -3125,6 +3127,7 @@ async function playKokoroBlob(blob,clean){
     if(alvisAudioContext&&alvisAudioContext.state==="running"){
       try{
         const audioBuffer=await alvisAudioContext.decodeAudioData(await blob.arrayBuffer());
+        if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
         const source=alvisAudioContext.createBufferSource();
         source.buffer=audioBuffer;
         source.playbackRate.value=rate;
@@ -3148,6 +3151,7 @@ async function playKokoroBlob(blob,clean){
       }
     }
     // AudioContextを利用できない場合は、音声プレーヤーを表示してユーザー操作で再生できるようにする。
+    if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
     kokoroObjectUrl=URL.createObjectURL(blob);
     kokoroAudio=player||new Audio();
     kokoroAudio.src=kokoroObjectUrl;
@@ -4635,12 +4639,14 @@ async function sendToAlvis(){
       const failedEngine=aiEngine;
       aiEngine=null;
       if(failedEngine){try{await failedEngine.unload();}catch(unloadError){}}
+      if(!isCurrentSession())return;
       message+="\n"+ALVIS_MODEL_LABEL+"の実行状態が失われたため、古い実行エンジンを切り離しました。「"+ALVIS_MODEL_LABEL+"を読み込む」を押して再起動してください。記憶庫や会話履歴、保存済みモデルキャッシュは変更していません。";
       $("loadAiModel").disabled=false;
       $("unloadAiModel").disabled=true;
     }
     data.history.push({role:"alvis",text:message,createdAt:new Date().toISOString()});
     try{await saveLocal();}catch(saveError){}
+    if(!isCurrentSession())return;
     setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。"+ALVIS_MODEL_LABEL+"を再読み込みしてください。":message);
   }finally{
     if(isCurrentSession()){
