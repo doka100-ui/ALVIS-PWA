@@ -49,7 +49,7 @@ check("chat composer, AI inference and mode switching remain in the page",
   app.includes('id="jarvisModeButton"') &&
   app.includes('id="avatarModeButton"'));
 check("Service Worker refreshes only the ALVIS app shell cache",
-  sw.includes('const CACHE_NAME = "alvis-cache-v241-integrated";') &&
+  sw.includes('const CACHE_NAME = "alvis-cache-v242-integrated";') &&
   !sw.includes("alvis-dashboard-reference.avif") &&
   sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";'));
 const openScripts = (app.match(/<script\b/gi) || []).length;
