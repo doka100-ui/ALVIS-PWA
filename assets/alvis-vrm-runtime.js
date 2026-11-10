@@ -72,6 +72,19 @@ export async function mountVrmAvatar(host, blob) {
   const idleBaseY = vrm.scene.position.y;
   const idleBaseRotY = vrm.scene.rotation.y;
   const clock = new THREE.Clock();
+  // Normalized humanoid bones are optional; unsupported rigs simply keep their existing motion.
+  const neckBone = vrm.humanoid?.getNormalizedBoneNode?.("neck") || null;
+  const headBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
+  const neckBaseQuaternion = neckBone?.quaternion?.clone?.() || null;
+  const headBaseQuaternion = headBone?.quaternion?.clone?.() || null;
+  const neckOffsetQuaternion = new THREE.Quaternion();
+  const headOffsetQuaternion = new THREE.Quaternion();
+  const neckOffsetEuler = new THREE.Euler();
+  const headOffsetEuler = new THREE.Euler();
+  const headMotionCurrent = new THREE.Vector3();
+  let headIdleTarget = new THREE.Vector3();
+  let nextHeadMotionAt = 2.5 + Math.random() * 2.5;
+  let headGestureStartedAt = -1;
 
   const setExpression = (name, weight = 1) => {
     if (!vrm.expressionManager || !name || expressionAvailability.get(name) === false) return false;
@@ -119,6 +132,12 @@ export async function mountVrmAvatar(host, blob) {
     return true;
   };
 
+  const setHeadGesture = (name = "nod") => {
+    if (name !== "nod" || (!headBone && !neckBone)) return false;
+    headGestureStartedAt = clock.elapsedTime;
+    return true;
+  };
+
   const hasExpression = (name) => {
     try {
       return !!vrm.expressionManager?.getExpression?.(name);
@@ -138,7 +157,9 @@ export async function mountVrmAvatar(host, blob) {
     return {
       format: "VRM",
       name: metaName || "名称なし",
-      humanoidHead: !!vrm.humanoid?.getNormalizedBoneNode?.("head"),
+      humanoidNeck: !!neckBone,
+      humanoidHead: !!headBone,
+      headMotion: !!(neckBone || headBone),
       lookAt: !!vrm.lookAt?.target,
       blink: hasExpression("blink") || (hasExpression("blinkLeft") && hasExpression("blinkRight")),
       blinkLeft: hasExpression("blinkLeft"),
@@ -237,6 +258,43 @@ export async function mountVrmAvatar(host, blob) {
     }
 
     vrm.update(delta);
+
+    // Small idle head adjustments plus a brief, smooth nod after a reply.
+    if (idleEnabled && elapsed >= nextHeadMotionAt) {
+      headIdleTarget.set(
+        (Math.random() - 0.5) * 0.022,
+        (Math.random() - 0.5) * 0.052,
+        (Math.random() - 0.5) * 0.028
+      );
+      nextHeadMotionAt = elapsed + 4.0 + Math.random() * 4.0;
+    }
+    const gestureProgress = headGestureStartedAt < 0
+      ? -1
+      : (elapsed - headGestureStartedAt) / 0.78;
+    const nodAmount = gestureProgress >= 0 && gestureProgress <= 1
+      ? Math.sin(gestureProgress * Math.PI) * 0.055
+      : 0;
+    if (gestureProgress > 1) headGestureStartedAt = -1;
+    const headEase = 1 - Math.exp(-delta * 3.0);
+    headMotionCurrent.lerp(
+      new THREE.Vector3(
+        (idleEnabled ? headIdleTarget.x : 0) + nodAmount,
+        idleEnabled ? headIdleTarget.y : 0,
+        idleEnabled ? headIdleTarget.z : 0
+      ),
+      headEase
+    );
+    if (neckBone && neckBaseQuaternion) {
+      neckOffsetEuler.set(headMotionCurrent.x * 0.28,headMotionCurrent.y * 0.28,headMotionCurrent.z * 0.28,"XYZ");
+      neckOffsetQuaternion.setFromEuler(neckOffsetEuler);
+      neckBone.quaternion.copy(neckBaseQuaternion).multiply(neckOffsetQuaternion);
+    }
+    if (headBone && headBaseQuaternion) {
+      const headShare = neckBone ? 0.72 : 1;
+      headOffsetEuler.set(headMotionCurrent.x * headShare,headMotionCurrent.y * headShare,headMotionCurrent.z * headShare,"XYZ");
+      headOffsetQuaternion.setFromEuler(headOffsetEuler);
+      headBone.quaternion.copy(headBaseQuaternion).multiply(headOffsetQuaternion);
+    }
     renderer.render(scene, camera);
   };
   animate();
@@ -248,6 +306,7 @@ export async function mountVrmAvatar(host, blob) {
     setEmotion,
     setLookAt,
     setAutoLookAt,
+    setHeadGesture,
     getDiagnostics,
     setIdleEnabled(value) { idleEnabled = !!value; },
     dispose() {
