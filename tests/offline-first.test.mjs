@@ -953,8 +953,9 @@ assert.match(avatarRuntimeV247,/getNormalizedBoneNode\?\.\("neck"\)/,"neck motio
 assert.match(avatarRuntimeV247,/getNormalizedBoneNode\?\.\("head"\)/,"head motion must use the optional normalized head bone");
 assert.match(avatarRuntimeV247,/const setHeadGesture = \(name = "nod"\) =>/,"VRM runtime must expose a bounded nod gesture");
 assert.match(avatarRuntimeV247,/Math\.sin\(gestureProgress \* Math\.PI\) \* 0\.055/,"nod gesture must be low amplitude and smoothly eased");
-assert.match(avatarRuntimeV247,/headMotionCurrent\.lerp\(/,"head motion must interpolate instead of snapping");
+assert.match(avatarRuntimeV247,/headMotionCurrent\.lerp\(headMotionTarget, headEase\)/,"head motion must interpolate without allocating vectors per frame");
 assert.match(avatarRuntimeV247,/neckBone\.quaternion\.copy\(neckBaseQuaternion\)\.multiply\(neckOffsetQuaternion\)/,"neck rotation must be applied relative to the original pose");
+assert.match(avatarRuntimeV247,/const neckShare = headBone \? 0\.28 : 1/,"neck-only rigs must receive the full head motion");
 assert.match(avatarRuntimeV247,/headBone\.quaternion\.copy\(headBaseQuaternion\)\.multiply\(headOffsetQuaternion\)/,"head rotation must be applied relative to the original pose");
 assert.match(avatarRuntimeV247,/setHeadGesture,/,"head gesture API must be exported by the VRM runtime");
 assert.match(avatarRuntimeV247,/headMotion: !!\(neckBone \|\| headBone\)/,"diagnostics must report available head motion");
