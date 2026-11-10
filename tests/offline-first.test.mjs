@@ -641,7 +641,7 @@ assert.doesNotMatch(app.slice(welcomeStart,welcomeEnd),/prepareKokoroTTS/);
 assert.match(app,/welcomeButton\.onclick=async\(\)=>\{[\s\S]*?await playWelcomeGreeting\(\);/);
 assert.match(app,/async function previewKokoroVoice\(voiceId,button\)\{\s*unlockAlvisAudioFromGesture\(\);/);
 assert.match(app,/previewKokoroTuned"\)\?\.addEventListener\("click",async\(\)=>\{unlockAlvisAudioFromGesture\(\)/);
-assert.match(app,/source\.connect\(alvisAudioContext\.destination\)/);
+assert.match(app,/source\.connect\(lipAnalyser\)[\s\S]*?lipAnalyser\.connect\(alvisAudioContext\.destination\)/);
 assert.match(app,/source\.start\(0\)/);
 assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
 assert.match(app,/value="0\.98"/);
