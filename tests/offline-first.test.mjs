@@ -505,7 +505,7 @@ assert.match(app,/@keyframes alvisLoadRing/);
 assert.match(app,/prefers-reduced-motion:reduce[^}]*hud-ai-metric\[data-state="loading"\]:before/);
 assert.match(app,/if\(aiLoading\|\|aiEngine\)return;[\s\S]*?const loadButton=\$\("loadAiModel"\);[\s\S]*?loadButton\.click\(\)/);
 assert.doesNotMatch(app,/hudModelAction/);
-assert.doesNotMatch(app,/hud-action/);
+assert.match(app,/data-hud-action="memory"/);
 assert.match(app,/id="avatarModeButton"/);
 assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="mode-stage avatar-stage"/);
