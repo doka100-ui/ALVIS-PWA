@@ -930,7 +930,7 @@ assert.match(app,/report\?\.emotionPresets\?\.length/,"avatar diagnostics must s
 
 // v246: conversation-driven facial expressions run only in avatar mode and return to neutral.
 const avatarEmotionStart=app.indexOf("function detectAvatarEmotionFromConversation(userText,assistantText){");
-const avatarEmotionEnd=app.indexOf("\\nlet alvisAvatarEmotionResetTimer",avatarEmotionStart);
+const avatarEmotionEnd=app.indexOf("let alvisAvatarEmotionResetTimer",avatarEmotionStart);
 assert.ok(avatarEmotionStart>=0&&avatarEmotionEnd>avatarEmotionStart,"avatar emotion classifier must exist");
 const avatarEmotionClassifier=new Function(app.slice(avatarEmotionStart,avatarEmotionEnd)+"; return detectAvatarEmotionFromConversation;")();
 assert.deepEqual(avatarEmotionClassifier("今日は疲れた","今日は本当に大変ですね。しっかり休んでくださいね。"),{name:"relaxed",intensity:0.32});
