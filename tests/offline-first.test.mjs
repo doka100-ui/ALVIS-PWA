@@ -23,7 +23,8 @@ assert.match(app,/if\(info\?\.reason!=="destroyed"\)\{[\s\S]*?void handleAlvisUn
 assert.match(app,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngine=null/);
 assert.match(app,/保存済みモデルキャッシュと記憶・会話履歴は変更していません/);
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/);
-assert.match(sw,/alvis-cache-v242-integrated/);
+assert.match(sw,/alvis-cache-v243-integrated/);
+assert.match(sw,/\.\/assets\/alvis-vrm-runtime\.js/,"avatar runtime must remain in the app shell cache");
 
 
 const sendStart = app.indexOf("async function sendToAlvis()");
