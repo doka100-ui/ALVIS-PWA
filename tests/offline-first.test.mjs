@@ -547,7 +547,7 @@ assert.match(app,/class="hud-side hud-side-right"/);
 assert.match(app,/class="hud-projector"/);
 assert.match(app,/class="hud-platform"/);
 assert.match(app,/class="hud-orbit hud-orbit-a"/);
-assert.match(app,/class="hud-core"><span>ALVIS<\/span><small>PERSONAL AI SYSTEM<\/small>/);
+assert.match(app,/class="hud-core">[\s\S]*?<svg class="hud-globe-map"/);
 assert.match(app,/hudAiPercent/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-interface-item"/);
