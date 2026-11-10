@@ -4,6 +4,12 @@ import { readFile } from "node:fs/promises";
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 
+// v239: GPU loss during CreateMLCEngine startup must be recorded and the resolved stale engine unloaded.
+assert.match(app,/let alvisGpuLossDuringLoad=null/);
+assert.match(app,/if\(alvisGpuDiagnostics\.captureModelDevices\)alvisGpuLossDuringLoad=info/);
+assert.match(app,/alvisGpuLossDuringLoad=null;[\s\S]*?captureModelDevices=true/);
+assert.match(app,/const engine=serializeAlvisInference\(loadedEngine\);[\s\S]*?if\(alvisGpuLossDuringLoad\)[\s\S]*?await engine\.unload\(\);[\s\S]*?throw new Error\("モデル読み込み中にWebGPUが停止しました/);
+
 // v238: cached model weights are checked read-only before engine startup; unexpected GPU loss detaches the stale engine.
 assert.match(app,/alvisHasModelInCache\(ALVIS_MODEL_ID\)[\s\S]*?保存済みモデル重みを確認しました/);
 assert.match(app,/async function handleAlvisUnexpectedGpuLoss\(info=\{\}\)/);
@@ -11,7 +17,7 @@ assert.match(app,/if\(info\?\.reason!=="destroyed"\)void handleAlvisUnexpectedGp
 assert.match(app,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngine=null/);
 assert.match(app,/保存済みモデルキャッシュと記憶・会話履歴は変更していません/);
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/);
-assert.match(sw,/alvis-cache-v238-integrated/);
+assert.match(sw,/alvis-cache-v239-integrated/);
 
 
 const sendStart = app.indexOf("async function sendToAlvis()");
