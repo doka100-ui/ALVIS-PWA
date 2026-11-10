@@ -883,3 +883,5 @@ assert.match(send,/setTimeout\(\(\)=>\{if\(isCurrentSession\(\)\)speakAlvis\(rep
 assert.match(app,/function lockApp\(\)[\s\S]*?speechSynthesis\.cancel\(\)[\s\S]*?stopAlvisLipSync\(\)/,"logout must stop active speech and lip-sync");
 assert.match(app,/function speakAlvis\(text,options=\{\}\)\{[\s\S]*?if\(!unlocked\)return/,"speech must not start while logged out");
 assert.match(app,/prepareKokoroTTS\(\)\.then\(engine=>\{if\(engine&&unlocked&&speechSessionGeneration===alvisSessionGeneration\)speakKokoro\(text\);\}\)/,"late Kokoro preparation must not start speech in a later session");
+assert.match(send,/if\(failedEngine\)\{try\{await failedEngine\.unload\(\);\}catch\(unloadError\)\{\}\}[\s\S]*?if\(!isCurrentSession\(\)\)return/,"late inference-error cleanup must not write into a later session");
+assert.match(app,/async function playKokoroBlob\(blob,clean\)[\s\S]*?playbackSessionGeneration=alvisSessionGeneration[\s\S]*?decodeAudioData\([\s\S]*?if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return/,"late Kokoro audio decode must not start playback after logout");
