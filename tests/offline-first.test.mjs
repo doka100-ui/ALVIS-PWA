@@ -886,3 +886,12 @@ assert.match(app,/function speakAlvis\(text,options=\{\}\)\{[\s\S]*?if\(!unlocke
 assert.match(app,/prepareKokoroTTS\(\)\.then\(engine=>\{if\(engine&&unlocked&&speechSessionGeneration===alvisSessionGeneration\)speakKokoro\(text\);\}\)/,"late Kokoro preparation must not start speech in a later session");
 assert.match(send,/if\(failedEngine\)\{try\{await failedEngine\.unload\(\);\}catch\(unloadError\)\{\}\}[\s\S]*?if\(!isCurrentSession\(\)\)return/,"late inference-error cleanup must not write into a later session");
 assert.match(app,/async function playKokoroBlob\(blob,clean\)[\s\S]*?playbackSessionGeneration=alvisSessionGeneration[\s\S]*?decodeAudioData\([\s\S]*?if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return/,"late Kokoro audio decode must not start playback after logout");
+
+
+// v242: delayed Kokoro playback callbacks must not update a logged-out or newer session.
+assert.match(app,/source\.onended=\(\)=>\{\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late WebAudio completion must not mutate a later session");
+assert.match(app,/kokoroAudio\.onended=\(\)=>\{if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio completion must not mutate a later session");
+assert.match(app,/kokoroAudio\.onerror=\(\)=>\{if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio errors must not update a later session");
+assert.match(app,/await kokoroAudio\.play\(\);\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"play promise completion must be session-checked");
+assert.match(app,/async function playKokoroBlob[\\s\\S]*?catch\\(error\\)\\{\\s*if\\(!unlocked\\|\\|playbackSessionGeneration!==alvisSessionGeneration\\)return;/,"playback errors must be session-checked");
+assert.match(app,/async function speakKokoro[\\s\\S]*?catch\\(error\\)\\{\\s*if\\(!unlocked\\|\\|speechSessionGeneration!==alvisSessionGeneration\\)return;/,"speech-generation errors must be session-checked");
