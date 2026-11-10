@@ -719,7 +719,7 @@ assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the pi
 
 // v222: disposed-engine failures expose version, prompt-size, and stack diagnostics without prompt contents.
 assert.match(app,/let alvisWebLLMVersion = \"未読み込み\"/);
-assert.match(app,/alvisWebLLMVersion=\"0\.2\.82（CDN指定）\"/);
+assert.match(app,/alvisWebLLMVersion=\"0\.2\.87（CDN指定）\"/);
 assert.match(send,/let inferenceDiagnostic=\{/);
 assert.match(send,/systemChars:activePromptWithJapanesePack\.length/);
 assert.match(send,/conversationChars:conversationForGeneration\.reduce/);
