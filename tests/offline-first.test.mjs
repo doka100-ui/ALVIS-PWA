@@ -907,3 +907,16 @@ assert.match(avatarRuntime,/lookAtCurrent\.lerp\(lookAtDestination, gazeEase\)/,
 assert.match(avatarRuntime,/autoLookAtEnabled = false;[\s\S]*?lookAtDestination\.set/,"manual gaze must disable automatic gaze");
 assert.match(avatarRuntime,/const setAutoLookAt = \(enabled = true\) =>/,"automatic gaze must be explicitly controllable");
 assert.match(avatarRuntime,/setLookAt,\s*setAutoLookAt,/,"VRM runtime must expose manual and automatic gaze controls");
+
+
+// v244: VRM emotion presets blend smoothly and are exposed only through the avatar runtime bridge.
+const avatarRuntimeV244 = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
+assert.match(avatarRuntimeV244,/const emotionNames = \["happy", "angry", "sad", "relaxed", "surprised"\]/,"VRM emotion presets must be explicitly allow-listed");
+assert.match(avatarRuntimeV244,/const setEmotion = \(name = "neutral", intensity = 1\) =>/,"avatar runtime must expose a neutral-resettable emotion API");
+assert.match(avatarRuntimeV244,/if \(emotion !== "neutral" && !hasExpression\(emotion\)\) return false/,"emotion API must reject presets missing from the loaded model");
+assert.match(avatarRuntimeV244,/const emotionEase = 1 - Math\.exp\(-delta \* 3\.2\)/,"emotion changes must be smoothly blended");
+assert.match(avatarRuntimeV244,/emotionPresets: emotionNames\.filter/,"model diagnostics must list supported emotion presets");
+assert.match(avatarRuntimeV244,/setExpression,\s*setEmotion,/,"VRM runtime must export emotion control");
+assert.match(app,/window\.ALVISAvatarSetEmotion=mounted\.setEmotion/,"only the avatar UI bridge may expose VRM emotion control");
+assert.match(app,/window\.ALVISAvatarSetEmotion=null/,"emotion bridge must be cleared when avatar runtime is disposed");
+assert.match(app,/report\?\.emotionPresets\?\.length/,"avatar diagnostics must show supported emotion presets");
