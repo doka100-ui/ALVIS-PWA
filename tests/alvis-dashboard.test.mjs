@@ -81,8 +81,8 @@ check("encrypted memory, history, cloud sync, backup and voice code remain",
 check("avatar mode remains separate and hides only the ALVIS artwork stage",
   imageCss.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}') &&
   app.includes('id="alvisAvatarCanvas"'));
-check("Service Worker v246 precaches the approved artwork and preserves dependency cache",
-  sw.includes('const CACHE_NAME = "alvis-cache-v246-integrated";') &&
+check("Service Worker v247 precaches the approved artwork and preserves dependency cache",
+  sw.includes('const CACHE_NAME = "alvis-cache-v247-integrated";') &&
   sw.includes('./assets/alvis-dashboard-reference.avif') &&
   sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";'));
 check("Service Worker activation preserves non-ALVIS model and user-data caches",
