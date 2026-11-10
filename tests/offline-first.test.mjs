@@ -23,7 +23,7 @@ assert.match(app,/if\(info\?\.reason!=="destroyed"\)void handleAlvisUnexpectedGp
 assert.match(app,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngine=null/);
 assert.match(app,/保存済みモデルキャッシュと記憶・会話履歴は変更していません/);
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/);
-assert.match(sw,/alvis-cache-v240-integrated/);
+assert.match(sw,/alvis-cache-v241-integrated/);
 
 
 const sendStart = app.indexOf("async function sendToAlvis()");
@@ -869,3 +869,17 @@ assert.equal(ellipticalContext[2].content,"妻は？","elliptical current questi
 assert.match(app,/「妻は？」「料金は？」のような短い名詞句の追加質問は直前の話題と照合する/,"system prompt must guide resolution of elliptical follow-ups");
 assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\(recent,text\)/,"generation must use the bounded context builder");
 assert.match(sw,/alvis-cache-v228-integrated/,"v233 app shell must use refreshed cache");
+
+
+// v241: asynchronous chat and voice work from a logged-out session must not mutate or speak into a later session.
+assert.match(app,/let alvisSessionGeneration=0/,"chat session generation must be tracked");
+assert.match(app,/const requestSessionGeneration=alvisSessionGeneration;[\s\S]*?const isCurrentSession=\(\)=>unlocked&&requestSessionGeneration===alvisSessionGeneration/,"each chat request must capture its originating unlocked session");
+assert.match(app,/function lockApp\(\)[\s\S]*?alvisSessionGeneration\+\+;[\s\S]*?alvisResponseInProgress=false/,"logout must invalidate pending chat work and release the old send lock");
+assert.match(send,/await saveLocal\(\);[\s\S]*?if\(!isCurrentSession\(\)\)return/,"chat must stop after an awaited save if logout occurred");
+assert.match(send,/await aiEngine\.chat\.completions\.create\([\s\S]*?if\(!isCurrentSession\(\)\)return;[\s\S]*?reply=extractVisibleAnswer/,"chat must not process a model result after logout");
+assert.match(send,/if\(!isCurrentSession\(\)\)return;[\s\S]*?const citationResult=/,"chat must not append assistant history or memory candidates to a later session");
+assert.match(send,/if\(isCurrentSession\(\)\)\{[\s\S]*?alvisResponseInProgress=false/,"an old request's finally block must not unlock a newer session's send operation");
+assert.match(send,/setTimeout\(\(\)=>\{if\(isCurrentSession\(\)\)speakAlvis\(reply\);\},80\)/,"delayed auto-speech must be ignored after logout");
+assert.match(app,/function lockApp\(\)[\s\S]*?speechSynthesis\.cancel\(\)[\s\S]*?stopAlvisLipSync\(\)/,"logout must stop active speech and lip-sync");
+assert.match(app,/function speakAlvis\(text,options=\{\}\)\{[\s\S]*?if\(!unlocked\)return/,"speech must not start while logged out");
+assert.match(app,/prepareKokoroTTS\(\)\.then\(engine=>\{if\(engine&&unlocked&&speechSessionGeneration===alvisSessionGeneration\)speakKokoro\(text\);\}\)/,"late Kokoro preparation must not start speech in a later session");
