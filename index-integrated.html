@@ -2558,11 +2558,17 @@ async function decryptRecord(record,password){
 }
 
 async function saveLocal(){
+  const saveSessionGeneration=alvisSessionGeneration;
+  const saveSessionKey=cryptoKey;
+  const saveSessionData=data;
   const record=await encryptData();
+  // Encryption may finish after logout/re-login. Never let an old session overwrite newer local data.
+  if(!unlocked||saveSessionGeneration!==alvisSessionGeneration||saveSessionKey!==cryptoKey||saveSessionData!==data)return false;
   localStorage.setItem(DB_KEY,JSON.stringify(record));
   localDirty=true;
   lastLocalChange=Date.now();
   scheduleAutoSave();
+  return true;
 }
 
 function scheduleAutoSave(){
