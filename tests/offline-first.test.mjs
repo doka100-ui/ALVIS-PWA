@@ -531,7 +531,8 @@ assert.match(app,/aiLoadProgress=100/,"successful model load must show 100 perce
 assert.match(app,/class="hud-shortcuts" aria-label="ALVISクイック機能"/);
 assert.match(app,/data-page="memoryPage"/);
 assert.match(app,/data-page="growthPage"/);
-assert.match(app,/data-scroll="voicePanel"/);
+assert.match(app,/id="voicePage"/);
+assert.match(app,/id="voicePanel"/);
 assert.match(app,/\.hud-shortcut\[data-page\][\s\S]*?nav button\[data-page=/);
 assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
