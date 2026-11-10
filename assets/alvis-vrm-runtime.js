@@ -82,6 +82,7 @@ export async function mountVrmAvatar(host, blob) {
   const neckOffsetEuler = new THREE.Euler();
   const headOffsetEuler = new THREE.Euler();
   const headMotionCurrent = new THREE.Vector3();
+  const headMotionTarget = new THREE.Vector3();
   let headIdleTarget = new THREE.Vector3();
   let nextHeadMotionAt = 2.5 + Math.random() * 2.5;
   let headGestureStartedAt = -1;
@@ -276,16 +277,15 @@ export async function mountVrmAvatar(host, blob) {
       : 0;
     if (gestureProgress > 1) headGestureStartedAt = -1;
     const headEase = 1 - Math.exp(-delta * 3.0);
-    headMotionCurrent.lerp(
-      new THREE.Vector3(
-        (idleEnabled ? headIdleTarget.x : 0) + nodAmount,
-        idleEnabled ? headIdleTarget.y : 0,
-        idleEnabled ? headIdleTarget.z : 0
-      ),
-      headEase
+    headMotionTarget.set(
+      (idleEnabled ? headIdleTarget.x : 0) + nodAmount,
+      idleEnabled ? headIdleTarget.y : 0,
+      idleEnabled ? headIdleTarget.z : 0
     );
+    headMotionCurrent.lerp(headMotionTarget, headEase);
     if (neckBone && neckBaseQuaternion) {
-      neckOffsetEuler.set(headMotionCurrent.x * 0.28,headMotionCurrent.y * 0.28,headMotionCurrent.z * 0.28,"XYZ");
+      const neckShare = headBone ? 0.28 : 1;
+      neckOffsetEuler.set(headMotionCurrent.x * neckShare,headMotionCurrent.y * neckShare,headMotionCurrent.z * neckShare,"XYZ");
       neckOffsetQuaternion.setFromEuler(neckOffsetEuler);
       neckBone.quaternion.copy(neckBaseQuaternion).multiply(neckOffsetQuaternion);
     }
