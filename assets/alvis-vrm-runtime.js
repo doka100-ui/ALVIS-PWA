@@ -58,6 +58,11 @@ export async function mountVrmAvatar(host, blob) {
   let mouthOpen = 0;
   let mouthTarget = 0;
   let idleEnabled = true;
+  // Avatar-only automatic gaze: gently shifts focus while keeping the user as the default target.
+  let autoLookAtEnabled = !!vrm.lookAt?.target;
+  const lookAtCurrent = new THREE.Vector3(0, 1.35, 2.5);
+  const lookAtDestination = lookAtCurrent.clone();
+  let nextGazeChangeAt = 2.8 + Math.random() * 2.2;
   const expressionAvailability = new Map();
   const idleBaseY = vrm.scene.position.y;
   const idleBaseRotY = vrm.scene.rotation.y;
@@ -81,7 +86,20 @@ export async function mountVrmAvatar(host, blob) {
 
   const setLookAt = (x = 0, y = 1.35, z = 2.5) => {
     if (!vrm.lookAt?.target) return false;
-    vrm.lookAt.target.position.set(Number(x) || 0, Number(y) || 1.35, Number(z) || 2.5);
+    autoLookAtEnabled = false;
+    lookAtDestination.set(Number(x) || 0, Number(y) || 1.35, Number(z) || 2.5);
+    lookAtCurrent.copy(lookAtDestination);
+    vrm.lookAt.target.position.copy(lookAtCurrent);
+    return true;
+  };
+
+  const setAutoLookAt = (enabled = true) => {
+    if (!vrm.lookAt?.target) return false;
+    autoLookAtEnabled = !!enabled;
+    if (autoLookAtEnabled) {
+      lookAtDestination.set(0, 1.35, 2.5);
+      nextGazeChangeAt = clock.elapsedTime + 1.5 + Math.random() * 1.5;
+    }
     return true;
   };
 
@@ -161,6 +179,22 @@ export async function mountVrmAvatar(host, blob) {
       }
     }
 
+    // Avatar-only gaze: linger on the user, occasionally glance aside, and ease back naturally.
+    if (autoLookAtEnabled && vrm.lookAt?.target) {
+      if (elapsed >= nextGazeChangeAt) {
+        const glance = Math.random() < 0.68;
+        lookAtDestination.set(
+          glance ? (Math.random() - 0.5) * 0.34 : 0,
+          1.35 + (glance ? (Math.random() - 0.5) * 0.14 : 0),
+          2.5
+        );
+        nextGazeChangeAt = elapsed + 2.8 + Math.random() * 3.8;
+      }
+      const gazeEase = 1 - Math.exp(-delta * 2.4);
+      lookAtCurrent.lerp(lookAtDestination, gazeEase);
+      vrm.lookAt.target.position.copy(lookAtCurrent);
+    }
+
     // Smoothly follow audio amplitude so the mouth does not snap between frames.
     mouthOpen += (mouthTarget - mouthOpen) * Math.min(1, delta * 18);
     if (vrm.expressionManager) {
@@ -184,6 +218,7 @@ export async function mountVrmAvatar(host, blob) {
     setMouthOpen,
     setExpression,
     setLookAt,
+    setAutoLookAt,
     getDiagnostics,
     setIdleEnabled(value) { idleEnabled = !!value; },
     dispose() {
