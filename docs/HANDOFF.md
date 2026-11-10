@@ -3,7 +3,7 @@
 - ALVISモードのステージへ画像を表示し、1397:1126比率・画像全体・元の色/球体/リング/投影台/左右パネルを保持。CSS/SVGで描き直したり、追加リングや光を重ねたりしない。
 - 左の5メニューとAI起動、右の端末診断/記憶/成長は既存のページ遷移・AI起動ボタンへ接続する透明タップ領域のみ。画像自体の文字/状態は固定表示で、正確な見た目を保つため動的な文字重ねは行わない。
 - Service Worker cache v245へ更新し画像をプリキャッシュ。モデル/依存キャッシュ、暗号化記憶、会話履歴、バックアップ/復元、同期、ローカルAI、音声処理は変更しない。
-- 専用回帰テストを画像表示・AVIFバイナリ・タップ領域・既存機能保持へ更新。GitHub ActionsとCloudflare開発版配信、Safari実機での表示/操作/オフライン再読込はこのコミット後に確認。未確認の間は完了扱いにしない。
+- GitHub Actions run `42750214051` は `dashboard-image` 15/15 PASS、`offline-first` PASS。開発版URL `https://development.alvis-pwa.pages.dev/index-integrated.html` はこの実行環境から取得できず、Cloudflare配信/画像の実ロード/タップ/オフライン再読込は未確認。Safari実機も未確認のため、完了扱いにせず保留。
 
 ## v244 アバターモードの感情表現制御（2026-11-10）
 - VRM標準表情 happy / angry / sad / relaxed / surprised を許可リスト化し、setEmotion(name, intensity)で切り替える。neutralで中立へ戻す。
