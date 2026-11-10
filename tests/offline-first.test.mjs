@@ -516,7 +516,7 @@ assert.match(app,/localStorage\.getItem\(ALVIS_DISPLAY_MODE_KEY\)/);
 assert.match(app,/aria-pressed/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{display:none}'));
 assert.match(app,/id="alvisAvatarStatus"[^>]*>ALVIS AVATAR \/ STANDBY/);
-assert.match(app,/次の段階で3Dモデル、表情、視線、音声連動を追加します/);
+assert.match(app,/id="alvisLoadGlbButton"[^>]*>3D \/ VRMモデルを読み込む/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
 assert.match(sw,/const CACHE_NAME = "alvis-cache-v\\d+-integrated"/);
 
