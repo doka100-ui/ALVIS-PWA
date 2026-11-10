@@ -599,7 +599,7 @@ assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v113: live conversation state/latency and branded secure login surface.
-assert.match(app,/id="hudThinkingReadout" data-state="idle"/);
+assert.match(app,/function updateHudConversationState\(state="idle",elapsedSeconds=null\)[\s\S]*?if\(panel\)\{panel\.dataset\.state=state;\}/);
 assert.match(app,/id="hudThinkingState">STANDBY/);
 assert.match(app,/id="hudResponseTime">--\.\- s/);
 assert.match(app,/function updateHudConversationState\(/);
