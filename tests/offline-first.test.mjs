@@ -693,7 +693,7 @@ assert.match(app,/data-page="devicePage"/);
 assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center,"));
 assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side-right,"));
 assert.ok(app.includes("display:none!important"));
-assert.match(sw,/alvis-cache-v245-integrated/);
+assert.match(sw,/alvis-cache-v246-integrated/);
 assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
