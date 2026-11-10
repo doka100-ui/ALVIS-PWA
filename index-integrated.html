@@ -2258,7 +2258,7 @@ function resolveAlvisDeviceProfile({userAgent="",platform="",maxTouchPoints=0}={
     isMobile,
     modelId:isMobile?"Qwen3-1.7B-q4f16_1-MLC":"Qwen3-4B-q4f16_1-MLC",
     modelLabel:isMobile?"Qwen3-1.7B":"Qwen3-4B",
-    contextWindow:isMobile?1024:2048
+    contextWindow:(isMobile||isIPad)?1024:2048
   };
 }
 const ALVIS_DEVICE_PROFILE=resolveAlvisDeviceProfile({
