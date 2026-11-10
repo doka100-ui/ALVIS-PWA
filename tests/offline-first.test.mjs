@@ -926,3 +926,22 @@ assert.match(avatarRuntimeV244,/setExpression,\s*setEmotion,/,"VRM runtime must 
 assert.match(app,/window\.ALVISAvatarSetEmotion=mounted\.setEmotion/,"only the avatar UI bridge may expose VRM emotion control");
 assert.match(app,/window\.ALVISAvatarSetEmotion=null/,"emotion bridge must be cleared when avatar runtime is disposed");
 assert.match(app,/report\?\.emotionPresets\?\.length/,"avatar diagnostics must show supported emotion presets");
+
+
+// v246: conversation-driven facial expressions run only in avatar mode and return to neutral.
+const avatarEmotionStart=app.indexOf("function detectAvatarEmotionFromConversation(userText,assistantText){");
+const avatarEmotionEnd=app.indexOf("\\nlet alvisAvatarEmotionResetTimer",avatarEmotionStart);
+assert.ok(avatarEmotionStart>=0&&avatarEmotionEnd>avatarEmotionStart,"avatar emotion classifier must exist");
+const avatarEmotionClassifier=new Function(app.slice(avatarEmotionStart,avatarEmotionEnd)+"; return detectAvatarEmotionFromConversation;")();
+assert.deepEqual(avatarEmotionClassifier("今日は疲れた","今日は本当に大変ですね。しっかり休んでくださいね。"),{name:"relaxed",intensity:0.32});
+assert.deepEqual(avatarEmotionClassifier("最近悲しくてつらい","それはつらかったね。無理せず、話したくなったら聞くよ。"),{name:"sad",intensity:0.28});
+assert.deepEqual(avatarEmotionClassifier("やった、試験に合格した！","おめでとう！本当によかったね。"),{name:"happy",intensity:0.36});
+assert.deepEqual(avatarEmotionClassifier("それはびっくりした","確かに意外な結果だね。"),{name:"surprised",intensity:0.28});
+assert.deepEqual(avatarEmotionClassifier("富士山の高さは？","富士山の標高は3776メートルです。"),{name:"neutral",intensity:0});
+assert.ok(app.includes('if(!chatPage||chatPage.dataset.displayMode!=="avatar")return false;'),"emotion application must be avatar-mode-only");
+assert.ok(app.includes("const setEmotion=window.ALVISAvatarSetEmotion;"),"emotion application must require the loaded VRM bridge");
+assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);"),"offline conversational replies must update avatar emotion");
+assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
+assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
+assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
+assert.ok(sw.includes("alvis-cache-v246-integrated"),"v246 app shell cache must be refreshed");
