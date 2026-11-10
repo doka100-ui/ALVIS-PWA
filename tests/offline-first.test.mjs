@@ -895,3 +895,13 @@ assert.match(app,/kokoroAudio\.onerror=\(\)=>\{if\(!unlocked\|\|playbackSessionG
 assert.match(app,/await kokoroAudio\.play\(\);\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"play promise completion must be session-checked");
 assert.match(app,/async function playKokoroBlob[\s\S]*?catch\(error\)\{\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"playback errors must be session-checked");
 assert.match(app,/async function speakKokoro[\s\S]*?catch\(error\)\{\s*if\(!unlocked\|\|speechSessionGeneration!==alvisSessionGeneration\)return;/,"speech-generation errors must be session-checked");
+
+
+// v243: automatic gaze is confined to the VRM avatar runtime and never touches the ALVIS HUD.
+const avatarRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
+assert.match(avatarRuntime,/let autoLookAtEnabled = !!vrm\.lookAt\?\.target/,"automatic gaze must require a VRM lookAt target");
+assert.match(avatarRuntime,/if \(autoLookAtEnabled && vrm\.lookAt\?\.target\)/,"automatic gaze must run only inside the avatar runtime");
+assert.match(avatarRuntime,/lookAtCurrent\.lerp\(lookAtDestination, gazeEase\)/,"gaze movement must be eased rather than snapped");
+assert.match(avatarRuntime,/autoLookAtEnabled = false;[\s\S]*?lookAtDestination\.set/,"manual gaze must disable automatic gaze");
+assert.match(avatarRuntime,/const setAutoLookAt = \(enabled = true\) =>/,"automatic gaze must be explicitly controllable");
+assert.match(avatarRuntime,/setLookAt,\s*setAutoLookAt,/,"VRM runtime must expose manual and automatic gaze controls");
