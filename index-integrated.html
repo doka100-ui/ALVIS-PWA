@@ -4466,6 +4466,7 @@ async function sendToAlvis(){
     // ALVIS自身の固定情報は推論モデルを呼ばず、端末内で即答する。
     if(userIsAlvisNameQuestion){
       const instantReply="私はALVISです。";
+      applyAvatarEmotionFromConversation(text,instantReply);
       data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
       await saveLocal();
       if(!isCurrentSession())return;
@@ -4474,6 +4475,7 @@ async function sendToAlvis(){
     }
     if(userIsSimpleFatigueShare){
       const instantReply=buildNonRepeatingEmotionFallback(text,data.history);
+      applyAvatarEmotionFromConversation(text,instantReply);
       data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
       await saveLocal();
       if(!isCurrentSession())return;
@@ -4713,6 +4715,7 @@ async function sendToAlvis(){
     // 引用番号がある場合だけ「参考にした」、ない場合は「関連する承認済み資料」と区別する。
     const attachedResearchSources=citationResult.sources.length?citationResult.sources:numberedResearchSources;
     const sourceLabel=citationResult.sources.length?"参考にした情報源：":"関連する承認済み資料：";
+    applyAvatarEmotionFromConversation(text,reply);
     data.history.push({role:"alvis",text:reply,...(attachedResearchSources.length?{sources:attachedResearchSources,sourceLabel}:{}),createdAt:new Date().toISOString()});
     if($("autoSpeak").checked)setTimeout(()=>{if(isCurrentSession())speakAlvis(reply);},80);
     let candidateCount = 0;
@@ -5231,6 +5234,41 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
 });
 
 
+
+/* v246: conversation-driven expressions are isolated to the avatar mode. */
+function detectAvatarEmotionFromConversation(userText,assistantText){
+  const user=String(userText||"").normalize("NFKC");
+  const reply=String(assistantText||"").normalize("NFKC");
+  const supportiveReply=/(大変|無理しない|ゆっくり|しっかり休|休んで|話して|聞くよ|そばに|気持ち|心配|大丈夫)/u.test(reply);
+  if(/悲しい|寂しい|さみしい|つらい|苦しい|泣きたい|涙/u.test(user)&&supportiveReply)return {name:"sad",intensity:0.28};
+  if(/疲れ|くたくた|へとへと|しんどい|不安|心配|緊張/u.test(user)&&supportiveReply)return {name:"relaxed",intensity:0.32};
+  if(/ありがとう|嬉しい|うれしい|楽しい|たのしい|成功|できた|やった|最高|よかった/u.test(user)
+    &&/よかった|嬉しい|うれしい|おめでとう|ありがとう|どういたしまして|役に立て/u.test(reply))return {name:"happy",intensity:0.36};
+  if(/驚いた|びっくり|まさか|意外/u.test(user)&&reply.length>0)return {name:"surprised",intensity:0.28};
+  return {name:"neutral",intensity:0};
+}
+let alvisAvatarEmotionResetTimer=null;
+let alvisAvatarEmotionSequence=0;
+function applyAvatarEmotionFromConversation(userText,assistantText){
+  const chatPage=$("chatPage");
+  if(!chatPage||chatPage.dataset.displayMode!=="avatar")return false;
+  const setEmotion=window.ALVISAvatarSetEmotion;
+  if(typeof setEmotion!=="function")return false;
+  const emotion=detectAvatarEmotionFromConversation(userText,assistantText);
+  alvisAvatarEmotionSequence++;
+  const sequence=alvisAvatarEmotionSequence;
+  if(alvisAvatarEmotionResetTimer!==null){clearTimeout(alvisAvatarEmotionResetTimer);alvisAvatarEmotionResetTimer=null;}
+  if(!setEmotion(emotion.name,emotion.intensity))return false;
+  if(emotion.name!=="neutral"){
+    alvisAvatarEmotionResetTimer=setTimeout(()=>{
+      if(sequence!==alvisAvatarEmotionSequence||chatPage.dataset.displayMode!=="avatar")return;
+      window.ALVISAvatarSetEmotion?.("neutral");
+      alvisAvatarEmotionResetTimer=null;
+    },5200);
+  }
+  return true;
+}
+
 const ALVIS_DISPLAY_MODE_KEY="ALVIS_DISPLAY_MODE";
 /* Keep the JARVIS hologram animation lifecycle independent from avatar rendering. */
 let alvisHudMotionAnimations=[];
@@ -5247,6 +5285,10 @@ function applyAlvisDisplayMode(mode,save=true){
   $("avatarModeButton")?.setAttribute("aria-pressed",String(safeMode==="avatar"));
   if(save){try{localStorage.setItem(ALVIS_DISPLAY_MODE_KEY,safeMode);}catch(error){}}
   if(safeMode==="jarvis"){
+    // Clear only the hidden avatar's temporary expression; the ALVIS HUD is untouched.
+    alvisAvatarEmotionSequence++;
+    if(alvisAvatarEmotionResetTimer!==null){clearTimeout(alvisAvatarEmotionResetTimer);alvisAvatarEmotionResetTimer=null;}
+    window.ALVISAvatarSetEmotion?.("neutral");
     requestAnimationFrame(startAlvisHudMotion);
   }else{
     stopAlvisHudMotion();
