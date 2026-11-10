@@ -693,7 +693,7 @@ assert.match(app,/data-page="devicePage"/);
 assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center,"));
 assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side-right,"));
 assert.ok(app.includes("display:none!important"));
-assert.match(sw,/alvis-cache-v246-integrated/);
+assert.match(sw,/alvis-cache-v247-integrated/);
 assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
@@ -944,7 +944,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v246-integrated"),"v246 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v247-integrated"),"v246 app shell cache must be refreshed");
 
 
 // v247: gentle head/neck motion is confined to supported VRM humanoid bones.
