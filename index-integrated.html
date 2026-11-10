@@ -5254,6 +5254,7 @@ function applyAvatarEmotionFromConversation(userText,assistantText){
   if(!chatPage||chatPage.dataset.displayMode!=="avatar")return false;
   const setEmotion=window.ALVISAvatarSetEmotion;
   if(typeof setEmotion!=="function")return false;
+  window.ALVISAvatarSetHeadGesture?.("nod");
   const emotion=detectAvatarEmotionFromConversation(userText,assistantText);
   alvisAvatarEmotionSequence++;
   const sequence=alvisAvatarEmotionSequence;
@@ -5506,10 +5507,11 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarSetExpression=mounted.setExpression;
       window.ALVISAvatarSetLookAt=mounted.setLookAt;
       window.ALVISAvatarSetEmotion=mounted.setEmotion;
+      window.ALVISAvatarSetHeadGesture=mounted.setHeadGesture;
       window.ALVISAvatarGetDiagnostics=mounted.getDiagnostics;
       const report=mounted.getDiagnostics();
       renderDiagnostics(report);
-      const features=[report.blink&&"BLINK",report.aa&&report.oh&&"LIP SYNC",report.lookAt&&"LOOK AT"].filter(Boolean);
+      const features=[report.blink&&"BLINK",report.aa&&report.oh&&"LIP SYNC",report.lookAt&&"LOOK AT",report.headMotion&&"HEAD MOTION"].filter(Boolean);
       setStatus("ALVIS / VRM READY"+(features.length?" — "+features.join(" · "):" — BASIC MODEL"));
     }catch(error){
       modelFailed=true;
@@ -5550,6 +5552,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     window.ALVISAvatarSetExpression=null;
     window.ALVISAvatarSetLookAt=null;
      window.ALVISAvatarSetEmotion=null;
+    window.ALVISAvatarSetHeadGesture=null;
     window.ALVISAvatarGetDiagnostics=null;
     if(!host.querySelector(".alvis-avatar-preview")){
       const image=portraitTemplate.cloneNode(true);
@@ -5600,6 +5603,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarSetExpression=null;
       window.ALVISAvatarSetLookAt=null;
      window.ALVISAvatarSetEmotion=null;
+    window.ALVISAvatarSetHeadGesture=null;
     window.ALVISAvatarGetDiagnostics=null;
     }
   });
