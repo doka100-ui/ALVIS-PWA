@@ -1,6 +1,6 @@
 ## v244（2026-11-10）
 - アバターモードのVRM感情表現APIを追加。happy / angry / sad / relaxed / surprisedを滑らかに遷移し、neutralで解除。非対応モデルでは適用しない。
-- アバター診断にモデルが対応する感情プリセットを表示。ALVISモードと共有データ/音声処理は変更なし。実機・CI未確認。
+- アバター診断にモデルが対応する感情プリセットを表示。ALVISモードと共有データ/音声処理は変更なし。GitHub Actionsの `offline-first` / `dashboard-image` はcommit `2a2d9cc` で成功。実VRM表示・iPad Safari負荷・Cloudflare配信は未確認。
 
 ## v243（2026-11-10）
 - アバターモードのVRM runtimeに滑らかな自動視線移動を追加。VRM lookAt対応モデルのみ対象。手動視線制御と自動視線ON/OFFを公開。
