@@ -1,3 +1,10 @@
+## v244 アバターモードの感情表現制御（2026-11-10）
+- VRM標準表情 happy / angry / sad / relaxed / surprised を許可リスト化し、setEmotion(name, intensity)で切り替える。neutralで中立へ戻す。
+- 表情はフレーム単位で滑らかに補間し、音声口パク（aa/oh）と瞬きの処理を独立して維持する。モデルに存在しない表情は適用せずfalseを返す。
+- アバター診断に対応表情一覧を追加。window.ALVISAvatarSetEmotionはVRMロード時のみ公開し、アバター終了/画像へ戻る際に解除する。
+- 変更対象はassets/alvis-vrm-runtime.js、index-integrated.htmlのアバター専用ブリッジ/診断表示、回帰テスト、Service Worker cache、開発資料。ALVISモードHUD、球体、リング、投影台、チャット/記憶/履歴/暗号化/同期/バックアップ/音声生成は変更しない。
+- 表情の実際の見た目はVRMモデルの表情データ次第。実VRMでの表示、iPad Safari負荷、Nodeテスト/CI/Cloudflare配信は未確認。
+
 ## v243 アバターモードの自然な自動視線（2026-11-10）
 - VRM runtime内に、ユーザー正面を基本に数秒ごとに左右/上下へ小さく視線を移し、滑らかに戻す自動視線を追加。VRM lookAt targetが存在するモデルだけで有効。
 - 手動setLookAtを呼ぶと自動視線を停止し、setAutoLookAt(true/false)で再開/停止できる。視線対応のないVRMやGLB/静止画には無理に適用しない。
