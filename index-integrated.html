@@ -2106,6 +2106,8 @@ let alvisEngineCleanupError=null;
 let aiLoadProgress = 0;
 let alvisResponseInProgress = false;
 let alvisResponseStartedAt = 0;
+// Ignore async chat work that belongs to a session closed by logout.
+let alvisSessionGeneration=0;
 
 // 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
@@ -3538,6 +3540,10 @@ function stopPolling(){
 }
 
 function lockApp(){
+  // Invalidate pending chat/voice callbacks before clearing the unlocked session.
+  alvisSessionGeneration++;
+  alvisResponseInProgress=false;
+  alvisResponseStartedAt=0;
   stopPolling();
   if(aiEngine){
     const engine=aiEngine;
@@ -4312,6 +4318,8 @@ async function sendToAlvis(){
   const input=$("chatInput");
   const text=input.value.trim();
   if(!text)return;
+  const requestSessionGeneration=alvisSessionGeneration;
+  const isCurrentSession=()=>unlocked&&requestSessionGeneration===alvisSessionGeneration;
   let inferenceDiagnostic={webllmVersion:alvisWebLLMVersion,model:ALVIS_MODEL_ID,contextWindow:ALVIS_CONTEXT_WINDOW,userChars:text.length,systemChars:0,conversationChars:0,externalReferenceChars:0,messageCount:0,maxTokens:0};
   // 送信操作中に音声出力を解放し、推論完了後のKokoro読み上げに備える。
   unlockAlvisAudioFromGesture();
@@ -4340,11 +4348,13 @@ async function sendToAlvis(){
     data.history.push({role:"user",text,createdAt:new Date().toISOString()});
     renderAll();
     await saveLocal();
+    if(!isCurrentSession())return;
     // ALVIS自身の固定情報は推論モデルを呼ばず、端末内で即答する。
     if(userIsAlvisNameQuestion){
       const instantReply="私はALVISです。";
       data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
       await saveLocal();
+      if(!isCurrentSession())return;
       setStatus("aiStatus","ALVISの基本情報から即答しました（Qwen3未使用・オフライン対応）。");
       return;
     }
@@ -4352,6 +4362,7 @@ async function sendToAlvis(){
       const instantReply=buildNonRepeatingEmotionFallback(text,data.history);
       data.history.push({role:"alvis",text:instantReply,createdAt:new Date().toISOString()});
       await saveLocal();
+      if(!isCurrentSession())return;
       setStatus("aiStatus","短い気持ちの共有へ端末内で即答しました（Qwen3未使用・オフライン対応）。");
       return;
     }
@@ -4378,10 +4389,12 @@ async function sendToAlvis(){
       try{
         setStatus("aiStatus","質問文だけをオンラインAIへ送信し、複数の意見を集めています…");
         const opinions=await requestOnlineAiCollaboration(text);
+        if(!isCurrentSession())return;
         externalLearningCandidateCount=queueExternalAiLearningCandidates(text,opinions);
         onlineReferenceText=opinions.map((item,index)=>"【外部AI "+(index+1)+"："+item.provider+(item.model?" / "+item.model:"")+"】\n"+item.text).join("\n\n").slice(0,500);
         setStatus("aiStatus","外部AI "+opinions.length+"件の意見を取得。端末内ALVISが内容を比較しています…");
       }catch(error){
+        if(!isCurrentSession())return;
         setStatus("aiStatus","オンラインAIは利用できません。端末内AIだけで続けます（"+(error?.message||"接続エラー")+"）。");
       }
     }
@@ -4439,6 +4452,7 @@ async function sendToAlvis(){
         max_tokens:responseTokenLimit,
         extra_body:{enable_thinking:false}
       });
+      if(!isCurrentSession())return;
       reply=extractVisibleAnswer(result.choices?.[0]?.message);
       // Qwen3が思考タグだけを返して回答本文が空になった場合、履歴を外した短い入力で一度だけ再試行する。
       if(!reply){
@@ -4453,7 +4467,8 @@ async function sendToAlvis(){
           max_tokens:64,
           extra_body:{enable_thinking:false}
         });
-        reply=extractVisibleAnswer(result.choices?.[0]?.message);
+        if(!isCurrentSession())return;
+      reply=extractVisibleAnswer(result.choices?.[0]?.message);
       }
       // 日本語の質問に対して英語主体の回答が返った場合だけ、日本語指定で一度再生成する。
       if(generationAttempts===1 && reply && isLikelyEnglishReply(reply) && /[\u3040-\u30ff\u3400-\u9fff]/.test(text)){
@@ -4468,6 +4483,7 @@ async function sendToAlvis(){
           max_tokens:64,
           extra_body:{enable_thinking:false}
         });
+        if(!isCurrentSession())return;
         const japaneseRetry=extractVisibleAnswer(result.choices?.[0]?.message);
         if(japaneseRetry)reply=japaneseRetry;
       }
@@ -4488,6 +4504,7 @@ async function sendToAlvis(){
           max_tokens:64,
           extra_body:{enable_thinking:false}
         });
+        if(!isCurrentSession())return;
         const recovered=extractVisibleAnswer(result.choices?.[0]?.message);
         if(recovered && !isCorruptedModelReply(recovered)){
           reply=recovered;
@@ -4511,6 +4528,7 @@ async function sendToAlvis(){
           max_tokens:64,
           extra_body:{enable_thinking:false}
         });
+        if(!isCurrentSession())return;
         const repaired=extractVisibleAnswer(repairResult.choices?.[0]?.message);
         if(repaired && !isCorruptedModelReply(repaired) && !analyzeJapaneseOutputQuality(repaired).needsRepair && !analyzeConversationRepetition(repaired,data.history).repeated){
           reply=repaired;
@@ -4574,6 +4592,7 @@ async function sendToAlvis(){
     }
     if(!reply)reply="回答を生成できませんでした。もう一度聞いてみてください。";
     // 通常の非ストリーミング応答では、過去と同じ文章でも毎回新しい返答として追加する。
+    if(!isCurrentSession())return;
     const citationResult=extractApprovedResearchCitations(reply,numberedResearchSources);
     reply=citationResult.text||reply;
     // Qwenが引用番号を出し忘れても、回答生成時に渡した関連資料への導線を失わない。
@@ -4585,11 +4604,13 @@ async function sendToAlvis(){
     let candidateCount = 0;
     try { candidateCount = generateMemoryCandidates(text); } catch(candidateError) { /* 候補抽出の失敗で会話自体は止めない */ }
     await saveLocal();
+    if(!isCurrentSession())return;
     renderAll();
     setStatus("aiStatus",generationStatusDetails
       ? "Qwen3-4B "+generationStatusDetails+(candidateCount?" / 記憶候補 "+candidateCount+"件":"")+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":"")
       : candidateCount ? "Qwen3-4B 接続中・記憶候補 "+candidateCount+"件を追加（承認待ち）"+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":"") : "Qwen3-4B 接続中・準備完了"+(externalLearningCandidateCount?" / 外部AI学習候補 "+externalLearningCandidateCount+"件（承認待ち）":""));
   }catch(error){
+    if(!isCurrentSession())return;
     const detail=String(error?.message||error||"不明なエラー");
     const errorName=String(error?.name||"Error");
     const stackPreview=String(error?.stack||"").split("\n").slice(0,5).join(" | ").slice(0,700);
@@ -4611,12 +4632,14 @@ async function sendToAlvis(){
     try{await saveLocal();}catch(saveError){}
     setStatus("aiStatus",engineStateLost?"モデルの実行状態が失われました。"+ALVIS_MODEL_LABEL+"を再読み込みしてください。":message);
   }finally{
-    const elapsed=alvisResponseStartedAt?Math.max(0,(performance.now()-alvisResponseStartedAt)/1000):0;
-    updateHudConversationState("ready",elapsed);
-    alvisResponseStartedAt=0;
-    alvisResponseInProgress=false;
-    // 描画が失敗しても、入力内容に応じた送信ボタン状態を必ず再計算する。
-    try{renderAll();}finally{updateChatSendButton();}
+    if(isCurrentSession()){
+      const elapsed=alvisResponseStartedAt?Math.max(0,(performance.now()-alvisResponseStartedAt)/1000):0;
+      updateHudConversationState("ready",elapsed);
+      alvisResponseStartedAt=0;
+      alvisResponseInProgress=false;
+      // 描画が失敗しても、入力内容に応じた送信ボタン状態を必ず再計算する。
+      try{renderAll();}finally{updateChatSendButton();}
+    }
   }
 }
 $("sendChat").addEventListener("click",sendToAlvis);
