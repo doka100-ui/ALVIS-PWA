@@ -23,7 +23,7 @@ assert.match(app,/if\(info\?\.reason!=="destroyed"\)\{[\s\S]*?void handleAlvisUn
 assert.match(app,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngine=null/);
 assert.match(app,/保存済みモデルキャッシュと記憶・会話履歴は変更していません/);
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 assert.match(sw,/\.\/assets\/alvis-vrm-runtime\.js/,"avatar runtime must remain in the app shell cache");
 
 
@@ -519,7 +519,7 @@ assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{disp
 assert.match(app,/id="alvisAvatarStatus"[^>]*>ALVIS AVATAR \/ STANDBY/);
 assert.match(app,/id="alvisLoadGlbButton"[^>]*>3D \/ VRMモデルを読み込む/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v\\d+-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v\d+-integrated"/);
 
 
 // v108 HUD progress, compact chat layout, and working quick navigation.
@@ -537,7 +537,7 @@ assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
 assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
 assert.match(app,/id="unloadAiModel"/,"model unload control must remain available");
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v\\d+-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v\d+-integrated"/);
 
 // v109 spatial hologram HUD: visual-only layers; existing model action and display modes stay wired.
 assert.match(app,/aria-label="ALVIS立体ホログラム管制画面"/);
@@ -552,7 +552,7 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-interface-item"/);
 assert.match(app,/v109: spatial hologram control room/);
 assert.match(app,/#(?:[0-9a-fA-F]{3,8})\b/);
-assert.match(sw,/const CACHE_NAME = "alvis-cache-v\\d+-integrated"/);
+assert.match(sw,/const CACHE_NAME = "alvis-cache-v\d+-integrated"/);
 
 // A single user turn must own the conversation pipeline until its finally block.
 assert.match(app,/let alvisResponseInProgress = false;/);
@@ -563,7 +563,7 @@ const sendTurn=app.slice(sendTurnStart,sendTurnEnd);
 assert.ok(sendTurn.indexOf("if(alvisResponseInProgress)return;")<sendTurn.indexOf("alvisResponseInProgress=true;"),"duplicate turn guard must run before starting a turn");
 assert.match(sendTurn,/alvisResponseInProgress=true;/);
 assert.match(sendTurn,/finally\{[\s\S]*?alvisResponseInProgress=false;/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
  
 // v111: autonomy task duplicates are normalized across Unicode width and spacing.
@@ -578,7 +578,7 @@ assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"会話の文脈理解を強化","別の検証を行う"),-1,"a genuinely different action must remain registrable");
 assert.equal(autonomyHelpers.findDuplicateAutonomyTask(duplicateTasks,"別の目標","直近の会話を確認する"),-1,"a different goal must remain registrable");
 assert.equal((app.match(/findDuplicateAutonomyTask\(data\.autonomyTasks,goal,action\)!==-1/g)||[]).length,2,"both autonomy task registration paths must use normalized duplicate detection");
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v112: AI-generated autonomy metadata is only attached to the exact goal/action it describes.
@@ -593,7 +593,7 @@ assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"会話の文脈理解�
 assert.match(app,/dataset\.sourceGoal=proposal\.goal/);
 assert.match(app,/dataset\.sourceAction=proposal\.firstAction/);
 assert.match(app,/getAutonomyTaskMetadata\(\$\("autonomyTaskDraft"\),goal,action\)/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v113: live conversation state/latency and branded secure login surface.
@@ -609,7 +609,7 @@ assert.match(app,/id="lockPanel" class="panel"/);
 assert.match(app,/class="login-emblem"/);
 assert.match(app,/SECURE ACCESS/);
 assert.match(app,/AES-256 ENCRYPTED/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v117: login greeting still respects the saved auto-speech preference and transition timing.
@@ -618,7 +618,7 @@ assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"&&!options\.fallbackT
 assert.match(app,/const transitionDuration=transitionIntoAlvis\(\);/);
 assert.match(app,/if\(\$\("ttsEngine"\)\?\.value==="kokoro"\|\|\$\("autoSpeak"\)\?\.checked\)\{[\s\S]*?await playWelcomeGreeting\(\)/);
 assert.match(app,/\},transitionDuration\+120\);/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v120: login uses the configured Kokoro voice, unlocks Safari audio from the user gesture,
@@ -643,7 +643,7 @@ assert.match(app,/source\.connect\(alvisAudioContext\.destination\)/);
 assert.match(app,/source\.start\(0\)/);
 assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
 assert.match(app,/value="0\.98"/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 // v121: Kokoro and Qwen must not be initialized together on memory-constrained phones.
 // Login reuses the cached greeting audio only; it never loads the Kokoro inference runtime.
@@ -652,7 +652,7 @@ assert.match(app,/if\(kokoroTts\|\|kokoroLoading\)\{[\s\S]*?ページを再読�
 assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?端末標準音声で読み上げます/);
 assert.match(app,/async function playKokoroBlob\(blob,clean\)/);
 assert.match(app,/async function getCachedKokoroWelcomeBlob\(\)/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v122-v123: choose an appropriately sized local model from a centralized device profile.
@@ -671,7 +671,7 @@ assert.match(app,/CreateMLCEngine\(ALVIS_MODEL_ID,/);
 assert.match(app,/context_window_size:ALVIS_CONTEXT_WINDOW/);
 assert.match(app,/ALVIS_MODEL_LABEL\+"を読み込む"/);
 assert.match(app,/自動選択モデル：/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 
@@ -687,7 +687,7 @@ assert.match(app,/class="hud-projector"/);
 assert.match(app,/id="hudAiAction"/);
 assert.doesNotMatch(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
@@ -700,7 +700,7 @@ assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by t
 assert.match(app,/id="alvisAvatarDiagnosticsButton"/,"avatar UI must expose the diagnostics button");
 assert.match(app,/window\.ALVISAvatarGetDiagnostics=mounted\.getDiagnostics/,"loaded VRM diagnostics must be connected to the UI");
 assert.match(app,/VRM MODEL CHECK/,"diagnostics panel must explain the inspected model");
-assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker cache must be bumped for v201");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v201");
 
 
 // v202: switching display modes must explicitly restart/stop only JARVIS hologram motion.
@@ -708,7 +708,7 @@ assert.match(app,/function stopAlvisHudMotion\(\)[\s\S]*?alvisHudMotionAnimation
 assert.match(app,/if\(safeMode==="jarvis"\)\{\s*requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
 assert.match(app,/function startAlvisHudMotion\(\)[\s\S]*?if\(!chatPage \|\| chatPage\.classList\.contains\("hidden"\) \|\| chatPage\.dataset\.displayMode==="avatar"\)\{\s*stopAlvisHudMotion\(\);/,"hidden or avatar mode must not leave JARVIS ring animations running");
 assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/,"three JARVIS orbital ring speeds must remain unchanged");
-assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker cache must be bumped for v204");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v204");
 
 
 // v204/v235: restored live HUD and orbit motion remain present and visible.
@@ -730,14 +730,14 @@ assert.match(sw,/\.filter\(\(key\)[\s\S]*?key\.startsWith\("alvis-cache-"\)[\s\S
 assert.match(send,/object has already been disposed|already been disposed|object\.\*disposed|disposed\.\*object/i,"disposed WebLLM runtime errors must invalidate the stale engine reference");
 assert.match(send,/const failedEngine=aiEngine;[\s\S]*?aiEngine=null;[\s\S]*?failedEngine\.unload\(\)/,"lost engine recovery must detach the stale reference and attempt best-effort cleanup");
 assert.match(send,/ALVIS_MODEL_LABEL\+"の実行状態が失われたため/,"recovery guidance must use the active device model label");
-assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the updated disposed-engine recovery code");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker must serve the updated disposed-engine recovery code");
 
 
  
 // v221: pin WebLLM to the last reported working version for disposed ShapeTuple regression.
 assert.match(app,/@mlc-ai\/web-llm@0\.2\.87/,"WebLLM must include the TVM runtime lifetime fix from 0.28.0-dev1");
 assert.doesNotMatch(app,/@mlc-ai\/web-llm@0\.2\.(?:82|83|84|85|86)(?!\d)/,"obsolete WebLLM runtime versions must not be loaded");
-assert.match(sw,/alvis-cache-v\\d+-integrated/,"service worker must serve the pinned WebLLM version");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker must serve the pinned WebLLM version");
 
 
 // v222: disposed-engine failures expose version, prompt-size, and stack diagnostics without prompt contents.
@@ -751,7 +751,7 @@ assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)\.split\("\\\\n"
 assert.match(send,/diagnosticSummary="\\\\n診断: WebLLM /);
 assert.match(send,/診断: WebLLM /);
 assert.match(send,/stack: /);
-assert.match(sw,/alvis-cache-v218-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 // v224: observe WebGPU device loss and Safari page lifecycle without clearing caches or user data.
@@ -768,14 +768,14 @@ assert.match(gpuMonitorSource,/visibilitychange/);
 assert.match(gpuMonitorSource,/pageshow/);
 assert.match(gpuMonitorSource,/pagehide/);
 assert.match(app,/message\+=getAlvisGpuDiagnosticSummary\(\)/,"GPU lifecycle details must be attached to inference failures");
-assert.match(sw,/alvis-cache-v219-integrated/,"app shell cache must be versioned for v224");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"app shell cache must be versioned for v224");
 assert.doesNotMatch(sw,/caches\.delete\([^)]*webllm/i,"service worker must not delete WebLLM model caches");
 
 
 // v223: use the first WebLLM release bundling the TVM runtime lifetime fix.
 assert.match(app,/web-llm@0\.2\.87/);
 assert.match(app,/alvisWebLLMVersion="0\.2\.87（CDN指定）"/);
-assert.match(sw,/alvis-cache-v218-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
  
 // v226: only WebLLM initialization devices contribute to GPU-loss diagnostics.
@@ -788,7 +788,7 @@ assert.match(app,/alvisGpuDiagnostics\.originalRequestDevice=originalRequestDevi
 assert.match(app,/alvisGpuDiagnostics\.originalRequestDevice\?alvisGpuDiagnostics\.originalRequestDevice\.call\(defaultAdapter\)/,"standard GPU diagnostic must use the retained native requestDevice");
 assert.match(app,/alvisGpuDiagnostics\.originalRequestDevice\?alvisGpuDiagnostics\.originalRequestDevice\.call\(adapter,/,"WebLLM-like GPU diagnostic must use the retained native requestDevice");
 assert.ok(app.includes('"（model device "+d.modelDeviceCreateCount+"回） / visibility "'),"diagnostic summary must label model device count explicitly");
-assert.match(sw,/alvis-cache-v221-integrated/,"v226 app shell must use refreshed cache");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"v226 app shell must use refreshed cache");
 
 
 // v227: inspect the actual WebLLM tensor cache without deleting or changing cached artifacts.
@@ -797,7 +797,7 @@ assert.match(app,/webllm\.hasModelInCache/);
 assert.match(app,/alvisHasModelInCache\(ALVIS_MODEL_ID\)/);
 assert.match(app,/WebLLMモデル重みキャッシュ：/);
 assert.match(app,/model tensors only/);
-assert.match(sw,/alvis-cache-v223-integrated/,"v228 app shell must use refreshed cache");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"v228 app shell must use refreshed cache");
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/,"cache diagnostic must never delete model artifacts");
 
 
@@ -807,13 +807,13 @@ assert.match(app,/requestAlvisStoragePersistence\(\);[\s\S]*?await alvisServiceW
 assert.match(app,/モデル起動時の永続化要求：/,"diagnostics must expose the persistence request result");
 assert.match(app,/alvisStoragePersistenceStatus=granted\?"ブラウザから許可済み":"ブラウザが未許可"/,"browser denial must be reported without blocking model loading");
 assert.doesNotMatch(app,/caches\.delete\([^)]*webllm|deleteModelAllInfoInCache|deleteModelInCache\(/i,"persistence request must not clear model caches");
-assert.match(sw,/alvis-cache-v224-integrated/,"v229 app shell must use refreshed cache");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"v229 app shell must use refreshed cache");
 
 
 // v230: StorageManager.persist may reject or throw synchronously; neither path may block model startup.
 assert.match(app,/try\{\s*return Promise\.resolve\(navigator\.storage\.persist\(\)\)/,"persistent storage request must handle synchronous exceptions");
 assert.match(app,/catch\(error\)\{[\s\S]*?alvisStoragePersistenceStatus="要求失敗（"/,"synchronous persistence errors must be reported");
-assert.match(sw,/alvis-cache-v225-integrated/,"v230 app shell must use refreshed cache");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"v230 app shell must use refreshed cache");
 
 
 // v231: make engine shutdown idempotent and reject queued inference after shutdown begins.
@@ -825,7 +825,7 @@ assert.match(serializedInferenceSource,/let unloadPromise=null/,"serialized engi
 assert.match(serializedInferenceSource,/if\(unloadPromise\)return unloadPromise/,"concurrent unload requests must share one promise");
 assert.match(serializedInferenceSource,/unloadRequested=true;[\s\S]*?await inferenceQueue\.catch/,"shutdown must stop new inference and wait for active inference");
 assert.match(serializedInferenceSource,/if\(unloadRequested\)throw new Error/,"queued inference must not run after shutdown begins");
-assert.match(sw,/alvis-cache-v226-integrated/,"v231 app shell must use refreshed cache");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"v231 app shell must use refreshed cache");
 
 
 // v232: keep the referenced user question and assistant answer for follow-ups with a strict context budget.
@@ -869,7 +869,7 @@ assert.deepEqual(ellipticalContext.map(item=>item.role),["user","assistant","use
 assert.equal(ellipticalContext[2].content,"妻は？","elliptical current question must remain complete");
 assert.match(app,/「妻は？」「料金は？」のような短い名詞句の追加質問は直前の話題と照合する/,"system prompt must guide resolution of elliptical follow-ups");
 assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\(recent,text\)/,"generation must use the bounded context builder");
-assert.match(sw,/alvis-cache-v228-integrated/,"v233 app shell must use refreshed cache");
+assert.match(sw,/alvis-cache-v\d+-integrated/,"v233 app shell must use refreshed cache");
 
 
 // v241: asynchronous chat and voice work from a logged-out session must not mutate or speak into a later session.
