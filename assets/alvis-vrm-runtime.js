@@ -58,6 +58,11 @@ export async function mountVrmAvatar(host, blob) {
   let mouthOpen = 0;
   let mouthTarget = 0;
   let idleEnabled = true;
+  // Emotion weights are blended independently from lip-sync and blink.
+  const emotionNames = ["happy", "angry", "sad", "relaxed", "surprised"];
+  const emotionCurrent = Object.fromEntries(emotionNames.map((name) => [name, 0]));
+  let emotionTarget = "neutral";
+  let emotionTargetWeight = 0;
   // Avatar-only automatic gaze: gently shifts focus while keeping the user as the default target.
   let autoLookAtEnabled = !!vrm.lookAt?.target;
   const lookAtCurrent = new THREE.Vector3(0, 1.35, 2.5);
@@ -82,6 +87,17 @@ export async function mountVrmAvatar(host, blob) {
 
   const setMouthOpen = (amount = 0) => {
     mouthTarget = THREE.MathUtils.clamp(Number(amount) || 0, 0, 1);
+  };
+
+  const setEmotion = (name = "neutral", intensity = 1) => {
+    const emotion = String(name || "neutral").toLowerCase();
+    if (emotion !== "neutral" && !emotionNames.includes(emotion)) return false;
+    if (emotion !== "neutral" && !hasExpression(emotion)) return false;
+    emotionTarget = emotion;
+    emotionTargetWeight = emotion === "neutral"
+      ? 0
+      : THREE.MathUtils.clamp(Number(intensity) || 0, 0, 1);
+    return true;
   };
 
   const setLookAt = (x = 0, y = 1.35, z = 2.5) => {
@@ -130,7 +146,11 @@ export async function mountVrmAvatar(host, blob) {
       aa: hasExpression("aa"),
       oh: hasExpression("oh"),
       happy: hasExpression("happy"),
-      sad: hasExpression("sad")
+      sad: hasExpression("sad"),
+      angry: hasExpression("angry"),
+      relaxed: hasExpression("relaxed"),
+      surprised: hasExpression("surprised"),
+      emotionPresets: emotionNames.filter((name) => hasExpression(name))
     };
   };
 
@@ -195,6 +215,14 @@ export async function mountVrmAvatar(host, blob) {
       vrm.lookAt.target.position.copy(lookAtCurrent);
     }
 
+    // Blend emotional presets gradually; never overwrite lip-sync or blink weights.
+    const emotionEase = 1 - Math.exp(-delta * 3.2);
+    for (const name of emotionNames) {
+      const target = name === emotionTarget ? emotionTargetWeight : 0;
+      emotionCurrent[name] += (target - emotionCurrent[name]) * emotionEase;
+      setExpression(name, emotionCurrent[name]);
+    }
+
     // Smoothly follow audio amplitude so the mouth does not snap between frames.
     mouthOpen += (mouthTarget - mouthOpen) * Math.min(1, delta * 18);
     if (vrm.expressionManager) {
@@ -217,6 +245,7 @@ export async function mountVrmAvatar(host, blob) {
     vrm,
     setMouthOpen,
     setExpression,
+    setEmotion,
     setLookAt,
     setAutoLookAt,
     getDiagnostics,
