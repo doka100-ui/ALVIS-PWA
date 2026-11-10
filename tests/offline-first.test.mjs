@@ -749,7 +749,7 @@ assert.match(send,/let inferenceDiagnostic=\{/);
 assert.match(send,/systemChars:activePromptWithJapanesePack\.length/);
 assert.match(send,/conversationChars:conversationForGeneration\.reduce/);
 assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)/);
-assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)\.split\("\\\\n"\)/);
+assert.match(send,/stackPreview=String\(error\?\.stack\|\|\"\"\)\.split\("\\n"\)/);
 assert.match(send,/diagnosticSummary="\\\\n診断: WebLLM /);
 assert.match(send,/診断: WebLLM /);
 assert.match(send,/stack: /);
