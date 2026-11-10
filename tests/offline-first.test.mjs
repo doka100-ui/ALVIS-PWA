@@ -533,7 +533,7 @@ assert.match(app,/data-page="memoryPage"/);
 assert.match(app,/data-page="growthPage"/);
 assert.match(app,/id="voicePage"/);
 assert.match(app,/id="voicePanel"/);
-assert.match(app,/\.hud-shortcut\[data-page\][\s\S]*?nav button\[data-page=/);
+assert.match(app,/document\.querySelectorAll\("button\[data-page\]"\)[\s\S]*?navigateAlvisPage\(button\.dataset\.page\)/);
 assert.match(app,/\.hud-shortcut\[data-scroll\][\s\S]*?scrollIntoView/);
 assert.doesNotMatch(app,/<strong>ローカルAIモデル<\/strong>/,"the local model panel must no longer appear in chat");
 assert.match(app,/id="devicePage" class="hidden">[\s\S]*?id="loadAiModel" class="hidden"/,"model controls must be kept in device settings");
