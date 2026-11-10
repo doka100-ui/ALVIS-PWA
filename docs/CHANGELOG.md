@@ -1,3 +1,8 @@
+## v245（2026-11-10）
+- ユーザー指定の完成見本「未来都市のホログラム地球ダッシュボード.png」を元にした既存AVIFアセットをALVISモードへ再統合。球体・リング・投影台・左右パネルを画像そのまま表示し、再描画や追加装飾はしない。
+- 左メニュー/AI起動/右側の端末・記憶・成長を既存機能へつなぐ透明タップ領域を追加。チャット/ローカルAI/暗号化記憶/履歴/バックアップ/同期/音声ロジックは変更なし。
+- Service Worker cache v245で画像をプリキャッシュ。専用dashboard回帰テストを更新。Cloudflare開発版配信・Safari実機の表示/タップ/オフライン動作は未確認。
+
 ## v244（2026-11-10）
 - アバターモードのVRM感情表現APIを追加。happy / angry / sad / relaxed / surprisedを滑らかに遷移し、neutralで解除。非対応モデルでは適用しない。
 - アバター診断にモデルが対応する感情プリセットを表示。ALVISモードと共有データ/音声処理は変更なし。GitHub Actionsの `offline-first` / `dashboard-image` はcommit `2a2d9cc` で成功。実VRM表示・iPad Safari負荷・Cloudflare配信は未確認。
