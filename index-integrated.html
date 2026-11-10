@@ -2140,6 +2140,7 @@ function serializeAlvisInference(engine){
 }
 // Unexpected GPU loss recovery: detach the unusable engine only after serialized inference settles.
 let alvisGpuRecoveryPromise=null;
+let alvisGpuLossDuringLoad=null;
 async function handleAlvisUnexpectedGpuLoss(info={}){
   const engine=aiEngine;
   if(!engine||alvisGpuRecoveryPromise)return;
@@ -2195,13 +2196,18 @@ function installAlvisWebGpuDiagnostics(){
             alvisGpuDiagnostics.deviceLostReason=String(info?.message||"理由なし").slice(0,180);
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
             // Explicit engine unload also destroys its GPUDevice; do not treat that as a crash.
-            if(info?.reason!=="destroyed")void handleAlvisUnexpectedGpuLoss(info);
+            if(info?.reason!=="destroyed"){
+              if(alvisGpuDiagnostics.captureModelDevices)alvisGpuLossDuringLoad=info;
+              void handleAlvisUnexpectedGpuLoss(info);
+            }
           },error=>{
             alvisGpuDiagnostics.deviceState="lost";
             alvisGpuDiagnostics.deviceLostReasonCode="promise-rejected";
             alvisGpuDiagnostics.deviceLostReason=String(error?.message||error||"lost promise rejected").slice(0,180);
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
-            void handleAlvisUnexpectedGpuLoss({reason:"promise-rejected",message:error?.message||String(error)});
+            const lossInfo={reason:"promise-rejected",message:error?.message||String(error)};
+            if(alvisGpuDiagnostics.captureModelDevices)alvisGpuLossDuringLoad=lossInfo;
+            void handleAlvisUnexpectedGpuLoss(lossInfo);
           });
         }
         if(device&&typeof device.addEventListener==="function"){
@@ -3593,6 +3599,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     let loadedEngine;
     // WebLLM engine initialization may create its GPUDevice asynchronously.
     // Observe only devices requested during this window; diagnostics use the original unwrapped API.
+    alvisGpuLossDuringLoad=null;
     alvisGpuDiagnostics.captureModelDevices=true;
     try{
       loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
@@ -3606,6 +3613,12 @@ $("loadAiModel").addEventListener("click",async()=>{
       alvisGpuDiagnostics.captureModelDevices=false;
     }
     const engine=serializeAlvisInference(loadedEngine);
+    // GPU loss can arrive before CreateMLCEngine resolves, while aiEngine is still null.
+    // Do not publish a successfully-resolved but already-lost engine as ready.
+    if(alvisGpuLossDuringLoad){
+      try{await engine.unload();}catch(cleanupError){}
+      throw new Error("モデル読み込み中にWebGPUが停止しました。古い実行エンジンは解放しました。");
+    }
     // 読み込み中にロックされた場合、エンジンを残さず解放する。
     if(!unlocked){
       try{await engine.unload();}catch(cleanupError){}
