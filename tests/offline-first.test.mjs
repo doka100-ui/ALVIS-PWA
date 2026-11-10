@@ -485,7 +485,7 @@ assert.match(app,/\.avatar-stage:before\{content:""/);
 assert.match(app,/\.hud-core span\{font-weight:800/);
 
 assert.match(app,/class="display-dock" aria-label="固定表示エリア"/);
-assert.match(app,/\.display-dock\{position:sticky;top:8px;z-index:30/);
+assert.match(app,/\.display-dock\{position:relative;top:auto;z-index:30/);
 assert.match(app,/\.display-dock \.mode-stage\{margin-bottom:0\}/);
 assert.match(app,/@media\(max-width:600px\)\{\.display-dock/);
 
