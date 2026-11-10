@@ -1,3 +1,9 @@
+## v237 iPad向けQwen3-4BのKVキャッシュ負荷を軽減（2026-11-10）
+- iPadOS Safari（通常UA/デスクトップUA）の自動選択モデルは従来どおりQwen3-4Bのまま、WebLLMのcontext_window_sizeのみ2048から1024へ縮小。iPhone/Androidは既存のQwen3-1.7B・1024を維持。その他端末の4B・2048も維持。
+- WebLLMのcontext_window_sizeはKVキャッシュ設定としてモデル読み込み時に指定できる。モデル重み・量子化・保存キャッシュ・推論履歴の保存形式は変更しない。
+- Service Workerのアプリシェルキャッシュをv237へ更新。既存のWebLLMモデルキャッシュ、Kokoro、暗号化記憶、履歴、同期データは削除しない。
+- 回帰テストをv235ライブHUD構成へ更新し、旧v234画像表示を必須とする古い検査を撤去。iPad端末判定と1024コンテキストを検査する。実機でのOOM改善効果、読み込み速度、応答品質は11月22日以降にiPad Pro M1で確認する。
+
 ## v236 offline-firstテストのブラウザ依存コード混入を修正（2026-11-10）
 - 推論直列化テストが `serializeAlvisInference()` だけでなく、その直後にあるブラウザ専用GPU診断初期化まで `new Function()` で評価していたため、Node.js環境に `document` がなく `document is not defined` で停止していた。
 - テストの抽出終端を `// WebGPU device lifecycle diagnostics` の直前へ変更し、推論直列化関数だけを分離して検証する。
