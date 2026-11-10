@@ -893,5 +893,5 @@ assert.match(app,/source\.onended=\(\)=>\{\s*if\(!unlocked\|\|playbackSessionGen
 assert.match(app,/kokoroAudio\.onended=\(\)=>\{if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio completion must not mutate a later session");
 assert.match(app,/kokoroAudio\.onerror=\(\)=>\{if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio errors must not update a later session");
 assert.match(app,/await kokoroAudio\.play\(\);\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"play promise completion must be session-checked");
-assert.match(app,/async function playKokoroBlob[\\s\\S]*?catch\\(error\\)\\{\\s*if\\(!unlocked\\|\\|playbackSessionGeneration!==alvisSessionGeneration\\)return;/,"playback errors must be session-checked");
-assert.match(app,/async function speakKokoro[\\s\\S]*?catch\\(error\\)\\{\\s*if\\(!unlocked\\|\\|speechSessionGeneration!==alvisSessionGeneration\\)return;/,"speech-generation errors must be session-checked");
+assert.match(app,/async function playKokoroBlob[\s\S]*?catch\(error\)\{\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"playback errors must be session-checked");
+assert.match(app,/async function speakKokoro[\s\S]*?catch\(error\)\{\s*if\(!unlocked\|\|speechSessionGeneration!==alvisSessionGeneration\)return;/,"speech-generation errors must be session-checked");
