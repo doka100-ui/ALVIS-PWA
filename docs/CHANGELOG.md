@@ -1,3 +1,8 @@
+## v247（2026-11-10）
+- アバターVRMのnormalized neck/head骨に小さな姿勢変化を適用。アイドル中の微細な頭部動作と会話応答時の短いうなずきを追加。
+- 元姿勢Quaternionから毎フレーム合成し、累積回転を防止。骨格未対応モデルでは無効。アバター診断にHEAD MOTIONを追加。
+- ALVIS HUD/球体/リング/タップ領域および共有機能は変更なし。Service Worker cache v247。実機VRM/Safari/Cloudflare配信は未確認。
+
 ## v246（2026-11-10）
 - アバターモードのVRM表情を会話応答に連動。happy / sad / relaxed / surprisedを控えめに適用し、約5.2秒でneutralへ戻す。怒り表情は自動化せず、通常の事実回答はneutral。
 - アバターモード限定のブリッジ確認を追加。ALVISモードHUD、チャット/音声/記憶/履歴/暗号化/同期/バックアップは変更なし。
