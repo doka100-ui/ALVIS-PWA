@@ -1,3 +1,6 @@
+## v253 Service Workerリダイレクト応答の正規化
+- キャッシュ/ネットワーク/オフラインフォールバックから応答を返す際、redirected応答はResponseを再構築してリダイレクト属性を除去する。本文・status・statusText・headersは維持する。opaqueまたはstatus 0の応答は再構築しない。
+- iOS SafariのService Workerナビゲーションエラー対策。実機での280blocker併用検証が必要。
 ## v252 Avatar用依存CDNのキャッシュ
 - Avatarモードが使用するmodel-viewerの `ajax.googleapis.com` 配信コードを、既存の依存コードキャッシュ `alvis-deps-v2` に保存する。
 - WebLLM/Kokoroのesm.run・jsdelivr依存キャッシュと同じく、初回オンライン読み込み後の再利用を目指す。依存グラフやモデル/テクスチャの完全オフライン動作は別途実機確認する。
