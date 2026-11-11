@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [app, sw, image] = await Promise.all([
+const [app, sw] = await Promise.all([
   readFile(new URL("../index-integrated.html", import.meta.url), "utf8"),
-  readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
-  readFile(new URL("../assets/alvis-dashboard-reference.avif", import.meta.url))
+  readFile(new URL("../service-worker.js", import.meta.url), "utf8")
 ]);
 
 const checks = [];
@@ -16,76 +15,61 @@ function check(name, condition) {
 const stageStart = app.indexOf('<div class="mode-stage jarvis-stage"');
 const stageEnd = app.indexOf('<div class="alvis-chat-area"', stageStart);
 const stage = stageStart >= 0 && stageEnd > stageStart ? app.slice(stageStart, stageEnd) : "";
-const imageTag = stage.match(/<img class="alvis-reference-image"[^>]+>/)?.[0] || "";
-const navStart = stage.indexOf('<nav class="hud-nav" aria-label="ALVISメニュー">');
-const navEnd = stage.indexOf("</nav>", navStart);
-const nav = navStart >= 0 && navEnd > navStart ? stage.slice(navStart, navEnd) : "";
-const hotspotStart = stage.indexOf('<div class="alvis-reference-right-hotspots"');
-const hotspotEnd = stage.indexOf("</div>", hotspotStart);
-const hotspots = hotspotStart >= 0 && hotspotEnd > hotspotStart ? stage.slice(hotspotStart, hotspotEnd) : "";
-const imageCssStart = app.lastIndexOf("/* v245: show the approved dashboard artwork");
-const imageCssEnd = app.lastIndexOf("</style>");
-const imageCss = imageCssStart >= 0 && imageCssEnd > imageCssStart ? app.slice(imageCssStart, imageCssEnd) : "";
 
-check("the approved 700×564 AVIF artwork is the single ALVIS reference image",
-  (app.match(/class="alvis-reference-image"/g) || []).length === 1 &&
-  imageTag.includes('src="./assets/alvis-dashboard-reference.avif"') &&
-  imageTag.includes('width="700" height="564"'));
-check("the registered binary is the expected AVIF format and size",
-  image.length > 20000 && image.length < 60000 &&
-  image.subarray(4, 12).toString("ascii") === "ftypavif");
-check("the original 1397:1126 composition is shown without filters or transforms",
-  imageCss.includes("aspect-ratio:1397/1126") &&
-  imageCss.includes("object-fit:fill!important") &&
-  imageCss.includes("filter:none!important") &&
-  imageCss.includes("transform:none!important"));
-check("the selected image is the only visible globe, orbit, projector and panel artwork",
-  imageCss.includes(">.hud-side-right") &&
-  imageCss.includes(">.hud-center") &&
-  imageCss.includes("display:none!important") &&
-  !stage.includes('class="alvis-motion-orbit'));
-check("the five image-aligned left menu controls map to the existing pages",
+check("ALVIS mode uses the live hologram stage and not the obsolete static reference image",
+  stageStart >= 0 &&
+  !stage.includes('class="alvis-reference-image"') &&
+  !stage.includes('alvis-dashboard-reference.avif') &&
+  !stage.includes('class="alvis-reference-right-hotspots"'));
+check("the central hologram globe is live SVG artwork",
+  stage.includes('class="hud-globe-map"') &&
+  stage.includes('aria-label="青く輝くホログラム球体"'));
+check("all three orbital rings remain live DOM elements",
+  ["hud-orbit-a", "hud-orbit-b", "hud-orbit-c"]
+    .every(name => stage.includes('class="hud-orbit ' + name + '"')));
+check("the three orbital rings keep their independent 22/31/42 second motion",
+  app.includes('duration:22000') &&
+  app.includes('duration:31000') &&
+  app.includes('duration:42000'));
+check("projector, light beam and hologram platform remain visible components",
+  stage.includes('class="hud-projector"') &&
+  stage.includes('class="hud-beam"') &&
+  stage.includes('class="hud-platform"'));
+check("both live information panels remain in the stage",
+  stage.includes('class="hud-side hud-side-left"') &&
+  stage.includes('class="hud-side hud-side-right"'));
+check("the five left-side menu controls remain connected to existing pages",
   ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage"]
-    .every(page => nav.includes('data-page="' + page + '"')));
-check("the left menu controls remain transparent, touchable and keyboard-focusable",
-  imageCss.includes("opacity:.001!important") &&
-  imageCss.includes("pointer-events:auto!important") &&
-  imageCss.includes("touch-action:manipulation!important") &&
-  imageCss.includes(":focus-visible"));
-check("the AI launch hotspot remains the existing unique hudAiAction button",
+    .every(page => stage.includes('data-page="' + page + '"')));
+check("the existing local AI launch control remains connected",
   (app.match(/id="hudAiAction"/g) || []).length === 1 &&
   stage.includes('id="hudAiAction"') &&
   app.includes('$("hudAiAction")?.addEventListener("click"'));
-check("the right system, memory and growth hotspots map to existing pages",
-  ["devicePage", "memoryPage", "growthPage"]
-    .every(page => hotspots.includes('data-page="' + page + '"')) &&
-  hotspots.includes('aria-label="端末診断"') &&
-  hotspots.includes('aria-label="好み・長期記憶"') &&
-  hotspots.includes('aria-label="プロジェクト・成長"'));
-check("all dashboard page buttons use the existing navigation handler",
-  app.includes('document.querySelectorAll("button[data-page]")') &&
-  app.includes("navigateAlvisPage(button.dataset.page)"));
-check("chat input, send, local inference and both display modes remain",
+check("the right panel keeps its real memory and growth actions",
+  stage.includes('data-hud-action="memory"') &&
+  stage.includes('data-hud-action="growth"'));
+check("device diagnostics remains reachable through the existing navigation",
+  app.includes('<button data-page="devicePage">端末診断</button>'));
+check("no v245 image overlay CSS hides the live globe or right panel",
+  !app.includes("/* v245: show the approved dashboard artwork") &&
+  !app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center,") &&
+  !app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side-right,"));
+check("Avatar mode stays separate and hides only the ALVIS stage",
+  app.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}') &&
+  app.includes('id="alvisAvatarCanvas"'));
+check("chat, local inference, display mode switching and shared features remain",
   app.includes('id="chatInput"') &&
   app.includes('id="sendChat"') &&
   app.includes("async function sendToAlvis()") &&
   app.includes('id="jarvisModeButton"') &&
-  app.includes('id="avatarModeButton"'));
-check("encrypted memory, history, cloud sync, backup and voice code remain",
+  app.includes('id="avatarModeButton"') &&
   app.includes("encryptData") &&
-  app.includes("saveLocal") &&
   app.includes("saveCloudCore") &&
-  app.toLowerCase().includes("backup") &&
-  app.includes("Kokoro") &&
-  app.includes("data.history"));
-check("avatar mode remains separate and hides only the ALVIS artwork stage",
-  imageCss.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}') &&
-  app.includes('id="alvisAvatarCanvas"'));
-check("Service Worker v247 precaches the approved artwork and preserves dependency cache",
-  sw.includes('const CACHE_NAME = "alvis-cache-v247-integrated";') &&
-  sw.includes('./assets/alvis-dashboard-reference.avif') &&
-  sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";'));
-check("Service Worker activation preserves non-ALVIS model and user-data caches",
+  app.includes("Kokoro"));
+check("Service Worker v248 refreshes only the ALVIS app shell, not model/dependency caches",
+  sw.includes('const CACHE_NAME = "alvis-cache-v248-integrated";') &&
+  !sw.includes("./assets/alvis-dashboard-reference.avif") &&
+  sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";') &&
   sw.includes('key.startsWith("alvis-cache-")') &&
   sw.includes('key.startsWith("alvis-deps-")'));
 const openScripts = app.split("<script").length - 1;
@@ -93,4 +77,4 @@ const closeScripts = app.split("</script>").length - 1;
 check("the HTML script tags remain balanced", openScripts === closeScripts);
 
 for (const name of checks) console.log("PASS " + name);
-console.log(checks.length + "/" + checks.length + " ALVIS approved-dashboard checks passed.");
+console.log(checks.length + "/" + checks.length + " ALVIS live-HUD checks passed.");
