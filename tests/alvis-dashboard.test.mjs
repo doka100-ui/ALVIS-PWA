@@ -66,8 +66,23 @@ check("chat, local inference, display mode switching and shared features remain"
   app.includes("encryptData") &&
   app.includes("saveCloudCore") &&
   app.includes("Kokoro"));
-check("Service Worker v248 refreshes only the ALVIS app shell, not model/dependency caches",
-  sw.includes('const CACHE_NAME = "alvis-cache-v248-integrated";') &&
+check("v249 widens only the ALVIS-mode hologram on narrow portrait screens",
+  app.includes('@media(max-width:600px) and (orientation:portrait)') &&
+  app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') &&
+  app.includes('width:calc(100% + 12px)!important;') &&
+  app.includes('margin-left:-6px!important;') &&
+  app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage'));
+check("v249 moves the external-AI and local-model notes lower on iPhone portrait",
+  app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option') &&
+  app.includes('margin:24px 0 10px!important;') &&
+  app.includes('.hud-shortcuts+.inline-option+p.small'));
+check("v249 mobile layout leaves Avatar mode and shared features intact",
+  app.includes('#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{') &&
+  app.includes('id="alvisAvatarCanvas"') &&
+  app.includes('id="useOnlineAi"') &&
+  app.includes('id="chatInput"'));
+check("Service Worker v249 refreshes only the ALVIS app shell, not model/dependency caches",
+  sw.includes('const CACHE_NAME = "alvis-cache-v249-integrated";') &&
   !sw.includes("./assets/alvis-dashboard-reference.avif") &&
   sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";') &&
   sw.includes('key.startsWith("alvis-cache-")') &&
