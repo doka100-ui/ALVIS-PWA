@@ -55,7 +55,7 @@ check("no v245 image overlay CSS hides the live globe or right panel",
   app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side{display:block!important;visibility:visible!important}") &&
   app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center{display:grid!important;visibility:visible!important}"));
 check("Avatar mode stays separate and hides only the ALVIS stage",
-  app.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}') &&
+  app.includes('#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{') && /#chatPage\[data-display-mode="avatar"\] \.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/.test(app) &&
   app.includes('id="alvisAvatarCanvas"'));
 check("chat, local inference, display mode switching and shared features remain",
   app.includes('id="chatInput"') &&
