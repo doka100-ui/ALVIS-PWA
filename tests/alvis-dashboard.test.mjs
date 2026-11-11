@@ -81,8 +81,13 @@ check("v249 mobile layout leaves Avatar mode and shared features intact",
   app.includes('id="alvisAvatarCanvas"') &&
   app.includes('id="useOnlineAi"') &&
   app.includes('id="chatInput"'));
-check("Service Worker v249 refreshes only the ALVIS app shell, not model/dependency caches",
-  sw.includes('const CACHE_NAME = "alvis-cache-v249-integrated";') &&
+check("v250 extends only the ALVIS hologram downward on narrow portrait screens",
+  app.includes("/* v250: extend the live ALVIS hologram downward on iPhone portrait */") &&
+  app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{') &&
+  app.includes("min-height:450px!important;") &&
+  app.includes("min-height:390px!important;"));
+check("Service Worker v250 refreshes only the ALVIS app shell, not model/dependency caches",
+  sw.includes('const CACHE_NAME = "alvis-cache-v250-integrated";') &&
   !sw.includes("./assets/alvis-dashboard-reference.avif") &&
   sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";') &&
   sw.includes('key.startsWith("alvis-cache-")') &&
