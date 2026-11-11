@@ -1673,6 +1673,18 @@ header .status{margin-top:2px}
 }
 /* end v249 */
 
+/* v250: extend the live ALVIS hologram downward on iPhone portrait.
+   Keep the globe, rings, side panels and Avatar mode styling unchanged. */
+@media(max-width:600px) and (orientation:portrait){
+  #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{
+    min-height:450px!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-center{
+    min-height:390px!important;
+  }
+}
+/* end v250 */
+
 </style>
 <script type="importmap">
 {
