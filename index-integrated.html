@@ -1648,6 +1648,31 @@ header .status{margin-top:2px}
 
 
 
+
+/* v249: iPhone portrait layout — slightly widen the live ALVIS hologram
+   and move the external-AI / local-model notes lower, without touching Avatar mode. */
+@media(max-width:600px) and (orientation:portrait){
+  #chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{
+    width:calc(100% + 12px)!important;
+    max-width:none!important;
+    margin-left:-6px!important;
+    margin-right:-6px!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+    width:100%!important;
+    max-width:none!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{
+    display:flex!important;
+    margin:24px 0 10px!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option+p.small,
+  #chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option+p.small+p.small{
+    margin:8px 0 10px!important;
+  }
+}
+/* end v249 */
+
 </style>
 <script type="importmap">
 {
