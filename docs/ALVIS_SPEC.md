@@ -1,3 +1,7 @@
+## v252 Avatar用依存CDNのキャッシュ
+- Avatarモードが使用するmodel-viewerの `ajax.googleapis.com` 配信コードを、既存の依存コードキャッシュ `alvis-deps-v2` に保存する。
+- WebLLM/Kokoroのesm.run・jsdelivr依存キャッシュと同じく、初回オンライン読み込み後の再利用を目指す。依存グラフやモデル/テクスチャの完全オフライン動作は別途実機確認する。
+
 ## v251 オフライン起動用PWA設定
 - 統合画面は `manifest-integrated.json` を参照し、iOS/iPadOSのホーム画面Webアプリ起動メタデータを持つ。
 - manifestの起動先は `./index-integrated.html`。Service Workerはクエリ文字列を無視して同一パスのアプリシェルを再利用し、activate時の `clients.claim()` 完了を待つ。
