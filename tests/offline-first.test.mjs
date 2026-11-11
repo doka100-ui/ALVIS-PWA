@@ -3,6 +3,16 @@ import { readFile } from "node:fs/promises";
 
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
+const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
+
+// v251: the integrated page is installable from the iOS/iPadOS home screen and keeps offline navigation stable.
+assert.match(app, /<link rel="manifest" href="\.\/manifest-integrated\.json">/);
+assert.match(app, /name="apple-mobile-web-app-capable" content="yes"/);
+assert.match(app, /name="apple-mobile-web-app-title" content="ALVIS"/);
+assert.equal(manifest.start_url, "./index-integrated.html");
+assert.equal(manifest.scope, "./");
+assert.match(sw, /caches\.match\(request, \{ ignoreSearch: true \}\)/);
+assert.match(sw, /await self\.clients\.claim\(\)/);
 
 // v240: a fresh model load must wait for logout-triggered GPU cleanup and stop after a failed cleanup.
 assert.match(app,/let alvisEngineCleanupPromise=Promise\.resolve\(\)/);
@@ -695,7 +705,7 @@ assert.match(app,/data-page="chatPage"/);
 assert.match(app,/data-page="devicePage"/);
 assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
 assert.match(app,/data-display-mode="avatar"[\s\S]*?\.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/);
-assert.match(sw,/alvis-cache-v250-integrated/);
+assert.match(sw,/alvis-cache-v251-integrated/);
 assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v250: portrait ALVIS hologram expands downward without changing Avatar mode.
@@ -703,7 +713,7 @@ assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portra
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
 assert.match(app,/min-height:390px!important/);
-assert.match(sw,/alvis-cache-v250-integrated/);
+assert.match(sw,/alvis-cache-v251-integrated/);
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
@@ -953,7 +963,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v250-integrated"),"v250 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v251-integrated"),"v250 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
