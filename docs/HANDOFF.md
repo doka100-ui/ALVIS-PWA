@@ -1,3 +1,7 @@
+## v253 iOS SafariのService Workerリダイレクト応答を正規化（2026-11-11）
+- iOS Safariで「Response served by service worker has redirections」が発生する可能性に対応するため、Service Workerがキャッシュ応答・ネットワーク応答・オフライン用アプリシェルを返す直前に、redirected応答のリダイレクトメタデータを除去し、最終レスポンスの本文/ステータス/ヘッダーを維持する。
+- アプリシェルキャッシュをv253へ更新。既存のモデルキャッシュ、依存コードキャッシュ、音声、記憶、履歴、暗号化、同期、バックアップは削除・変更しない。
+- 回帰テストを追加。iPhone Safari + 280blocker有効状態での実機起動、およびCloudflare Pages反映は未確認。
 ## v252 Avatar用model-viewer依存CDNのオフラインキャッシュ（2026-11-11）
 - Avatarモードが初回ロードする `https://ajax.googleapis.com` のmodel-viewerモジュールも、既存の依存コードキャッシュ `alvis-deps-v2` へ保存する許可オリジンに追加。
 - Service Workerのアプリシェルキャッシュをv252へ更新。v251のPWAメタデータ、クエリ文字列を無視するアプリシェル照合、activate時のclients.claim待機を維持。
