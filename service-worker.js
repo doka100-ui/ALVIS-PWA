@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v247-integrated";
+const CACHE_NAME = "alvis-cache-v248-integrated";
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
   "https://esm.run",
@@ -10,7 +10,6 @@ const FILES_TO_CACHE = [
   "./index.html",
   "./index-integrated.html",
   "./assets/alvis-vrm-runtime.js",
-  "./assets/alvis-dashboard-reference.avif",
   "./manifest.json",
   "./manifest-integrated.json",
   "./assets/alvis-18-preview.jpg",
