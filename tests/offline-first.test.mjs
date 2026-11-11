@@ -694,7 +694,7 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/data-page="chatPage"/);
 assert.match(app,/data-page="devicePage"/);
 assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
-assert.match(app,/#chatPage\[data-display-mode="avatar"\] \.display-dock \.mode-stage\.jarvis-stage\{display:none!important\}/);
+assert.match(app,/data-display-mode="avatar"[\s\S]*?\.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/);
 assert.match(sw,/alvis-cache-v248-integrated/);
 assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
