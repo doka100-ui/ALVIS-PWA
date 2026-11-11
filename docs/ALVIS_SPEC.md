@@ -1,3 +1,7 @@
+## v255 ズーム中のWeb Animations API制御
+- ALVIS HUDのリングはCSS keyframesではなくElement.animateで生成される。ズーム時はAnimation.pause()、通常倍率へ戻るとAnimation.play()を適用する。
+- pageshow/visibility復帰時にリングを再生成した場合も、ズーム中なら直ちに停止する。Avatarモードは対象外。
+
 ## v254 iOSピンチズーム時のHUD描画負荷軽減
 - `visualViewport.scale` が1.01を超えた場合、`alvis-zooming`クラスを付与し、ALVISモードの軌道アニメーションを停止、球体の強いbox-shadowを一時的に軽減する。
 - ズーム操作は許可したままにし、scaleが通常に戻るとクラスを解除して元のHUD演出へ復帰する。Avatarモードやモデル/ユーザーデータの状態は変更しない。
