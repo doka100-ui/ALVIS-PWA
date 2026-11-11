@@ -86,8 +86,8 @@ check("v250 extends only the ALVIS hologram downward on narrow portrait screens"
   app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{') &&
   app.includes("min-height:450px!important;") &&
   app.includes("min-height:390px!important;"));
-check("Service Worker v251 refreshes only the ALVIS app shell, not model/dependency caches",
-  sw.includes('const CACHE_NAME = "alvis-cache-v251-integrated";') &&
+check("Service Worker v252 refreshes only the ALVIS app shell, not model/dependency caches",
+  sw.includes('const CACHE_NAME = "alvis-cache-v252-integrated";') &&
   !sw.includes("./assets/alvis-dashboard-reference.avif") &&
   sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";') &&
   sw.includes('key.startsWith("alvis-cache-")') &&
