@@ -1,3 +1,8 @@
+## v255 実際のHUDリングアニメーションをズーム中に停止（2026-11-11）
+- v254ではCSS animation-play-stateを変更していたが、実際のリング回転はWeb Animations API（Element.animate）で作られていたため停止対象外だった。
+- v255ではvisualViewportのscale監視に連動し、`alvisHudMotionAnimations`のAnimationオブジェクトを拡大中pause、通常倍率でplayする。pageshow/visibility復帰後に再生成されたリングも拡大中ならpauseする。
+- これによりv254の対策が実際のリング回転に適用される。iPhone実機でのクラッシュ解消は未確認。
+
 ## v254 iOSホーム画面アプリのピンチズーム時にHUD描画負荷を抑制（2026-11-11）
 - Qwen3-4B読み込み完了後のピンチズームでSafariホーム画面アプリが再起動する可能性に対し、Visual Viewportのscaleを監視し、拡大中だけALVISモードの軌道リングCSSアニメーションと球体の強い発光影を一時停止/軽減する。
 - ズーム自体は無効化しない。拡大解除時に元の演出へ自動復帰。Avatarモード、ログイン、WebGPUモデル、記憶/履歴/暗号化/同期/バックアップ処理は変更しない。
