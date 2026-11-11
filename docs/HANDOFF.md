@@ -1,3 +1,9 @@
+## v251 オフライン起動用PWA設定とService Worker制御の強化（2026-11-11）
+- `index-integrated.html` に `manifest-integrated.json` の参照とiOS/iPadOS向けホーム画面起動メタデータを追加。manifestのstart_urlは統合版 `index-integrated.html`、scopeは既存の `./` を維持。
+- Service Workerのアプリシェルキャッシュ照合を `ignoreSearch:true` にし、`?refresh=...` 等のクエリ付きURLでも保存済み同一パスを再利用できるようにする。activate内で旧ALVISアプリ/依存キャッシュの整理後に `clients.claim()` をawait。
+- 旧ALVISアプリキャッシュだけをv251へ更新。WebLLMモデルキャッシュ、依存キャッシュ名/内容、Kokoro音声キャッシュ、暗号化記憶、会話履歴、同期、バックアップ、AIモデル設定は削除・変更しない。
+- 回帰テストにPWAメタデータ、manifestのstart_url/scope、クエリ付きキャッシュ照合、activate制御を追加。iOSホーム画面追加・完全オフライン再起動・Qwenモデル再ロード・Cloudflare Pages配信は実機未確認。完全オフライン対応完了とは扱わない。
+
 ## v250 iPhone縦画面でホログラムを下方向へ拡張（2026-11-11）
 - 600px以下の縦向き画面に限定し、ALVISモードのライブHUDステージをmin-height 450px、中央HUD領域を390pxへ拡張。v249の横幅調整と説明文位置は維持。
 - 球体/リング/左右パネルのデザインやアニメーション自体は変更せず、表示領域を縦方向へ拡大。Avatarモードと共有チャット/AI/音声/記憶/履歴/暗号化/同期/バックアップ、モデル/依存キャッシュは変更しない。Service Worker cache v250。
