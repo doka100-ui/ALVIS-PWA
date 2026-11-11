@@ -677,24 +677,26 @@ assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 
-// v245: the approved dashboard image is the visible ALVIS mode; legacy HUD DOM remains hidden for compatibility.
-assert.match(app,/class="alvis-reference-image"/);
-assert.match(app,/src="\.\/assets\/alvis-dashboard-reference\.avif"/);
-assert.match(app,/class="alvis-reference-right-hotspots"/);
+// v248: ALVIS mode must show the live v188-style hologram HUD, never the obsolete static reference image.
+assert.doesNotMatch(app,/class="alvis-reference-image"/);
+assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
+assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="hud-center"/);
 assert.match(app,/class="hud-globe-map"/);
 assert.match(app,/class="hud-orbit hud-orbit-a"/);
 assert.match(app,/class="hud-orbit hud-orbit-b"/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
 assert.match(app,/class="hud-projector"/);
+assert.match(app,/class="hud-platform"/);
+assert.match(app,/class="hud-side hud-side-left"/);
+assert.match(app,/class="hud-side hud-side-right"/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/data-page="chatPage"/);
 assert.match(app,/data-page="devicePage"/);
-assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center,"));
-assert.ok(app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side-right,"));
-assert.ok(app.includes("display:none!important"));
-assert.match(sw,/alvis-cache-v247-integrated/);
-assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
+assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
+assert.match(app,/#chatPage\[data-display-mode="avatar"\] \.display-dock \.mode-stage\.jarvis-stage\{display:none!important\}/);
+assert.match(sw,/alvis-cache-v248-integrated/);
+assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
@@ -718,7 +720,7 @@ assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\
 assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v204");
 
 
-// v245: retained vector HUD DOM and motion bindings remain available but are hidden behind the approved image.
+// v248: the live vector HUD remains visible and its three independent ring animations stay connected.
 assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer must not be reintroduced");
 assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "HUD motion code targets the live orbital rings");
 assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "orbit state bindings remain available");
