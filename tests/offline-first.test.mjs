@@ -700,7 +700,7 @@ assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v250: portrait ALVIS hologram expands downward without changing Avatar mode.
 assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
-assert.match(app,/#chatPage\\\[data-display-mode="jarvis"\\\] \\.display-dock \\.mode-stage\\.jarvis-stage/);
+assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
 assert.match(app,/min-height:390px!important/);
 assert.match(sw,/alvis-cache-v250-integrated/);
