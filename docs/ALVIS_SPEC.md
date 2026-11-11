@@ -1,3 +1,7 @@
+## v254 iOSピンチズーム時のHUD描画負荷軽減
+- `visualViewport.scale` が1.01を超えた場合、`alvis-zooming`クラスを付与し、ALVISモードの軌道アニメーションを停止、球体の強いbox-shadowを一時的に軽減する。
+- ズーム操作は許可したままにし、scaleが通常に戻るとクラスを解除して元のHUD演出へ復帰する。Avatarモードやモデル/ユーザーデータの状態は変更しない。
+
 ## v253 Service Workerリダイレクト応答の正規化
 - キャッシュ/ネットワーク/オフラインフォールバックから応答を返す際、redirected応答はResponseを再構築してリダイレクト属性を除去する。本文・status・statusText・headersは維持する。opaqueまたはstatus 0の応答は再構築しない。
 - iOS SafariのService Workerナビゲーションエラー対策。実機での280blocker併用検証が必要。
