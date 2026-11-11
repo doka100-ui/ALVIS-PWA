@@ -1,4 +1,5 @@
 const CACHE_NAME = "alvis-cache-v251-integrated";
+// v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
   "https://esm.run",
