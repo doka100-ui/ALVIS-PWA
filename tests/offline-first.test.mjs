@@ -946,7 +946,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v247-integrated"),"v246 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v248-integrated"),"v248 app shell cache must be refreshed");
 
 
 // v247: gentle head/neck motion is confined to supported VRM humanoid bones.
