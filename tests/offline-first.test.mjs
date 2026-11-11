@@ -719,7 +719,7 @@ assert.match(app,/data-page="chatPage"/);
 assert.match(app,/data-page="devicePage"/);
 assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
 assert.match(app,/data-display-mode="avatar"[\s\S]*?\.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/);
-assert.match(sw,/alvis-cache-v253-integrated/);
+assert.match(sw,/alvis-cache-v\\d+-integrated/);
 assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v250: portrait ALVIS hologram expands downward without changing Avatar mode.
@@ -727,7 +727,7 @@ assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portra
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
 assert.match(app,/min-height:390px!important/);
-assert.match(sw,/alvis-cache-v253-integrated/);
+assert.match(sw,/alvis-cache-v\\d+-integrated/);
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
@@ -977,7 +977,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v253-integrated"),"v250 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v254-integrated"),"v254 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
