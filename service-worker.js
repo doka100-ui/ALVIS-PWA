@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v252-integrated";
+const CACHE_NAME = "alvis-cache-v253-integrated";
 // v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
@@ -43,13 +43,24 @@ self.addEventListener("activate", (event) => {
   })());
 });
 
+// iOS Safari can reject a redirected Response returned by a Service Worker.
+// Strip redirect metadata while preserving the final response body and headers.
+function makeServiceWorkerSafeResponse(response) {
+  if (!response || !response.redirected || response.type === "opaque" || response.status === 0) return response;
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers
+  });
+}
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
 
   event.respondWith((async () => {
     const cached = await caches.match(request, { ignoreSearch: true });
-    if (cached) return cached;
+    if (cached) return makeServiceWorkerSafeResponse(cached);
 
     const url = new URL(request.url);
     // module import / Worker / WASM fetches may have an empty destination.
@@ -58,7 +69,7 @@ self.addEventListener("fetch", (event) => {
     const isTrustedDependency = DEPENDENCY_ORIGINS.has(url.origin);
 
     try {
-      const response = await fetch(request);
+      const response = makeServiceWorkerSafeResponse(await fetch(request));
       // 許可したCDNの依存コード/音声用アセットを専用キャッシュへ保存する。
       // Hugging Face上の大容量モデルは各推論ライブラリのモデルキャッシュに任せる。
       if (isTrustedDependency && response.ok && response.type !== "opaque" && request.headers.get("range") === null) {
@@ -72,7 +83,7 @@ self.addEventListener("fetch", (event) => {
         const appShell =
           await caches.match("./index-integrated.html") ||
           await caches.match("./index.html");
-        if (appShell) return appShell;
+        if (appShell) return makeServiceWorkerSafeResponse(appShell);
       }
       return new Response(
         "ALVIS: オフラインのため、このファイルを取得できません。オンラインで一度読み込んでください。",
