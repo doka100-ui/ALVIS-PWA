@@ -1,3 +1,9 @@
+## v252 Avatar用model-viewer依存CDNのオフラインキャッシュ（2026-11-11）
+- Avatarモードが初回ロードする `https://ajax.googleapis.com` のmodel-viewerモジュールも、既存の依存コードキャッシュ `alvis-deps-v2` へ保存する許可オリジンに追加。
+- Service Workerのアプリシェルキャッシュをv252へ更新。v251のPWAメタデータ、クエリ文字列を無視するアプリシェル照合、activate時のclients.claim待機を維持。
+- 既存のesm.run/jsdelivr依存キャッシュ方式、WebLLMモデルキャッシュ、Kokoroモデル/音声キャッシュ、暗号化記憶、履歴、同期、バックアップは削除・変更しない。
+- 回帰テストを追加。Google CDNを含む依存グラフ全体、3Dモデル/テクスチャ、Qwen/Kokoroの全資材がオフラインで利用できるかは実機未確認。
+
 ## v251 オフライン起動用PWA設定とService Worker制御の強化（2026-11-11）
 - `index-integrated.html` に `manifest-integrated.json` の参照とiOS/iPadOS向けホーム画面起動メタデータを追加。manifestのstart_urlは統合版 `index-integrated.html`、scopeは既存の `./` を維持。
 - Service Workerのアプリシェルキャッシュ照合を `ignoreSearch:true` にし、`?refresh=...` 等のクエリ付きURLでも保存済み同一パスを再利用できるようにする。activate内で旧ALVISアプリ/依存キャッシュの整理後に `clients.claim()` をawait。
