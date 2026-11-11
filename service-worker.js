@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v250-integrated";
+const CACHE_NAME = "alvis-cache-v251-integrated";
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
   "https://esm.run",
@@ -25,21 +25,20 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          // ALVIS自身の旧アプリ/依存コードキャッシュだけを更新する。
-          // WebLLMのモデルキャッシュなど、他ライブラリのCache Storageは保持する。
-          .filter((key) =>
-            (key.startsWith("alvis-cache-") && key !== CACHE_NAME) ||
-            (key.startsWith("alvis-deps-") && key !== DEPENDENCY_CACHE_NAME)
-          )
-          .map((key) => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys
+        // ALVIS自身の旧アプリ/依存コードキャッシュだけを更新する。
+        // WebLLMのモデルキャッシュなど、他ライブラリのCache Storageは保持する。
+        .filter((key) =>
+          (key.startsWith("alvis-cache-") && key !== CACHE_NAME) ||
+          (key.startsWith("alvis-deps-") && key !== DEPENDENCY_CACHE_NAME)
+        )
+        .map((key) => caches.delete(key))
+    );
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
@@ -47,7 +46,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   event.respondWith((async () => {
-    const cached = await caches.match(request);
+    const cached = await caches.match(request, { ignoreSearch: true });
     if (cached) return cached;
 
     const url = new URL(request.url);
