@@ -981,6 +981,20 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
  .display-dock .hud-center .hud-orbit{animation:none!important;}
 }
 
+/* v254: temporarily reduce compositing work while iOS home-screen pinch zoom is active. */
+html.alvis-zooming .display-dock .hud-center .hud-orbit{
+  animation-play-state:paused!important;
+  will-change:auto!important;
+}
+html.alvis-zooming .display-dock .hud-core{
+  box-shadow:0 0 14px #7deaff66,inset 0 0 20px #7ceaff55!important;
+}
+html.alvis-zooming .display-dock .hud-core:before,
+html.alvis-zooming .display-dock .hud-core:after{
+  box-shadow:none!important;
+}
+
+
 
 /* v154: premium precision-machined holographic pedestal.
    Keep the pedestal static; remove the toy-like hot-pink core and oversized glow. */
@@ -2295,6 +2309,21 @@ function getAlvisGpuDiagnosticSummary(){
     (d.visibilityChangedAt?" / visibilityAt "+d.visibilityChangedAt:"");
 }
 installAlvisWebGpuDiagnostics();
+
+// iOS standalone Safari can exceed its compositing budget when pinch-zooming
+// the animated holographic HUD after WebGPU model startup. Pause only costly
+// HUD effects while zoomed; preserve native page zoom and restore effects on zoom-out.
+function updateAlvisZoomRenderMode(){
+  const viewport=window.visualViewport;
+  const zoomed=!!viewport&&Number(viewport.scale)>1.01;
+  document.documentElement.classList.toggle("alvis-zooming",zoomed);
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",updateAlvisZoomRenderMode,{passive:true});
+  window.visualViewport.addEventListener("scroll",updateAlvisZoomRenderMode,{passive:true});
+  window.addEventListener("pageshow",updateAlvisZoomRenderMode);
+}
+
 
 let CreateMLCEngine = null;
 let alvisHasModelInCache = null;
