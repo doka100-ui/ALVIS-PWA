@@ -719,7 +719,7 @@ assert.match(app,/data-page="chatPage"/);
 assert.match(app,/data-page="devicePage"/);
 assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
 assert.match(app,/data-display-mode="avatar"[\s\S]*?\.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v250: portrait ALVIS hologram expands downward without changing Avatar mode.
@@ -727,7 +727,7 @@ assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portra
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
 assert.match(app,/min-height:390px!important/);
-assert.match(sw,/alvis-cache-v\\d+-integrated/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
 const vrmRuntime = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
