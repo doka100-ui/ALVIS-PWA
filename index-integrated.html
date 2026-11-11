@@ -2317,6 +2317,13 @@ function updateAlvisZoomRenderMode(){
   const viewport=window.visualViewport;
   const zoomed=!!viewport&&Number(viewport.scale)>1.01;
   document.documentElement.classList.toggle("alvis-zooming",zoomed);
+  // ALVIS rings use the Web Animations API, not CSS keyframes. Pause the
+  // actual Animation objects while the iOS standalone viewport is magnified.
+  if(typeof alvisHudMotionAnimations!=="undefined"){
+    alvisHudMotionAnimations.forEach(animation=>{
+      try{if(zoomed)animation.pause();else animation.play();}catch(error){}
+    });
+  }
 }
 if(window.visualViewport){
   window.visualViewport.addEventListener("resize",updateAlvisZoomRenderMode,{passive:true});
@@ -5321,6 +5328,10 @@ function startAlvisHudMotion(){
     );
     alvisHudMotionAnimations.push(animation);
   });
+  // pageshow/visibility restoration may recreate the rings while still zoomed.
+  if(document.documentElement.classList.contains("alvis-zooming")){
+    alvisHudMotionAnimations.forEach(animation=>{try{animation.pause();}catch(error){}});
+  }
 }
 window.addEventListener("pageshow",()=>requestAnimationFrame(startAlvisHudMotion));
 document.addEventListener("visibilitychange",()=>{
