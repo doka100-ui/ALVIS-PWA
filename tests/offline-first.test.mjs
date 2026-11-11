@@ -6,13 +6,16 @@ const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
-// v254: temporarily reduce animated HUD compositing while iOS standalone pinch-zoom is active.
+// v254: reduce HUD effects while iOS standalone pinch-zoom is active.
+// v255: pause the actual Web Animations API ring animations during pinch-zoom.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v254-integrated/);
+assert.match(sw, /alvis-cache-v255-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
+assert.match(app,/alvisHudMotionAnimations\.forEach\(animation=>\{[\s\S]*?if\(zoomed\)animation\.pause\(\);else animation\.play\(\)/);
+assert.match(app,/if\(document\.documentElement\.classList\.contains\("alvis-zooming"\)\)[\s\S]*?animation\.pause\(\)/);
 assert.match(app,/visualViewport\.addEventListener\("resize",updateAlvisZoomRenderMode/);
 assert.match(app,/visualViewport\.addEventListener\("scroll",updateAlvisZoomRenderMode/);
 assert.match(app,/html\.alvis-zooming \.display-dock \.hud-center \.hud-orbit\{[\s\S]*?animation-play-state:paused!important/);
