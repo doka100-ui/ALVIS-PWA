@@ -1,3 +1,8 @@
+## v251 オフライン起動用PWA設定
+- 統合画面は `manifest-integrated.json` を参照し、iOS/iPadOSのホーム画面Webアプリ起動メタデータを持つ。
+- manifestの起動先は `./index-integrated.html`。Service Workerはクエリ文字列を無視して同一パスのアプリシェルを再利用し、activate時の `clients.claim()` 完了を待つ。
+- この変更はPWA起動基盤のみ。外部モジュール、WebLLMモデル重み、Kokoro全資材の完全オフライン利用を保証しない。実機の機内モード試験が必要。
+
 ## v250 iPhone縦画面のホログラム縦方向拡張
 - 600px以下の縦向き画面ではALVISモードのライブHUDステージを最低450px、中央HUD領域を最低390pxにする。球体/リング/左右パネルの構成・アニメーションは維持。
 - Avatarモードには適用しない。v249の横幅拡張と説明文の下方移動を維持。
