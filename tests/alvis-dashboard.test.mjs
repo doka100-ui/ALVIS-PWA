@@ -52,8 +52,8 @@ check("device diagnostics remains reachable through the existing navigation",
   app.includes('<button data-page="devicePage">端末診断</button>'));
 check("no v245 image overlay CSS hides the live globe or right panel",
   !app.includes("/* v245: show the approved dashboard artwork") &&
-  !app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center,") &&
-  !app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side-right,"));
+  app.includes(".display-dock .mode-stage.jarvis-stage>.hud-side{display:block!important;visibility:visible!important}") &&
+  app.includes(".display-dock .mode-stage.jarvis-stage>.hud-center{display:grid!important;visibility:visible!important}"));
 check("Avatar mode stays separate and hides only the ALVIS stage",
   app.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}') &&
   app.includes('id="alvisAvatarCanvas"'));
