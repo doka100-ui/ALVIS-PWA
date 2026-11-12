@@ -2311,25 +2311,41 @@ function getAlvisGpuDiagnosticSummary(){
 installAlvisWebGpuDiagnostics();
 
 // iOS standalone Safari can exceed its compositing budget when pinch-zooming
-// the animated holographic HUD after WebGPU model startup. Pause only costly
-// HUD effects while zoomed; preserve native page zoom and restore effects on zoom-out.
+// the animated holographic HUD after WebGPU model startup. Pause every animation
+// inside the ALVIS stage (including CSS pseudo-elements), not just orbital rings.
+let alvisHudPinchGestureActive=false;
+let alvisHudZoomRenderState=null;
+function setAlvisHudZoomAnimationState(zoomed){
+  const chatPage=$("chatPage");
+  if(!chatPage||chatPage.dataset.displayMode==="avatar")return;
+  const stage=chatPage.querySelector(".display-dock .jarvis-stage");
+  if(!stage)return;
+  const animations=new Set();
+  // Element.getAnimations() includes CSS animations on pseudo-elements. Walk
+  // the stage so Safari versions without the subtree option are also covered.
+  [stage,...stage.querySelectorAll("*")].forEach(target=>{
+    try{target.getAnimations().forEach(animation=>animations.add(animation));}catch(error){}
+  });
+  animations.forEach(animation=>{
+    try{if(zoomed)animation.pause();else animation.play();}catch(error){}
+  });
+}
 function updateAlvisZoomRenderMode(){
   const viewport=window.visualViewport;
-  const zoomed=!!viewport&&Number(viewport.scale)>1.01;
+  const zoomed=alvisHudPinchGestureActive||(!!viewport&&Number(viewport.scale)>1.01);
   document.documentElement.classList.toggle("alvis-zooming",zoomed);
-  // ALVIS rings use the Web Animations API, not CSS keyframes. Pause the
-  // actual Animation objects while the iOS standalone viewport is magnified.
-  if(typeof alvisHudMotionAnimations!=="undefined"){
-    alvisHudMotionAnimations.forEach(animation=>{
-      try{if(zoomed)animation.pause();else animation.play();}catch(error){}
-    });
-  }
+  if(zoomed===alvisHudZoomRenderState)return;
+  alvisHudZoomRenderState=zoomed;
+  setAlvisHudZoomAnimationState(zoomed);
 }
 if(window.visualViewport){
   window.visualViewport.addEventListener("resize",updateAlvisZoomRenderMode,{passive:true});
   window.visualViewport.addEventListener("scroll",updateAlvisZoomRenderMode,{passive:true});
-  window.addEventListener("pageshow",updateAlvisZoomRenderMode);
 }
+window.addEventListener("gesturestart",()=>{alvisHudPinchGestureActive=true;updateAlvisZoomRenderMode();},{passive:true});
+window.addEventListener("gesturechange",()=>{alvisHudPinchGestureActive=true;updateAlvisZoomRenderMode();},{passive:true});
+window.addEventListener("gestureend",()=>{alvisHudPinchGestureActive=false;updateAlvisZoomRenderMode();},{passive:true});
+window.addEventListener("pageshow",updateAlvisZoomRenderMode);
 
 
 let CreateMLCEngine = null;
@@ -5328,9 +5344,9 @@ function startAlvisHudMotion(){
     );
     alvisHudMotionAnimations.push(animation);
   });
-  // pageshow/visibility restoration may recreate the rings while still zoomed.
+  // Recreated rings and CSS effects must inherit the current zoom state.
   if(document.documentElement.classList.contains("alvis-zooming")){
-    alvisHudMotionAnimations.forEach(animation=>{try{animation.pause();}catch(error){}});
+    setAlvisHudZoomAnimationState(true);
   }
 }
 window.addEventListener("pageshow",()=>requestAnimationFrame(startAlvisHudMotion));
