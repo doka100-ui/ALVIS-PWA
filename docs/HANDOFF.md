@@ -1,3 +1,10 @@
+## v259 指定完成見本をALVISモードへ再適用（2026-11-12）
+- ユーザー指定の完成見本を元にした既存バイナリ `assets/alvis-dashboard-reference.avif`（700×564、Git blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8`）を再利用。画像バイナリ自体は変更しない。
+- ALVISモードのステージへ画像全体を1397:1126比率で表示。球体・リング・投影装置・台座・左右パネル・色・文字を画像そのまま使用し、追加の装飾や動的文字を重ねない。
+- 既存の左5メニューとAI起動ボタン、右側の端末診断/記憶/成長は透明なタップ領域で既存ページへ接続。旧ライブHUDのDOMは状態連携互換のため残し、画面上は非表示。
+- Service Workerをv259へ更新し、完成見本AVIFをアプリシェルへプリキャッシュ。WebLLM/Kokoroモデル、依存キャッシュ、暗号化記憶、履歴、同期、バックアップは削除・変更しない。
+- 画像専用テストとoffline-first回帰テストを、静止画ダッシュボードの表示仕様へ更新。Cloudflare Pages配信、Safari実機の画像読み込み/タップ/オフライン再読込は別途確認が必要。
+
 ## v258 非表示中の描画ループを停止（2026-11-12）
 - iOS Safari/ホーム画面アプリで画面が非表示になった間、VRM AvatarのrequestAnimationFrame描画を停止し、visible復帰時に再開する。非表示時間はアニメーション時計へ加算せず、復帰時の大きな時間ジャンプを防ぐ。
 - ALVIS HUDの3本のリングアニメーションは非表示中pauseし、復帰時にplayする。Avatar runtimeの終了時にvisibility/page lifecycle listenerを解除する。

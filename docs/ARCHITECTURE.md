@@ -1,9 +1,9 @@
-## 完成見本を使うALVISホログラム画面（v245）
-- ALVISモードは `assets/alvis-dashboard-reference.avif`（700×564 AVIF）を表示する。これはユーザー指定PNG「未来都市のホログラム地球ダッシュボード.png」を元にした既存アセットで、v234時点と現在のGit blob SHAが同一であることを確認済み。
-- ステージは元画像比率1397:1126、画像全体を `object-fit:fill` で表示。球体・軌道リング・上部投影装置・下部台座・左右パネル・文字・配色は画像自体を使い、CSS/SVGによる再描画や追加装飾は行わない。
-- 左側のチャット/記憶候補/長期記憶/履歴/同期、AI起動、右側の端末診断/長期記憶/成長計画は、既存の `button[data-page]` ナビゲーションと `hudAiAction` に接続した透明なタップ領域で操作する。
-- 画像内の日付・状態・件数は完成見本の固定表示。画像の一致を優先し、画像上に動的な文字や追加HUDを重ねない。実際のAI状態や記憶データは既存ページ/処理で維持する。
-- Service Worker cacheは `alvis-cache-v245-integrated`。画像をアプリシェルへプリキャッシュし、WebLLM/Kokoro依存キャッシュ、モデル重み、暗号化記憶、履歴、同期/バックアップデータを削除しない。
+## 完成見本を使うALVISホログラム画面（v259）
+- ALVISモードは `assets/alvis-dashboard-reference.avif`（700×564 AVIF）を表示する。ユーザー指定PNG「未来都市のホログラム地球ダッシュボード.png」を元にした既存アセットで、Git blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8` を維持する。
+- ステージは元画像比率1397:1126、画像全体を `object-fit:fill` で表示。球体・軌道リング・上部投影装置・下部台座・左右パネル・文字・配色は画像自体を使い、CSS/SVGで再描画したり追加装飾を重ねたりしない。
+- 左側のチャット/記憶候補/長期記憶/履歴/同期とAI起動、右側の端末診断/長期記憶/成長計画は、既存の `button[data-page]` と `hudAiAction` を使う透明なタップ領域で操作する。旧ライブHUDのDOMは状態連携互換のため残すが、表示は隠す。
+- 画像内の日付・状態・件数は完成見本の固定表示。実際のAI状態や記憶データは既存ページ/処理で維持する。
+- Service Worker cacheは `alvis-cache-v259-integrated`。画像をアプリシェルへプリキャッシュし、WebLLM/Kokoro依存キャッシュ、モデル重み、暗号化記憶、履歴、同期/バックアップデータを削除しない。
 - 回帰テストで画像バイナリ、表示比率、重複HUD非表示、左右の操作領域、チャット/AI/アバターモード/既存データ処理の保持を確認する。Cloudflare配信とSafari実機の表示/タップ/オフライン再読込は別途確認が必要。
 
 ## 参考画像ベースのホログラム（v138）
@@ -130,7 +130,7 @@
 
 # ALVIS システム構成・設計
 
-最終確認日: 2026-11-10  
+最終確認日: 2026-11-12  
 対象ブランチ: `development`
 
 ## 1. 全体構成
@@ -172,7 +172,7 @@ iPad / iPhone Safari
 - 同期Worker: https://alvis-sync.dokodemodoa100.workers.dev
 - 主な実機: iPad Pro M1 Safari。iPhone 17 Pro Maxも利用端末。
 - ブラウザでWebGPUを利用してモデルをロードする。モデルの初回ダウンロードは外部配信元への接続が必要。
-- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v245-integrated`。
+- PWA Service Workerは `./service-worker.js` を登録する。現在のキャッシュ名は `alvis-cache-v259-integrated`。
 
 ## 4. データの流れ
 

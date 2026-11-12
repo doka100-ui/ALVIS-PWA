@@ -14,7 +14,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v258-integrated/);
+assert.match(sw, /alvis-cache-v259-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
 assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
 assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
@@ -718,9 +718,9 @@ assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 
-// v248: ALVIS mode must show the live v188-style hologram HUD, never the obsolete static reference image.
-assert.doesNotMatch(app,/class="alvis-reference-image"/);
-assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
+// v259: ALVIS mode displays the approved artwork as-is; legacy HUD nodes stay hidden for state compatibility.
+assert.match(app,/class="alvis-reference-image" src="\.\/assets\/alvis-dashboard-reference\.avif"/);
+assert.match(app,/class="alvis-reference-right-hotspots"/);
 assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="hud-center"/);
 assert.match(app,/class="hud-globe-map"/);
@@ -735,11 +735,16 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/data-page="chatPage"/);
 assert.match(app,/data-page="devicePage"/);
 assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
-assert.match(app,/data-display-mode="avatar"[\s\S]*?\.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/);
+assert.match(app,/aspect-ratio:1397\/1126/);
+assert.match(app,/object-fit:fill!important/);
+assert.match(app,/filter:none!important/);
+assert.match(app,/transform:none!important/);
+assert.match(app,/v259: show the approved dashboard artwork as-is/);
+assert.match(app,/\.display-dock \.mode-stage\.jarvis-stage>\.hud-side-right,[\s\S]*?display:none!important/);
 assert.match(sw,/alvis-cache-v\d+-integrated/);
-assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
+assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
 
-// v250: portrait ALVIS hologram expands downward without changing Avatar mode.
+// v250: portrait sizing rules remain scoped; the final v259 override keeps the selected artwork ratio.
 assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
@@ -775,12 +780,14 @@ assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\
 assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v204");
 
 
-// v248: the live vector HUD remains visible and its three independent ring animations stay connected.
+// v259: the approved artwork is the visible surface; legacy HUD nodes and motion hooks remain isolated.
 assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer must not be reintroduced");
-assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "HUD motion code targets the live orbital rings");
-assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "orbit state bindings remain available");
-assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI launch control remains connected to its existing button");
-assert.match(app, /class="hud-globe-map"/, "live hologram sphere remains present");
+assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "legacy ring lifecycle remains isolated");
+assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
+assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "existing AI state controls remain connected");
+assert.match(app, /class="alvis-reference-image"/, "selected artwork remains in the ALVIS stage");
+assert.match(app, /class="alvis-reference-right-hotspots"/, "right-side image controls remain connected");
+assert.match(app, /class="hud-globe-map"/, "legacy globe nodes remain available but hidden");
 assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker cache is versioned");
 
 // v219: model-cache diagnostics must inspect non-ALVIS caches without deleting them.
@@ -1001,7 +1008,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v258-integrated"),"v258 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v259-integrated"),"v258 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
