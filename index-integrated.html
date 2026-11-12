@@ -5329,6 +5329,9 @@ function stopAlvisHudMotion(){
   alvisHudMotionAnimations.forEach(animation=>{try{animation.cancel();}catch(error){}});
   alvisHudMotionAnimations=[];
 }
+function setAlvisHudMotionPaused(paused){
+  alvisHudMotionAnimations.forEach(animation=>{try{if(paused)animation.pause();else animation.play();}catch(error){}});
+}
 function applyAlvisDisplayMode(mode,save=true){
   const safeMode=mode==="avatar"?"avatar":"jarvis";
   const chatPage=$("chatPage");
@@ -5392,10 +5395,17 @@ function startAlvisHudMotion(){
     setAlvisHudZoomAnimationState(true);
   }
 }
-window.addEventListener("pageshow",()=>requestAnimationFrame(startAlvisHudMotion));
-document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible")requestAnimationFrame(startAlvisHudMotion);
+window.addEventListener("pageshow",()=>{
+  if(alvisHudMotionAnimations.length)setAlvisHudMotionPaused(false);
+  else requestAnimationFrame(startAlvisHudMotion);
 });
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    if(alvisHudMotionAnimations.length)setAlvisHudMotionPaused(false);
+    else requestAnimationFrame(startAlvisHudMotion);
+  }else setAlvisHudMotionPaused(true);
+});
+window.addEventListener("pagehide",()=>setAlvisHudMotionPaused(true));
 
 /* v157: unified navigation with a cinematic but lightweight page transition. */
 let alvisPageTransitionCleanup=null;
