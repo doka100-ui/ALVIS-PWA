@@ -87,7 +87,7 @@ check("v250 extends only the ALVIS hologram downward on narrow portrait screens"
   app.includes("min-height:450px!important;") &&
   app.includes("min-height:390px!important;"));
 check("Service Worker v255 refreshes only the ALVIS app shell, not model/dependency caches",
-  sw.includes('const CACHE_NAME = "alvis-cache-v257-integrated";') &&
+  sw.includes('const CACHE_NAME = "alvis-cache-v258-integrated";') &&
   !sw.includes("./assets/alvis-dashboard-reference.avif") &&
   sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";') &&
   sw.includes('key.startsWith("alvis-cache-")') &&
