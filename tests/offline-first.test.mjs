@@ -756,7 +756,7 @@ assert.match(vrmRuntime,/lookAt: !!vrm\.lookAt\?\.target/,"diagnostics must chec
 assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by the runtime");
 // v258: VRM rendering is suspended while the document is hidden and resumes when visible.
 assert.match(vrmRuntime,/const animate = \(timestamp = 0\) => \{[\s\S]*?document\.visibilityState !== "visible"/,"VRM animation frames must stop when the document is hidden");
-assert.match(vrmRuntime,/function startRenderLoop\(\)[\s\S]*?document\.visibilityState !== "visible"[\s\S]*?requestAnimationFrame\(animate\)/,"VRM render loop must resume only when visible");
+assert.match(vrmRuntime,/const startRenderLoop = \(\) => \{[\s\S]*?document\.visibilityState !== "visible"[\s\S]*?requestAnimationFrame\(animate\)/,"VRM render loop must resume only when visible");
 assert.match(vrmRuntime,/document\.addEventListener\("visibilitychange", handleVisibilityChange\)/,"VRM runtime must listen for visibility changes");
 assert.match(vrmRuntime,/window\.removeEventListener\("pagehide", stopRenderLoop\)/,"VRM runtime must clean up page lifecycle listeners");
 assert.match(app,/function setAlvisHudMotionPaused\(paused\)/,"ALVIS HUD must expose a pause-only lifecycle for background tabs");
