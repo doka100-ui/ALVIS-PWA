@@ -22,8 +22,8 @@ assert.match(app,/window\.addEventListener\("gesturestart"/);
 assert.match(app,/window\.addEventListener\("gesturechange"/);
 assert.match(app,/window\.addEventListener\("gestureend"/);
 
-assert.match(app,/alvisHudMotionAnimations\.forEach\(animation=>\{[\s\S]*?if\(zoomed\)animation\.pause\(\);else animation\.play\(\)/);
-assert.match(app,/if\(document\.documentElement\.classList\.contains\("alvis-zooming"\)\)[\s\S]*?animation\.pause\(\)/);
+assert.match(app,/animations\.forEach\(animation=>\{\s*try\{if\(zoomed\)animation\.pause\(\);else animation\.play\(\)/);
+assert.match(app,/if\(document\.documentElement\.classList\.contains\("alvis-zooming"\)\)[\s\S]*?setAlvisHudZoomAnimationState\(true\)/);
 assert.match(app,/visualViewport\.addEventListener\("resize",updateAlvisZoomRenderMode/);
 assert.match(app,/visualViewport\.addEventListener\("scroll",updateAlvisZoomRenderMode/);
 assert.match(app,/html\.alvis-zooming \.display-dock \.hud-center \.hud-orbit\{[\s\S]*?animation-play-state:paused!important/);
