@@ -1,3 +1,8 @@
+## v256 ALVISモードのズーム中はHUD内すべてのアニメーションを停止（2026-11-12）
+- v255では3本の軌道リングだけを停止していたが、球体内部のCSS疑似要素アニメーションや状態表示など、HUD内の別アニメーションは動作し続けていた。
+- v256ではALVISモードのHUDステージ内にある全要素のAnimationを列挙し、ピンチズーム中に一時停止、通常倍率へ戻ると再開する。iOS Safariのgesturestart/change/endも監視し、visualViewportの更新前から停止を開始する。
+- Avatarモードは対象外。ズーム操作自体は無効化しない。WebGPUモデル、モデルキャッシュ、音声、記憶/履歴、暗号化、同期、バックアップは変更しない。アプリシェルキャッシュv256。iPhone実機でのクラッシュ解消は未確認。
+
 ## v255 実際のHUDリングアニメーションをズーム中に停止（2026-11-11）
 - v254ではCSS animation-play-stateを変更していたが、実際のリング回転はWeb Animations API（Element.animate）で作られていたため停止対象外だった。
 - v255ではvisualViewportのscale監視に連動し、`alvisHudMotionAnimations`のAnimationオブジェクトを拡大中pause、通常倍率でplayする。pageshow/visibility復帰後に再生成されたリングも拡大中ならpauseする。
