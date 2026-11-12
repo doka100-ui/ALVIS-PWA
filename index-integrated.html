@@ -993,6 +993,49 @@ html.alvis-zooming .display-dock .hud-core:before,
 html.alvis-zooming .display-dock .hud-core:after{
   box-shadow:none!important;
 }
+/* v257: use a low-compositing ALVIS HUD while Safari magnifies the page.
+   Preserve the globe, layout and orbital geometry; temporarily remove only
+   decorative multi-layer glows, scan effects and expensive shadow stacks. */
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .jarvis-stage::before,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .jarvis-stage::after{
+  opacity:0!important;background:none!important;box-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core{
+  background:#062746!important;
+  box-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core::before,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core::after{
+  background:none!important;box-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core span,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core small,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-center-caption,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-caption{
+  text-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-orbit,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-orbit::after,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-projector,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-projector *,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-platform,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-platform *,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-metric,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-ai-metric,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-ai-metric::before,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-side{
+  box-shadow:none!important;text-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-beam,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .alvis-globe-shimmer,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .alvis-core-light,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .alvis-projection-scan{
+  display:none!important;animation:none!important;mix-blend-mode:normal!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-globe-map{
+  filter:none!important;mix-blend-mode:normal!important;
+}
+
 
 
 
