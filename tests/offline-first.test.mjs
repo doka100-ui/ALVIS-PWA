@@ -754,6 +754,12 @@ assert.match(vrmRuntime,/blink: hasExpression\("blink"\)/,"diagnostics must chec
 assert.match(vrmRuntime,/aa: hasExpression\("aa"\)/,"diagnostics must check mouth expression support");
 assert.match(vrmRuntime,/lookAt: !!vrm\.lookAt\?\.target/,"diagnostics must check look-at support");
 assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by the runtime");
+// v258: VRM rendering is suspended while the document is hidden and resumes when visible.
+assert.match(vrmRuntime,/function startRenderLoop\(\)[\s\S]*?document\.visibilityState !== "visible"[\s\S]*?requestAnimationFrame\(animate\)/,"VRM rendering must only run while the page is visible");
+assert.match(vrmRuntime,/document\.addEventListener\("visibilitychange", handleVisibilityChange\)/,"VRM runtime must listen for visibility changes");
+assert.match(vrmRuntime,/window\.removeEventListener\("pagehide", stopRenderLoop\)/,"VRM runtime must clean up page lifecycle listeners");
+assert.match(app,/function setAlvisHudMotionPaused\(paused\)/,"ALVIS HUD must expose a pause-only lifecycle for background tabs");
+assert.match(app,/else setAlvisHudMotionPaused\(true\)/,"ALVIS HUD motion must pause when the document is hidden");
 assert.match(app,/id="alvisAvatarDiagnosticsButton"/,"avatar UI must expose the diagnostics button");
 assert.match(app,/window\.ALVISAvatarGetDiagnostics=mounted\.getDiagnostics/,"loaded VRM diagnostics must be connected to the UI");
 assert.match(app,/VRM MODEL CHECK/,"diagnostics panel must explain the inspected model");
