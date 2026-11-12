@@ -1,3 +1,7 @@
+## v258 非表示時の描画停止
+- documentがhiddenまたはpagehideになった場合、VRMのrequestAnimationFrame描画を停止し、visible/pageshowで再開する。非表示時間をアニメーション経過時間に含めない。
+- ALVIS HUDのリングは非表示中pauseし、visible復帰で再開する。両モードの描画ライフサイクルは独立して維持する。
+
 ## v257 ALVIS HUDのズーム中低負荷表示
 - Safariのズーム中、ALVISモードに限り多重発光/影/走査線/ビーム/シマーなどの装飾描画を一時簡略化する。球体・地図・HUD配置・軌道形状は維持し、通常倍率へ戻ると通常スタイルへ復帰する。
 - Avatarモードには適用せず、ページズーム自体も無効化しない。
