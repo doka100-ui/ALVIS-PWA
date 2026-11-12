@@ -9,11 +9,12 @@ const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json"
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
 // v255: pause the actual Web Animations API ring animations during pinch-zoom.
 // v256: pause all animations inside the ALVIS HUD, including CSS pseudo-elements, and catch iOS gesture events.
+// v257: flatten decorative glow/scan layers during zoom to reduce Safari compositing pressure.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v256-integrated/);
+assert.match(sw, /alvis-cache-v257-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
 assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
 assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
@@ -21,6 +22,11 @@ assert.match(app,/alvisHudPinchGestureActive\|\|\(\!\!viewport&&Number\(viewport
 assert.match(app,/window\.addEventListener\("gesturestart"/);
 assert.match(app,/window\.addEventListener\("gesturechange"/);
 assert.match(app,/window\.addEventListener\("gestureend"/);
+assert.match(app,/v257: use a low-compositing ALVIS HUD while Safari magnifies the page/);
+assert.match(app,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-core\{\s*background:#062746!important;\s*box-shadow:none!important;/);
+assert.match(app,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-beam[\s\S]*?display:none!important/);
+assert.match(app,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-globe-map[\s\S]*?mix-blend-mode:normal!important/);
+
 
 assert.match(app,/animations\.forEach\(animation=>\{\s*try\{if\(zoomed\)animation\.pause\(\);else animation\.play\(\)/);
 assert.match(app,/if\(document\.documentElement\.classList\.contains\("alvis-zooming"\)\)[\s\S]*?setAlvisHudZoomAnimationState\(true\)/);
@@ -988,7 +994,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v256-integrated"),"v256 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v257-integrated"),"v256 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
