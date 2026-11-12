@@ -71,7 +71,10 @@ export async function mountVrmAvatar(host, blob) {
   const expressionAvailability = new Map();
   const idleBaseY = vrm.scene.position.y;
   const idleBaseRotY = vrm.scene.rotation.y;
-  const clock = new THREE.Clock();
+  // Count only visible animation time; background tabs should not spend GPU frames or jump animation clocks.
+  let activeElapsed = 0;
+  let lastFrameTimestamp = 0;
+  let frameRunning = false;
   // Normalized humanoid bones are optional; unsupported rigs simply keep their existing motion.
   const neckBone = vrm.humanoid?.getNormalizedBoneNode?.("neck") || null;
   const headBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
@@ -128,14 +131,14 @@ export async function mountVrmAvatar(host, blob) {
     autoLookAtEnabled = !!enabled;
     if (autoLookAtEnabled) {
       lookAtDestination.set(0, 1.35, 2.5);
-      nextGazeChangeAt = clock.elapsedTime + 1.5 + Math.random() * 1.5;
+      nextGazeChangeAt = activeElapsed + 1.5 + Math.random() * 1.5;
     }
     return true;
   };
 
   const setHeadGesture = (name = "nod") => {
     if (name !== "nod" || (!headBone && !neckBone)) return false;
-    headGestureStartedAt = clock.elapsedTime;
+    headGestureStartedAt = activeElapsed;
     return true;
   };
 
@@ -190,11 +193,20 @@ export async function mountVrmAvatar(host, blob) {
   resize();
   host.replaceChildren(renderer.domElement);
 
-  const animate = () => {
-    if (disposed) return;
+  const animate = (timestamp = 0) => {
+    if (disposed || document.visibilityState !== "visible") {
+      frameRunning = false;
+      frameId = 0;
+      lastFrameTimestamp = 0;
+      return;
+    }
     frameId = requestAnimationFrame(animate);
-    const delta = Math.min(clock.getDelta(), 0.05);
-    const elapsed = clock.elapsedTime;
+    const delta = lastFrameTimestamp
+      ? Math.min(Math.max(0, (timestamp - lastFrameTimestamp) / 1000), 0.05)
+      : 0;
+    lastFrameTimestamp = timestamp;
+    activeElapsed += delta;
+    const elapsed = activeElapsed;
 
     // Natural, irregular idle blink, when the supplied VRM has the standard expression.
     if (blinkAvailable) {
@@ -297,7 +309,26 @@ export async function mountVrmAvatar(host, blob) {
     }
     renderer.render(scene, camera);
   };
-  animate();
+  const startRenderLoop = () => {
+    if (disposed || frameRunning || document.visibilityState !== "visible") return;
+    frameRunning = true;
+    lastFrameTimestamp = 0;
+    frameId = requestAnimationFrame(animate);
+  };
+  const stopRenderLoop = () => {
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = 0;
+    frameRunning = false;
+    lastFrameTimestamp = 0;
+  };
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") startRenderLoop();
+    else stopRenderLoop();
+  };
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  window.addEventListener("pagehide", stopRenderLoop);
+  window.addEventListener("pageshow", handleVisibilityChange);
+  startRenderLoop();
 
   return {
     vrm,
@@ -312,7 +343,10 @@ export async function mountVrmAvatar(host, blob) {
     dispose() {
       if (disposed) return;
       disposed = true;
-      cancelAnimationFrame(frameId);
+      stopRenderLoop();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", stopRenderLoop);
+      window.removeEventListener("pageshow", handleVisibilityChange);
       resizeObserver.disconnect();
       try { vrm.expressionManager?.setValue("blink", 0); } catch (_) {}
       renderer.dispose();
