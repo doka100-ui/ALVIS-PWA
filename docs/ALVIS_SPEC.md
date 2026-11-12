@@ -1,3 +1,7 @@
+## v256 ALVISモードのズーム中アニメーション停止
+- ピンチズーム中はALVIS HUDステージ内のすべてのAnimation（CSSアニメーション、疑似要素、Web Animations API）を一時停止し、通常倍率へ戻ると再開する。
+- visualViewportのscaleに加え、iOS Safariのgesturestart/change/endも監視する。Avatarモードは対象外で、ズーム自体は無効化しない。
+
 ## v255 ズーム中のWeb Animations API制御
 - ALVIS HUDのリングはCSS keyframesではなくElement.animateで生成される。ズーム時はAnimation.pause()、通常倍率へ戻るとAnimation.play()を適用する。
 - pageshow/visibility復帰時にリングを再生成した場合も、ズーム中なら直ちに停止する。Avatarモードは対象外。
