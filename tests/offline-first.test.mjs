@@ -8,12 +8,20 @@ const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json"
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
 // v255: pause the actual Web Animations API ring animations during pinch-zoom.
+// v256: pause all animations inside the ALVIS HUD, including CSS pseudo-elements, and catch iOS gesture events.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v255-integrated/);
+assert.match(sw, /alvis-cache-v256-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
+assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
+assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
+assert.match(app,/alvisHudPinchGestureActive\|\|\(\!\!viewport&&Number\(viewport\.scale\)>1\.01\)/);
+assert.match(app,/window\.addEventListener\("gesturestart"/);
+assert.match(app,/window\.addEventListener\("gesturechange"/);
+assert.match(app,/window\.addEventListener\("gestureend"/);
+
 assert.match(app,/alvisHudMotionAnimations\.forEach\(animation=>\{[\s\S]*?if\(zoomed\)animation\.pause\(\);else animation\.play\(\)/);
 assert.match(app,/if\(document\.documentElement\.classList\.contains\("alvis-zooming"\)\)[\s\S]*?animation\.pause\(\)/);
 assert.match(app,/visualViewport\.addEventListener\("resize",updateAlvisZoomRenderMode/);
