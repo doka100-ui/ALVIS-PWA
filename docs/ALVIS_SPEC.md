@@ -1,3 +1,7 @@
+## v257 ALVIS HUDのズーム中低負荷表示
+- Safariのズーム中、ALVISモードに限り多重発光/影/走査線/ビーム/シマーなどの装飾描画を一時簡略化する。球体・地図・HUD配置・軌道形状は維持し、通常倍率へ戻ると通常スタイルへ復帰する。
+- Avatarモードには適用せず、ページズーム自体も無効化しない。
+
 ## v256 ALVISモードのズーム中アニメーション停止
 - ピンチズーム中はALVIS HUDステージ内のすべてのAnimation（CSSアニメーション、疑似要素、Web Animations API）を一時停止し、通常倍率へ戻ると再開する。
 - visualViewportのscaleに加え、iOS Safariのgesturestart/change/endも監視する。Avatarモードは対象外で、ズーム自体は無効化しない。
