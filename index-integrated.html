@@ -1829,10 +1829,6 @@ header .status{margin-top:2px}
 }
 #chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}
 /* end v259 */
-/* v259: slightly smaller and slower ALVIS orbital rings; keep center and tilt unchanged. */
-.display-dock .hud-center .hud-orbit-a{width:90.5%!important;height:33.5%!important;}
-.display-dock .hud-center .hud-orbit-b{width:84%!important;height:45%!important;}
-.display-dock .hud-center .hud-orbit-c{width:90.5%!important;height:90.5%!important;}
 </style>
 <script type="importmap">
 {
@@ -5470,9 +5466,9 @@ function startAlvisHudMotion(){
   // Keep their gentle continuous rotation even when the OS requests reduced motion;
   // page transitions and other non-essential effects still respect that preference.
   const motions=[
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"-24deg",to:"336deg",duration:27500},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:38750},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-c")),from:"0deg",to:"360deg",duration:52500}
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"-24deg",to:"336deg",duration:22000},
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:31000},
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-c")),from:"0deg",to:"360deg",duration:42000}
   ];
   motions.forEach(motion=>{
     if(!motion.node || typeof motion.node.animate!=="function")return;
