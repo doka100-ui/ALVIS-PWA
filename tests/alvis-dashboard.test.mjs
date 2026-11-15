@@ -20,7 +20,7 @@ check("the two rings are reduced to 75% of their previous dimensions",app.includ
 check("ring animation starts with only the two visible rings",app.includes('orbitNodes.length<2')&&app.includes('duration:27500')&&app.includes('duration:38750')&&!app.includes('classList.contains("hud-orbit-c")'));
 check("left and right HUD panels and navigation remain",stage.includes('class="hud-side hud-side-left"')&&stage.includes('class="hud-side hud-side-right"')&&stage.includes('class="hud-nav"'));
 check("both display modes and shared AI functions remain",app.includes('id="jarvisModeButton"')&&app.includes('id="avatarModeButton"')&&app.includes("async function sendToAlvis()"));
-check("Avatar mode remains independently hidden when ALVIS mode is selected",app.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}')&&app.includes('id="alvisAvatarCanvas"'));
+check("Avatar mode remains independently hidden when ALVIS mode is selected",app.includes('#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{')&&app.includes("display:none!important")&&app.includes('id="alvisAvatarCanvas"'));
 check("memory, history, encrypted storage, sync, backup and voice remain",app.includes("encryptData")&&app.includes("data.history")&&app.includes("saveCloudCore")&&app.toLowerCase().includes("backup")&&app.includes("Kokoro"));
 check("Service Worker v262 does not precache the flattened dashboard artwork",sw.includes('alvis-cache-v262-integrated')&&!sw.includes("alvis-dashboard-reference.avif"));
 check("Service Worker preserves the independent dependency cache",sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2"')&&sw.includes('key.startsWith("alvis-deps-")'));
