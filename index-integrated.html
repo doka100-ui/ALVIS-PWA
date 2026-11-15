@@ -2553,7 +2553,11 @@ function updateHudAiStatus(value=""){
   if(/エラー|失われ|失敗|停止扱い/.test(message)){state="error";label="ERROR";detail="モデル状態を確認してください";}
   else if(/終了して|解放しています/.test(message)){state="stopping";label="STOPPING";detail="メモリ解放中";}
   else if(aiEngine){state="online";label="ONLINE";detail=ALVIS_MODEL_LABEL+" 稼働中・端末内推論";aiLoadProgress=100;}
-  else if(aiLoading){state="loading";label="LOADING";detail=ALVIS_MODEL_LABEL+" 準備中";}
+  else if(aiLoading){
+    state="loading";label="LOADING";
+    const stage=message.replace(/モデル読み込み中\s+\d+%\s*/,"").replace(/\s+/g," ").trim();
+    detail=ALVIS_MODEL_LABEL+" "+(progressMatch?"読み込み中 "+aiLoadProgress+"%":"準備中")+(stage?" · "+stage.slice(0,64):"");
+  }
   else{aiLoadProgress=0;}
   const percentNode=$("hudAiPercent");if(percentNode)percentNode.textContent=aiLoadProgress+"%";
   const launch=$("hudAiAction");
