@@ -14,7 +14,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v262-integrated/);
+assert.match(sw, /alvis-cache-v263-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
 assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
 assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
