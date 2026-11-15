@@ -2,7 +2,7 @@
 - 対象: developmentブランチ。中央球体を囲む内側2本の楕円軌道A/Bを、個別CSS scaleではなく直接寸法指定へ変更（A:86%×32%、B:80%×44%）。
 - A/Bの青白い発光と軌道上の光点を控えめに調整。外側リングC（125%×31%）と角度は維持。
 - Service Workerアプリシェルcache v266。WebLLM/Kokoroモデル・依存キャッシュ、共有AI/音声、記憶/履歴、暗号化、同期、バックアップ、Avatarモードは変更なし。
-- コードcommit: `b5b95bd493d8bce19bcc4c3aab3e8f36105702f1`。テスト更新commit: dashboard `ac5cc18686cfba6bf5c62fa4b6d86024a65082ac`、offline-first `982d1e98189f0993d61172fb3e8f685e8c7f9d5a`。CI/Cloudflare Pages/Safari実機の表示確認は未確認。
+- コードcommit: `b5b95bd493d8bce19bcc4c3aab3e8f36105702f1`。テスト更新commit: dashboard最終commit `8a843a292f7ba2b44a3857552b201702cd7490ab`、offline-first commit `d2f71b1939495b8d059c622b1f364a05769500d0`。GitHub Actions run `43691111119` はdashboard-image/offline-first両job成功。Cloudflare Pages/Safari実機の表示確認は未確認。
 
 ## v265（2026-11-15）
 - 中央球体を囲む内側2本の楕円軌道A/Bを明示的に縮小。対象を .hud-center 直下の実要素に限定し、CSS scale:.65 を適用。
