@@ -3288,8 +3288,15 @@ function getAlvisKanaViseme(character){
   const normalized=String(character||"").normalize("NFKC");
   if(!normalized)return "";
   let kana=normalized.charAt(0);
-  const code=kana.charCodeAt(0);
-  if(code>=0x30A1&&code<=0x30F6)kana=String.fromCharCode(code-0x60);
+  let following=normalized.charAt(1)||"";
+  const toHiragana=value=>{
+    const code=value.charCodeAt(0);
+    return code>=0x30A1&&code<=0x30F6?String.fromCharCode(code-0x60):value;
+  };
+  kana=toHiragana(kana);
+  following=toHiragana(following);
+  const smallVowels={"ぁ":"aa","ぃ":"ih","ぅ":"ou","ぇ":"ee","ぉ":"oh","ゃ":"aa","ゅ":"ou","ょ":"oh"};
+  if(smallVowels[following])return smallVowels[following];
   const rows={
     aa:"あかさたなはまやらわがざだばぱぁゃ",
     ih:"いきしちにひみりぎじぢびぴぃ",
