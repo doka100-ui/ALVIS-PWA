@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v263-integrated";
+const CACHE_NAME = "alvis-cache-v264-integrated";
 // v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
@@ -59,10 +59,43 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   event.respondWith((async () => {
+    const url = new URL(request.url);
+    const isIntegratedShellNavigation =
+      request.mode === "navigate" &&
+      url.origin === self.location.origin &&
+      /\\/index-integrated\\.html$/.test(url.pathname);
+
+    // The integrated page is network-first while online so a stale app-shell
+    // cache cannot hide a newly deployed ALVIS interface. Offline navigation
+    // still falls back to the last verified app-shell response.
+    if (isIntegratedShellNavigation) {
+      try {
+        const response = makeServiceWorkerSafeResponse(await fetch(request));
+        if (response.ok && response.type !== "opaque") {
+          try {
+            const appCache = await caches.open(CACHE_NAME);
+            const shellUrl = new URL("./index-integrated.html", self.registration.scope).href;
+            await appCache.put(shellUrl, response.clone());
+          } catch (cacheError) {
+            // A cache write failure must not block the live page response.
+          }
+          return response;
+        }
+        const cachedShell =
+          await caches.match(request, { ignoreSearch: true }) ||
+          await caches.match("./index-integrated.html");
+        return cachedShell ? makeServiceWorkerSafeResponse(cachedShell) : response;
+      } catch (networkError) {
+        const cachedShell =
+          await caches.match(request, { ignoreSearch: true }) ||
+          await caches.match("./index-integrated.html");
+        if (cachedShell) return makeServiceWorkerSafeResponse(cachedShell);
+      }
+    }
+
     const cached = await caches.match(request, { ignoreSearch: true });
     if (cached) return makeServiceWorkerSafeResponse(cached);
 
-    const url = new URL(request.url);
     // module import / Worker / WASM fetches may have an empty destination.
     // Cache successful assets from explicitly trusted CDNs, including Kokoro's
     // Japanese dictionary, Worker and WASM files.
