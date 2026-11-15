@@ -10,12 +10,11 @@ const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json"
 // v255: pause the actual Web Animations API ring animations during pinch-zoom.
 // v256: pause all animations inside the ALVIS HUD, including CSS pseudo-elements, and catch iOS gesture events.
 // v257: flatten decorative glow/scan layers during zoom to reduce Safari compositing pressure.
-// v260: restore the v188 live HUD and slow/shrink only its three independent orbital rings.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v260-integrated/);
+assert.match(sw, /alvis-cache-v261-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
 assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
 assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
@@ -719,7 +718,9 @@ assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 
-// v260: the visible ALVIS dashboard is the original v188 live HUD.
+// v261: the approved reference artwork is the visible ALVIS dashboard; legacy HUD nodes stay hidden.
+assert.match(app,/class="alvis-reference-image" src="\.\/assets\/alvis-dashboard-reference\.avif"/);
+assert.match(app,/class="alvis-reference-right-hotspots"/);
 assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="hud-center"/);
 assert.match(app,/class="hud-globe-map"/);
@@ -730,15 +731,20 @@ assert.match(app,/class="hud-projector"/);
 assert.match(app,/class="hud-platform"/);
 assert.match(app,/class="hud-side hud-side-left"/);
 assert.match(app,/class="hud-side hud-side-right"/);
-assert.doesNotMatch(app,/class="alvis-reference-image"/);
-assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
-assert.ok(app.includes('duration:27500') && app.includes('duration:38750') && app.includes('duration:52500'));
-assert.ok(app.includes('scale:.75!important'));
-assert.match(sw,/alvis-cache-v260-integrated/);
-assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
+assert.match(app,/id="hudAiAction"/);
+assert.match(app,/data-page="chatPage"/);
+assert.match(app,/data-page="devicePage"/);
+assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
+assert.match(app,/aspect-ratio:1397\/1126/);
+assert.match(app,/object-fit:fill!important/);
+assert.match(app,/filter:none!important/);
+assert.match(app,/transform:none!important/);
+assert.match(app,/v259: show the approved dashboard artwork as-is/);
+assert.match(app,/\.display-dock \.mode-stage\.jarvis-stage>\.hud-side-right,[\s\S]*?display:none!important/);
+assert.match(sw,/alvis-cache-v\d+-integrated/);
+assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
 
-// v250: portrait sizing rules remain scoped; v260 restores the live HUD inside that layout.
-// v250: portrait sizing rules remain scoped; v260 restores the live HUD inside that layout.
+// v250: portrait sizing rules remain scoped; the final v259 override keeps the selected artwork ratio.
 assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
@@ -770,21 +776,19 @@ assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bump
 assert.match(app,/function stopAlvisHudMotion\(\)[\s\S]*?alvisHudMotionAnimations=\[\]/,"JARVIS ring animations must have an isolated stop lifecycle");
 assert.match(app,/if\(safeMode==="jarvis"\)\{[\s\S]*?requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
 assert.match(app,/function startAlvisHudMotion\(\)[\s\S]*?if\(!chatPage \|\| chatPage\.classList\.contains\("hidden"\) \|\| chatPage\.dataset\.displayMode==="avatar"\)\{\s*stopAlvisHudMotion\(\);/,"hidden or avatar mode must not leave JARVIS ring animations running");
-assert.match(app,/const motions=\[[\s\S]*?duration:27500[\s\S]*?duration:38750[\s\S]*?duration:52500/,"three JARVIS orbital rings use the slower v260 speeds");
+assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/,"three JARVIS orbital ring speeds must remain unchanged");
 assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v204");
 
 
-// v260: original live HUD ring lifecycle remains visible and isolated from Avatar mode.
+// v259: the approved artwork is the visible surface; legacy HUD nodes and motion hooks remain isolated.
 assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer must not be reintroduced");
-assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "ring lifecycle remains scoped to the ALVIS center HUD");
-assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "the original orbit nodes remain available");
-assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "AI state controls remain connected to the live HUD");
-assert.doesNotMatch(app, /class="alvis-reference-image"/, "the static artwork is not overlaid on the live HUD");
-assert.doesNotMatch(app, /class="alvis-reference-right-hotspots"/, "image-specific hotspots are removed");
-assert.match(app, /class="hud-globe-map"/, "the original SVG globe remains visible");
-assert.ok(app.includes('duration:27500') && app.includes('duration:38750') && app.includes('duration:52500'), "the three rings rotate more slowly");
-assert.ok(app.includes('scale:.75!important'), "the three rings are reduced to 75 percent");
-assert.match(sw, /alvis-cache-v260-integrated/, "the app shell cache is versioned for v260");
+assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "legacy ring lifecycle remains isolated");
+assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
+assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "existing AI state controls remain connected");
+assert.match(app, /class="alvis-reference-image"/, "selected artwork remains in the ALVIS stage");
+assert.match(app, /class="alvis-reference-right-hotspots"/, "right-side image controls remain connected");
+assert.match(app, /class="hud-globe-map"/, "legacy globe nodes remain available but hidden");
+assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker cache is versioned");
 
 // v219: model-cache diagnostics must inspect non-ALVIS caches without deleting them.
 assert.match(app,/otherCaches=keys\.filter\(key=>!key\.startsWith\("alvis-cache-"\)&&!key\.startsWith\("alvis-deps-"\)\)/);
@@ -1004,7 +1008,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v260-integrated"),"v258 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v261-integrated"),"v258 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
