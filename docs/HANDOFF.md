@@ -3,7 +3,7 @@
 - A/Bの発光色・軌道上の小さな光点を控えめに差別化し、ホログラムらしい立体感を強調。外側リングCの寸法125%×31%・角度・表示は変更しない。
 - 球体/SVG地図/背景/左右HUD/投影装置/台座/ズーム負荷対策/Avatarモード/共有チャット・AI・音声/記憶/履歴/暗号化/同期/バックアップは変更しない。
 - Service Workerアプリシェルをv266へ更新。WebLLM/Kokoroモデルキャッシュと依存キャッシュは保持。
-- developmentのコード変更commit: `b5b95bd493d8bce19bcc4c3aab3e8f36105702f1`。回帰テストの更新commit: dashboard `ac5cc18686cfba6bf5c62fa4b6d86024a65082ac`、offline-first `982d1e98189f0993d61172fb3e8f685e8c7f9d5a`。Cloudflare Pages配信とSafari実機での見た目/回転/ズームは未確認。実機確認前に完了扱いにしない。
+- developmentのコード変更commit: `b5b95bd493d8bce19bcc4c3aab3e8f36105702f1`。回帰テストの更新commit: dashboard `8a843a292f7ba2b44a3857552b201702cd7490ab`、offline-first `d2f71b1939495b8d059c622b1f364a05769500d0`。GitHub Actions run `43691111119` はdashboard-image/offline-first両job成功。Cloudflare Pages配信とSafari実機での見た目/回転/ズームは未確認。実機確認前に完了扱いにしない。
 
 ## v265 球体を囲む内側2本の楕円軌道を明示的に縮小（2026-11-15）
 - ユーザーが指定した対象を、中央球体の周囲にある .hud-orbit-a と .hud-orbit-b の2つの楕円軌道として再確認。
