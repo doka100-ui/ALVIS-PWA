@@ -779,7 +779,7 @@ assert.match(vrmRuntime,/aa: hasExpression\("aa"\)/,"diagnostics must check mout
 assert.match(vrmRuntime,/const mouthVisemeNames = \["aa", "ih", "ou", "ee", "oh"\]/);
 assert.match(vrmRuntime,/const setMouthViseme = \(name = "", amount = 0\.72\)/);
 assert.match(vrmRuntime,/mouthVisemes: mouthVisemeNames\.filter\(\(name\) => hasExpression\(name\)\)/);
-assert.match(vrmRuntime,/setExpression\("ih", 0\)/,"generic mouth-open mode must release unused vowel shapes");
+assert.match(vrmRuntime,/\["ih", "ou", "ee"\]\) setExpression\(name, 0\)/,"generic mouth-open mode must release unused vowel shapes");
 assert.match(app,/function getAlvisKanaViseme\(character\)/,"Japanese kana must map to standard vowel visemes");
 assert.match(app,/function updateAlvisSpeechViseme\(text,event\)/,"speech boundary events must update Avatar mouth shapes");
 assert.match(app,/utterance\.onboundary=event=>\{[\s\S]*?updateAlvisSpeechViseme\(clean,event\)/,"standard speech must drive mouth visemes from boundary events");
