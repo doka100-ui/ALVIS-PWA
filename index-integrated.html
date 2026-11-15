@@ -3220,6 +3220,7 @@ let kokoroObjectUrl=null;
 let kokoroAudioSource=null;
 let alvisAudioContext=null;
 let alvisLipSyncFrame=0;
+const alvisMediaAudioPipelines=new WeakMap();
 function stopAlvisLipSync(){
   if(alvisLipSyncFrame)cancelAnimationFrame(alvisLipSyncFrame);
   alvisLipSyncFrame=0;
@@ -3243,6 +3244,32 @@ function startAlvisLipSync(analyser){
   };
   tick();
 }
+// Kokoro HTMLAudioElement fallback also feeds the Avatar mouth analyser.
+// Each media element is connected only once because Web Audio forbids duplicate source nodes.
+function startAlvisMediaLipSync(mediaElement){
+  if(!mediaElement||!alvisAudioContext)return false;
+  const connectAndStart=()=>{
+    if(mediaElement.paused||!unlocked)return false;
+    try{
+      let pipeline=alvisMediaAudioPipelines.get(mediaElement);
+      if(!pipeline){
+        const source=alvisAudioContext.createMediaElementSource(mediaElement);
+        const analyser=alvisAudioContext.createAnalyser();
+        analyser.fftSize=256;
+        source.connect(analyser);
+        analyser.connect(alvisAudioContext.destination);
+        pipeline={analyser};
+        alvisMediaAudioPipelines.set(mediaElement,pipeline);
+      }
+      startAlvisLipSync(pipeline.analyser);
+      return true;
+    }catch(error){return false;}
+  };
+  if(alvisAudioContext.state==="running")return connectAndStart();
+  alvisAudioContext.resume().then(connectAndStart).catch(()=>{});
+  return false;
+}
+$("kokoroPlayer")?.addEventListener("play",event=>startAlvisMediaLipSync(event.currentTarget));
 // 読み上げ時だけ ALVIS の英字読みを日本語名に置き換える（画面表示・保存内容は変更しない）
 function unlockAlvisAudioFromGesture(){
   const AudioContextClass=window.AudioContext||window.webkitAudioContext;
@@ -3359,8 +3386,8 @@ async function playKokoroBlob(blob,clean){
     if("preservesPitch" in kokoroAudio)kokoroAudio.preservesPitch=false;
     if("webkitPreservesPitch" in kokoroAudio)kokoroAudio.webkitPreservesPitch=false;
     if(player){player.classList.remove("hidden");player.load();}
-    kokoroAudio.onended=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
-    kokoroAudio.onerror=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;setStatus("voiceStatus","Kokoro音声の再生に失敗しました。プレーヤーの再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
+    kokoroAudio.onended=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;stopAlvisLipSync();setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
+    kokoroAudio.onerror=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;stopAlvisLipSync();setStatus("voiceStatus","Kokoro音声の再生に失敗しました。プレーヤーの再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
     try{
       await kokoroAudio.play();
       if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
