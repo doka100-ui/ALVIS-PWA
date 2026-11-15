@@ -738,7 +738,7 @@ assert.match(sw,/alvis-cache-v260-integrated/);
 assert.ok(!sw.includes("./assets/alvis-dashboard-reference.avif"));
 
 // v250: portrait sizing rules remain scoped; v260 restores the live HUD inside that layout.
-// v250: portrait sizing rules remain scoped; the final v259 override keeps the selected artwork ratio.
+// v250: portrait sizing rules remain scoped; v260 restores the live HUD inside that layout.
 assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
