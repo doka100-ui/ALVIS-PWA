@@ -1,3 +1,8 @@
+## v272 Qwenモデル読み込み状態の表示
+- HUDのLOADING詳細欄は固定の「準備中」ではなく、aiStatusに渡された読み込み段階とWebLLM進捗率を表示する。長い説明は64文字までに制限する。
+- 進捗コールバック自体が発火しない場合は準備中表示のままとなる。これは進捗表示の改善であり、ダウンロード停止を直接解消する処理ではない。
+- モデル実行/キャッシュ/暗号化データには変更を加えない。Service Worker app shell cache v272。
+
 ## v271 Qwenモデル起動のService Worker待機フォールバック
 - Qwen起動時のService Worker準備待ちは最大3.5秒。pending/失敗/未利用の場合はService Workerを待ち続けず、WebLLMのimportとモデル初期化へ進む。
 - Service Workerが準備できた場合は従来の依存コードキャッシュ経路を使う。タイムアウトしても既存のWebLLMモデルキャッシュやユーザーデータを削除・変更しない。
