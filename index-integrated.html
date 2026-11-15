@@ -1774,6 +1774,17 @@ header .status{margin-top:2px}
   display:block!important;width:125%!important;height:31%!important;
   transform:translate(-50%,-50%) rotate(9deg)!important;
 }
+
+/* v265: explicitly scale the two ellipse paths around the globe.
+   Target the actual direct-child orbit elements; keep the outer orbit C untouched.
+   Individual scale composes with the existing translate and WAAPI rotate animation. */
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a{
+  width:108%!important;height:40%!important;transform-origin:50% 50%!important;scale:.65!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b{
+  width:100%!important;height:54%!important;transform-origin:50% 50%!important;scale:.65!important;
+}
+/* end v265 inner-orbit-only sizing */
 </style>
 <script type="importmap">
 {
