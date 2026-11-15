@@ -1,3 +1,8 @@
+## v269 Avatarモード: 日本語5母音の口形制御
+- VRM標準expression aa/ih/ou/ee/ohを独立してブレンドする。未対応expressionは既存の汎用口開閉へフォールバックし、診断画面に5母音の対応状況を表示する。
+- 端末標準speechSynthesisのboundaryイベントからかな文字の母音行を読み取り、対応する口形を切り替える。漢字の読みは推測せず、未判定文字は控えめな汎用口形を使う。
+- 音声終了/エラー/停止/Avatar終了時に口形をリセットする。Kokoroは従来の音量ベース口パクを維持し、音素同期は今後の拡張対象。
+
 ## v268 Avatarモード: Kokoro音声プレーヤー経由の口パク同期
 - KokoroのAudioBuffer再生に加えてHTMLAudioElementフォールバックもAnalyserNodeで波形を取得し、VRMのaa/oh口開閉へ反映する。手動プレーヤー再生もplayイベントから同期を開始する。
 - 音声要素ごとのMediaElementAudioSourceNodeをWeakMapで再利用し、終了/エラー/ログアウト時は口パクを停止。既存のセッション世代ガードを維持する。
