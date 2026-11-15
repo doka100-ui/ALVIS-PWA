@@ -1,3 +1,8 @@
+## v268 Avatarモード: Kokoro音声プレーヤー経由の口パク同期
+- KokoroのAudioBuffer再生に加えてHTMLAudioElementフォールバックもAnalyserNodeで波形を取得し、VRMのaa/oh口開閉へ反映する。手動プレーヤー再生もplayイベントから同期を開始する。
+- 音声要素ごとのMediaElementAudioSourceNodeをWeakMapで再利用し、終了/エラー/ログアウト時は口パクを停止。既存のセッション世代ガードを維持する。
+- 音量包絡ベースであり、音素/viseme単位の日本語発音同期ではない。端末標準speechSynthesisは今回対象外。ALVIS HUDやAvatarの表示/モデル保存、共有AI/記憶/履歴/同期/バックアップは変更しない。
+
 ## v266 ALVISモード: 内側2本の楕円軌道を直接寸法指定
 - 内側リングA/BはCSS scaleを重ねず、幅/高さを直接指定（A:86%×32%、B:80%×44%）。既存の中心位置とWAAPI回転を維持する。
 - A/Bの発光色と光点を控えめに差別化し、外側リングCは125%×31%・角度・表示を維持する。
