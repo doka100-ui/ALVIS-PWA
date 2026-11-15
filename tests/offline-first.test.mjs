@@ -16,7 +16,11 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v270-integrated/);
+assert.match(sw, /alvis-cache-v271-integrated/);
+// v271: a stalled Service Worker install must not block WebLLM model startup.
+assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
+assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
+assert.match(app,/Service Workerの準備が長引いているため、待機を終了してAIモデルの読み込みを続けます/);
 // v264: fetch the integrated app shell from the network first when online,
 // while retaining the cached shell as the offline fallback.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
