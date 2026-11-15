@@ -63,7 +63,7 @@ self.addEventListener("fetch", (event) => {
     const isIntegratedShellNavigation =
       request.mode === "navigate" &&
       url.origin === self.location.origin &&
-      /\\/index-integrated\\.html$/.test(url.pathname);
+      /\/index-integrated\.html$/.test(url.pathname);
 
     // The integrated page is network-first while online so a stale app-shell
     // cache cannot hide a newly deployed ALVIS interface. Offline navigation
