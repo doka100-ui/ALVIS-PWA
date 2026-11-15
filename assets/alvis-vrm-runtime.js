@@ -57,6 +57,10 @@ export async function mountVrmAvatar(host, blob) {
   let nextBlinkAt = 2.8 + Math.random() * 2.8;
   let mouthOpen = 0;
   let mouthTarget = 0;
+  const mouthVisemeNames = ["aa", "ih", "ou", "ee", "oh"];
+  const mouthVisemeCurrent = Object.fromEntries(mouthVisemeNames.map((name) => [name, 0]));
+  const mouthVisemeTarget = Object.fromEntries(mouthVisemeNames.map((name) => [name, 0]));
+  let activeMouthViseme = "";
   let idleEnabled = true;
   // Emotion weights are blended independently from lip-sync and blink.
   const emotionNames = ["happy", "angry", "sad", "relaxed", "surprised"];
@@ -104,6 +108,24 @@ export async function mountVrmAvatar(host, blob) {
 
   const setMouthOpen = (amount = 0) => {
     mouthTarget = THREE.MathUtils.clamp(Number(amount) || 0, 0, 1);
+    activeMouthViseme = "";
+    for (const name of mouthVisemeNames) mouthVisemeTarget[name] = 0;
+  };
+
+  // VRM standard vowel presets: aa, ih, ou, ee, oh.
+  // Unsupported presets are ignored; the existing generic mouth-open remains the fallback.
+  const setMouthViseme = (name = "", amount = 0.72) => {
+    const viseme = String(name || "").toLowerCase();
+    if (!mouthVisemeNames.includes(viseme) || !hasExpression(viseme)) {
+      setMouthOpen(amount);
+      return false;
+    }
+    activeMouthViseme = viseme;
+    mouthTarget = 0;
+    for (const preset of mouthVisemeNames) mouthVisemeTarget[preset] = preset === viseme
+      ? THREE.MathUtils.clamp(Number(amount) || 0, 0, 1)
+      : 0;
+    return true;
   };
 
   const setEmotion = (name = "neutral", intensity = 1) => {
@@ -169,7 +191,11 @@ export async function mountVrmAvatar(host, blob) {
       blinkLeft: hasExpression("blinkLeft"),
       blinkRight: hasExpression("blinkRight"),
       aa: hasExpression("aa"),
+      ih: hasExpression("ih"),
+      ou: hasExpression("ou"),
+      ee: hasExpression("ee"),
       oh: hasExpression("oh"),
+      mouthVisemes: mouthVisemeNames.filter((name) => hasExpression(name)),
       happy: hasExpression("happy"),
       sad: hasExpression("sad"),
       angry: hasExpression("angry"),
@@ -257,11 +283,19 @@ export async function mountVrmAvatar(host, blob) {
       setExpression(name, emotionCurrent[name]);
     }
 
-    // Smoothly follow audio amplitude so the mouth does not snap between frames.
-    mouthOpen += (mouthTarget - mouthOpen) * Math.min(1, delta * 18);
+    // Blend vowel visemes independently from emotion and blink.
+    const mouthEase = Math.min(1, delta * 18);
+    mouthOpen += (mouthTarget - mouthOpen) * mouthEase;
+    for (const name of mouthVisemeNames) {
+      mouthVisemeCurrent[name] += (mouthVisemeTarget[name] - mouthVisemeCurrent[name]) * mouthEase;
+    }
     if (vrm.expressionManager) {
-      setExpression("aa", mouthOpen);
-      setExpression("oh", mouthOpen * 0.18);
+      if (activeMouthViseme) {
+        for (const name of mouthVisemeNames) setExpression(name, mouthVisemeCurrent[name]);
+      } else {
+        setExpression("aa", mouthOpen);
+        setExpression("oh", mouthOpen * 0.18);
+      }
     }
 
     // Very subtle idle breathing/sway; disableable by the host.
@@ -333,6 +367,7 @@ export async function mountVrmAvatar(host, blob) {
   return {
     vrm,
     setMouthOpen,
+    setMouthViseme,
     setExpression,
     setEmotion,
     setLookAt,
