@@ -1775,11 +1775,11 @@ header .status{margin-top:2px}
   transform:translate(-50%,-50%) rotate(9deg)!important;
 }
 
-/* v266: refine only the two inner orbital ellipses.
+/* v267: shrink the two actively rotating inner orbital ellipses only.
    Set their geometry directly instead of stacking a CSS scale transform.
    Preserve the centered translate and independent WAAPI rotation. The outer C ring is untouched. */
 #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a{
-  width:86%!important;height:32%!important;
+  width:60.75%!important;height:22.5%!important;
   border-color:#b8f5ffdd!important;border-width:1.2px!important;
   box-shadow:0 0 8px #67e8f977,0 0 22px #0ea5e933!important;
 }
@@ -1788,7 +1788,7 @@ header .status{margin-top:2px}
   background:#e6fcff!important;box-shadow:0 0 8px 3px #67e8f9!important;
 }
 #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b{
-  width:80%!important;height:44%!important;
+  width:56.25%!important;height:30.375%!important;
   border-color:#38bdf8bb!important;border-width:1px!important;
   box-shadow:0 0 9px #0ea5e966,0 0 24px #0284c733!important;
 }
@@ -1796,7 +1796,7 @@ header .status{margin-top:2px}
   left:84%!important;top:82%!important;width:4px!important;height:4px!important;
   background:#b8eaff!important;box-shadow:0 0 8px 3px #38bdf8!important;
 }
-/* end v266 inner-orbit refinement */
+/* end v267 inner-orbit refinement */
 </style>
 <script type="importmap">
 {
