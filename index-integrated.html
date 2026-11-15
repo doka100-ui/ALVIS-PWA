@@ -3306,7 +3306,7 @@ function updateAlvisSpeechViseme(text,event){
   const character=String(text||"").slice(index,index+2);
   const viseme=getAlvisKanaViseme(character);
   if(viseme)window.ALVISAvatarSetMouthViseme?.(viseme,0.72);
-  else if(/[、。，．.!！?？\\s　]/.test(character.charAt(0)))window.ALVISAvatarSetMouthOpen?.(0);
+  else if(/[、。，．.!！?？\s　]/.test(character.charAt(0)))window.ALVISAvatarSetMouthOpen?.(0);
   else window.ALVISAvatarSetMouthViseme?.("aa",0.42);
 }
 function loadSpeechVoices(){
