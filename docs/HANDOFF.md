@@ -1,3 +1,10 @@
+## v265 球体を囲む内側2本の楕円軌道を明示的に縮小（2026-11-15）
+- ユーザーが指定した対象を、中央球体の周囲にある .hud-orbit-a と .hud-orbit-b の2つの楕円軌道として再確認。
+- 以前の幅/高さ指定だけでは実機表示に変化が確認できなかったため、ALVISモードの .hud-center 直下にあるA/Bへ個別CSS scale:.65 を適用。既存の位置合わせとWAAPIのrotateアニメーションを維持する。
+- 外側リングCはCSS/寸法/角度を変更しない。球体、地図、背景、左右HUD、投影装置、台座、Avatarモードは変更しない。
+- Service Workerアプリシェルをv265へ更新。v264のオンラインnetwork-first/オフラインfallbackを維持。WebLLM/Kokoroモデルキャッシュ、依存キャッシュ、記憶/履歴/暗号化/同期/バックアップには触れない。
+- GitHub Actions/Cloudflare Pages/Safari実機での反映確認はこれから。実機での視覚確認前に完了扱いにしない。
+
 ## v264 開発版の古い画面キャッシュを避ける（2026-11-15）
 - iOS Safari/PWAのService Workerが、更新後も古い `index-integrated.html` をcache-firstで返して表示変更が反映されない可能性に対応。
 - `index-integrated.html` へのオンラインの画面遷移だけnetwork-firstへ変更し、成功した最新HTMLをALVISアプリシェルキャッシュへ保存。通信失敗/オフライン時は既存キャッシュへフォールバックする。
