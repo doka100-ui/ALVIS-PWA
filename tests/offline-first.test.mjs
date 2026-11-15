@@ -771,17 +771,17 @@ assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bump
 assert.match(app,/function stopAlvisHudMotion\(\)[\s\S]*?alvisHudMotionAnimations=\[\]/,"JARVIS ring animations must have an isolated stop lifecycle");
 assert.match(app,/if\(safeMode==="jarvis"\)\{[\s\S]*?requestAnimationFrame\(startAlvisHudMotion\);\s*\}else\{\s*stopAlvisHudMotion\(\);/,"mode switch must restart JARVIS rings and stop them in avatar mode");
 assert.match(app,/function startAlvisHudMotion\(\)[\s\S]*?if\(!chatPage \|\| chatPage\.classList\.contains\("hidden"\) \|\| chatPage\.dataset\.displayMode==="avatar"\)\{\s*stopAlvisHudMotion\(\);/,"hidden or avatar mode must not leave JARVIS ring animations running");
-assert.match(app,/const motions=\[[\s\S]*?duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/,"three JARVIS orbital ring speeds must remain unchanged");
+assert.match(app,/const motions=\[[\s\S]*?duration:27500[\s\S]*?duration:38750/,"two JARVIS orbital ring speeds must remain stable");
 assert.match(sw,/alvis-cache-v\d+-integrated/,"service worker cache must be bumped for v204");
 
 
 // v259: the approved artwork is the visible surface; legacy HUD nodes and motion hooks remain isolated.
 assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer must not be reintroduced");
-assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit"\)/, "legacy ring lifecycle remains isolated");
+assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit:not\(\.hud-orbit-c\)"\)/, "only the two visible rings are animated");
 assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
 assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "existing AI state controls remain connected");
-assert.match(app, /class="alvis-reference-image"/, "selected artwork remains in the ALVIS stage");
-assert.match(app, /class="alvis-reference-right-hotspots"/, "right-side image controls remain connected");
+assert.doesNotMatch(app, /class="alvis-reference-image"/, "flattened artwork must not replace the live HUD");
+assert.doesNotMatch(app, /class="alvis-reference-right-hotspots"/, "obsolete image-only hotspots must be absent");
 assert.match(app, /class="hud-globe-map"/, "legacy globe nodes remain available but hidden");
 assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker cache is versioned");
 
