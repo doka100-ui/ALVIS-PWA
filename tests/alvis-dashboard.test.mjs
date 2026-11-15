@@ -81,8 +81,8 @@ check("Service Worker uses the v260 shell cache and preserves model/dependency c
 check("Service Worker activation still preserves non-ALVIS model and user-data caches",
   sw.includes('key.startsWith("alvis-cache-")') &&
   sw.includes('key.startsWith("alvis-deps-")'));
-const openScripts = (app.match(/<script\\b/gi) || []).length;
-const closeScripts = (app.match(/<\\/script\\s*>/gi) || []).length;
+const openScripts = (app.match(/<script\b/gi) || []).length;
+const closeScripts = (app.match(/<\/script\s*>/gi) || []).length;
 check("the HTML script tags remain balanced", openScripts === closeScripts);
 
 for (const name of checks) console.log("PASS " + name);
