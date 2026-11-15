@@ -1775,16 +1775,28 @@ header .status{margin-top:2px}
   transform:translate(-50%,-50%) rotate(9deg)!important;
 }
 
-/* v265: explicitly scale the two ellipse paths around the globe.
-   Target the actual direct-child orbit elements; keep the outer orbit C untouched.
-   Individual scale composes with the existing translate and WAAPI rotate animation. */
+/* v266: refine only the two inner orbital ellipses.
+   Set their geometry directly instead of stacking a CSS scale transform.
+   Preserve the centered translate and independent WAAPI rotation. The outer C ring is untouched. */
 #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a{
-  width:108%!important;height:40%!important;transform-origin:50% 50%!important;scale:.65!important;
+  width:86%!important;height:32%!important;
+  border-color:#b8f5ffdd!important;border-width:1.2px!important;
+  box-shadow:0 0 8px #67e8f977,0 0 22px #0ea5e933!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a::after{
+  left:12%!important;top:8%!important;width:4px!important;height:4px!important;
+  background:#e6fcff!important;box-shadow:0 0 8px 3px #67e8f9!important;
 }
 #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b{
-  width:100%!important;height:54%!important;transform-origin:50% 50%!important;scale:.65!important;
+  width:80%!important;height:44%!important;
+  border-color:#38bdf8bb!important;border-width:1px!important;
+  box-shadow:0 0 9px #0ea5e966,0 0 24px #0284c733!important;
 }
-/* end v265 inner-orbit-only sizing */
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b::after{
+  left:84%!important;top:82%!important;width:4px!important;height:4px!important;
+  background:#b8eaff!important;box-shadow:0 0 8px 3px #38bdf8!important;
+}
+/* end v266 inner-orbit refinement */
 </style>
 <script type="importmap">
 {
