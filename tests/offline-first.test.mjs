@@ -693,6 +693,14 @@ assert.match(app,/async function previewKokoroVoice\(voiceId,button\)\{\s*unlock
 assert.match(app,/previewKokoroTuned"\)\?\.addEventListener\("click",async\(\)=>\{unlockAlvisAudioFromGesture\(\)/);
 assert.match(app,/source\.connect\(lipAnalyser\)[\s\S]*?lipAnalyser\.connect\(alvisAudioContext\.destination\)/);
 assert.match(app,/source\.start\(0\)/);
+
+// v268: Kokoro HTMLAudioElement fallback must feed the same Avatar mouth analyser.
+assert.match(app,/const alvisMediaAudioPipelines=new WeakMap\(\)/,"media audio source nodes must be reused per element");
+assert.match(app,/function startAlvisMediaLipSync\(mediaElement\)/,"Kokoro media fallback must expose a dedicated lip-sync bridge");
+assert.match(app,/createMediaElementSource\(mediaElement\)[\s\S]*?createAnalyser\(\)[\s\S]*?source\.connect\(analyser\)[\s\S]*?analyser\.connect\(alvisAudioContext\.destination\)/,"HTML audio must be routed through a reusable analyser");
+assert.match(app,/kokoroPlayer"\)\?\.addEventListener\("play",event=>startAlvisMediaLipSync/,"manual player playback must also start Avatar lip-sync");
+assert.match(app,/kokoroAudio\.onended=\(\)=>\{[\s\S]*?stopAlvisLipSync\(\)/,"media playback end must close the Avatar mouth");
+assert.match(app,/kokoroAudio\.onerror=\(\)=>\{[\s\S]*?stopAlvisLipSync\(\)/,"media playback errors must stop Avatar lip-sync");
 assert.match(app,/if\(kokoroAudioSource\)\{try\{kokoroAudioSource\.stop\(\)/);
 assert.match(app,/value="0\.98"/);
 assert.match(sw,/alvis-cache-v\d+-integrated/);
