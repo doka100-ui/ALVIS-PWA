@@ -1,3 +1,10 @@
+## v269 Avatarモード: 日本語5母音の口形制御（2026-11-15）
+- VRM標準expressionのaa/ih/ou/ee/ohを個別に滑らかに制御するsetMouthVisemeを追加。モデルに対象expressionがない場合は既存の汎用口開閉へフォールバック。診断に5母音の対応状況を追加。
+- 端末標準speechSynthesisのonboundary/charIndexから、ひらがな/カタカナの母音行を判定して対応する口形へ切り替える。漢字の読みは推測しないため、境界イベントが漢字・未知文字の場合は控えめなaaへフォールバック。発音境界イベントはOS/ブラウザの音声実装に依存し、実際の音素時刻と完全一致するものではない。
+- 読み上げ終了/エラー/停止/Avatar終了時に口を閉じる。セッション世代チェックを維持。
+- Kokoroは現行の音量ベース口パクを維持し、今回の文字境界マッピングは端末標準音声経路のみ。Kokoroの音素/viseme同期は次段階。ALVIS HUD、Avatarモデル保存、Qwen、音声生成、記憶/履歴/暗号化/同期/バックアップは変更しない。
+- Service Workerアプリシェルcache v269。GitHub Actions回帰テスト実行後に実機確認する。VRMモデルがaa/ih/ou/ee/ohを備えているかは診断画面で確認が必要。
+
 ## v268 Avatarモード: Kokoro音声プレーヤー経由の口パク同期（2026-11-15）
 - 既存のAudioContext/AudioBuffer経路に加え、KokoroのHTMLAudioElementフォールバックでも音声波形をAnalyserNodeへ接続し、VRMの口開閉へ反映する。Safari等で自動再生できず、画面上の音声プレーヤーを手動再生した場合もplayイベントから同期を開始する。
 - MediaElementAudioSourceNodeは同じ音声要素に一度しか作れないため、WeakMapで要素ごとに再利用する。音声終了/エラー/ログアウト時は口パクを停止し、セッションガードを維持。
