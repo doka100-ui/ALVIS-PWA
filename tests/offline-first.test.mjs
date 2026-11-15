@@ -718,13 +718,13 @@ assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 
-// v262: restore the v188 live HUD with exactly two smaller orbital rings.
+// v263: preserve the outer ring and shrink only the two inner rings.
 assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="hud-center"/);
 assert.match(app,/class="hud-globe-map"/);
 assert.match(app,/class="hud-orbit hud-orbit-a"/);
 assert.match(app,/class="hud-orbit hud-orbit-b"/);
-assert.doesNotMatch(app,/class="hud-orbit hud-orbit-c"/);
+assert.match(app,/class="hud-orbit hud-orbit-c"/);
 assert.match(app,/class="hud-projector"/);
 assert.match(app,/class="hud-platform"/);
 assert.match(app,/class="hud-side hud-side-left"/);
@@ -732,9 +732,9 @@ assert.match(app,/class="hud-side hud-side-right"/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/duration:27500[\s\S]*?duration:38750/);
-assert.match(app,/v262: restore the v188 live HUD and keep exactly two smaller orbital rings/);
-assert.match(app,/hud-orbit-a\{\s*width:81%!important;height:30%!important/);
-assert.match(app,/hud-orbit-b\{\s*width:75%!important;height:40\.5%!important/);
+assert.match(app,/v263: preserve the outer ring and shrink only the two inner rings/);
+assert.match(app,/hud-orbit-a\{\s*width:60\.75%!important;height:22\.5%!important/);
+assert.match(app,/hud-orbit-b\{\s*width:56\.25%!important;height:30\.375%!important/);
 assert.doesNotMatch(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
 assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
@@ -1003,7 +1003,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v262-integrated"),"v258 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v263-integrated"),"v263 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1031,7 +1031,7 @@ assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must sh
 assert.match(app,/v262: restore the v188 live HUD and keep exactly two smaller orbital rings/);
 assert.match(app,/hud-orbit-a\{\s*width:81%!important;height:30%!important/);
 assert.match(app,/hud-orbit-b\{\s*width:75%!important;height:40\.5%!important/);
-assert.match(app,/hud-orbit-c\{\s*display:none!important/);
+assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.doesNotMatch(app,/class="hud-orbit hud-orbit-c"/);
 assert.doesNotMatch(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
