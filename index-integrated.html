@@ -3220,15 +3220,21 @@ let kokoroObjectUrl=null;
 let kokoroAudioSource=null;
 let alvisAudioContext=null;
 let alvisLipSyncFrame=0;
+let alvisLipSyncEnvelope=0;
+let alvisLipSyncNoiseFloor=0.006;
 const alvisMediaAudioPipelines=new WeakMap();
 function stopAlvisLipSync(){
   if(alvisLipSyncFrame)cancelAnimationFrame(alvisLipSyncFrame);
   alvisLipSyncFrame=0;
+  alvisLipSyncEnvelope=0;
   window.ALVISAvatarSetMouthOpen?.(0);
 }
+// Kokoro lip-sync uses a gated, smoothed amplitude envelope rather than raw frame RMS.
+// Fast attack follows syllables; slower release avoids a chattering, mechanical jaw.
 function startAlvisLipSync(analyser){
   stopAlvisLipSync();
   if(!analyser)return;
+  alvisLipSyncNoiseFloor=0.006;
   const samples=new Uint8Array(analyser.fftSize);
   const tick=()=>{
     analyser.getByteTimeDomainData(samples);
@@ -3238,8 +3244,15 @@ function startAlvisLipSync(analyser){
       sum+=v*v;
     }
     const rms=Math.sqrt(sum/samples.length);
-    const amount=Math.max(0,Math.min(1,(rms-0.018)*5.2));
-    window.ALVISAvatarSetMouthOpen?.(amount);
+    if(rms<Math.max(0.022,alvisLipSyncNoiseFloor*2.5)){
+      alvisLipSyncNoiseFloor+=(rms-alvisLipSyncNoiseFloor)*0.025;
+    }
+    const gate=Math.max(0.012,alvisLipSyncNoiseFloor*2.0);
+    const activity=Math.max(0,rms-gate);
+    const target=Math.pow(Math.min(1,activity/0.085),0.78);
+    const smoothing=target>alvisLipSyncEnvelope?0.52:0.19;
+    alvisLipSyncEnvelope+=(target-alvisLipSyncEnvelope)*smoothing;
+    window.ALVISAvatarSetMouthOpen?.(Math.max(0,Math.min(1,alvisLipSyncEnvelope)));
     alvisLipSyncFrame=requestAnimationFrame(tick);
   };
   tick();
