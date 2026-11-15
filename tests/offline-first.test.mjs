@@ -10,12 +10,12 @@ const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json"
 // v255: pause the actual Web Animations API ring animations during pinch-zoom.
 // v256: pause all animations inside the ALVIS HUD, including CSS pseudo-elements, and catch iOS gesture events.
 // v257: flatten decorative glow/scan layers during zoom to reduce Safari compositing pressure.
-// v266: use direct geometry for the two inner ALVIS orbit ellipses.
+// v267: use direct geometry for the two inner ALVIS orbit ellipses.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v266-integrated/);
+assert.match(sw, /alvis-cache-v267-integrated/);
 // v264: fetch the integrated app shell from the network first when online,
 // while retaining the cached shell as the offline fallback.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
@@ -742,8 +742,8 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/duration:27500[\s\S]*?duration:38750/);
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
-assert.match(app,/hud-orbit-a\{\s*width:86%!important;height:32%!important/,"v266 must set the first inner ellipse geometry directly");
-assert.match(app,/hud-orbit-b\{\s*width:80%!important;height:44%!important/,"v266 must set the second inner ellipse geometry directly");
+assert.match(app,/hud-orbit-a\{\s*width:60.75%!important;height:22.5%!important/,"v267 must shrink the first rotating inner ellipse directly");
+assert.match(app,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!important/,"v267 must shrink the second rotating inner ellipse directly");
 assert.match(app,/border-color:#b8f5ffdd!important/,"the first orbit keeps its refined cyan glow");
 assert.match(app,/border-color:#38bdf8bb!important/,"the second orbit keeps its refined blue glow");
 assert.doesNotMatch(app,/scale:\.65!important/,"the previous stacked scale transform must be removed");
@@ -1017,7 +1017,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v266-integrated"),"v263 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v267-integrated"),"v263 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1043,9 +1043,9 @@ assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge m
 assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
 
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
-assert.match(app,/hud-orbit-a\{\s*width:86%!important;height:32%!important/,"v266 direct geometry must size the first inner orbit");
-assert.match(app,/hud-orbit-b\{\s*width:80%!important;height:44%!important/,"v266 direct geometry must size the second inner orbit");
-assert.doesNotMatch(app,/scale:\.65!important/,"v266 must not use the previous stacked scale property");
+assert.match(app,/hud-orbit-a\{\s*width:60.75%!important;height:22.5%!important/,"v267 must size the first rotating inner orbit to the compact geometry");
+assert.match(app,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!important/,"v267 must size the second rotating inner orbit to the compact geometry");
+assert.doesNotMatch(app,/scale:\.65!important/,"v267 must not use the previous stacked scale property");
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
