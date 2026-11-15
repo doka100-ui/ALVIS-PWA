@@ -1,3 +1,9 @@
+## v265（2026-11-15）
+- 中央球体を囲む内側2本の楕円軌道A/Bを明示的に縮小。対象を .hud-center 直下の実要素に限定し、CSS scale:.65 を適用。
+- 外側楕円C、球体、背景、左右HUD、投影装置、台座、Avatarモードは変更なし。A/Bの回転アニメーションと位置合わせを維持。
+- Service Workerアプリシェルv265。v264のオンラインnetwork-first/オフラインfallbackを維持。AIモデル/依存キャッシュ、記憶、履歴、暗号化、同期、バックアップは変更なし。
+- CI/Cloudflare Pages/Safari実機での表示反映確認は未実施。
+
 ## v264（2026-11-15）
 - iOS Safari/PWAで開発版の画面変更が古いService Workerキャッシュに隠れる可能性へ対応。
 - `index-integrated.html` のオンライン画面遷移をnetwork-firstにし、最新HTMLをアプリシェルキャッシュへ保存。通信失敗時はキャッシュ済み画面へフォールバック。
