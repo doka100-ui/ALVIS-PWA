@@ -2450,6 +2450,25 @@ let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
 let alvisStoragePersistenceStatus = "未要求";
 
+// Service Workerのinstall/cache.addAllが失敗するとreadyが長時間pendingになる環境がある。
+// アプリシェルのキャッシュ準備は待ち過ぎず、AIモデル取得そのものは直接続行する。
+function waitForAlvisServiceWorkerReady(timeoutMs=3500){
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=(ready,timedOut=false)=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      resolve({ready:!!ready,timedOut});
+    };
+    const timer=setTimeout(()=>finish(false,true),timeoutMs);
+    Promise.resolve(alvisServiceWorkerReady).then(
+      ready=>finish(ready,false),
+      ()=>finish(false,false)
+    );
+  });
+}
+
 // モデル起動ボタンの直接操作中に、ブラウザへ保存領域の永続化を要求する。
 // 拒否・非対応でもモデル起動を妨げず、既存キャッシュやユーザーデータには触れない。
 function requestAlvisStoragePersistence(){
@@ -3901,8 +3920,15 @@ $("loadAiModel").addEventListener("click",async()=>{
       if(alvisEngineCleanupError)throw new Error("前回のモデル解放に失敗しています。ページを再読み込みしてから再試行してください。詳細："+alvisEngineCleanupError);
     }
     setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
-    // Service Workerが利用可能なら先に起動を待ち、WebLLMのJavaScript依存コードをキャッシュできる状態にする。
-    await alvisServiceWorkerReady;
+    // Service Workerの準備待ちでモデル取得全体を止めない。タイムアウト/失敗時もWebLLMを直接起動する。
+    const serviceWorkerResult=await waitForAlvisServiceWorkerReady();
+    if(serviceWorkerResult.timedOut){
+      setStatus("aiStatus","Service Workerの準備が長引いているため、待機を終了してAIモデルの読み込みを続けます…");
+    }else if(!serviceWorkerResult.ready){
+      setStatus("aiStatus","Service Workerを利用できないため、AIモデルを直接読み込みます…");
+    }else{
+      setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
+    }
     if(!CreateMLCEngine){
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
       alvisWebLLMVersion="0.2.87（CDN指定）";
