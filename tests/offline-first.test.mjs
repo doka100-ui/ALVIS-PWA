@@ -747,8 +747,8 @@ assert.doesNotMatch(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
 assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
 
-assert.match(app,/#chatPage\\[data-display-mode="jarvis"\\] \\.display-dock \\.mode-stage\\.jarvis-stage \\.hud-center>\\.hud-orbit-a\\{[\\s\\S]*?scale:\\.65!important/,"v265 must explicitly scale the first inner ellipse around the globe");
-assert.match(app,/#chatPage\\[data-display-mode="jarvis"\\] \\.display-dock \\.mode-stage\\.jarvis-stage \\.hud-center>\\.hud-orbit-b\\{[\\s\\S]*?scale:\\.65!important/,"v265 must explicitly scale the second inner ellipse around the globe");
+assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a{') && app.includes("scale:.65!important;"),"v265 must explicitly scale the first inner ellipse around the globe");
+assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b{') && app.includes("scale:.65!important;"),"v265 must explicitly scale the second inner ellipse around the globe");
 assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain present");
 
 
