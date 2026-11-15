@@ -784,6 +784,9 @@ assert.match(app,/function getAlvisKanaViseme\(character\)/,"Japanese kana must 
 assert.match(app,/function updateAlvisSpeechViseme\(text,event\)/,"speech boundary events must update Avatar mouth shapes");
 assert.match(app,/utterance\.onboundary=event=>\{[\s\S]*?updateAlvisSpeechViseme\(clean,event\)/,"standard speech must drive mouth visemes from boundary events");
 assert.match(app,/window\.ALVISAvatarSetMouthViseme=mounted\.setMouthViseme/,"VRM mouth viseme bridge must be connected");
+assert.match(app,/口形 \(aa \/ ih \/ ou \/ ee \/ oh\)/,"Avatar diagnostics must show supported vowel presets");
+assert.match(app,/report\.mouthVisemes\?\.length===5&&"5 VOWELS"/,"Avatar ready status must identify complete five-vowel support");
+assert.match(app,/\?？\\s　/,"Japanese speech mapping must recognize whitespace boundaries");
 assert.match(app,/utterance\.onend=\(\)=>\{[\s\S]*?ALVISAvatarSetMouthOpen\?\.\(0\)/,"standard speech end must close Avatar mouth");
 assert.match(vrmRuntime,/lookAt: !!vrm\.lookAt\?\.target/,"diagnostics must check look-at support");
 assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by the runtime");
