@@ -17,7 +17,7 @@ check("ALVIS mode uses the live v188-style HUD, not a flattened artwork",!stage.
 check("the central holographic globe, projector and pedestal remain",center.includes('class="hud-projector"')&&center.includes('class="hud-platform"')&&center.includes('class="hud-globe-map"'));
 check("exactly two orbital rings remain in the live HUD",(center.match(/class="hud-orbit hud-orbit-[ab]"/g)||[]).length===2&&!center.includes("hud-orbit-c"));
 check("the two rings are reduced to 75% of their previous dimensions",app.includes("hud-orbit-a{\n  width:81%!important;height:30%!important;")&&app.includes("hud-orbit-b{\n  width:75%!important;height:40.5%!important;"));
-check("ring animation starts with only the two visible rings",app.includes('orbitNodes.length<2')&&app.includes('duration:27500')&&app.includes('duration:38750')&&!app.includes('classList.contains("hud-orbit-c")), "only A/B rings are animated");
+check("ring animation starts with only the two visible rings",app.includes('orbitNodes.length<2')&&app.includes('duration:27500')&&app.includes('duration:38750')&&!app.includes('classList.contains("hud-orbit-c")'));
 check("left and right HUD panels and navigation remain",stage.includes('class="hud-side hud-side-left"')&&stage.includes('class="hud-side hud-side-right"')&&stage.includes('class="hud-nav"'));
 check("both display modes and shared AI functions remain",app.includes('id="jarvisModeButton"')&&app.includes('id="avatarModeButton"')&&app.includes("async function sendToAlvis()"));
 check("Avatar mode remains independently hidden when ALVIS mode is selected",app.includes('#chatPage[data-display-mode="avatar"] .display-dock .mode-stage.jarvis-stage{display:none!important}')&&app.includes('id="alvisAvatarCanvas"'));
