@@ -718,33 +718,28 @@ assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 
 
-// v261: the approved reference artwork is the visible ALVIS dashboard; legacy HUD nodes stay hidden.
-assert.match(app,/class="alvis-reference-image" src="\.\/assets\/alvis-dashboard-reference\.avif"/);
-assert.match(app,/class="alvis-reference-right-hotspots"/);
+// v262: restore the v188 live HUD with exactly two smaller orbital rings.
 assert.match(app,/class="mode-stage jarvis-stage"/);
 assert.match(app,/class="hud-center"/);
 assert.match(app,/class="hud-globe-map"/);
 assert.match(app,/class="hud-orbit hud-orbit-a"/);
 assert.match(app,/class="hud-orbit hud-orbit-b"/);
-assert.match(app,/class="hud-orbit hud-orbit-c"/);
+assert.doesNotMatch(app,/class="hud-orbit hud-orbit-c"/);
 assert.match(app,/class="hud-projector"/);
 assert.match(app,/class="hud-platform"/);
 assert.match(app,/class="hud-side hud-side-left"/);
 assert.match(app,/class="hud-side hud-side-right"/);
 assert.match(app,/id="hudAiAction"/);
-assert.match(app,/data-page="chatPage"/);
-assert.match(app,/data-page="devicePage"/);
-assert.match(app,/duration:22000[\s\S]*?duration:31000[\s\S]*?duration:42000/);
-assert.match(app,/aspect-ratio:1397\/1126/);
-assert.match(app,/object-fit:fill!important/);
-assert.match(app,/filter:none!important/);
-assert.match(app,/transform:none!important/);
-assert.match(app,/v259: show the approved dashboard artwork as-is/);
-assert.match(app,/\.display-dock \.mode-stage\.jarvis-stage>\.hud-side-right,[\s\S]*?display:none!important/);
-assert.match(sw,/alvis-cache-v\d+-integrated/);
-assert.ok(sw.includes("./assets/alvis-dashboard-reference.avif"));
+assert.match(app,/orbitNodes\.length<2/);
+assert.match(app,/duration:27500[\s\S]*?duration:38750/);
+assert.match(app,/v262: restore the v188 live HUD and keep exactly two smaller orbital rings/);
+assert.match(app,/hud-orbit-a\{\s*width:81%!important;height:30%!important/);
+assert.match(app,/hud-orbit-b\{\s*width:75%!important;height:40\.5%!important/);
+assert.doesNotMatch(app,/class="alvis-reference-image"/);
+assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
+assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
 
-// v250: portrait sizing rules remain scoped; the final v259 override keeps the selected artwork ratio.
+// v250: portrait sizing rules remain scoped to the ALVIS live HUD.
 assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(app,/min-height:450px!important/);
