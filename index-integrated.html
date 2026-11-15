@@ -3311,7 +3311,7 @@ function getAlvisKanaViseme(character){
 }
 function updateAlvisSpeechViseme(text,event){
   const index=Number.isFinite(event?.charIndex)?event.charIndex:-1;
-  if(index<0)return;
+  if(index<0||index>=String(text||"").length)return;
   const character=String(text||"").slice(index,index+2);
   const first=character.charAt(0);
   const viseme=getAlvisKanaViseme(character);
@@ -3518,6 +3518,8 @@ function speakAlvis(text,options={}){
   if(voice)utterance.voice=voice;
   utterance.onstart=()=>{window.ALVISAvatarSetMouthOpen?.(0.24);setStatus("voiceStatus","ALVISが話しています…");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
   utterance.onboundary=event=>{if(speechSessionGeneration!==alvisSessionGeneration)return;updateAlvisSpeechViseme(clean,event);};
+  utterance.onpause=()=>{if(speechSessionGeneration!==alvisSessionGeneration)return;window.ALVISAvatarSetMouthOpen?.(0);};
+  utterance.onresume=()=>{if(speechSessionGeneration!==alvisSessionGeneration)return;window.ALVISAvatarSetMouthOpen?.(0.2);};
   utterance.onend=()=>{if(speechSessionGeneration!==alvisSessionGeneration)return;window.ALVISAvatarSetMouthOpen?.(0);setStatus("voiceStatus","読み上げ完了");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
   utterance.onerror=event=>{
     if(speechSessionGeneration!==alvisSessionGeneration)return;
