@@ -741,14 +741,14 @@ assert.match(app,/id="hudAiAction"/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/duration:27500[\s\S]*?duration:38750/);
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
-assert.match(app,/hud-orbit-a\{\s*width:60\.75%!important;height:22\.5%!important/);
-assert.match(app,/hud-orbit-b\{\s*width:56\.25%!important;height:30\.375%!important/);
+assert.match(app,/hud-orbit-a\{\s*width:86%!important;height:32%!important/,"v266 must set the first inner ellipse geometry directly");
+assert.match(app,/hud-orbit-b\{\s*width:80%!important;height:44%!important/,"v266 must set the second inner ellipse geometry directly");
+assert.match(app,/border-color:#b8f5ffdd!important/,"the first orbit keeps its refined cyan glow");
+assert.match(app,/border-color:#38bdf8bb!important/,"the second orbit keeps its refined blue glow");
+assert.doesNotMatch(app,/scale:\.65!important/,"the previous stacked scale transform must be removed");
 assert.doesNotMatch(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
 assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
-
-assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a{') && app.includes("scale:.65!important;"),"v265 must explicitly scale the first inner ellipse around the globe");
-assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b{') && app.includes("scale:.65!important;"),"v265 must explicitly scale the second inner ellipse around the globe");
 assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain present");
 
 
