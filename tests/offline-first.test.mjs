@@ -14,7 +14,15 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v263-integrated/);
+assert.match(sw, /alvis-cache-v264-integrated/);
+// v264: fetch the integrated app shell from the network first when online,
+// while retaining the cached shell as the offline fallback.
+const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
+const genericCacheIndex = sw.indexOf("const cached = await caches.match(request, { ignoreSearch: true })");
+assert.ok(shellNavigationIndex >= 0 && genericCacheIndex > shellNavigationIndex, "integrated navigation must be network-first before generic cache-first handling");
+assert.match(sw, /request\.mode === "navigate"/);
+assert.match(sw, /appCache\.put\(shellUrl, response\.clone\(\)\)/);
+
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
 assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
 assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
@@ -1003,7 +1011,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v263-integrated"),"v263 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v264-integrated"),"v263 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
