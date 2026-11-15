@@ -1750,6 +1750,11 @@ header .status{margin-top:2px}
 
 
 
+/* v262: restore the v188 live HUD and keep exactly two smaller orbital rings.
+   The globe, side panels, projector, pedestal, colors and layout stay unchanged. */
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:grid!important;
+}
 </style>
 <script type="importmap">
 {
@@ -5690,11 +5695,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 </html>
 
 
-/* v262: restore the v188 live HUD and keep exactly two smaller orbital rings.
-   The globe, side panels, projector, pedestal, colors and layout stay unchanged. */
-#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{
-  position:relative!important;display:grid!important;
-}
+
 #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side{
   display:block!important;visibility:visible!important;
 }
