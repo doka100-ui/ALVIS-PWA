@@ -16,7 +16,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v269-integrated/);
+assert.match(sw, /alvis-cache-v270-integrated/);
 // v264: fetch the integrated app shell from the network first when online,
 // while retaining the cached shell as the offline fallback.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
@@ -444,6 +444,10 @@ assert.equal((app.match(/normalizeAlvisSpeechText\(String\(text\|\|""\)\.replace
   "both standard and Kokoro TTS must normalize ALVIS pronunciation");
 assert.match(app, /new SpeechSynthesisUtterance\(clean\)/);
 assert.match(app, /kokoroTts\.speak\(clean,/);
+assert.match(app,/let alvisLipSyncEnvelope=0/,"Kokoro lip-sync must keep a smoothed amplitude envelope");
+assert.match(app,/alvisLipSyncNoiseFloor\+=\(rms-alvisLipSyncNoiseFloor\)\*0\.025/,"Kokoro lip-sync must adapt its silence floor");
+assert.match(app,/const smoothing=target>alvisLipSyncEnvelope\?0\.52:0\.19/,"Kokoro lip-sync must use faster attack and slower release");
+assert.match(app,/const gate=Math\.max\(0\.012,alvisLipSyncNoiseFloor\*2\.0\)/,"Kokoro lip-sync must gate background noise");
 
 // Approved public research remains untrusted reference material, never executable instructions.
 assert.match(app, /外部資料は承認済みでも未検証/);
