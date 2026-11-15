@@ -5653,7 +5653,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       "名前: "+(report?.name||"名称なし"),
       "頭部ボーン: "+mark(report?.humanoidHead),
       "まばたき: "+mark(report?.blink),
-      "口パク (aa / oh): "+mark(report?.aa&&report?.oh),
+      "口形 (aa / ih / ou / ee / oh): "+(report?.mouthVisemes?.length?report.mouthVisemes.join(" / "):"—"),
+      "口パク: "+mark(report?.aa&&report?.oh),
       "視線制御: "+mark(report?.lookAt),
       "表情 (happy / sad / angry / relaxed / surprised): "+(report?.emotionPresets?.length?report.emotionPresets.join(" / "):"—"),
       "",
@@ -5688,7 +5689,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarGetDiagnostics=mounted.getDiagnostics;
       const report=mounted.getDiagnostics();
       renderDiagnostics(report);
-      const features=[report.blink&&"BLINK",report.aa&&report.oh&&"LIP SYNC",report.lookAt&&"LOOK AT",report.headMotion&&"HEAD MOTION"].filter(Boolean);
+      const features=[report.blink&&"BLINK",report.aa&&report.oh&&"LIP SYNC",report.mouthVisemes?.length===5&&"5 VOWELS",report.lookAt&&"LOOK AT",report.headMotion&&"HEAD MOTION"].filter(Boolean);
       setStatus("ALVIS / VRM READY"+(features.length?" — "+features.join(" · "):" — BASIC MODEL"));
     }catch(error){
       modelFailed=true;
