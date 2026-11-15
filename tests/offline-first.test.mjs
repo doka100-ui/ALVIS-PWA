@@ -14,7 +14,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v261-integrated/);
+assert.match(sw, /alvis-cache-v262-integrated/);
 assert.match(app,/function updateAlvisZoomRenderMode\(\)/);
 assert.match(app,/function setAlvisHudZoomAnimationState\(zoomed\)/);
 assert.match(app,/\[stage,\.\.\.stage\.querySelectorAll\("\*"\)\][\s\S]*?target\.getAnimations\(\)/);
@@ -1008,7 +1008,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v261-integrated"),"v258 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v262-integrated"),"v258 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1032,3 +1032,12 @@ assert.match(app,/window\.ALVISAvatarSetHeadGesture=mounted\.setHeadGesture/,"he
 assert.match(app,/window\.ALVISAvatarSetHeadGesture\?\.\("nod"\)/,"avatar replies must trigger a gentle nod");
 assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge must be cleared when avatar runtime is disposed");
 assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
+
+assert.match(app,/v262: restore the v188 live HUD and keep exactly two smaller orbital rings/);
+assert.match(app,/hud-orbit-a\{\s*width:81%!important;height:30%!important/);
+assert.match(app,/hud-orbit-b\{\s*width:75%!important;height:40\.5%!important/);
+assert.match(app,/hud-orbit-c\{\s*display:none!important/);
+assert.match(app,/orbitNodes\.length<2/);
+assert.doesNotMatch(app,/class="hud-orbit hud-orbit-c"/);
+assert.doesNotMatch(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
+assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
