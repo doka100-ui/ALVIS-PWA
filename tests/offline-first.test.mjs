@@ -9,7 +9,8 @@ const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json"
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
 // v255: pause the actual Web Animations API ring animations during pinch-zoom.
 // v256: pause all animations inside the ALVIS HUD, including CSS pseudo-elements, and catch iOS gesture events.
-// v257: flatten decorative glow/scan layers during zoom to reduce Safari compositing pressure.\n// v266: use direct geometry for the two inner ALVIS orbit ellipses.
+// v257: flatten decorative glow/scan layers during zoom to reduce Safari compositing pressure.
+// v266: use direct geometry for the two inner ALVIS orbit ellipses.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
@@ -1042,8 +1043,9 @@ assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge m
 assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
 
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
-assert.match(app,/hud-orbit-a\{\s*width:60\.75%!important;height:22\.5%!important/);
-assert.match(app,/hud-orbit-b\{\s*width:56\.25%!important;height:30\.375%!important/);
+assert.match(app,/hud-orbit-a\{\s*width:86%!important;height:32%!important/,"v266 direct geometry must size the first inner orbit");
+assert.match(app,/hud-orbit-b\{\s*width:80%!important;height:44%!important/,"v266 direct geometry must size the second inner orbit");
+assert.doesNotMatch(app,/scale:\.65!important/,"v266 must not use the previous stacked scale property");
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
