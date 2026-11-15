@@ -22,7 +22,7 @@ check("left and right HUD panels and navigation remain",stage.includes('class="h
 check("both display modes and shared AI functions remain",app.includes('id="jarvisModeButton"')&&app.includes('id="avatarModeButton"')&&app.includes("async function sendToAlvis()"));
 check("Avatar mode remains independently hidden when ALVIS mode is selected",/#chatPage\[data-display-mode="avatar"\] \.display-dock>\.alvis-hologram-frame>\.mode-stage\.jarvis-stage\{\s*display:none!important/.test(app)&&app.includes('id="alvisAvatarCanvas"'));
 check("memory, history, encrypted storage, sync, backup and voice remain",app.includes("encryptData")&&app.includes("data.history")&&app.includes("saveCloudCore")&&app.toLowerCase().includes("backup")&&app.includes("Kokoro"));
-check("Service Worker v263 does not precache the flattened dashboard artwork",sw.includes('alvis-cache-v263-integrated')&&!sw.includes("alvis-dashboard-reference.avif"));
+check("Service Worker v264 does not precache the flattened dashboard artwork",sw.includes('alvis-cache-v264-integrated')&&!sw.includes("alvis-dashboard-reference.avif"));
 check("Service Worker preserves the independent dependency cache",sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2"')&&sw.includes('key.startsWith("alvis-deps-")'));
 console.log(checks.map(name=>"PASS "+name).join("\n"));
 console.log(checks.length+"/"+checks.length+" live HUD checks passed.");
