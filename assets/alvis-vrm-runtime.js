@@ -295,6 +295,7 @@ export async function mountVrmAvatar(host, blob) {
       } else {
         setExpression("aa", mouthOpen);
         setExpression("oh", mouthOpen * 0.18);
+        for (const name of ["ih", "ou", "ee"]) setExpression(name, 0);
       }
     }
 
