@@ -732,7 +732,7 @@ assert.match(app,/class="hud-side hud-side-right"/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/duration:27500[\s\S]*?duration:38750/);
-assert.match(app,/v263: preserve the outer ring and shrink only the two inner rings/);
+assert.match(app,/hud-orbit-c\\{\\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/hud-orbit-a\{\s*width:60\.75%!important;height:22\.5%!important/);
 assert.match(app,/hud-orbit-b\{\s*width:56\.25%!important;height:30\.375%!important/);
 assert.doesNotMatch(app,/class="alvis-reference-image"/);
@@ -1028,7 +1028,7 @@ assert.match(app,/window\.ALVISAvatarSetHeadGesture\?\.\("nod"\)/,"avatar replie
 assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge must be cleared when avatar runtime is disposed");
 assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
 
-assert.match(app,/v263: preserve the outer ring and shrink only the two inner rings/);
+assert.match(app,/hud-orbit-c\\{\\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/hud-orbit-a\{\s*width:60\.75%!important;height:22\.5%!important/);
 assert.match(app,/hud-orbit-b\{\s*width:56\.25%!important;height:30\.375%!important/);
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
