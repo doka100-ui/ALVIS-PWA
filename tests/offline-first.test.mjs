@@ -920,7 +920,7 @@ assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/,"cache 
 
 // v229: request persistent origin storage directly from the explicit model-load gesture.
 assert.match(app,/function requestAlvisStoragePersistence\(\)[\s\S]*?navigator\.storage\.persist\(\)/,"model startup must request persistent browser storage when supported");
-assert.match(app,/requestAlvisStoragePersistence\(\);[\s\S]*?await alvisServiceWorkerReady/,"persistence request must start before the first await in the model-load handler");
+assert.match(app,/requestAlvisStoragePersistence\(\);[\s\S]*?await waitForAlvisServiceWorkerReady\(\)/,"persistence request must start before the first await in the model-load handler");
 assert.match(app,/モデル起動時の永続化要求：/,"diagnostics must expose the persistence request result");
 assert.match(app,/alvisStoragePersistenceStatus=granted\?"ブラウザから許可済み":"ブラウザが未許可"/,"browser denial must be reported without blocking model loading");
 assert.doesNotMatch(app,/caches\.delete\([^)]*webllm|deleteModelAllInfoInCache|deleteModelInCache\(/i,"persistence request must not clear model caches");
