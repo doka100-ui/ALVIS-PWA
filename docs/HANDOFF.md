@@ -1,3 +1,9 @@
+## v271 Qwenモデル起動をService Worker待ちで停止させない（2026-11-15）
+- Service Workerのinstall/cache.addAllが失敗・長時間pendingになるとnavigator.serviceWorker.readyも解決せず、Qwenモデル取得開始前に「準備中」で止まる可能性へ対応。
+- 起動時のService Worker待機を最大3.5秒に制限し、タイムアウト/利用不可でもWebLLMのimportとモデル起動を続行する。Service Workerの準備完了時は従来どおり依存コードのキャッシュを利用。
+- 既存のWebLLMモデルキャッシュ、音声モデル、GPU制御、Avatar、ALVIS HUD、記憶/履歴/暗号化/同期/バックアップは変更しない。キャッシュ削除やモデル再ダウンロードを強制しない。
+- Service Workerアプリシェルcache v271。CIと実機でのダウンロード再開/完了は別途確認が必要。
+
 ## v270 Avatarモード: Kokoro口パクの音量包絡を滑らかに調整（2026-11-15）
 - Kokoro音声のAudioBuffer/HTMLAudioElement両再生経路で共有する波形解析に、環境ノイズ床の緩やかな追従、ノイズゲート、速いアタック/遅いリリースの包絡平滑化を追加。小さな無音ノイズで口が震えるのを抑え、発話開始への反応と口の閉じ方を改善する。
 - 変更はAvatar専用のKokoro口開閉ブリッジのみ。音声モデル/音声キャッシュ/再生速度/標準音声5母音同期/VRM表情・視線・まばたき・頭部動作/ALVIS HUD/Qwen/記憶/履歴/暗号化/同期/バックアップは変更しない。
