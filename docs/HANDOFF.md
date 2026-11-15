@@ -1,3 +1,9 @@
+## v272 Qwenモデル読み込み段階をHUDへ表示（2026-11-15）
+- これまでHUDはaiLoading中に常に「Qwen3-1.7B 準備中」と表示し、WebLLMのinitProgressCallbackが返す進捗率や段階説明を隠していた。
+- HUDの詳細欄へ読み込み率と段階説明を表示し、準備待ち・キャッシュ確認・モデル取得などを区別しやすくする。WebLLMの進捗コールバックが発火しない場合は準備中表示のままになるため、次の診断材料として扱う。
+- 推論処理、モデルID/量子化、モデルキャッシュ、GPU管理、Service Worker待機フォールバック、Avatar、ALVIS HUDの構造、記憶/履歴/暗号化/同期/バックアップは変更しない。アプリシェルcache v272。
+- GitHub Actions回帰テストで表示ロジックを確認後、iPhone Safari実機で進捗表示とダウンロード完了を確認する。
+
 ## v271 Qwenモデル起動をService Worker待ちで停止させない（2026-11-15）
 - Service Workerのinstall/cache.addAllが失敗・長時間pendingになるとnavigator.serviceWorker.readyも解決せず、Qwenモデル取得開始前に「準備中」で止まる可能性へ対応。
 - 起動時のService Worker待機を最大3.5秒に制限し、タイムアウト/利用不可でもWebLLMのimportとモデル起動を続行する。Service Workerの準備完了時は従来どおり依存コードのキャッシュを利用。
