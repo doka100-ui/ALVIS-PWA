@@ -1028,11 +1028,11 @@ assert.match(app,/window\.ALVISAvatarSetHeadGesture\?\.\("nod"\)/,"avatar replie
 assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge must be cleared when avatar runtime is disposed");
 assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
 
-assert.match(app,/v262: restore the v188 live HUD and keep exactly two smaller orbital rings/);
-assert.match(app,/hud-orbit-a\{\s*width:81%!important;height:30%!important/);
-assert.match(app,/hud-orbit-b\{\s*width:75%!important;height:40\.5%!important/);
+assert.match(app,/v263: preserve the outer ring and shrink only the two inner rings/);
+assert.match(app,/hud-orbit-a\{\s*width:60\.75%!important;height:22\.5%!important/);
+assert.match(app,/hud-orbit-b\{\s*width:56\.25%!important;height:30\.375%!important/);
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
-assert.doesNotMatch(app,/class="hud-orbit hud-orbit-c"/);
+assert.match(app,/class="hud-orbit hud-orbit-c"/);
 assert.doesNotMatch(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
 assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
