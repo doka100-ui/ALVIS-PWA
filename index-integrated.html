@@ -1755,6 +1755,24 @@ header .status{margin-top:2px}
 #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{
   position:relative!important;display:grid!important;
 }
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side{
+  display:block!important;visibility:visible!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-center{
+  display:grid!important;visibility:visible!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.alvis-reference-image{
+  display:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-a{
+  width:81%!important;height:30%!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-b{
+  width:75%!important;height:40.5%!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-c{
+  display:none!important;
+}
 </style>
 <script type="importmap">
 {
@@ -5693,24 +5711,3 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 </script>
 </body>
 </html>
-
-
-
-#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side{
-  display:block!important;visibility:visible!important;
-}
-#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-center{
-  display:grid!important;visibility:visible!important;
-}
-#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.alvis-reference-image{
-  display:none!important;
-}
-#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-a{
-  width:81%!important;height:30%!important;
-}
-#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-b{
-  width:75%!important;height:40.5%!important;
-}
-#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-c{
-  display:none!important;
-}
