@@ -3283,6 +3283,32 @@ function unlockAlvisAudioFromGesture(){
 function normalizeAlvisSpeechText(value){
   return String(value||"").replace(/ALVIS/gi,"アルビス");
 }
+// Map Japanese kana to VRM standard vowel visemes. Kanji readings are deliberately not guessed.
+function getAlvisKanaViseme(character){
+  const normalized=String(character||"").normalize("NFKC");
+  if(!normalized)return "";
+  let kana=normalized.charAt(0);
+  const code=kana.charCodeAt(0);
+  if(code>=0x30A1&&code<=0x30F6)kana=String.fromCharCode(code-0x60);
+  const rows={
+    aa:"あかさたなはまやらわがざだばぱぁゃ",
+    ih:"いきしちにひみりぎじぢびぴぃ",
+    ou:"うくすつぬふむゆるぐずづぶぷぅゅ",
+    ee:"えけせてねへめれげぜでべぺぇ",
+    oh:"おこそとのほもよろをごぞどぼぽぉょ"
+  };
+  for(const [viseme,chars] of Object.entries(rows))if(chars.includes(kana))return viseme;
+  return "";
+}
+function updateAlvisSpeechViseme(text,event){
+  const index=Number.isFinite(event?.charIndex)?event.charIndex:-1;
+  if(index<0)return;
+  const character=String(text||"").slice(index,index+2);
+  const viseme=getAlvisKanaViseme(character);
+  if(viseme)window.ALVISAvatarSetMouthViseme?.(viseme,0.72);
+  else if(/[、。，．.!！?？\\s　]/.test(character.charAt(0)))window.ALVISAvatarSetMouthOpen?.(0);
+  else window.ALVISAvatarSetMouthViseme?.("aa",0.42);
+}
 function loadSpeechVoices(){
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザは音声読み上げに対応していません。");return;}
   availableSpeechVoices=window.speechSynthesis.getVoices();
@@ -3479,9 +3505,12 @@ function speakAlvis(text,options={}){
   const selected=$("voiceSelect").value;
   const voice=availableSpeechVoices.find(item=>item.name===selected)||availableSpeechVoices.find(item=>/^ja(?:-|$)/i.test(item.lang));
   if(voice)utterance.voice=voice;
-  utterance.onstart=()=>{setStatus("voiceStatus","ALVISが話しています…");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
-  utterance.onend=()=>{setStatus("voiceStatus","読み上げ完了");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
+  utterance.onstart=()=>{window.ALVISAvatarSetMouthOpen?.(0.24);setStatus("voiceStatus","ALVISが話しています…");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
+  utterance.onboundary=event=>{if(speechSessionGeneration!==alvisSessionGeneration)return;updateAlvisSpeechViseme(clean,event);};
+  utterance.onend=()=>{if(speechSessionGeneration!==alvisSessionGeneration)return;window.ALVISAvatarSetMouthOpen?.(0);setStatus("voiceStatus","読み上げ完了");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
   utterance.onerror=event=>{
+    if(speechSessionGeneration!==alvisSessionGeneration)return;
+    window.ALVISAvatarSetMouthOpen?.(0);
     setStatus("voiceStatus","音声再生エラー: "+event.error);
     if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");
   };
@@ -3489,6 +3518,7 @@ function speakAlvis(text,options={}){
 }
 function stopAlvisSpeech(){
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
+  window.ALVISAvatarSetMouthOpen?.(0);
   if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
   if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;}
   if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
@@ -5650,6 +5680,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       if(!isActive()){mounted.dispose();return;}
       vrmRuntime=mounted;
       window.ALVISAvatarSetMouthOpen=mounted.setMouthOpen;
+      window.ALVISAvatarSetMouthViseme=mounted.setMouthViseme;
       window.ALVISAvatarSetExpression=mounted.setExpression;
       window.ALVISAvatarSetLookAt=mounted.setLookAt;
       window.ALVISAvatarSetEmotion=mounted.setEmotion;
@@ -5695,6 +5726,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     if(modelBlob&&!force)return;
     if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
     window.ALVISAvatarSetMouthOpen=null;
+     window.ALVISAvatarSetMouthViseme=null;
     window.ALVISAvatarSetExpression=null;
     window.ALVISAvatarSetLookAt=null;
      window.ALVISAvatarSetEmotion=null;
@@ -5746,6 +5778,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;host.querySelector("model-viewer")?.remove();}
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
       window.ALVISAvatarSetMouthOpen=null;
+     window.ALVISAvatarSetMouthViseme=null;
       window.ALVISAvatarSetExpression=null;
       window.ALVISAvatarSetLookAt=null;
      window.ALVISAvatarSetEmotion=null;
