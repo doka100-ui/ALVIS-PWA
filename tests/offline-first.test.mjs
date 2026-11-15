@@ -11,6 +11,7 @@ const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json"
 // v256: pause all animations inside the ALVIS HUD, including CSS pseudo-elements, and catch iOS gesture events.
 // v257: flatten decorative glow/scan layers during zoom to reduce Safari compositing pressure.
 // v267: use direct geometry for the two inner ALVIS orbit ellipses.
+// v269: add five standard VRM vowel visemes and Japanese speech-boundary mapping.
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /function makeServiceWorkerSafeResponse\(response\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
@@ -774,6 +775,16 @@ assert.match(vrmRuntime,/const getDiagnostics = \(\) =>/,"VRM runtime must expos
 assert.match(vrmRuntime,/humanoidHead: !!headBone/,"diagnostics must check the cached humanoid head bone");
 assert.match(vrmRuntime,/blink: hasExpression\("blink"\)/,"diagnostics must check blink expression support");
 assert.match(vrmRuntime,/aa: hasExpression\("aa"\)/,"diagnostics must check mouth expression support");
+// v269: Avatar mouth control supports all five VRM standard vowel visemes.
+assert.match(vrmRuntime,/const mouthVisemeNames = \["aa", "ih", "ou", "ee", "oh"\]/);
+assert.match(vrmRuntime,/const setMouthViseme = \(name = "", amount = 0\.72\)/);
+assert.match(vrmRuntime,/mouthVisemes: mouthVisemeNames\.filter\(\(name\) => hasExpression\(name\)\)/);
+assert.match(vrmRuntime,/setExpression\("ih", 0\)/,"generic mouth-open mode must release unused vowel shapes");
+assert.match(app,/function getAlvisKanaViseme\(character\)/,"Japanese kana must map to standard vowel visemes");
+assert.match(app,/function updateAlvisSpeechViseme\(text,event\)/,"speech boundary events must update Avatar mouth shapes");
+assert.match(app,/utterance\.onboundary=event=>\{[\s\S]*?updateAlvisSpeechViseme\(clean,event\)/,"standard speech must drive mouth visemes from boundary events");
+assert.match(app,/window\.ALVISAvatarSetMouthViseme=mounted\.setMouthViseme/,"VRM mouth viseme bridge must be connected");
+assert.match(app,/utterance\.onend=\(\)=>\{[\s\S]*?ALVISAvatarSetMouthOpen\?\.\(0\)/,"standard speech end must close Avatar mouth");
 assert.match(vrmRuntime,/lookAt: !!vrm\.lookAt\?\.target/,"diagnostics must check look-at support");
 assert.match(vrmRuntime,/getDiagnostics,/,"diagnostics API must be returned by the runtime");
 // v258: VRM rendering is suspended while the document is hidden and resumes when visible.
