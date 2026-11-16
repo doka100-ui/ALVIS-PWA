@@ -2111,3 +2111,11 @@
 - 通常質問は直前の発言1件のみ最大240文字とし、古い話題の混入とprefill負荷を抑える。
 - 永続会話履歴・記憶・学び・暗号化・同期・バックアップのデータは変更しない。Service Worker cache: `alvis-cache-v227-integrated`。
 - 回帰テストにフォローアップの役割順、現在質問の完全保持、過去文脈600文字上限を追加。実機の推論品質・速度は未確認。
+
+## v273 — 指定完成見本をALVISモードへ復帰（2026-11-16）
+- developmentブランチで、ユーザー指定の「未来都市のホログラム地球ダッシュボード.png」を元に登録済みの `assets/alvis-dashboard-reference.avif`（700×564、27,940 bytes、blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8`）をALVISモードの表示面へ戻す。
+- リポジトリ内のAVIFは元PNG（1397×1126）の最適化派生版であり、元PNGそのもの・画素単位の同一データではない。球体、軌道リング、上部投影装置、下部投影台、左右パネルは一枚の画像として表示し、CSS/SVGで描き直さない。
+- 画像内の左5メニューは既存の `data-page` ボタン、左下のAI状態領域は既存の `#hudAiAction`、右側の記憶/成長行は既存の `data-hud-action` ボタンへ透明なタップ領域として接続。右側ボタンに既存の `hud-interface-action` イベント委譲を追加して、記憶/成長ページへ遷移できるようにする。
+- 旧 `.hud-center` と装飾レイヤーはALVIS画像表示中に隠し、画像表示中は旧リングのWeb Animationsも開始しない。アバターモードと既存チャット入力/送信は別領域のまま維持。
+- Service Worker app-shell cacheをv273へ更新し、AVIFをプリキャッシュ対象へ追加。独立した依存キャッシュ、WebLLM/Kokoroモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ形式、推論処理は変更しない。
+- 回帰検査は `tests/alvis-dashboard.test.mjs` と `tests/offline-first.test.mjs` で画像表示、透明操作領域、既存機能、オフラインキャッシュを確認する。Safari実機での実タップ/オフライン再読込は別途確認が必要。

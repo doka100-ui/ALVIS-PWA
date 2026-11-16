@@ -880,3 +880,11 @@ Safari等でログイン後の遅延音声再生が拒否される場合に備�
 - Existing ALVIS navigation and model-start actions remain functional through transparent, image-aligned hit areas. The legacy HUD DOM remains in place for existing status bindings but is not visually rendered over the artwork.
 - The image is included in the Service Worker app-shell precache for offline display. Updating the ALVIS app cache does not delete WebLLM/Kokoro model caches or change encrypted memory, history, synchronization, or backup data.
 - Avatar mode and the existing chat composer remain separate and unchanged.
+
+## 指定完成見本のALVIS表示面（v273）
+- ALVISモードの表示面は `assets/alvis-dashboard-reference.avif` を単一の背景画像として使用し、700:564の比率を維持する。球体・リング・投影装置・投影台・左右パネル・文字・色・情報密度をCSS/SVGで再生成しない。
+- 画像の上に描画するのは操作可能な透明ボタン領域のみ。左の5つの `data-page` ボタンは既存ページ遷移、左下 `#hudAiAction` は既存のローカルAI起動、右側の記憶/成長ボタンは既存の `hud-interface-action` 委譲処理へ接続する。
+- 旧HUD DOMは既存の状態バインディングとの互換性のため保持するが、画像表示中は球体/リング/投影台/左右パネルの描画を隠す。画像表示中は旧リングのWAAPIアニメーションも開始しない。
+- Service Workerのアプリシェルキャッシュに画像を含める。アプリキャッシュ更新は独立依存キャッシュとWebLLM/Kokoroモデルキャッシュを削除しない。
+- チャット入力/送信、アバターモード、暗号化記憶、会話履歴、同期、バックアップ、音声、ローカル推論のデータ形式と処理経路は変更しない。
+- リポジトリのAVIFはユーザー指定PNGの最適化派生版。元PNGの高解像度バイナリをそのままGitへ登録したものではない。

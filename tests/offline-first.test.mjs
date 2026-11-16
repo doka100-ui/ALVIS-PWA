@@ -16,7 +16,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cached\) return makeServiceWorkerSafeResponse\(cached\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v272-integrated/);
+assert.match(sw, /alvis-cache-v273-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -609,8 +609,8 @@ assert.match(app,/class="hud-orbit hud-orbit-a"/);
 assert.match(app,/class="hud-core">[\s\S]*?<svg class="hud-globe-map"/);
 assert.match(app,/hudAiPercent/);
 assert.match(app,/id="hudAiAction"/);
-assert.match(app,/class="hud-info-action" data-hud-action="memory"/);
-assert.match(app,/class="hud-info-action" data-hud-action="growth"/);
+assert.match(app,/class="hud-info-action hud-interface-action" data-hud-action="memory"/);
+assert.match(app,/class="hud-info-action hud-interface-action" data-hud-action="growth"/);
 assert.match(app,/v109: spatial hologram control room/);
 assert.match(app,/#(?:[0-9a-fA-F]{3,8})\b/);
 assert.match(sw,/const CACHE_NAME = "alvis-cache-v\d+-integrated"/);
@@ -766,7 +766,7 @@ assert.match(app,/border-color:#38bdf8bb!important/,"the second orbit keeps its 
 assert.doesNotMatch(app,/scale:\.65!important/,"the previous stacked scale transform must be removed");
 assert.doesNotMatch(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
-assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
+assert.match(sw,/alvis-dashboard-reference\.avif/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain present");
 
 
@@ -831,7 +831,7 @@ assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer m
 assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit:not\(\.hud-orbit-c\)"\)/, "only the two visible rings are animated");
 assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
 assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "existing AI state controls remain connected");
-assert.doesNotMatch(app, /class="alvis-reference-image"/, "flattened artwork must not replace the live HUD");
+assert.match(app, /class="alvis-reference-image"/, "the approved artwork must be the visible ALVIS surface");
 assert.doesNotMatch(app, /class="alvis-reference-right-hotspots"/, "obsolete image-only hotspots must be absent");
 assert.match(app, /class="hud-globe-map"/, "legacy globe nodes remain available but hidden");
 assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker cache is versioned");
@@ -1054,7 +1054,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v272-integrated"),"v263 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v273-integrated"),"v263 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1086,8 +1086,8 @@ assert.doesNotMatch(app,/scale:\.65!important/,"v267 must not use the previous s
 assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
-assert.doesNotMatch(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
-assert.doesNotMatch(sw,/alvis-dashboard-reference\.avif/);
+assert.match(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
+assert.match(sw,/alvis-dashboard-reference\.avif/);
 
 // v272: expose WebLLM's real stage/progress instead of a generic LOADING label.
 assert.match(app,/detail=ALVIS_MODEL_LABEL\+" "\+\(progressMatch\?"読み込み中 "/);
