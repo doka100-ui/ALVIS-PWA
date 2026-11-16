@@ -764,7 +764,7 @@ assert.match(app,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!importan
 assert.match(app,/border-color:#b8f5ffdd!important/,"the first orbit keeps its refined cyan glow");
 assert.match(app,/border-color:#38bdf8bb!important/,"the second orbit keeps its refined blue glow");
 assert.doesNotMatch(app,/scale:\.65!important/,"the previous stacked scale transform must be removed");
-assert.doesNotMatch(app,/class="alvis-reference-image"/);
+assert.match(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
 assert.match(sw,/alvis-dashboard-reference\.avif/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain present");
