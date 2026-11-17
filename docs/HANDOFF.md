@@ -2152,3 +2152,14 @@
 - アプリ起動時のService Worker登録にupdateViaCache:noneを指定し、registration.update()を明示実行。新Workerのactivateを最大12秒待ち、失敗時は既存Service Worker/オンライン起動へフォールバック。
 - QwenモデルID・量子化・GPU処理・モデルキャッシュ・記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
 - app shell cache: alvis-cache-v277-integrated。iPhone Safariでv258から更新されるか、実機確認が必要。
+
+## v278 — Service Worker待機の無期限化を回避（2026-11-17）
+- 起動時のService Worker登録後に `navigator.serviceWorker.ready` を無期限で待たないよう修正。Worker activateの待機は最大12秒とし、未完了でも通常のページ初期化へ進む。
+- Service Workerのapp shell cache: alvis-cache-v278-integrated。
+- WebLLM/Kokoroモデルキャッシュ、依存コードキャッシュ、暗号化記憶、履歴、同期、バックアップ、アバターモードは変更しない。
+- iPhone Safari実機での起動確認は未完了。
+
+## v279 — iPhone幅WebKitの初期表示スモークテスト（2026-11-17）
+- デプロイ済みページに対し、390×844・タッチ対応・iPhone Safari User-AgentのWebKitテストを追加。
+- 初期パスワード画面の表示、ALVIS画像の読み込み、アプリロック状態、未捕捉JavaScriptエラーを検証。診断用スクリーンショットも保存。
+- これはiPhone幅のWebKitエミュレーションであり、実機Safariの完全な代替ではない。
