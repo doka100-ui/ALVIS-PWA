@@ -965,3 +965,10 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - フォローアップでは直前のユーザー質問とALVIS回答を保持し、過去文脈は合計600文字以内。現在の質問は切り詰めない。
 - 通常質問では直前の発言1件を最大240文字だけ参照する。
 - 保存履歴そのものは変更・削除せず、推論時に渡す会話コンテキストのみを制限する。
+
+
+## v277 — Service Worker更新の回復性
+- プリキャッシュは資産単位で独立して実行し、任意ファイルの取得失敗でService Worker install全体が失敗しないようにする。index-integrated.htmlは必須とし、これが保存できない場合は新Workerをactivateしない。
+- 登録時はupdateViaCache:noneとregistration.update()を使ってWorkerスクリプトの更新を明示確認し、installing/waiting Workerのactivateを最大12秒待つ。
+- 既存のWebLLM/Kokoroキャッシュ、暗号化記憶・履歴・同期・バックアップデータを更新処理から除外する。
+- Service Worker app shell cache: alvis-cache-v277-integrated。実機Safariでの更新確認は別途必要。
