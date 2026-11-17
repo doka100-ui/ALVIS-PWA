@@ -1,3 +1,9 @@
+## v275 — 完成見本を覆う旧サイド装飾の除去とプレビュー検査修正（2026-11-17）
+- 完成見本の左右透明操作レイヤーに残っていた旧 `::before` ガラス背景と `::after` チャート棒を、ALVIS静止画モード時だけ無効化。画像内の球体・リング・投影装置・台座・左右パネルはそのまま表示し、透明な操作領域は維持する。
+- Playwright Chromium/WebKitの実配信検査に、画像の全不透明度と左右4つの疑似要素が非表示であることの確認を追加。
+- Chromiumのオフライン検査は `navigator.onLine` に依存せず、キャッシュ済み画像のService Worker応答と未キャッシュURLへの503オフラインフォールバックで判定する。
+- Service Worker app shell cache v275。モデル重み/依存キャッシュ、暗号化記憶、履歴、同期/バックアップ、音声データは削除しない。iPad/iPhone実機Safariは別途確認する。
+
 ## v274 — 開発版プレビューのブラウザ検証（2026-11-17）
 - Cloudflare Pagesの当該コミット用チェックが成功するまで待ち、チェックURLから一意のPreview URLを解決するGitHub Actions workflow `.github/workflows/dashboard-preview-smoke.yml` を追加。
 - Playwright Chromium/WebKitで実配信ページと `assets/alvis-dashboard-reference.avif` のHTTP応答・700×564実寸・非トリミング表示・5メニュー・右側の記憶/成長操作・AI起動タップ領域・チャット入力を確認する。

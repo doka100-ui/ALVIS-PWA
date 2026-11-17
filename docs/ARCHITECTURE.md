@@ -1,3 +1,9 @@
+## 完成見本の疑似要素オーバーレイ除去（v275）
+- 透明なメニュー/操作領域を担う左右の `.hud-side-left/right` に残っていた旧ガラス背景（`::before`）と棒グラフ（`::after`）をALVIS静止画モードだけ非表示にする。画像の色・明るさ・パネル・球体・リング・投影装置・台座は画像バイナリそのまま。
+- Playwrightは左右のbefore/after contentがすべてnoneであること、画像とステージのopacityが1であることを確認する。
+- オフライン検証はChromiumで、キャッシュ画像がService Workerから200で返ることと、未キャッシュURLがService Workerの503オフラインフォールバックを返すことを確認する。navigator.onLineはブラウザー実装差があるため判定に使わない。
+- Service Worker app shell cache v275。既存のモデル/音声/ユーザーデータの保存領域には触れない。
+
 ## 開発版プレビューのブラウザ検証（v274）
 - `.github/workflows/dashboard-preview-smoke.yml` はdevelopmentへの対象ファイルpush後、同一commitのCloudflare Pages check-runがsuccessになるまで待機し、そのdeployment IDからPreview URLを解決する。
 - `tests/dashboard-preview-smoke.mjs` はPlaywright Chromium/WebKitで配信ページ、AVIF実寸/HTTP応答、ステージ比率、画像を覆わない旧HUD非表示、左5メニュー、右側記憶/成長、AI起動hit area、チャット入力を確認する。

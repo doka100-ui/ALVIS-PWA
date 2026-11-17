@@ -1871,6 +1871,15 @@ header .status{margin-top:2px}
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-side-right .hud-info-action:focus-visible{
   outline:2px solid #67e8f9!important;outline-offset:-2px!important;background:rgba(103,232,249,.08)!important;
 }
+/* v275: remove inherited glass/chart pseudo-elements from the transparent hotspot layers.
+   The approved artwork already contains the complete side panels and their visual details. */
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side-left::before,
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side-left::after,
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side-right::before,
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side-right::after{
+  content:none!important;
+  display:none!important;
+}
 /* end v273 */
 </style>
 <script type="importmap">

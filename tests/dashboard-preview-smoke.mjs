@@ -80,13 +80,22 @@ async function verifyBrowser(browserType, verifyOffline) {
         imageDisplay: getComputedStyle(image).display,
         objectFit: getComputedStyle(image).objectFit,
         ratio: rect.width / rect.height,
-        legacyCenterDisplay: getComputedStyle(stage.querySelector(".hud-center")).display
+        legacyCenterDisplay: getComputedStyle(stage.querySelector(".hud-center")).display,
+        imageOpacity: getComputedStyle(image).opacity,
+        stageOpacity: getComputedStyle(stage).opacity,
+        sidePseudoContent: [".hud-side-left", ".hud-side-right"].flatMap(selector => {
+          const side = stage.querySelector(selector);
+          return ["::before", "::after"].map(pseudo => getComputedStyle(side, pseudo).content);
+        })
       };
     });
     assert.equal(layout.imageDisplay, "block", browserName + ": the approved image must be visible in ALVIS mode");
     assert.equal(layout.objectFit, "fill", browserName + ": the complete artwork must not be cropped");
     assert.ok(Math.abs(layout.ratio - 700 / 564) < 0.01, browserName + ": stage ratio must match the image");
     assert.equal(layout.legacyCenterDisplay, "none", browserName + ": legacy globe/rings must not be drawn over the artwork");
+    assert.equal(layout.imageOpacity, "1", browserName + ": approved artwork must remain at full opacity");
+    assert.equal(layout.stageOpacity, "1", browserName + ": image stage must remain at full opacity");
+    assert.ok(layout.sidePseudoContent.every(value => value === "none"), browserName + ": legacy side glass/chart pseudo-elements must not cover the artwork");
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
@@ -173,7 +182,12 @@ async function verifyBrowser(browserType, verifyOffline) {
       assert.equal(offlineImageResponse.status(), 200, "Chromium: dashboard image must load offline");
       assert.equal(offlineImageResponse.fromServiceWorker(), true, "Chromium: offline image must come from the Service Worker cache");
       await waitForDashboardImage(page);
-      assert.equal(await page.evaluate(() => navigator.onLine), false, "Chromium: offline test must really be offline");
+      const offlineProbe = await page.evaluate(async () => {
+        const response = await fetch("./__alvis_offline_probe__?nonce=" + Date.now(), { cache: "no-store" });
+        return { status: response.status, body: await response.text() };
+      });
+      assert.equal(offlineProbe.status, 503, "Chromium: an uncached request must use the Service Worker offline fallback");
+      assert.match(offlineProbe.body, /ALVIS: オフライン/, "Chromium: the offline fallback response must be served");
     }
 
     console.log("PASS " + browserName + ": deployed image, no-crop layout, menu navigation, memory/growth actions, AI hit area, and chat composer");

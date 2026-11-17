@@ -20,6 +20,7 @@ check("the approved dashboard asset exists as a valid AVIF file", image.length >
 check("ALVIS mode uses the approved 700x564 dashboard artwork", stage.includes('src="./assets/alvis-dashboard-reference.avif"') && stage.includes('width="700" height="564"'));
 check("the stage preserves the artwork aspect ratio without a generated crop", app.includes("aspect-ratio:700/564!important") && app.includes("object-fit:fill!important"));
 check("the legacy globe, projector, pedestal and rings are hidden beneath the artwork", /mode-stage\.jarvis-stage>\.hud-center,\s*#chatPage/.test(app) && app.includes(">.hud-caption{display:none!important}"));
+check("legacy side glass panels and chart bars do not overlay the approved artwork", [".hud-side-left::before", ".hud-side-left::after", ".hud-side-right::before", ".hud-side-right::after"].every(selector => app.includes(selector)) && app.includes("content:none!important;\\n  display:none!important;"));
 check("the left navigation keeps all five existing page destinations", menuCount === 5 && ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage"].every(id => stage.includes('data-page="' + id + '"')));
 check("the local AI launch button remains connected and overlays the image status area", stage.includes('id="hudAiAction"') && app.includes('$("hudAiAction")?.addEventListener("click"'));
 check("the right memory and growth hotspots are wired to existing page navigation", stage.includes('class="hud-info-action hud-interface-action" data-hud-action="memory"') && stage.includes('class="hud-info-action hud-interface-action" data-hud-action="growth"') && app.includes('.hud-interface-action[data-hud-action]'));
@@ -27,7 +28,7 @@ check("legacy HUD motion stops while the approved image stage is active", app.in
 check("the actual chat composer remains outside the static artwork", app.includes('id="chatInput"') && app.includes('id="sendChat"'));
 check("ALVIS and Avatar display modes remain separate", app.includes('id="jarvisModeButton"') && app.includes('id="avatarModeButton"') && app.includes('id="alvisAvatarCanvas"'));
 check("encrypted memory, history, synchronization, backup and Kokoro code remain", app.includes("encryptData") && app.includes("data.history") && app.includes("saveCloudCore") && app.toLowerCase().includes("backup") && app.includes("Kokoro"));
-check("the app shell cache is v273 and precaches the approved artwork", sw.includes('alvis-cache-v273-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
+check("the app shell cache is v273 and precaches the approved artwork", sw.includes('alvis-cache-v275-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
 check("the independent dependency cache remains separate", sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2"') && sw.includes('key.startsWith("alvis-deps-")'));
 console.log(checks.map(name => "PASS " + name).join("\n"));
 console.log(checks.length + "/" + checks.length + " dashboard-image checks passed.");

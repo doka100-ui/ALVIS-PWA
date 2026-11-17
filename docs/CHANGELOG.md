@@ -1,3 +1,8 @@
+## v275 — 完成見本の表示を覆う旧装飾を除去（2026-11-17）
+- ALVIS静止画モードで左右の透明操作レイヤーに残っていた旧ガラス背景/チャート棒の疑似要素を無効化し、完成見本画像をそのまま表示。メニュー、AI起動、記憶/成長の透明タップ領域は維持。
+- PlaywrightのChromium/WebKit実配信検査に画像の不透明度と左右疑似要素の非表示確認を追加。Chromiumのオフライン検査はキャッシュ画像200と未キャッシュURLの503フォールバックで検証し、navigator.onLine依存を除去。
+- Service Worker app shell cache v275。モデル重み/依存キャッシュ、暗号化記憶、履歴、同期/バックアップ、音声データは変更・削除しない。実機Safariは別途確認。
+
 ## v274 — 開発版プレビューのブラウザ検証を追加（2026-11-17）
 - Cloudflare Pagesの当該commitのdeployment check-run完了を待ってPreview URLを解決し、Playwright Chromium/WebKitで実配信画像・表示比率・メニュー/記憶/成長の画面遷移・AI起動hit area・チャット入力を検査するworkflowを追加。
 - ChromiumでService Workerの画像プリキャッシュとオフライン再読込を検証し、スクリーンショットをActions artifactへ保存する。
