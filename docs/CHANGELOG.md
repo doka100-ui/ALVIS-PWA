@@ -1518,3 +1518,12 @@
 - アプリ起動時にService Workerの更新確認を明示し、HTTPキャッシュを介さずWorkerスクリプトを確認。新Workerのactivateを待つ。
 - WebLLMモデルキャッシュ、依存コードキャッシュ、Kokoro、記憶・履歴・暗号化・同期・バックアップは削除・変更しない。
 - app shell cache v277。iPhone Safari実機でv258から更新されるかは未確認。
+
+## 2026-11-17 — 起動待機の無期限化回避 v278
+- Service Workerのactivate待機を最大12秒に制限し、navigator.serviceWorker.readyの無期限待機を削除。Workerの更新に時間がかかってもページ本体の起動を妨げないように変更。
+- app shell cache v278。モデル/依存キャッシュ、記憶、履歴、同期、バックアップ、音声、アバターは変更なし。
+
+## 2026-11-17 — iPhone幅WebKitの初期表示検証 v279
+- iPhone相当の画面幅・タッチ・Safari User-Agentを使ったデプロイ後テストを追加。
+- 初期パスワード画面、ALVIS画像、ロック状態、未捕捉JavaScriptエラーを検証し、診断スクリーンショットを保存。
+- 実機Safari固有の挙動は実機確認が必要。
