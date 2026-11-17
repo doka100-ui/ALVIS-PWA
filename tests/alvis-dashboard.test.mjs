@@ -28,7 +28,7 @@ check("legacy HUD motion stops while the approved image stage is active", app.in
 check("the actual chat composer remains outside the static artwork", app.includes('id="chatInput"') && app.includes('id="sendChat"'));
 check("ALVIS and Avatar display modes remain separate", app.includes('id="jarvisModeButton"') && app.includes('id="avatarModeButton"') && app.includes('id="alvisAvatarCanvas"'));
 check("encrypted memory, history, synchronization, backup and Kokoro code remain", app.includes("encryptData") && app.includes("data.history") && app.includes("saveCloudCore") && app.toLowerCase().includes("backup") && app.includes("Kokoro"));
-check("the app shell cache is v273 and precaches the approved artwork", sw.includes('alvis-cache-v275-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
+check("the app shell cache is v273 and precaches the approved artwork", sw.includes('alvis-cache-v276-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
 check("the independent dependency cache remains separate", sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2"') && sw.includes('key.startsWith("alvis-deps-")'));
 console.log(checks.map(name => "PASS " + name).join("\n"));
 console.log(checks.length + "/" + checks.length + " dashboard-image checks passed.");
