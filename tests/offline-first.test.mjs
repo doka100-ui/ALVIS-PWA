@@ -4,6 +4,26 @@ import { readFile } from "node:fs/promises";
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
+ 
+// v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
+// the existing vault password; the AES-GCM vault format and password fallback remain intact.
+assert.match(app,/id="faceIdUnlockButton"/);
+assert.match(app,/id="faceIdSetupButton"/);
+assert.match(app,/authenticatorAttachment:"platform"/);
+assert.match(app,/residentKey:"required",userVerification:"required"/);
+assert.match(app,/extensions:\\{prf:\\{\\}\\}/);
+assert.match(app,/extensions:\\{prf:\\{eval:\\{first:/);
+assert.match(app,/name:"HKDF"/);
+assert.match(app,/ALVIS_LOCAL_VAULT_PASSWORD_WRAP_V1/);
+assert.match(app,/name:"AES-GCM",iv,additionalData:BIOMETRIC_UNLOCK_AAD/);
+assert.match(app,/localStorage\.setItem\(BIOMETRIC_UNLOCK_KEY,JSON\.stringify\(record\)\)/);
+assert.match(app,/localStorage\.removeItem\(BIOMETRIC_UNLOCK_KEY\)/);
+assert.match(app,/function unlockWithFaceId\(\)/);
+assert.match(app,/function deriveKey\(password,salt\)/);
+assert.match(app,/async function decryptRecord\(record,password\)/);
+assert.match(app,/function lockApp\(\)[\\s\\S]*?resetFaceIdSetup\(\)/);
+assert.match(sw,/alvis-cache-v276-integrated/);
+
 
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
