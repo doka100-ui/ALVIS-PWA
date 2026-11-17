@@ -2139,3 +2139,11 @@
 - 旧 `.hud-center` と装飾レイヤーはALVIS画像表示中に隠し、画像表示中は旧リングのWeb Animationsも開始しない。アバターモードと既存チャット入力/送信は別領域のまま維持。
 - Service Worker app-shell cacheをv273へ更新し、AVIFをプリキャッシュ対象へ追加。独立した依存キャッシュ、WebLLM/Kokoroモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ形式、推論処理は変更しない。
 - 回帰検査は `tests/alvis-dashboard.test.mjs` と `tests/offline-first.test.mjs` で画像表示、透明操作領域、既存機能、オフラインキャッシュを確認する。Safari実機での実タップ/オフライン再読込は別途確認が必要。
+
+
+## v277 — Service Worker更新の失敗耐性と明示的更新確認（2026-11-17）
+- Service Workerのinstall時に全アプリ資産を一括cache.addAll()していたため、任意の1ファイル取得失敗で新しいWorker全体のinstallが失敗し、旧バージョンが残り続ける可能性を修正。
+- 各プリキャッシュ資産を個別に取得・保存し、任意資産の失敗ではinstallを中断しない。必須のindex-integrated.htmlが保存できた場合だけ新Workerを有効化する。旧キャッシュ削除対象はALVIS app/dependency cacheに限定し、WebLLM/Kokoro/ユーザーデータは保持。
+- アプリ起動時のService Worker登録にupdateViaCache:noneを指定し、registration.update()を明示実行。新Workerのactivateを最大12秒待ち、失敗時は既存Service Worker/オンライン起動へフォールバック。
+- QwenモデルID・量子化・GPU処理・モデルキャッシュ・記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
+- app shell cache: alvis-cache-v277-integrated。iPhone Safariでv258から更新されるか、実機確認が必要。
