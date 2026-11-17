@@ -64,8 +64,12 @@ async function verifyBrowser(browserType, verifyOffline) {
     // Reveal only the already-rendered app shell in this disposable test browser.
     // No password is submitted and no encrypted user data is read or changed.
     await page.evaluate(() => {
-      document.getElementById("lockPanel").classList.add("hidden");
-      document.getElementById("appPanel").classList.remove("hidden");
+      const lockPanel = document.getElementById("lockPanel");
+      const appPanel = document.getElementById("appPanel");
+      lockPanel.classList.add("hidden");
+      lockPanel.classList.remove("auth-exit");
+      appPanel.classList.remove("hidden", "auth-enter");
+      document.body.classList.remove("auth-transitioning");
     });
     await page.waitForFunction(() => {
       const chat = document.getElementById("chatPage");
@@ -86,7 +90,21 @@ async function verifyBrowser(browserType, verifyOffline) {
         sidePseudoContent: [".hud-side-left", ".hud-side-right"].flatMap(selector => {
           const side = stage.querySelector(selector);
           return ["::before", "::after"].map(pseudo => getComputedStyle(side, pseudo).content);
-        })
+        }),
+        ancestorOpacity: (() => {
+          const values = [];
+          for (let node = stage; node; node = node.parentElement) {
+            values.push({ id: node.id, className: typeof node.className === "string" ? node.className : "", opacity: getComputedStyle(node).opacity });
+          }
+          return values;
+        })(),
+        artworkSamples: (() => {
+          const canvas = document.createElement("canvas");
+          canvas.width = 700; canvas.height = 564;
+          const context = canvas.getContext("2d", { willReadFrequently: true });
+          context.drawImage(image, 0, 0, 700, 564);
+          return [[350,280],[350,480]].map(([x,y]) => Array.from(context.getImageData(x,y,1,1).data));
+        })()
       };
     });
     assert.equal(layout.imageDisplay, "block", browserName + ": the approved image must be visible in ALVIS mode");
@@ -96,6 +114,8 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(layout.imageOpacity, "1", browserName + ": approved artwork must remain at full opacity");
     assert.equal(layout.stageOpacity, "1", browserName + ": image stage must remain at full opacity");
     assert.ok(layout.sidePseudoContent.every(value => value === "none"), browserName + ": legacy side glass/chart pseudo-elements must not cover the artwork");
+    assert.ok(layout.ancestorOpacity.every(item => item.opacity === "1"), browserName + ": the unlocked workspace and artwork must not remain dimmed by a transition");
+    assert.ok(layout.artworkSamples.every(pixel => pixel[0] + pixel[1] + pixel[2] > 300), browserName + ": the approved artwork must retain its original luminous colors");
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
