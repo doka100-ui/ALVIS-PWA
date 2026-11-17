@@ -115,7 +115,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(layout.stageOpacity, "1", browserName + ": image stage must remain at full opacity");
     assert.ok(layout.sidePseudoContent.every(value => value === "none"), browserName + ": legacy side glass/chart pseudo-elements must not cover the artwork");
     assert.ok(layout.ancestorOpacity.every(item => item.opacity === "1"), browserName + ": the unlocked workspace and artwork must not remain dimmed by a transition");
-    assert.ok(layout.artworkSamples.every(pixel => pixel[0] + pixel[1] + pixel[2] > 300), browserName + ": the approved artwork must retain its original luminous colors");
+    assert.ok(layout.artworkSamples.every(pixel => pixel[0] + pixel[1] + pixel[2] > 420), browserName + ": the approved artwork must retain its original luminous colors");
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
@@ -150,6 +150,17 @@ async function verifyBrowser(browserType, verifyOffline) {
     });
 
     await returnToChat();
+    await page.waitForFunction(() => {
+      const chat = document.getElementById("chatPage");
+      return !!chat && !chat.classList.contains("alvis-page-enter") &&
+        !document.body.classList.contains("alvis-page-transitioning");
+    }, null, { timeout: 10000 });
+    const finalDisplayState = await page.evaluate(() => ({
+      chatOpacity: getComputedStyle(document.getElementById("chatPage")).opacity,
+      imageOpacity: getComputedStyle(document.querySelector(".alvis-reference-image")).opacity
+    }));
+    assert.equal(finalDisplayState.chatOpacity, "1", browserName + ": page transition must finish before the preview screenshot");
+    assert.equal(finalDisplayState.imageOpacity, "1", browserName + ": artwork must remain fully opaque after navigation");
     const aiHitArea = await page.locator("#hudAiAction").evaluate(element => {
       const rect = element.getBoundingClientRect();
       return {
