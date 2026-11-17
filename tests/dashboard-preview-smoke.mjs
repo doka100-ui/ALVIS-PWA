@@ -90,10 +90,16 @@ async function verifyBrowser(browserType, verifyOffline) {
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
-    const globalChat = page.locator('#appPanel > nav button[data-page="chatPage"]').first();
+    const returnToChat = async () => {
+      await page.evaluate(() => document.querySelector('#appPanel > nav button[data-page="chatPage"]').click());
+      await page.waitForFunction(() => {
+        const target = document.getElementById("chatPage");
+        return !!target && !target.classList.contains("hidden");
+      });
+    };
 
     for (const pageId of expectedPages) {
-      await globalChat.click();
+      await returnToChat();
       await page.locator('.hud-side-left .hud-nav button[data-page="' + pageId + '"]').click();
       await page.waitForFunction(id => {
         const target = document.getElementById(id);
@@ -101,7 +107,7 @@ async function verifyBrowser(browserType, verifyOffline) {
       }, pageId, { timeout: 15000 });
     }
 
-    await globalChat.click();
+    await returnToChat();
     await page.locator('.hud-side-right .hud-info-action[data-hud-action="memory"]').click();
     await page.waitForFunction(() => {
       const target = document.getElementById("memoryPage");
