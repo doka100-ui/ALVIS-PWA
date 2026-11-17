@@ -1,3 +1,10 @@
+## v274 — 開発版プレビューのブラウザ検証（2026-11-17）
+- Cloudflare Pagesの当該コミット用チェックが成功するまで待ち、チェックURLから一意のPreview URLを解決するGitHub Actions workflow `.github/workflows/dashboard-preview-smoke.yml` を追加。
+- Playwright Chromium/WebKitで実配信ページと `assets/alvis-dashboard-reference.avif` のHTTP応答・700×564実寸・非トリミング表示・5メニュー・右側の記憶/成長操作・AI起動タップ領域・チャット入力を確認する。
+- テスト用の使い捨てブラウザー内だけでロック画面/appPanelの表示クラスを切り替え、実パスワード入力、暗号化データの読出し/復号、ユーザーデータ変更は行わない。ローカルAIの起動や送信も実行しない。
+- ChromiumではService Workerの画像プリキャッシュと、HTTPキャッシュを無効化した状態でのオフライン再読込も検証し、画面キャプチャをActions artifactへ保存する。WebKitは表示・操作確認を行う。
+- アプリ本体、Service Worker、画像バイナリ、保存形式は変更しない。Playwright WebKitは実機iPad Safariそのものではないため、iPad/iPhone実機確認は別途扱う。
+
 ## v272 Qwenモデル読み込み段階をHUDへ表示（2026-11-15）
 - これまでHUDはaiLoading中に常に「Qwen3-1.7B 準備中」と表示し、WebLLMのinitProgressCallbackが返す進捗率や段階説明を隠していた。
 - HUDの詳細欄へ読み込み率と段階説明を表示し、準備待ち・キャッシュ確認・モデル取得などを区別しやすくする。WebLLMの進捗コールバックが発火しない場合は準備中表示のままになるため、次の診断材料として扱う。

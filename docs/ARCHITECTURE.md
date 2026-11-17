@@ -1,4 +1,10 @@
-## 完成見本を使うALVISホログラム画面（v261）
+## 開発版プレビューのブラウザ検証（v274）
+- `.github/workflows/dashboard-preview-smoke.yml` はdevelopmentへの対象ファイルpush後、同一commitのCloudflare Pages check-runがsuccessになるまで待機し、そのdeployment IDからPreview URLを解決する。
+- `tests/dashboard-preview-smoke.mjs` はPlaywright Chromium/WebKitで配信ページ、AVIF実寸/HTTP応答、ステージ比率、画像を覆わない旧HUD非表示、左5メニュー、右側記憶/成長、AI起動hit area、チャット入力を確認する。
+- 使い捨てブラウザーで表示クラスのみ切り替えるため、ログインパスワードやユーザーの暗号化データを扱わない。ChromiumはService Workerキャッシュとオフライン再読込も確認する。
+- これは開発版の自動ブラウザー検証であり、iPad/iPhone Safari実機のタッチ・GPU・表示品質を代替しない。
+
+## 完成見本を使うALVISホログラム画面（v273）
 - ALVISモードは `assets/alvis-dashboard-reference.avif`（700×564 AVIF）を表示する。ユーザー指定PNG「未来都市のホログラム地球ダッシュボード.png」を元にした既存アセットで、Git blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8` を維持する。
 - ステージは元画像比率1397:1126、画像全体を `object-fit:fill` で表示。球体・軌道リング・上部投影装置・下部台座・左右パネル・文字・配色は画像自体を使い、CSS/SVGで再描画したり追加装飾を重ねたりしない。
 - 左側のチャット/記憶候補/長期記憶/履歴/同期とAI起動、右側の端末診断/長期記憶/成長計画は、既存の `button[data-page]` と `hudAiAction` を使う透明なタップ領域で操作する。旧ライブHUDのDOMは状態連携互換のため残すが、表示は隠す。

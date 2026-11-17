@@ -1,3 +1,8 @@
+## v274 — 開発版プレビューのブラウザ検証を追加（2026-11-17）
+- Cloudflare Pagesの当該commitのdeployment check-run完了を待ってPreview URLを解決し、Playwright Chromium/WebKitで実配信画像・表示比率・メニュー/記憶/成長の画面遷移・AI起動hit area・チャット入力を検査するworkflowを追加。
+- ChromiumでService Workerの画像プリキャッシュとオフライン再読込を検証し、スクリーンショットをActions artifactへ保存する。
+- テストは使い捨てブラウザー内の表示クラスのみ切り替え、実パスワード・ユーザー暗号化データ・ローカルAI推論は使用しない。アプリ本体と保存データは変更なし。実機iPad/iPhone Safariは別途確認。
+
 ## v272 Qwen読み込み段階のHUD表示改善（2026-11-15）
 - HUDが「Qwen3-1.7B 準備中」に固定されていた問題を改善し、WebLLMから届く進捗率と段階テキストを表示する。
 - 進捗コールバックが届かない場合の根本原因は別途診断が必要。モデルや保存データの削除・再取得強制は行わない。

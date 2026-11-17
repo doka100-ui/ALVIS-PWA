@@ -1,0 +1,80 @@
+name: Dashboard preview browser smoke
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - "index-integrated.html"
+      - "service-worker.js"
+      - "assets/alvis-dashboard-reference.avif"
+      - "tests/alvis-dashboard.test.mjs"
+      - "tests/dashboard-preview-smoke.mjs"
+      - "docs/HANDOFF.md"
+      - "docs/ARCHITECTURE.md"
+      - "docs/CHANGELOG.md"
+      - ".github/workflows/dashboard-preview-smoke.yml"
+
+permissions:
+  contents: read
+  checks: read
+
+jobs:
+  preview-browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for this commit's Cloudflare Pages deployment
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          GH_SHA: ${{ github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoint = `https://api.github.com/repos/${process.env.GH_REPOSITORY}/commits/${process.env.GH_SHA}/check-runs?per_page=100`;
+          const headers = {
+            Authorization: `Bearer ${process.env.GH_TOKEN}`,
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
+          };
+          const deadline = Date.now() + 15 * 60 * 1000;
+          while (Date.now() < deadline) {
+            const response = await fetch(endpoint, { headers });
+            if (!response.ok) throw new Error(`GitHub check-run lookup failed: ${response.status}`);
+            const data = await response.json();
+            const deployment = (data.check_runs || []).find(item => item.name === "Cloudflare Pages");
+            if (deployment && deployment.status === "completed") {
+              if (deployment.conclusion !== "success") throw new Error(`Cloudflare Pages deployment concluded: ${deployment.conclusion}`);
+              const deploymentId = new URL(deployment.details_url).pathname.split("/").pop();
+              const previewId = deploymentId.slice(0, 8);
+              if (!/^[0-9a-f]{8}$/i.test(previewId)) throw new Error(`Unexpected Cloudflare deployment URL: ${deployment.details_url}`);
+              const url = `https://${previewId}.alvis-pwa.pages.dev/index-integrated.html`;
+              await import("node:fs/promises").then(({ appendFile }) => appendFile(process.env.GITHUB_OUTPUT, `url=${url}\n`));
+              console.log(`Cloudflare Pages deployment succeeded: ${url}`);
+              process.exit(0);
+            }
+            await new Promise(resolve => setTimeout(resolve, 10000));
+          }
+          throw new Error("Cloudflare Pages check did not complete successfully within 15 minutes.");
+          NODE
+      - name: Install Playwright browsers
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium webkit
+      - name: Verify the deployed ALVIS dashboard
+        env:
+          ALVIS_PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: node tests/dashboard-preview-smoke.mjs
+      - name: Upload deployed dashboard screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alvis-dashboard-preview-${{ github.sha }}
+          path: artifacts/*.png
+          if-no-files-found: warn
