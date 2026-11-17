@@ -113,14 +113,14 @@ async function verifyBrowser(browserType, verifyOffline) {
       const target = document.getElementById("memoryPage");
       return !!target && !target.classList.contains("hidden");
     });
-    await globalChat.click();
+    await returnToChat();
     await page.locator('.hud-side-right .hud-info-action[data-hud-action="growth"]').click();
     await page.waitForFunction(() => {
       const target = document.getElementById("growthPage");
       return !!target && !target.classList.contains("hidden");
     });
 
-    await globalChat.click();
+    await returnToChat();
     const aiHitArea = await page.locator("#hudAiAction").evaluate(element => {
       const rect = element.getBoundingClientRect();
       return {
