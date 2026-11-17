@@ -229,6 +229,60 @@ async function verifyBrowser(browserType, verifyOffline) {
   }
 }
 
+
+async function verifyMobileWebKit() {
+  const browser = await webkit.launch({ headless: true });
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1"
+  });
+  const page = await context.newPage();
+  const pageErrors = [];
+  const consoleErrors = [];
+  page.on("pageerror", error => pageErrors.push(error.message));
+  page.on("console", message => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  try {
+    const response = await page.goto(previewUrl, {
+      waitUntil: "domcontentloaded",
+      timeout: 120000
+    });
+    assert.ok(response && response.ok(), "iPhone WebKit: preview document must return HTTP 200");
+    await waitForDashboardImage(page);
+    const initialState = await page.evaluate(() => {
+      const lock = document.getElementById("lockPanel");
+      const app = document.getElementById("appPanel");
+      const image = document.querySelector(".alvis-reference-image");
+      const rect = lock?.getBoundingClientRect();
+      return {
+        title: document.title,
+        bodyText: document.body?.innerText?.slice(0, 500) || "",
+        bodyBackground: getComputedStyle(document.body).backgroundColor,
+        lockExists: !!lock,
+        lockVisible: !!lock && !lock.classList.contains("hidden") && getComputedStyle(lock).display !== "none",
+        lockWidth: rect?.width || 0,
+        appHidden: !!app && app.classList.contains("hidden"),
+        imageLoaded: !!image && image.complete && image.naturalWidth === 700
+      };
+    });
+    assert.ok(initialState.lockVisible && initialState.lockWidth > 0,
+      "iPhone WebKit: initial password screen must be visible; state=" + JSON.stringify(initialState));
+    assert.equal(initialState.appHidden, true, "iPhone WebKit: app panel must remain locked initially");
+    assert.equal(initialState.imageLoaded, true, "iPhone WebKit: approved ALVIS artwork must load");
+    assert.deepEqual(pageErrors, [], "iPhone WebKit: no uncaught JavaScript errors; console=" + JSON.stringify(consoleErrors));
+    await page.screenshot({ path: "artifacts/alvis-dashboard-iphone-webkit.png", fullPage: true });
+    console.log("PASS iPhone WebKit: initial password screen and ALVIS artwork render without uncaught errors");
+    if (consoleErrors.length) console.log("iPhone WebKit console errors: " + JSON.stringify(consoleErrors));
+  } finally {
+    await browser.close();
+  }
+}
+
 await verifyBrowser(chromium, true);
 await verifyBrowser(webkit, false);
+await verifyMobileWebKit();
 console.log("All deployed dashboard browser smoke checks passed.");
