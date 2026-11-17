@@ -5985,7 +5985,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       // 更新失敗時も既存Service Workerとオフライン動作は維持する。
       try{await registration.update();}catch(updateError){}
       const activated=await waitForAlvisServiceWorkerActivation(registration);
-      await navigator.serviceWorker.ready;
+      // Never wait on navigator.serviceWorker.ready here: it has no timeout and
+      // can block the entire page if a fresh worker install stalls on iOS Safari.
       return activated||!!registration.active;
     }catch(error){
       // Service Workerが使えない環境でも、オンライン時の通常読み込みは妨げない。
