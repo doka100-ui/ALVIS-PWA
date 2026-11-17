@@ -1906,6 +1906,8 @@ header .status{margin-top:2px}
 <label for="password">ACCESS PASSWORD</label>
 <input id="password" type="password" autocomplete="current-password" placeholder="パスワードを入力">
 <button id="unlockButton">認証して接続</button>
+<button id="faceIdUnlockButton" class="secondary hidden" type="button" style="width:100%;margin-top:10px">Face IDでログイン</button>
+<div id="faceIdLockStatus" class="small" aria-live="polite"></div>
 <div id="lockStatus" class="small" aria-live="polite"></div>
 <div class="login-security"><span>◈ AES-256 ENCRYPTED</span><span>◉ LOCAL FIRST</span><span>⌁ PRIVATE VAULT</span></div>
 </section>
@@ -2276,6 +2278,15 @@ header .status{margin-top:2px}
 
 <section id="devicePage" class="hidden">
  <div class="panel">
+ <h2>ログイン・セキュリティ</h2>
+ <p class="small">この端末のパスキーとFace IDを使い、既存のALVISパスワードを安全に保護します。初回設定には現在のパスワードが必要です。従来のパスワードログインも引き続き使えます。</p>
+ <label for="faceIdSetupPassword">現在のALVISパスワード</label>
+ <input id="faceIdSetupPassword" type="password" autocomplete="current-password" placeholder="現在のパスワードを入力">
+ <button id="faceIdSetupButton" type="button">この端末でFace IDを設定</button>
+ <button id="faceIdDisableButton" class="secondary hidden" type="button" style="margin-top:8px">Face ID設定を解除</button>
+ <div id="faceIdSetupStatus" class="small" aria-live="polite">未設定。パスワードログインはいつでも利用できます。</div>
+ </div>
+ <div class="panel">
  <h2>AIモデル管理</h2>
  <p class="small">チャット画面上部の円から、この端末に適したQwen3モデルを起動できます。モデルを終了すると端末のメモリを解放します。</p>
  <button id="loadAiModel" class="hidden" type="button">Qwen3モデルを読み込む</button>
@@ -2318,6 +2329,8 @@ header .status{margin-top:2px}
 
 const DB_KEY = "ALVIS_ENCRYPTED_V1";
 const SYNC_TOKEN_KEY = "ALVIS_SYNC_TOKEN_ENCRYPTED_V1";
+const BIOMETRIC_UNLOCK_KEY = "ALVIS_BIOMETRIC_UNLOCK_V1";
+const BIOMETRIC_UNLOCK_AAD = new TextEncoder().encode("ALVIS_BIOMETRIC_UNLOCK_V1");
 const SYNC_TOKEN_AAD = new TextEncoder().encode("ALVIS_SYNC_TOKEN_V1");
 const WORKER_URL = "https://alvis-sync.dokodemodoa100.workers.dev";
 const LOAD_PATH = "/sync/vault-load";
@@ -2348,6 +2361,7 @@ let alvisResponseInProgress = false;
 let alvisResponseStartedAt = 0;
 // Ignore async chat work that belongs to a session closed by logout.
 let alvisSessionGeneration=0;
+let alvisFaceIdSetup={phase:"password",password:"",credentialId:"",salt:null,expiresAt:0};
 
 // 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
@@ -2838,6 +2852,156 @@ async function encryptData(){
     iv:Array.from(iv),
     encrypted:Array.from(new Uint8Array(encrypted))
   };
+}
+function randomWebAuthnBytes(length=32){
+  return crypto.getRandomValues(new Uint8Array(length));
+}
+function bytesToBase64Url(bytes){
+  let binary="";
+  for(const value of bytes)binary+=String.fromCharCode(value);
+  return btoa(binary).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/g,"");
+}
+function base64UrlToBytes(value){
+  const normalized=String(value||"").replace(/-/g,"+").replace(/_/g,"/");
+  const padded=normalized+"=".repeat((4-normalized.length%4)%4);
+  const binary=atob(padded);
+  return Uint8Array.from(binary,character=>character.charCodeAt(0));
+}
+function getPrfBytes(credential){
+  const value=credential?.getClientExtensionResults?.()?.prf?.results?.first;
+  if(value instanceof ArrayBuffer)return new Uint8Array(value);
+  if(ArrayBuffer.isView(value))return new Uint8Array(value.buffer,value.byteOffset,value.byteLength);
+  return null;
+}
+async function deriveFaceIdWrappingKey(prfBytes){
+  if(!(prfBytes instanceof Uint8Array)||prfBytes.length!==32)throw new Error("Face ID用の安全な鍵を取得できませんでした。");
+  const material=await crypto.subtle.importKey("raw",prfBytes,"HKDF",false,["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    {name:"HKDF",salt:new Uint8Array(0),hash:"SHA-256",info:new TextEncoder().encode("ALVIS_LOCAL_VAULT_PASSWORD_WRAP_V1")},
+    material,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]
+  );
+}
+function resetFaceIdSetup(){
+  alvisFaceIdSetup={phase:"password",password:"",credentialId:"",salt:null,expiresAt:0};
+  const field=$("faceIdSetupPassword"),button=$("faceIdSetupButton");
+  if(field)field.value="";
+  if(button)button.textContent="この端末でFace IDを設定";
+}
+function updateFaceIdUi(){
+  let configured=false;
+  try{
+    const record=JSON.parse(localStorage.getItem(BIOMETRIC_UNLOCK_KEY)||"null");
+    configured=!!(record&&record.version===1&&record.credentialId&&record.salt&&record.iv&&record.encrypted);
+  }catch(error){}
+  const button=$("faceIdUnlockButton"),disable=$("faceIdDisableButton");
+  if(button){button.classList.toggle("hidden",!configured);button.disabled=!window.isSecureContext||!navigator.credentials;}
+  if(disable)disable.classList.toggle("hidden",!configured);
+  if(!configured&&button){button.disabled=true;}
+}
+async function unlockWithFaceId(){
+  try{
+    const record=JSON.parse(localStorage.getItem(BIOMETRIC_UNLOCK_KEY)||"null");
+    if(!record||record.version!==1||record.origin!==location.origin||record.rpId!==location.hostname||
+       typeof record.credentialId!=="string"||!Array.isArray(record.salt)||record.salt.length!==32||
+       !Array.isArray(record.iv)||record.iv.length!==12||!Array.isArray(record.encrypted)){
+      throw new Error("この端末のFace ID設定を確認できません。パスワードでログインし、再設定してください。");
+    }
+    if(!window.isSecureContext||!navigator.credentials?.get)throw new Error("この画面ではFace ID認証を利用できません。HTTPSのALVISを開いてください。");
+    const challenge=randomWebAuthnBytes();
+    const assertionPromise=navigator.credentials.get({publicKey:{
+      challenge,rpId:location.hostname,
+      allowCredentials:[{type:"public-key",id:base64UrlToBytes(record.credentialId)}],
+      userVerification:"required",timeout:60000,
+      extensions:{prf:{eval:{first:new Uint8Array(record.salt)}}}
+    }});
+    const assertion=await assertionPromise;
+    const prfBytes=getPrfBytes(assertion);
+    const wrappingKey=await deriveFaceIdWrappingKey(prfBytes);
+    const passwordBytes=await crypto.subtle.decrypt(
+      {name:"AES-GCM",iv:new Uint8Array(record.iv),additionalData:BIOMETRIC_UNLOCK_AAD},
+      wrappingKey,new Uint8Array(record.encrypted)
+    );
+    const password=new TextDecoder().decode(passwordBytes);
+    if(password.length<8||password.length>1024)throw new Error("保存されたログイン情報を確認できません。パスワードでログインしてください。");
+    $("password").value=password;
+    $("faceIdLockStatus").textContent="認証しました。保管庫を解除しています…";
+    await unlock();
+    if(unlocked)$("faceIdLockStatus").textContent="Face IDでログインしました。";
+  }catch(error){
+    $("faceIdLockStatus").textContent=error?.name==="NotAllowedError"?"Face ID認証がキャンセルされたか、利用できません。パスワードでログインできます。":"Face IDログインに失敗しました: "+(error?.message||String(error))+" パスワードでログインできます。";
+  }
+}
+async function handleFaceIdSetup(){
+  const button=$("faceIdSetupButton"),status=$("faceIdSetupStatus");
+  try{
+    if(!unlocked||!cryptoKey)throw new Error("先に通常のパスワードでALVISへログインしてください。");
+    if(!window.isSecureContext||!navigator.credentials?.create||!navigator.credentials?.get)throw new Error("この環境はFace ID対応の安全なパスキー機能を利用できません。HTTPSのiPhone Safariでお試しください。");
+    if(alvisFaceIdSetup.expiresAt&&Date.now()>alvisFaceIdSetup.expiresAt)resetFaceIdSetup();
+    if(alvisFaceIdSetup.phase==="password"){
+      const password=String($("faceIdSetupPassword").value||"");
+      if(password.length<8)throw new Error("現在のALVISパスワードを入力してください。");
+      const stored=localStorage.getItem(DB_KEY);
+      if(!stored)throw new Error("暗号化された保管庫が見つかりません。");
+      await decryptRecord(JSON.parse(stored),password);
+      alvisFaceIdSetup={phase:"register",password,credentialId:"",salt:null,expiresAt:Date.now()+180000};
+      $("faceIdSetupPassword").value="";
+      button.textContent="Face IDパスキーを登録";
+      status.textContent="パスワードを確認しました。続けて「Face IDパスキーを登録」を押してください。";
+      return;
+    }
+    if(alvisFaceIdSetup.phase==="register"){
+      const challenge=randomWebAuthnBytes(),userId=randomWebAuthnBytes();
+      const createPromise=navigator.credentials.create({publicKey:{
+        challenge,rp:{id:location.hostname,name:"ALVIS"},
+        user:{id:userId,name:"alvis-local-vault",displayName:"ALVIS"},
+        pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],
+        authenticatorSelection:{authenticatorAttachment:"platform",residentKey:"required",userVerification:"required"},
+        attestation:"none",timeout:60000,extensions:{prf:{}}
+      }});
+      const credential=await createPromise;
+      if(!credential)throw new Error("パスキー登録が完了しませんでした。");
+      const enabled=credential.getClientExtensionResults?.()?.prf?.enabled===true;
+      if(!enabled)throw new Error("この端末のパスキーはPRF鍵導出に対応していません。保管庫は変更していません。");
+      alvisFaceIdSetup.credentialId=credential.id;
+      alvisFaceIdSetup.salt=randomWebAuthnBytes();
+      alvisFaceIdSetup.phase="confirm";
+      alvisFaceIdSetup.expiresAt=Date.now()+180000;
+      button.textContent="Face IDで確認して保存";
+      status.textContent="パスキーを登録しました。最後に「Face IDで確認して保存」を押してください。";
+      return;
+    }
+    if(alvisFaceIdSetup.phase==="confirm"){
+      const challenge=randomWebAuthnBytes();
+      const assertionPromise=navigator.credentials.get({publicKey:{
+        challenge,rpId:location.hostname,
+        allowCredentials:[{type:"public-key",id:base64UrlToBytes(alvisFaceIdSetup.credentialId)}],
+        userVerification:"required",timeout:60000,
+        extensions:{prf:{eval:{first:alvisFaceIdSetup.salt}}}
+      }});
+      const assertion=await assertionPromise;
+      const prfBytes=getPrfBytes(assertion);
+      const wrappingKey=await deriveFaceIdWrappingKey(prfBytes);
+      const iv=randomWebAuthnBytes(12);
+      const encrypted=await crypto.subtle.encrypt(
+        {name:"AES-GCM",iv,additionalData:BIOMETRIC_UNLOCK_AAD},
+        wrappingKey,new TextEncoder().encode(alvisFaceIdSetup.password)
+      );
+      const record={
+        version:1,origin:location.origin,rpId:location.hostname,
+        credentialId:alvisFaceIdSetup.credentialId,
+        salt:Array.from(alvisFaceIdSetup.salt),iv:Array.from(iv),
+        encrypted:Array.from(new Uint8Array(encrypted))
+      };
+      localStorage.setItem(BIOMETRIC_UNLOCK_KEY,JSON.stringify(record));
+      resetFaceIdSetup();
+      updateFaceIdUi();
+      status.textContent="この端末のFace IDログインを設定しました。次回からログイン画面で使えます。";
+      return;
+    }
+  }catch(error){
+    status.textContent=error?.name==="NotAllowedError"?"Face ID操作がキャンセルされました。もう一度ボタンを押して続けられます。":(error?.message||String(error));
+    if(alvisFaceIdSetup.phase==="register"&&error?.name!=="NotAllowedError")resetFaceIdSetup();
+  }
 }
 async function decryptRecord(record,password){
   if(!record || record.version!==1 || !record.salt || !record.iv || !record.encrypted){
@@ -3944,6 +4108,7 @@ function stopPolling(){
 }
 
 function lockApp(){
+  resetFaceIdSetup();
   // Invalidate pending chat/voice callbacks before clearing the unlocked session.
   alvisSessionGeneration++;
   alvisResponseInProgress=false;
@@ -4114,6 +4279,19 @@ $("unloadAiModel").addEventListener("click",async()=>{
   }
 });
 $("unlockButton").addEventListener("click",unlock);
+$("faceIdUnlockButton")?.addEventListener("click",unlockWithFaceId);
+$("faceIdSetupButton")?.addEventListener("click",handleFaceIdSetup);
+$("faceIdDisableButton")?.addEventListener("click",()=>{
+  if(!unlocked)return;
+  if(!window.confirm("この端末のFace IDログイン設定を解除しますか？通常の暗号化データとパスワードは変更されません。"))return;
+  localStorage.removeItem(BIOMETRIC_UNLOCK_KEY);
+  resetFaceIdSetup();updateFaceIdUi();
+  $("faceIdSetupStatus").textContent="Face ID設定を解除しました。パスワードログインは引き続き利用できます。";
+});
+$("faceIdSetupPassword")?.addEventListener("input",()=>{
+  if(alvisFaceIdSetup.phase!=="password")resetFaceIdSetup();
+});
+updateFaceIdUi();
 $("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 
 function generateMemoryCandidates(userMessage){
