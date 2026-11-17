@@ -51,7 +51,9 @@ jobs:
             const deployment = (data.check_runs || []).find(item => item.name === "Cloudflare Pages");
             if (deployment && deployment.status === "completed") {
               if (deployment.conclusion !== "success") throw new Error(`Cloudflare Pages deployment concluded: ${deployment.conclusion}`);
-              const deploymentId = new URL(deployment.details_url).pathname.split("/").pop();
+              const details = new URL(deployment.details_url);
+              const targetPath = details.searchParams.get("to") || details.pathname;
+              const deploymentId = targetPath.split("/").filter(Boolean).pop();
               const previewId = deploymentId.slice(0, 8);
               if (!/^[0-9a-f]{8}$/i.test(previewId)) throw new Error(`Unexpected Cloudflare deployment URL: ${deployment.details_url}`);
               const url = `https://${previewId}.alvis-pwa.pages.dev/index-integrated.html`;
