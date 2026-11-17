@@ -2330,7 +2330,7 @@ header .status{margin-top:2px}
 const DB_KEY = "ALVIS_ENCRYPTED_V1";
 const SYNC_TOKEN_KEY = "ALVIS_SYNC_TOKEN_ENCRYPTED_V1";
 const BIOMETRIC_UNLOCK_KEY = "ALVIS_BIOMETRIC_UNLOCK_V1";
-const BIOMETRIC_UNLOCK_AAD = new TextEncoder().encode("ALVIS_BIOMETRIC_UNLOCK_V1");
+const BIOMETRIC_UNLOCK_AAD = new TextEncoder().encode("ALVIS_BIOMETRIC_UNLOCK_V1|"+location.origin);
 const SYNC_TOKEN_AAD = new TextEncoder().encode("ALVIS_SYNC_TOKEN_V1");
 const WORKER_URL = "https://alvis-sync.dokodemodoa100.workers.dev";
 const LOAD_PATH = "/sync/vault-load";
@@ -2362,6 +2362,7 @@ let alvisResponseStartedAt = 0;
 // Ignore async chat work that belongs to a session closed by logout.
 let alvisSessionGeneration=0;
 let alvisFaceIdSetup={phase:"password",password:"",credentialId:"",salt:null,expiresAt:0};
+let alvisFaceIdSetupGeneration=0;
 
 // 同じWebGPUモデルへの推論を直列化し、チャット・成長分析などの同時実行を防ぐ。
 // unloadも実行中の推論が終わるまで待ち、GPUリソースを使用中に破棄しない。
@@ -2882,6 +2883,7 @@ async function deriveFaceIdWrappingKey(prfBytes){
   );
 }
 function resetFaceIdSetup(){
+  alvisFaceIdSetupGeneration++;
   alvisFaceIdSetup={phase:"password",password:"",credentialId:"",salt:null,expiresAt:0};
   const field=$("faceIdSetupPassword"),button=$("faceIdSetupButton");
   if(field)field.value="";
@@ -2899,6 +2901,8 @@ function updateFaceIdUi(){
   if(!configured&&button){button.disabled=true;}
 }
 async function unlockWithFaceId(){
+  const loginButton=$("faceIdUnlockButton");
+  if(loginButton)loginButton.disabled=true;
   try{
     const record=JSON.parse(localStorage.getItem(BIOMETRIC_UNLOCK_KEY)||"null");
     if(!record||record.version!==1||record.origin!==location.origin||record.rpId!==location.hostname||
@@ -2929,6 +2933,8 @@ async function unlockWithFaceId(){
     if(unlocked)$("faceIdLockStatus").textContent="Face IDでログインしました。";
   }catch(error){
     $("faceIdLockStatus").textContent=error?.name==="NotAllowedError"?"Face ID認証がキャンセルされたか、利用できません。パスワードでログインできます。":"Face IDログインに失敗しました: "+(error?.message||String(error))+" パスワードでログインできます。";
+  }finally{
+    if(loginButton)loginButton.disabled=!window.isSecureContext||!navigator.credentials;
   }
 }
 async function handleFaceIdSetup(){
@@ -2942,7 +2948,9 @@ async function handleFaceIdSetup(){
       if(password.length<8)throw new Error("現在のALVISパスワードを入力してください。");
       const stored=localStorage.getItem(DB_KEY);
       if(!stored)throw new Error("暗号化された保管庫が見つかりません。");
+      const setupGeneration=alvisFaceIdSetupGeneration;
       await decryptRecord(JSON.parse(stored),password);
+      if(setupGeneration!==alvisFaceIdSetupGeneration)throw new Error("Face ID設定が中断されました。もう一度最初から設定してください。");
       const expiresAt=Date.now()+180000;
       alvisFaceIdSetup={phase:"register",password,credentialId:"",salt:null,expiresAt};
       window.setTimeout(()=>{
@@ -2966,7 +2974,9 @@ async function handleFaceIdSetup(){
         authenticatorSelection:{authenticatorAttachment:"platform",residentKey:"required",userVerification:"required"},
         attestation:"none",timeout:60000,extensions:{prf:{}}
       }});
+      const setupGeneration=alvisFaceIdSetupGeneration;
       const credential=await createPromise;
+      if(setupGeneration!==alvisFaceIdSetupGeneration)throw new Error("Face ID設定が中断されました。もう一度最初から設定してください。");
       if(!credential)throw new Error("パスキー登録が完了しませんでした。");
       const enabled=credential.getClientExtensionResults?.()?.prf?.enabled===true;
       if(!enabled)throw new Error("この端末のパスキーはPRF鍵導出に対応していません。保管庫は変更していません。");
@@ -2986,7 +2996,9 @@ async function handleFaceIdSetup(){
         userVerification:"required",timeout:60000,
         extensions:{prf:{eval:{first:alvisFaceIdSetup.salt}}}
       }});
+      const setupGeneration=alvisFaceIdSetupGeneration;
       const assertion=await assertionPromise;
+      if(setupGeneration!==alvisFaceIdSetupGeneration)throw new Error("Face ID設定が中断されました。もう一度最初から設定してください。");
       const prfBytes=getPrfBytes(assertion);
       const wrappingKey=await deriveFaceIdWrappingKey(prfBytes);
       const iv=randomWebAuthnBytes(12);
