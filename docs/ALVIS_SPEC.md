@@ -977,3 +977,11 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - 登録時はupdateViaCache:noneとregistration.update()を使ってWorkerスクリプトの更新を明示確認し、installing/waiting Workerのactivateを最大12秒待つ。
 - 既存のWebLLM/Kokoroキャッシュ、暗号化記憶・履歴・同期・バックアップデータを更新処理から除外する。
 - Service Worker app shell cache: alvis-cache-v277-integrated。実機Safariでの更新確認は別途必要。
+
+## v278 — 起動時Service Worker待機の上限
+- アプリ起動時にService Workerのactivateを最大12秒待ち、無期限の `navigator.serviceWorker.ready` 待機を行わない。タイムアウト時もページ本体の初期化を継続する。
+- app shell cache: alvis-cache-v278-integrated。モデル・依存・ユーザーデータのキャッシュは変更しない。
+
+## v279 — モバイル初期表示テスト
+- iPhone相当のWebKit viewportで、初期ロック画面・画像読み込み・未捕捉JavaScriptエラーを確認するデプロイ後スモークテストを追加。
+- 実機iPhone Safariの動作保証ではなく、実機確認は引き続き必要。
