@@ -1,3 +1,8 @@
+## v278 iOS SafariでService Worker準備待ちがページ全体を止めないよう修正（2026-11-17）
+- Service Worker登録後の更新確認・有効化待機は維持しつつ、無期限に解決しない場合がある `navigator.serviceWorker.ready` の追加待機を削除。12秒の有界な有効化待機後は、Service Workerが未準備でもページ本体の初期化を続行する。
+- Service Workerが利用できる場合のオフライン機能・キャッシュ更新は従来どおり維持。モデルキャッシュ、記憶/履歴、暗号化、同期/バックアップ、Avatar、音声機能は変更しない。既存キャッシュやユーザーデータの削除を要求しない。
+- Service Workerアプリシェルcache v278。CI回帰テストと実配信確認後、iPhone Safari実機で読み込み完了とQwen起動を確認する。
+
 ## v276 — iPhone/iPadのパスキーPRFによるFace IDログイン（2026-11-17）
 - 既存のパスワードログインを維持したまま、この端末のWebAuthn platform passkeyとPRF拡張でログイン補助を追加。iOS/iPadOSのFace ID/Touch IDによるユーザー確認後、PRF出力をHKDF-SHA256で用途分離したAES-GCM鍵へ導出し、既存ALVISパスワードを端末内で暗号化保管する。
 - ログイン時はパスキー認証で暗号化パスワードを復号し、既存のunlock()/PBKDF2-SHA256/AES-GCM保管庫解除処理へ渡す。既存DB_KEYの保存形式、暗号化記憶/履歴/候補/バックアップ/同期形式は変更しない。Face ID未設定・非対応・キャンセル時は従来パスワードへフォールバック。
