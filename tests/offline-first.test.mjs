@@ -11,8 +11,8 @@ assert.match(app,/id="faceIdUnlockButton"/);
 assert.match(app,/id="faceIdSetupButton"/);
 assert.match(app,/authenticatorAttachment:"platform"/);
 assert.match(app,/residentKey:"required",userVerification:"required"/);
-assert.match(app,/extensions:\\{prf:\\{\\}\\}/);
-assert.match(app,/extensions:\\{prf:\\{eval:\\{first:/);
+assert.match(app,/extensions:\{prf:\{\}\}/);
+assert.match(app,/extensions:\{prf:\{eval:\{first:/);
 assert.match(app,/name:"HKDF"/);
 assert.match(app,/ALVIS_LOCAL_VAULT_PASSWORD_WRAP_V1/);
 assert.match(app,/name:"AES-GCM",iv,additionalData:BIOMETRIC_UNLOCK_AAD/);
@@ -21,7 +21,7 @@ assert.match(app,/localStorage\.removeItem\(BIOMETRIC_UNLOCK_KEY\)/);
 assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
-assert.match(app,/function lockApp\(\)[\\s\\S]*?resetFaceIdSetup\(\)/);
+assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
 assert.match(sw,/alvis-cache-v276-integrated/);
 
 
