@@ -1,3 +1,10 @@
+## v276 — iPhone/iPadのパスキーPRFによるFace IDログイン（2026-11-17）
+- 既存のパスワードログインを維持したまま、この端末のWebAuthn platform passkeyとPRF拡張でログイン補助を追加。iOS/iPadOSのFace ID/Touch IDによるユーザー確認後、PRF出力をHKDF-SHA256で用途分離したAES-GCM鍵へ導出し、既存ALVISパスワードを端末内で暗号化保管する。
+- ログイン時はパスキー認証で暗号化パスワードを復号し、既存のunlock()/PBKDF2-SHA256/AES-GCM保管庫解除処理へ渡す。既存DB_KEYの保存形式、暗号化記憶/履歴/候補/バックアップ/同期形式は変更しない。Face ID未設定・非対応・キャンセル時は従来パスワードへフォールバック。
+- 登録は通常ログイン後、現在のパスワード検証→platform passkey登録（PRF有効化）→PRF取得/暗号化保存の段階式。未完了登録のパスワードはメモリ内だけで保持し、3分で破棄。ロック時にも破棄する。
+- 設定は端末ごとのlocalStorageに保存。iCloud Keychainのパスキーが同期されても、暗号化パスワード包みは各端末で個別に登録する。設定解除はALVIS側の包みを削除するが、OSのパスキー自体はiCloud Keychainに残る場合がある。
+- WebAuthn PRFが利用できるHTTPSのSafari/Apple platform authenticatorが必要。iOS/iPadOS実機でのFace ID表示・PRF出力・再ログインは未確認。CI/Cloudflare Pages配信も別途確認する。Service Worker app shell cache v276。
+
 ## v272 Qwenモデル読み込み状態の表示
 - HUDのLOADING詳細欄は固定の「準備中」ではなく、aiStatusに渡された読み込み段階とWebLLM進捗率を表示する。長い説明は64文字までに制限する。
 - 進捗コールバック自体が発火しない場合は準備中表示のままとなる。これは進捗表示の改善であり、ダウンロード停止を直接解消する処理ではない。
