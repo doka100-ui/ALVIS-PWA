@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v276-integrated";
+const CACHE_NAME = "alvis-cache-v277-integrated";
 // v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
@@ -21,10 +21,27 @@ const FILES_TO_CACHE = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
-  );
-  self.skipWaiting();
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // One optional asset must not abort the entire app update. Cache entries
+    // independently, but require the integrated shell before activating.
+    const results = await Promise.allSettled(FILES_TO_CACHE.map(async (file) => {
+      const request = new Request(file, { cache: "reload" });
+      const response = await fetch(request);
+      if (!response.ok || response.type === "opaque") {
+        throw new Error("App-shell asset unavailable: " + file + " (" + response.status + ")");
+      }
+      await cache.put(request, response);
+    }));
+    const shell = await cache.match("./index-integrated.html");
+    if (!shell) {
+      const failures = results
+        .map((result, index) => result.status === "rejected" ? FILES_TO_CACHE[index] : null)
+        .filter(Boolean);
+      throw new Error("Required ALVIS app shell could not be cached. Failed assets: " + failures.join(", "));
+    }
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", (event) => {
