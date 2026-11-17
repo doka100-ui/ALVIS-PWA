@@ -2943,7 +2943,15 @@ async function handleFaceIdSetup(){
       const stored=localStorage.getItem(DB_KEY);
       if(!stored)throw new Error("暗号化された保管庫が見つかりません。");
       await decryptRecord(JSON.parse(stored),password);
-      alvisFaceIdSetup={phase:"register",password,credentialId:"",salt:null,expiresAt:Date.now()+180000};
+      const expiresAt=Date.now()+180000;
+      alvisFaceIdSetup={phase:"register",password,credentialId:"",salt:null,expiresAt};
+      window.setTimeout(()=>{
+        if(alvisFaceIdSetup.expiresAt===expiresAt){
+          resetFaceIdSetup();
+          const setupStatus=$("faceIdSetupStatus");
+          if(setupStatus)setupStatus.textContent="設定時間が過ぎたため中断しました。もう一度パスワードを確認してください。";
+        }
+      },180000);
       $("faceIdSetupPassword").value="";
       button.textContent="Face IDパスキーを登録";
       status.textContent="パスワードを確認しました。続けて「Face IDパスキーを登録」を押してください。";
@@ -4283,7 +4291,7 @@ $("faceIdUnlockButton")?.addEventListener("click",unlockWithFaceId);
 $("faceIdSetupButton")?.addEventListener("click",handleFaceIdSetup);
 $("faceIdDisableButton")?.addEventListener("click",()=>{
   if(!unlocked)return;
-  if(!window.confirm("この端末のFace IDログイン設定を解除しますか？通常の暗号化データとパスワードは変更されません。"))return;
+  if(!window.confirm("この端末のFace IDログイン設定を解除しますか？通常の暗号化データとパスワードは変更されません。登録済みパスキー自体はiCloudキーチェーンに残る場合があります。"))return;
   localStorage.removeItem(BIOMETRIC_UNLOCK_KEY);
   resetFaceIdSetup();updateFaceIdUi();
   $("faceIdSetupStatus").textContent="Face ID設定を解除しました。パスワードログインは引き続き利用できます。";
