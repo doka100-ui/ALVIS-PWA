@@ -30,14 +30,14 @@ assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
 assert.match(sw,/alvis-cache-v283-integrated/);
 // v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
-const inlineStyle=app.match(/<style>([\\s\\S]*?)<\\/style>/)?.[1]||"";
+const inlineStyle=app.match(/<style>([\s\S]*?)<\/style>/)?.[1]||"";
 assert.ok(inlineStyle.length<12000,"critical inline CSS must stay small enough for a fast login first paint");
-assert.match(inlineStyle,/\\.hidden\\{display:none!important\\}/,"the locked app panel must remain hidden before authentication");
-assert.match(inlineStyle,/#lockPanel\\{/,"the login screen must retain its critical inline styling");
-assert.match(app,/rel="preload" as="style" href="\\.\\/assets\\/alvis-app\\.css"/,"noncritical app styles must load without blocking the login screen");
-assert.match(appCss,/\\.jarvis-stage\\{/,"the deferred stylesheet must retain ALVIS mode styling");
-assert.match(appCss,/\\.avatar-stage\\{/,"the deferred stylesheet must retain Avatar mode styling");
-assert.match(sw,/\\.\\/assets\\/alvis-app\\.css/,"the deferred stylesheet must be cached for offline use");
+assert.ok(inlineStyle.includes(".hidden{display:none!important}"),"the locked app panel must remain hidden before authentication");
+assert.ok(inlineStyle.includes("#lockPanel{"),"the login screen must retain its critical inline styling");
+assert.ok(app.includes('rel="preload" as="style" href="./assets/alvis-app.css"'),"noncritical app styles must load without blocking the login screen");
+assert.ok(appCss.includes(".jarvis-stage{"),"the deferred stylesheet must retain ALVIS mode styling");
+assert.ok(appCss.includes(".avatar-stage{"),"the deferred stylesheet must retain Avatar mode styling");
+assert.ok(sw.includes('"./assets/alvis-app.css"'),"the deferred stylesheet must be cached for offline use");
 // v278: optional precache failures must not abort the app-shell update.
 assert.match(sw,/Promise\.allSettled\(FILES_TO_CACHE\.map/);
 assert.match(sw,/const shell = await cache\.match\("\.\/index-integrated\.html"\)/);
