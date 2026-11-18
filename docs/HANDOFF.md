@@ -2218,6 +2218,6 @@
 
 ## v286 — ログイン初期表示とService Worker更新の競合を回避（2026-11-18）
 - v285でhead内へ移動したService Worker登録・更新処理を、メイン画面のHTML/スクリプト読込後へ戻す。新Workerのプリキャッシュ通信がログイン初期表示と競合する可能性を減らす。
-- updateViaCache:none、registration.update()、activate待機12秒上限、既存Workerへのフォールバックは維持する。navigator.serviceWorker.readyの無期限待機は行わない。
+- app shell cacheをv286へ更新。updateViaCache:none、registration.update()、activate待機12秒上限、既存Workerへのフォールバックは維持する。navigator.serviceWorker.readyの無期限待機は行わない。
 - Service Worker本体のキャッシュ優先動作、既存のオフライン対応、WebLLM/Kokoroモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ、ALVIS/AvatarのUI・AI設定は変更しない。
 - iPhone実機での速度改善はユーザー確認待ち。自動テストは登録処理がheadより後で開始されることを検証する。
