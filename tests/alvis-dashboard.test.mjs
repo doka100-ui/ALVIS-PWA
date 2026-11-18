@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [app, appCss, sw, image] = await Promise.all([
+const [app, appCss, sw, image, startupCheck] = await Promise.all([
   readFile(new URL("../index-integrated.html", import.meta.url), "utf8"),
   readFile(new URL("../assets/alvis-app.css", import.meta.url), "utf8"),
   readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
-  readFile(new URL("../assets/alvis-dashboard-reference.avif", import.meta.url))
+  readFile(new URL("../assets/alvis-dashboard-reference.avif", import.meta.url)),
+  readFile(new URL("../startup-check.html", import.meta.url), "utf8")
 ]);
 const appStyles = app + appCss;
 const checks = [];
@@ -32,5 +33,7 @@ check("ALVIS and Avatar display modes remain separate", app.includes('id="jarvis
 check("encrypted memory, history, synchronization, backup and Kokoro code remain", app.includes("encryptData") && app.includes("data.history") && app.includes("saveCloudCore") && app.toLowerCase().includes("backup") && app.includes("Kokoro"));
 check("the app shell cache is v284 and precaches the approved artwork", sw.includes('alvis-cache-v284-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
 check("the independent dependency cache remains separate", sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2"') && sw.includes('key.startsWith("alvis-deps-")'));
+check("the on-device startup diagnostic measures the real integrated login screen", startupCheck.includes('frame.src="./index-integrated.html?startup-check="') && startupCheck.includes('getElementById("lockPanel")') && startupCheck.includes("loginVisibleMs"));
+check("the startup diagnostic reports worker/cache versions without reading user data", startupCheck.includes('navigator.serviceWorker.controller') && startupCheck.includes('caches.keys()') && !startupCheck.includes("indexedDB.open") && !startupCheck.includes("localStorage.getItem"));
 console.log(checks.map(name => "PASS " + name).join("\n"));
 console.log(checks.length + "/" + checks.length + " dashboard-image checks passed.");
