@@ -121,7 +121,7 @@ assert.match(app, /name="apple-mobile-web-app-capable" content="yes"/);
 assert.match(app, /name="apple-mobile-web-app-title" content="ALVIS"/);
 assert.equal(manifest.start_url, "./index-integrated.html");
 assert.equal(manifest.scope, "./");
-assert.match(sw, /caches\.match\(request, \{ ignoreSearch: true \}\)/);
+assert.match(sw, /appCache\.match\(request, \{ ignoreSearch: true \}\)/);
 assert.match(sw, /await self\.clients\.claim\(\)/);
 assert.match(sw, /"https:\/\/ajax\.googleapis\.com"/, "the model-viewer CDN must be cached for offline avatar launch");
 
