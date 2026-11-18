@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
+const appHtml = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const appCss = await readFile(new URL("../assets/alvis-app.css", import.meta.url), "utf8");
+const app = appHtml + "\n" + appCss;
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
@@ -30,7 +31,7 @@ assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
 assert.match(sw,/alvis-cache-v283-integrated/);
 // v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
-const inlineStyle=app.match(/<style>([\s\S]*?)<\/style>/)?.[1]||"";
+const inlineStyle=appHtml.match(/<style>([\s\S]*?)<\/style>/)?.[1]||"";
 assert.ok(inlineStyle.length<12000,"critical inline CSS must stay small enough for a fast login first paint");
 assert.ok(inlineStyle.includes(".hidden{display:none!important}"),"the locked app panel must remain hidden before authentication");
 assert.ok(inlineStyle.includes("#lockPanel{"),"the login screen must retain its critical inline styling");
