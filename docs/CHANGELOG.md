@@ -1610,3 +1610,8 @@
 - ALVISアプリキャッシュは全一覧に加え、制御中Worker/登録済みactive Workerが報告したキャッシュと、それ以外のALVISキャッシュを分けて表示する。キャッシュ名の存在だけで稼働中バージョンと誤認しない。
 - 診断は読み取り専用。Cache Storage、WebLLM/Kokoroモデル、IndexedDB、暗号化記憶、会話履歴、同期、バックアップを削除・変更しない。
 - Service Worker app-shell cache: alvis-cache-v290-integrated。端末診断での実機バージョン判定は更新ページ適用後に確認する。
+
+
+## v291.1 - Service Worker refresh follow-up
+- Reapply `updateViaCache: "none"` when registering an existing Service Worker registration, then request an update. This addresses stale update policies on previously registered clients.
+- Update preview smoke checks to validate the v291 refresh page rather than the legacy refresh bridge.
