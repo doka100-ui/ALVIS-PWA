@@ -73,7 +73,7 @@ assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
 assert.match(sw,/alvis-cache-v282-integrated/);
-assert.match(app,/Service Workerの準備が長引いているため、待機を終了してAIモデルの読み込みを続けます/);
+assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v264: fetch the integrated app shell from the network first when online,
 // while retaining the cached shell as the offline fallback.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
