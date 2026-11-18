@@ -45,7 +45,9 @@ assert.match(sw,/const shell = await cache\.match\("\.\/index-integrated\.html"\
 assert.match(sw,/await self\.skipWaiting\(\)/);
 assert.match(app,/navigator\.serviceWorker\.register\("\.\/service-worker\.js",\{updateViaCache:"none"\}\)/);
 assert.match(app,/await registration\.update\(\)/);
-assert.match(app,/function waitForAlvisServiceWorkerActivation\(registration,timeoutMs=12000\)/);
+assert.match(app,/window\.__alvisEarlyServiceWorkerReady=\(\(\)=>/);
+assert.ok(app.indexOf("window.__alvisEarlyServiceWorkerReady")<app.indexOf("</head>"),"Service Worker update must start before app scripts are parsed");
+assert.match(app,/alvisServiceWorkerReady=window\.__alvisEarlyServiceWorkerReady\|\|Promise\.resolve\(false\)/);
 assert.doesNotMatch(app,/await navigator\.serviceWorker\.ready/,"page startup must not wait indefinitely for Service Worker activation");
 // v280: a network-served refresh bridge escapes a stale v258 app-shell cache without clearing user data.
 assert.match(refresh,/navigator\.serviceWorker\.getRegistration\("\.\/"\)/);
