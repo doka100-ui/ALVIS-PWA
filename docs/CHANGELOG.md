@@ -1556,3 +1556,9 @@
 - CacheStorage全体を毎回検索していた処理をやめ、ALVISアプリキャッシュと依存コードキャッシュを個別検索。WebLLMの既存モデル関連キャッシュは必要な外部リクエスト時のみ個別参照する。
 - 既存のWebLLMモデルキャッシュ、記憶、履歴、暗号化、同期、バックアップは削除しない。
 - 2回目・3回目の連続起動を自動テストに追加。
+
+
+## 2026-11-18 — iPhone幅WebKitのログイン初回表示時間を計測
+- v284の起動改善後もユーザー実機で初回から遅いとの報告を受け、既存のモバイルWebKitスモークテストへNavigation Timing / Paint Timingを追加。
+- ログイン画面がDOM上で可視になるまでの時間、responseStart、DOM interactive、DOMContentLoaded、load、first-paint、first-contentful-paintを記録する。画面の表示条件や認証動作は変更しない。
+- この値はPlaywright WebKitの参考計測であり、iPhone実機の所要時間とは区別する。モデルキャッシュ、暗号化記憶、履歴、同期、バックアップ、Avatar/ALVIS表示は変更しない。
