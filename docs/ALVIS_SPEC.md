@@ -1020,3 +1020,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - Service Workerの登録・更新開始はログイン画面の初期読込後に行い、初期表示のネットワーク/CPU負荷との競合を避ける。
 - app shell cacheはv286。更新確認と最大12秒のactivate待機は維持する。無期限のService Worker ready待機は禁止。
 - モデル・記憶・履歴・同期・バックアップ・ALVIS/Avatar機能には変更を加えない。
+
+
+## v287 ログイン初期表示時の画像取得優先度
+- 認証前は非表示のALVISダッシュボード画像とアバター画像をlazy loading / low fetch priorityにする。ログイン画面に不要な大きな画像要求が初期表示の通信と競合しにくくする。
+- 認証後に画像を表示する際は通常どおり取得し、Service Workerによる画像プリキャッシュとオフライン対応は維持する。
+- 画像素材、ALVIS/Avatarのデザイン、AIモデル、記憶・履歴・暗号化・同期・バックアップは変更しない。
