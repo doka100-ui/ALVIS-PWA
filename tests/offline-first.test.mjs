@@ -61,6 +61,10 @@ assert.match(refresh,/15000/,"update check must have a timeout");
 assert.match(refresh,/timeout=25000/,"worker activation must have a timeout");
 assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
 assert.match(refresh,/location\.replace\(target\)/);
+assert.match(refresh,/ALVIS_GET_BUILD_INFO/);
+assert.match(refresh,/alvis-cache-v288-integrated/);
+assert.match(refresh,/refresh=288/);
+assert.match(refresh,/Workerのバージョン応答がありません/);
 assert.match(refresh,/index-integrated\.html\?refresh=280/);
 assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 
