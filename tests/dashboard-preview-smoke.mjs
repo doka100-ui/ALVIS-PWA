@@ -282,11 +282,31 @@ async function verifyMobileWebKit() {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
   try {
+    const navigationStartedAt = Date.now();
     const response = await page.goto(previewUrl, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "commit",
       timeout: 120000
     });
     assert.ok(response && response.ok(), "iPhone WebKit: preview document must return HTTP 200");
+    await page.waitForSelector("#lockPanel", { state: "visible", timeout: 15000 });
+    const launchTiming = await page.evaluate(() => {
+      const navigation = performance.getEntriesByType("navigation")[0];
+      const paints = performance.getEntriesByType("paint");
+      const paintTime = name => paints.find(entry => entry.name === name)?.startTime ?? null;
+      return {
+        loginVisibleMs: performance.now(),
+        responseStartMs: navigation?.responseStart ?? null,
+        domInteractiveMs: navigation?.domInteractive ?? null,
+        domContentLoadedMs: navigation?.domContentLoadedEventEnd ?? null,
+        loadEventEndMs: navigation?.loadEventEnd || null,
+        firstPaintMs: paintTime("first-paint"),
+        firstContentfulPaintMs: paintTime("first-contentful-paint")
+      };
+    });
+    console.log("TIMING iPhone WebKit: " + JSON.stringify({
+      wallClockToLoginMs: Date.now() - navigationStartedAt,
+      ...launchTiming
+    }));
     await waitForDashboardImage(page);
     const initialState = await page.evaluate(() => {
       const lock = document.getElementById("lockPanel");
