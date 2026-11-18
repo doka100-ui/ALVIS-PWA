@@ -1007,3 +1007,10 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - 初期ロック画面に必要な基礎CSSとログイン専用CSSをインラインに保持し、その他のALVIS/Avatar/チャットUI CSSを外部スタイルシートへ分離する。
 - 外部CSSはpreload後に適用し、ログイン画面の表示を待たせない。Service WorkerでCSSをプリキャッシュし、オフライン表示も維持する。
 - 認証・データ形式・モデル設定・ALVIS/Avatarの機能とデザイン規則は変更しない。実機Safariでの速度確認は必要。
+
+
+## v284 — 再訪時の起動経路
+- Service Workerの統合アプリ画面ナビゲーションをキャッシュ優先へ変更し、毎回のネットワーク応答待ちを回避する。
+- 一般リソース検索をALVISアプリ/依存コードキャッシュに限定し、CacheStorage全体を走査しない。WebLLMの既存モデル・設定・WASMキャッシュは該当URLの要求時のみ個別に参照する。
+- 新しいアプリシェルはService Workerのインストール時にプリキャッシュし、更新後に切替。ユーザーデータとモデルデータは変更・削除しない。
+- 2・3回目の連続起動を自動テストへ追加。実機iPhone Safariでの体感確認は必要。
