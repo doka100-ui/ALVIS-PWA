@@ -1166,7 +1166,7 @@ assert.match(appStyles,/hud-orbit-c\{\s*display:block!important;width:125%!impor
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
 assert.match(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
-assert.match(sw,/alvis-dashboard-reference\.avif/);
+assert.ok(app.includes("./assets/alvis-dashboard-reference.avif") && sw.includes("url.origin === self.location.origin") && sw.includes("cache.put(cacheRequest, response.clone())"),"dashboard artwork must be cached on demand after it is requested");
 
 // v272: expose WebLLM's real stage/progress instead of a generic LOADING label.
 assert.match(app,/detail=ALVIS_MODEL_LABEL\+" "\+\(progressMatch\?"読み込み中 "/);
