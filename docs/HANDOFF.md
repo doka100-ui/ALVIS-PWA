@@ -2221,3 +2221,10 @@
 - app shell cacheをv286へ更新。updateViaCache:none、registration.update()、activate待機12秒上限、既存Workerへのフォールバックは維持する。navigator.serviceWorker.readyの無期限待機は行わない。
 - Service Worker本体のキャッシュ優先動作、既存のオフライン対応、WebLLM/Kokoroモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ、ALVIS/AvatarのUI・AI設定は変更しない。
 - iPhone実機での速度改善はユーザー確認待ち。自動テストは登録処理がheadより後で開始されることを検証する。
+
+
+## v287 — ログイン中の画像通信を後回し（2026-11-18）
+- ログイン前は非表示のALVISダッシュボード画像とアバター画像を loading=lazy / fetchpriority=low に変更し、初期パスワード画面の表示と画像取得が競合しにくいようにする。
+- 認証後に各表示領域が現れた時点で画像を読み込む。Service Workerの画像プリキャッシュは維持し、初回オンライン利用後のオフライン表示を保つ。
+- app shell cache: alvis-cache-v287-integrated。既存の画像・アバター表示、モデルキャッシュ、記憶、履歴、暗号化、同期、バックアップは変更しない。
+- 自動テストはログイン前に画像が遅延指定されていること、アプリ表示後に画像が読み込めることを確認する。iPhone実機での体感速度は別途確認が必要。
