@@ -70,20 +70,12 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh bridge must explicitly request a Service Worker update");
     assert.ok(refreshHtml.includes("index-integrated.html?refresh=280"), browserName + ": refresh bridge must return to the integrated app");
 
-    await waitForDashboardImage(page);
-
-    const imageState = await page.evaluate(() => {
-      const image = document.querySelector(".alvis-reference-image");
-      return {
-        src: image.currentSrc,
-        width: image.naturalWidth,
-        height: image.naturalHeight
-      };
-    });
-    assert.ok(imageState.src.includes("/assets/alvis-dashboard-reference.avif"), browserName + ": the approved AVIF must be requested");
-    assert.equal(imageState.width, 700, browserName + ": approved artwork width");
-    assert.equal(imageState.height, 564, browserName + ": approved artwork height");
-    assert.ok(imageResponses.some(item => item.status === 200), browserName + ": approved artwork request must return HTTP 200");
+    const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
+      loading: image.loading,
+      fetchPriority: image.fetchPriority
+    }));
+    assert.deepEqual(deferredImageState, { loading: "lazy", fetchPriority: "low" },
+      browserName + ": hidden dashboard artwork must not compete with the initial login screen");
 
     // Reveal only the already-rendered app shell in this disposable test browser.
     // No password is submitted and no encrypted user data is read or changed.
@@ -99,6 +91,19 @@ async function verifyBrowser(browserType, verifyOffline) {
       const chat = document.getElementById("chatPage");
       return !!chat && !chat.classList.contains("hidden");
     });
+    await waitForDashboardImage(page);
+    const imageState = await page.evaluate(() => {
+      const image = document.querySelector(".alvis-reference-image");
+      return {
+        src: image.currentSrc,
+        width: image.naturalWidth,
+        height: image.naturalHeight
+      };
+    });
+    assert.ok(imageState.src.includes("/assets/alvis-dashboard-reference.avif"), browserName + ": the approved AVIF must be requested after unlock");
+    assert.equal(imageState.width, 700, browserName + ": approved artwork width");
+    assert.equal(imageState.height, 564, browserName + ": approved artwork height");
+    assert.ok(imageResponses.some(item => item.status === 200), browserName + ": approved artwork request must return HTTP 200 after unlock");
 
     const layout = await page.evaluate(() => {
       const stage = document.querySelector(".mode-stage.jarvis-stage");
@@ -307,7 +312,6 @@ async function verifyMobileWebKit() {
       wallClockToLoginMs: Date.now() - navigationStartedAt,
       ...launchTiming
     }));
-    await waitForDashboardImage(page);
     const initialState = await page.evaluate(() => {
       const lock = document.getElementById("lockPanel");
       const app = document.getElementById("appPanel");
@@ -321,15 +325,25 @@ async function verifyMobileWebKit() {
         lockVisible: !!lock && !lock.classList.contains("hidden") && getComputedStyle(lock).display !== "none",
         lockWidth: rect?.width || 0,
         appHidden: !!app && app.classList.contains("hidden"),
+        imageLazy: !!image && image.loading === "lazy",
+        imagePriority: image?.fetchPriority || "",
         imageLoaded: !!image && image.complete && image.naturalWidth === 700
       };
     });
     assert.ok(initialState.lockVisible && initialState.lockWidth > 0,
       "iPhone WebKit: initial password screen must be visible; state=" + JSON.stringify(initialState));
     assert.equal(initialState.appHidden, true, "iPhone WebKit: app panel must remain locked initially");
-    assert.equal(initialState.imageLoaded, true, "iPhone WebKit: approved ALVIS artwork must load");
+    assert.equal(initialState.imageLazy, true, "iPhone WebKit: hidden ALVIS artwork must be deferred");
+    assert.equal(initialState.imagePriority, "low", "iPhone WebKit: hidden ALVIS artwork must not have high fetch priority");
     assert.deepEqual(pageErrors, [], "iPhone WebKit: no uncaught JavaScript errors; console=" + JSON.stringify(consoleErrors));
     await page.screenshot({ path: "artifacts/alvis-dashboard-iphone-webkit.png", fullPage: true });
+    await page.evaluate(() => {
+      document.getElementById("lockPanel")?.classList.add("hidden");
+      document.getElementById("appPanel")?.classList.remove("hidden");
+    });
+    await waitForDashboardImage(page);
+    const imageLoadedAfterUnlock = await page.locator(".alvis-reference-image").evaluate(image => image.complete && image.naturalWidth === 700);
+    assert.equal(imageLoadedAfterUnlock, true, "iPhone WebKit: approved ALVIS artwork must load after the app is revealed");
     console.log("PASS iPhone WebKit: initial password screen and ALVIS artwork render without uncaught errors");
     if (consoleErrors.length) console.log("iPhone WebKit console errors: " + JSON.stringify(consoleErrors));
   } finally {
