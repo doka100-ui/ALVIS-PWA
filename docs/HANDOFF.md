@@ -2179,3 +2179,11 @@
 - デプロイ済みページに対し、390×844・タッチ対応・iPhone Safari User-AgentのWebKitテストを追加。
 - 初期パスワード画面の表示、ALVIS画像の読み込み、アプリロック状態、未捕捉JavaScriptエラーを検証。診断用スクリーンショットも保存。
 - これはiPhone幅のWebKitエミュレーションであり、実機Safariの完全な代替ではない。
+
+
+## v283 — ログイン画面の初期表示を高速化（2026-11-18）
+- 128KB超のインラインCSSを分割し、ログイン画面に必要な基本スタイルとロック画面スタイル（約7.7KB）だけをHTML内へ残す。
+- ALVIS HUD・チャット・音声・記憶・履歴・同期・Avatarなどの非クリティカルCSSは `assets/alvis-app.css` へ移し、preload後に非同期適用。ログイン画面の初回描画を外部CSSの完了待ちから切り離す。
+- 新CSSはService Workerのアプリシェルへプリキャッシュし、オフライン時も既存UIスタイルを維持。
+- 認証処理、暗号化データ、記憶・履歴、同期・バックアップ、WebLLM/Kokoroモデルキャッシュ、ALVIS/Avatarの表示仕様は変更しない。
+- app shell cache: alvis-cache-v283-integrated。iPhone Safari実機の体感速度はデプロイ後に確認する。
