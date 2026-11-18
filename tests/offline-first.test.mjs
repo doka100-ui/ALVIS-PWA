@@ -836,7 +836,7 @@ assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain 
 
 // v250: portrait sizing rules remain scoped to the ALVIS live HUD.
 assert.match(appStyles,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
-assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
+assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(appStyles,/min-height:450px!important/);
 assert.match(appStyles,/min-height:390px!important/);
 assert.match(sw,/alvis-cache-v\d+-integrated/);
@@ -1119,7 +1119,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"gener
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
 assert.ok(sw.includes("alvis-cache-v283-integrated"),"v263 app shell cache must be refreshed");
-assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
+assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{') && appStyles.includes("id=\"alvisAvatarCanvas\""), "v249 does not alter Avatar mode");
