@@ -547,7 +547,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v289";
+const ALVIS_APP_BUILD_ID="v290";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -3816,6 +3816,23 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
   button.disabled=true;button.textContent="診断しています…";
   const lines=[];
   const yesNo=value=>value?"利用可能":"利用不可";
+  const readWorkerBuildInfo=async worker=>{
+    if(!worker||typeof MessageChannel!=="function")return "取得不可";
+    const channel=new MessageChannel();
+    try{
+      return await Promise.race([
+        new Promise(resolve=>{
+          channel.port1.onmessage=event=>resolve(event.data?.cacheName||"応答形式不明");
+          worker.postMessage({type:"ALVIS_GET_BUILD_INFO"},[channel.port2]);
+        }),
+        new Promise(resolve=>setTimeout(()=>resolve("応答なし"),1500))
+      ]);
+    }catch(error){
+      return "取得失敗";
+    }finally{
+      try{channel.port1.close();}catch(closeError){}
+    }
+  };
   try{
     lines.push("この画面のコード版："+ALVIS_APP_BUILD_ID);
     lines.push("接続状態の目安："+(navigator.onLine?"オンライン":"オフライン/接続なし"));
@@ -3889,33 +3906,26 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     }
     lines.push("標準音声読み上げ："+yesNo(!!window.speechSynthesis));
     lines.push("Service Worker："+yesNo("serviceWorker" in navigator));
+    let controllingWorkerCache="取得不可";
+    let registeredActiveWorkerCache="取得不可";
     if("serviceWorker" in navigator){
       const registration=await navigator.serviceWorker.getRegistration();
+      const controller=navigator.serviceWorker.controller;
       lines.push("Service Worker登録："+(registration?"登録あり":"登録なし"));
-      lines.push("Service Worker制御："+(navigator.serviceWorker.controller?"制御中":"まだ制御していない"));
-      lines.push("Service Worker状態："+(registration?.active?.state||registration?.waiting?.state||registration?.installing?.state||"状態不明"));
-      const activeWorker=navigator.serviceWorker.controller||registration?.active;
-      if(activeWorker){
-        lines.push("制御中Worker："+(activeWorker.state||"状態不明"));
-        if(typeof MessageChannel==="function"){
-          const channel=new MessageChannel();
-          try{
-            const workerCache=await Promise.race([
-              new Promise(resolve=>{
-                channel.port1.onmessage=event=>resolve(event.data?.cacheName||"応答形式不明");
-                activeWorker.postMessage({type:"ALVIS_GET_BUILD_INFO"},[channel.port2]);
-              }),
-              new Promise(resolve=>setTimeout(()=>resolve("応答なし（旧Workerまたは更新待ちの可能性）"),1500))
-            ]);
-            lines.push("制御中Workerのキャッシュ版："+workerCache);
-          }catch(workerInfoError){
-            lines.push("制御中Workerのキャッシュ版：取得失敗");
-          }finally{
-            try{channel.port1.close();}catch(closeError){}
-          }
-        }
+      lines.push("Service Worker制御："+(controller?"制御中":"まだ制御していない"));
+      lines.push("登録済みWorker状態："+(registration?.active?.state||registration?.waiting?.state||registration?.installing?.state||"状態不明"));
+      if(controller){
+        lines.push("制御中Worker状態："+(controller.state||"状態不明"));
+        controllingWorkerCache=await readWorkerBuildInfo(controller);
+        lines.push("現在この画面を制御するWorker版："+controllingWorkerCache);
       }else{
-        lines.push("制御中Worker：なし（このページはWorkerに制御されていません）");
+        lines.push("現在この画面を制御するWorker版：なし");
+      }
+      if(registration?.active){
+        registeredActiveWorkerCache=await readWorkerBuildInfo(registration.active);
+        lines.push("登録済みactive Worker版："+registeredActiveWorkerCache);
+      }else{
+        lines.push("登録済みactive Worker版：なし");
       }
     }
     // Read-only check of WebLLM's tensor cache for this device's active model.
@@ -3931,13 +3941,17 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     }catch(modelCacheCheckError){
       lines.push("WebLLMモデル重みキャッシュ：確認不可（"+String(modelCacheCheckError?.message||modelCacheCheckError||"不明").slice(0,120)+"）");
     }
-    let otherCaches=[];
     if("caches" in window){
       const keys=await caches.keys();
       const appCaches=keys.filter(key=>key.startsWith("alvis-cache-"));
       const dependencyCaches=keys.filter(key=>key.startsWith("alvis-deps-"));
-      otherCaches=keys.filter(key=>!key.startsWith("alvis-cache-")&&!key.startsWith("alvis-deps-"));
-      lines.push("ALVISアプリキャッシュ："+(appCaches.join(", ")||"見つかりません"));
+      const workerCaches=new Set([controllingWorkerCache,registeredActiveWorkerCache].filter(value=>value.startsWith("alvis-cache-")));
+      const otherAppCaches=appCaches.filter(key=>!workerCaches.has(key));
+      const otherCaches=keys.filter(key=>!key.startsWith("alvis-cache-")&&!key.startsWith("alvis-deps-"));
+      lines.push("ALVISアプリキャッシュ一覧："+(appCaches.join(", ")||"見つかりません"));
+      lines.push("制御中Workerのキャッシュ："+(controllingWorkerCache.startsWith("alvis-cache-")?controllingWorkerCache:"特定できません"));
+      lines.push("登録済みactive Workerのキャッシュ："+(registeredActiveWorkerCache.startsWith("alvis-cache-")?registeredActiveWorkerCache:"特定できません"));
+      lines.push("現Worker以外のALVISキャッシュ："+(otherAppCaches.join(", ")||"なし"));
       lines.push("依存コードキャッシュ："+(dependencyCaches.join(", ")||"見つかりません"));
       lines.push("ALVIS以外のキャッシュ："+(otherCaches.length?otherCaches.length+"種類":"見つかりません"));
       for(const key of otherCaches){
@@ -3971,7 +3985,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
       lines.push("保存領域の永続化：このブラウザでは状態を確認できません");
     }
     lines.push("モデル起動時の永続化要求："+alvisStoragePersistenceStatus);
-    lines.push("AIモデルの保存状態：ALVIS以外のキャッシュ名・件数を上に表示。個別のモデルファイル確認は未対応");
+    lines.push("AIモデルの保存状態：モデル重みキャッシュの存在のみ確認。完全なオフライン再利用は未確認");
     lines.push("Kokoroモデルの保存状態：この画面から個別判定できません");
     lines.push("");
     lines.push("注意：オンライン/オフライン表示やキャッシュ件数だけでは、モデルの再利用・完全オフライン動作は証明できません。機内モードで実際に試してください。");
