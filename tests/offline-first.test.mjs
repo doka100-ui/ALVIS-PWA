@@ -170,7 +170,7 @@ assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAl
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 // v116: restrained cinematic awakening replaces the game-like radial starburst.
 assert.match(appStyles,/#appPanel\.auth-enter\{[^}]*animation:alvisWorkspaceAwake/,"workspace must fade into focus without a circular game-like wipe");
-assert.match(app,/@keyframes alvisWorkspaceAwake\{0%\{opacity:0;filter:none\}45%\{opacity:\.82;filter:none\}100%\{opacity:1;filter:none\}\}/,"workspace must resolve without blur or brightness filters");
+assert.match(appStyles,/@keyframes alvisWorkspaceAwake\{0%\{opacity:0;filter:none\}45%\{opacity:\.82;filter:none\}100%\{opacity:1;filter:none\}\}/,"workspace must resolve without blur or brightness filters");
 assert.match(appStyles,/radial-gradient\(ellipse at 50% 46%/,"a restrained central ambient glow must remain");
 assert.match(appStyles,/@keyframes alvisQuietWave[\s\S]*?transform:scale\(1\.85\)/,"one subtle expanding light wave must originate at the center");
 assert.doesNotMatch(app,/conic-gradient\(from 0deg at 50% 46%/,"no starburst rays");
