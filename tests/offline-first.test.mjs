@@ -625,7 +625,7 @@ assert.match(app,/detail=ALVIS_MODEL_LABEL\+" 稼働中・端末内推論"/);
 assert.match(app,/if\(id==="aiStatus"\)updateHudAiStatus\(output\)/);
 assert.match(app,/hudAiAction.*addEventListener/s);
 assert.match(appStyles,/\.hud-ai-metric\[data-state="loading"\]:before[\s\S]*?animation:alvisLoadRing/);
-assert.match(app,/@keyframes alvisLoadRing/);
+assert.match(appStyles,/@keyframes alvisLoadRing/);
 assert.match(appStyles,/prefers-reduced-motion:reduce[^}]*hud-ai-metric\[data-state="loading"\]:before/);
 assert.match(app,/if\(aiLoading\|\|aiEngine\)return;[\s\S]*?const loadButton=\$\("loadAiModel"\);[\s\S]*?loadButton\.click\(\)/);
 assert.doesNotMatch(app,/hudModelAction/);
