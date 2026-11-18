@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
+const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -35,6 +36,14 @@ assert.match(app,/navigator\.serviceWorker\.register\("\.\/service-worker\.js",\
 assert.match(app,/await registration\.update\(\)/);
 assert.match(app,/function waitForAlvisServiceWorkerActivation\(registration,timeoutMs=12000\)/);
 assert.doesNotMatch(app,/await navigator\.serviceWorker\.ready/,"page startup must not wait indefinitely for Service Worker activation");
+// v280: a network-served refresh bridge escapes a stale v258 app-shell cache without clearing user data.
+assert.match(refresh,/navigator\.serviceWorker\.getRegistration\("\.\/"\)/);
+assert.match(refresh,/await registration\.update\(\)/);
+assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
+assert.match(refresh,/location\.replace\(target\)/);
+assert.match(refresh,/index-integrated\.html\?refresh=280/);
+assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
+
 
 
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
