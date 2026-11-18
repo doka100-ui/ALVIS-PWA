@@ -4179,6 +4179,14 @@ $("loadAiModel").addEventListener("click",async()=>{
   }
   aiLoading=true;
   aiLoadProgress=0;
+  let alvisLoadStage="起動処理を開始";
+  let alvisLoadProgressText="";
+  const alvisLoadStartedAt=Date.now();
+  const alvisLoadElapsed=()=>Math.max(0,Math.floor((Date.now()-alvisLoadStartedAt)/1000));
+  const setAlvisLoadStage=stage=>{
+    alvisLoadStage=String(stage||"処理中");
+    setStatus("aiStatus",ALVIS_MODEL_LABEL+" 読み込み中："+alvisLoadStage+"（"+alvisLoadElapsed()+"秒）");
+  };
   updateHudAiStatus("モデル読み込み中 0%");
   $("loadAiModel").disabled=true;
   $("unloadAiModel").disabled=true;
@@ -4186,24 +4194,31 @@ $("loadAiModel").addEventListener("click",async()=>{
   // 呼び出しは最初のawaitより前。Safariのユーザー操作中に永続化を要求する。
   // 拒否されてもQwenの読み込み・推論は続行する。
   requestAlvisStoragePersistence();
+  const alvisLoadWatchdog=setInterval(()=>{
+    if(aiLoading){
+      const progress=alvisLoadProgressText?" · "+alvisLoadProgressText:"";
+      setStatus("aiStatus",ALVIS_MODEL_LABEL+" 読み込み中："+alvisLoadStage+"（"+alvisLoadElapsed()+"秒）"+progress);
+    }
+  },5000);
   try{
     if(alvisEngineCleanupError)throw new Error("前回のモデル解放に失敗しています。GPUメモリの二重確保を避けるため、ページを再読み込みしてから再試行してください。詳細："+alvisEngineCleanupError);
     if(alvisEngineCleanupPromise){
-      setStatus("aiStatus","前回のモデル終了処理を待っています…");
+      setAlvisLoadStage("前回のモデル解放を確認中");
       await alvisEngineCleanupPromise;
       if(alvisEngineCleanupError)throw new Error("前回のモデル解放に失敗しています。ページを再読み込みしてから再試行してください。詳細："+alvisEngineCleanupError);
     }
-    setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
+    setAlvisLoadStage("Service Workerの準備を確認中");
     // Service Workerの準備待ちでモデル取得全体を止めない。タイムアウト/失敗時もWebLLMを直接起動する。
     const serviceWorkerResult=await waitForAlvisServiceWorkerReady();
     if(serviceWorkerResult.timedOut){
-      setStatus("aiStatus","Service Workerの準備が長引いているため、待機を終了してAIモデルの読み込みを続けます…");
+      setAlvisLoadStage("Service Worker待機を終了・AI読み込みへ移行");
     }else if(!serviceWorkerResult.ready){
-      setStatus("aiStatus","Service Workerを利用できないため、AIモデルを直接読み込みます…");
+      setAlvisLoadStage("Service WorkerなしでAI読み込みへ移行");
     }else{
-      setStatus("aiStatus","AI実行エンジンと"+ALVIS_MODEL_LABEL+"を準備中…");
+      setAlvisLoadStage("WebLLM実行エンジンを準備中");
     }
     if(!CreateMLCEngine){
+      setAlvisLoadStage("WebLLMライブラリを取得中");
       const webllm=await import("https://esm.run/@mlc-ai/web-llm@0.2.87");
       alvisWebLLMVersion="0.2.87（CDN指定）";
       CreateMLCEngine=webllm.CreateMLCEngine;
@@ -4213,6 +4228,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     // This check does not fetch, clear, migrate, or rewrite model artifacts.
     if(typeof alvisHasModelInCache==="function"){
       try{
+        setAlvisLoadStage("保存済みモデルキャッシュを確認中");
         const cachedWeights=await alvisHasModelInCache(ALVIS_MODEL_ID);
         setStatus("aiStatus",cachedWeights
           ?"保存済みモデル重みを確認しました。既存キャッシュを使って起動します…"
@@ -4227,10 +4243,13 @@ $("loadAiModel").addEventListener("click",async()=>{
     alvisGpuLossDuringLoad=null;
     alvisGpuDiagnostics.captureModelDevices=true;
     try{
+      setAlvisLoadStage("WebGPU・モデルエンジンを初期化中");
       loadedEngine=await CreateMLCEngine(ALVIS_MODEL_ID,{
         initProgressCallback:p=>{
           const percent=typeof p.progress==="number"?Math.max(0,Math.min(100,Math.round(p.progress*100))):aiLoadProgress;
           aiLoadProgress=percent;
+          alvisLoadProgressText=percent+"% "+String(p.text||"").slice(0,90);
+          alvisLoadStage="モデル初期化";
           setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
         }
       },{context_window_size:ALVIS_CONTEXT_WINDOW});
@@ -4257,7 +4276,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     $("unloadAiModel").disabled=false;
   }catch(error){
     aiEngine=null;
-    const detail=String(error?.message||error||"不明なエラー");
+    const detail=String(error?.message||error||"不明なエラー")+"（停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()+"秒）";
     const lower=detail.toLowerCase();
     let guidance="エラー内容を確認し、必要ならページを再読み込みしてから再試行してください。";
     if(/device was lost|device lost|gpu.*lost|out of memory|oom|allocation failed|memory access out of bounds/.test(lower)){
@@ -4269,6 +4288,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     }
     setStatus("aiStatus","モデル読み込みエラー: "+detail+"\n"+guidance);
   }finally{
+    clearInterval(alvisLoadWatchdog);
     aiLoading=false;
     updateChatSendButton();
     $("loadAiModel").disabled=false;
