@@ -1,3 +1,9 @@
+## v285 iPhone起動時にService Worker更新を先行開始（2026-11-18）
+- 端末診断でiPhoneがv258のALVISアプリキャッシュを使用し続けていた。従来の登録/更新処理は大きなアプリ本体スクリプトの末尾にあり、実行開始が遅れる構造だった。
+- Service Worker登録と明示的な更新確認をHTML headで先行開始し、巨大なアプリスクリプトの解析・実行を待たずに新Workerの取得を始める。更新確認は非同期で、ログイン画面の表示を待たせない。有効化待ちは12秒で打ち切り、通常起動を継続する。
+- 既存Workerを解除せず、Cache Storage/IndexedDB/localStorage、Qwen/Kokoroモデル・依存キャッシュ、暗号化記憶/履歴/同期/バックアップは削除・変更しない。ALVIS/Avatarの表示やAI設定も変更しない。
+- Service Worker app shell cache v285。iPhone実機で旧v258から更新されるか、起動時間が改善するかは未確認。CI後に既存 refresh.html を使って安全に切り替えを確認する。
+
 ## v282 Qwen起動の停止段階を可視化（2026-11-18）
 - Qwen起動中にService Worker待機・WebLLM CDN import・モデルキャッシュ確認・WebGPU/モデル初期化の各段階を明示し、5秒ごとに経過秒数を更新する。WebLLMの進捗コールバックも併記する。
 - タイムアウトで初期化を中断しない。エラー時は停止段階と経過時間を表示し、実際に停止したawaitを特定するための診断修正。
