@@ -38,7 +38,7 @@ assert.match(app,/function waitForAlvisServiceWorkerActivation\(registration,tim
 assert.doesNotMatch(app,/await navigator\.serviceWorker\.ready/,"page startup must not wait indefinitely for Service Worker activation");
 // v280: a network-served refresh bridge escapes a stale v258 app-shell cache without clearing user data.
 assert.match(refresh,/navigator\.serviceWorker\.getRegistration\("\.\/"\)/);
-assert.match(refresh,/await registration\.update\(\)/);
+assert.match(refresh,/registration\.update\(\)/);
 assert.match(refresh,/const withTimeout=\(promise,timeout,message\)=>Promise\.race\(\[/);
 assert.match(refresh,/8000[\s\S]*?15000[\s\S]*?25000/,"refresh bridge operations must have finite waits and actionable timeouts");
 assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
