@@ -213,6 +213,17 @@ async function verifyBrowser(browserType, verifyOffline) {
       }
       assert.equal(controlled, true, "Chromium: app shell must be controlled by the Service Worker");
 
+      // Repeat the exact launch path to catch the reported 2nd/3rd-open slowdown.
+      for (let launch = 2; launch <= 3; launch++) {
+        const startedAt = Date.now();
+        const repeatedResponse = await page.reload({ waitUntil: "commit", timeout: 15000 });
+        const elapsedMs = Date.now() - startedAt;
+        assert.ok(repeatedResponse && repeatedResponse.ok(), "Chromium: repeat launch " + launch + " must return HTTP 200");
+        assert.equal(repeatedResponse.fromServiceWorker(), true, "Chromium: repeat launch " + launch + " must use the Service Worker");
+        assert.ok(elapsedMs < 3000, "Chromium: repeat launch " + launch + " must not wait on a network-first shell request (" + elapsedMs + "ms)");
+        await page.waitForSelector("#lockPanel", { state: "visible", timeout: 5000 });
+      }
+
       const cacheInfo = await page.evaluate(async () => {
         const names = await caches.keys();
         for (const name of names.filter(value => value.startsWith("alvis-cache-"))) {
