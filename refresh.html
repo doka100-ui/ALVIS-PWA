@@ -26,7 +26,7 @@
 (() => {
   const status=document.getElementById("status");
   const retry=document.getElementById("retry");
-  const target="./index-integrated.html?refresh=289";
+  const target="./index-integrated.html?refresh=290";
   const withTimeout=(promise,timeout,message)=>Promise.race([
     promise,
     new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),timeout))
@@ -94,10 +94,10 @@
         try{activeWorker.postMessage({type:"ALVIS_GET_BUILD_INFO"},[channel.port2]);}
         catch(error){channel.port1.close();reject(error);}
       }),3000,"Workerのバージョン応答がありません");
-      if(workerVersion!=="alvis-cache-v289-integrated"){
+      if(workerVersion!=="alvis-cache-v290-integrated"){
         throw new Error("最新版を確認できません。検出したWorker："+(workerVersion||"不明"));
       }
-      status.textContent="v289を確認しました。ALVISを開いています…";
+      status.textContent="v290を確認しました。ALVISを開いています…";
       location.replace(target);
     }catch(error){
       status.textContent="更新できませんでした："+String(error?.message||error);
