@@ -213,6 +213,10 @@ async function verifyBrowser(browserType, verifyOffline) {
       let controlled = await page.evaluate(() => !!navigator.serviceWorker.controller);
       if (!controlled) {
         await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });
+        await page.evaluate(() => {
+          document.getElementById("lockPanel")?.classList.add("hidden");
+          document.getElementById("appPanel")?.classList.remove("hidden");
+        });
         await waitForDashboardImage(page);
         controlled = await page.evaluate(() => !!navigator.serviceWorker.controller);
       }
@@ -249,6 +253,10 @@ async function verifyBrowser(browserType, verifyOffline) {
       await context.setOffline(true);
       const offlineNavigation = await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });
       assert.ok(offlineNavigation && offlineNavigation.ok(), "Chromium: integrated app shell must reload offline");
+      await page.evaluate(() => {
+        document.getElementById("lockPanel")?.classList.add("hidden");
+        document.getElementById("appPanel")?.classList.remove("hidden");
+      });
       const offlineImageResponse = await offlineImageResponsePromise;
       assert.equal(offlineImageResponse.status(), 200, "Chromium: dashboard image must load offline");
       assert.equal(offlineImageResponse.fromServiceWorker(), true, "Chromium: offline image must come from the Service Worker cache");
