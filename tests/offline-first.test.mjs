@@ -99,7 +99,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v290-integrated/);
+assert.match(sw, /alvis-cache-v291-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -1147,7 +1147,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v290-integrated"),"v290 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v291-integrated"),"v291 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
