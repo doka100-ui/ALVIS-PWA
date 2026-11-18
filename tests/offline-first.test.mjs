@@ -115,7 +115,7 @@ assert.match(sw, /"https:\/\/ajax\.googleapis\.com"/, "the model-viewer CDN must
 // v240: a fresh model load must wait for logout-triggered GPU cleanup and stop after a failed cleanup.
 assert.match(app,/let alvisEngineCleanupPromise=Promise\.resolve\(\)/);
 assert.match(app,/const engine=aiEngine;\s*aiEngine=null;\s*alvisEngineCleanupPromise=alvisEngineCleanupPromise\.then\(\(\)=>engine\.unload\(\)\)/);
-assert.match(app,/前回のモデル終了処理を待っています[\s\S]*?await alvisEngineCleanupPromise[\s\S]*?if\(alvisEngineCleanupError\)throw new Error/);
+assert.match(app,/setAlvisLoadStage\("前回のモデル解放を確認中"\)[\s\S]*?await alvisEngineCleanupPromise[\s\S]*?if\(alvisEngineCleanupError\)throw new Error/);
 assert.match(app,/前回のモデル解放に失敗しています[\s\S]*?ページを再読み込みしてから再試行/);
 
 // v239: GPU loss during CreateMLCEngine startup must be recorded and the resolved stale engine unloaded.
