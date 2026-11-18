@@ -29,7 +29,10 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v287-integrated/);
+assert.match(sw,/alvis-cache-v288-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v288"/);
+assert.match(app,/ALVIS_GET_BUILD_INFO/);
+assert.match(sw,/ALVIS_GET_BUILD_INFO/);
 // v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
 const inlineStyle=app.match(/<style>([\s\S]*?)<\/style>/)?.[1]||"";
 assert.ok(inlineStyle.length<12000,"critical inline CSS must stay small enough for a fast login first paint");
@@ -74,7 +77,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v287-integrated/);
+assert.match(sw, /alvis-cache-v288-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
