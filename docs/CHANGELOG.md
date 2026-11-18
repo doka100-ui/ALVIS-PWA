@@ -1,3 +1,9 @@
+## 2026-11-18 — iPhone Safari向けService Worker更新中継ページ v280
+- 旧アプリシェルが画面遷移をキャッシュし続ける場合に備え、旧Workerのキャッシュ対象外となる `refresh.html` を追加。
+- 中継ページから既存登録へ `registration.update()` を実行し、新Workerの有効化を待って統合画面へ戻す。30秒でタイムアウトし、失敗時は再試行可能。
+- キャッシュ/IndexedDB/localStorage/モデル/記憶/履歴/暗号化/同期/バックアップは削除・変更しない。アプリ本体の表示・Avatar・音声・Qwen設定は変更しない。
+- CIで中継ページの安全性と配信応答を検査。iPhone Safari実機での切替確認はこれから。
+
 ## v278 iOS SafariでService Worker準備待ちがページ全体を止めないよう修正（2026-11-17）
 - Service Worker登録後の更新確認・有効化待機は維持しつつ、無期限に解決しない場合がある `navigator.serviceWorker.ready` の追加待機を削除。12秒の有界な有効化待機後は、Service Workerが未準備でもページ本体の初期化を続行する。
 - Service Workerが利用できる場合のオフライン機能・キャッシュ更新は従来どおり維持。モデルキャッシュ、記憶/履歴、暗号化、同期/バックアップ、Avatar、音声機能は変更しない。既存キャッシュやユーザーデータの削除を要求しない。
