@@ -6,6 +6,7 @@ on:
     paths:
       - "index-integrated.html"
       - "service-worker.js"
+      - "refresh.html"
       - "tests/offline-first.test.mjs"
       - "tests/alvis-dashboard.test.mjs"
       - "assets/alvis-dashboard-reference.avif"
