@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v288-integrated";
+const CACHE_NAME = "alvis-cache-v289-integrated";
 // v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
@@ -7,18 +7,11 @@ const DEPENDENCY_ORIGINS = new Set([
   "https://ajax.googleapis.com"
 ]);
 
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
+// Only the login-critical shell is required before a new worker can activate.
+// Large images and Avatar-only assets are cached on demand after the page opens.
+const REQUIRED_FILES_TO_CACHE = [
   "./index-integrated.html",
-  "./assets/alvis-vrm-runtime.js",
-  "./assets/alvis-app.css",
-  "./manifest.json",
-  "./manifest-integrated.json",
-  "./assets/alvis-dashboard-reference.avif",
-  "./assets/alvis-18-preview.jpg",
-  "./assets/alvis-18-preview-clean-400.jpg",
-  "./assets/alvis-18-preview-clean-hq.jpg"
+  "./assets/alvis-app.css"
 ];
 
 self.addEventListener("message", (event) => {
@@ -30,23 +23,18 @@ self.addEventListener("message", (event) => {
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // One optional asset must not abort the entire app update. Cache entries
-    // independently, but require the integrated shell before activating.
-    const results = await Promise.allSettled(FILES_TO_CACHE.map(async (file) => {
+    // Cache only the integrated login shell and its critical stylesheet before
+    // activation. Do not make login availability wait for dashboard/Avatar images.
+    await Promise.all(REQUIRED_FILES_TO_CACHE.map(async (file) => {
       const request = new Request(file, { cache: "reload" });
       const response = await fetch(request);
       if (!response.ok || response.type === "opaque") {
-        throw new Error("App-shell asset unavailable: " + file + " (" + response.status + ")");
+        throw new Error("Required ALVIS shell asset unavailable: " + file + " (" + response.status + ")");
       }
       await cache.put(request, response);
     }));
     const shell = await cache.match("./index-integrated.html");
-    if (!shell) {
-      const failures = results
-        .map((result, index) => result.status === "rejected" ? FILES_TO_CACHE[index] : null)
-        .filter(Boolean);
-      throw new Error("Required ALVIS app shell could not be cached. Failed assets: " + failures.join(", "));
-    }
+    if (!shell) throw new Error("Required ALVIS integrated shell could not be cached");
     await self.skipWaiting();
   })());
 });
@@ -137,8 +125,19 @@ self.addEventListener("fetch", (event) => {
 
     try {
       const response = makeServiceWorkerSafeResponse(await fetch(request));
-      // 許可したCDNの依存コード/音声用アセットを専用キャッシュへ保存する。
-      // Hugging Face上の大容量モデルは各推論ライブラリのモデルキャッシュに任せる。
+      // Cache same-origin app assets after they are actually requested. This keeps
+      // Avatar-only assets and dashboard artwork available offline without delaying
+      // the login-critical Service Worker install.
+      if (url.origin === self.location.origin && !url.pathname.includes("/sync/") &&
+          response.ok && response.type !== "opaque" && request.headers.get("range") === null) {
+        const cache = await caches.open(CACHE_NAME);
+        const cacheRequest = request.mode === "navigate" && /\/index-integrated\.html$/.test(url.pathname)
+          ? new Request(new URL("./index-integrated.html", self.registration.scope).href)
+          : request;
+        try { await cache.put(cacheRequest, response.clone()); } catch (cacheError) {}
+      }
+      // Trusted CDN dependencies are cached separately; large Hugging Face models
+      // remain managed by WebLLM/Kokoro and are never touched here.
       if (isTrustedDependency && response.ok && response.type !== "opaque" && request.headers.get("range") === null) {
         const cache = await caches.open(DEPENDENCY_CACHE_NAME);
         await cache.put(request, response.clone());
