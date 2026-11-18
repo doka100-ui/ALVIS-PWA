@@ -2195,3 +2195,9 @@
 - WebLLMの `webllm/model`・`webllm/config`・`webllm/wasm` は対象リクエスト時だけ個別参照し、既存モデルデータを保持。
 - アプリシェルの新バージョンはService Worker更新・インストール時にプリキャッシュしてから有効化。通常起動は即時キャッシュ、更新時は新Workerのキャッシュへ切替。
 - 記憶・履歴・暗号化・同期・バックアップ・モデルデータの削除や再取得は行わない。2・3回目の連続起動をブラウザテストで確認する。
+
+
+## 2026-11-18 — iPhone幅WebKitのログイン初回表示時間を計測
+- v284の起動改善後もユーザー実機で初回から遅いとの報告を受け、既存のモバイルWebKitスモークテストへNavigation Timing / Paint Timingを追加。
+- ログイン画面がDOM上で可視になるまでの時間、responseStart、DOM interactive、DOMContentLoaded、load、first-paint、first-contentful-paintを記録する。画面の表示条件や認証動作は変更しない。
+- この値はPlaywright WebKitの参考計測であり、iPhone実機の所要時間とは区別する。モデルキャッシュ、暗号化記憶、履歴、同期、バックアップ、Avatar/ALVIS表示は変更しない。
