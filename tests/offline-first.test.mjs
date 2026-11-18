@@ -845,7 +845,7 @@ assert.match(appStyles,/border-color:#38bdf8bb!important/,"the second orbit keep
 assert.doesNotMatch(app,/scale:\.65!important/,"the previous stacked scale transform must be removed");
 assert.match(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
-assert.match(sw,/alvis-dashboard-reference\.avif/);
+assert.ok(app.includes("./assets/alvis-dashboard-reference.avif") && sw.includes("url.origin === self.location.origin") && sw.includes("cache.put(cacheRequest, response.clone())"),"dashboard artwork must be cached on demand after it is requested");
 assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain present");
 
 
