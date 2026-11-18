@@ -1,3 +1,4 @@
+- v288更新導線：`refresh.html` はService Workerの更新後、稼働中Workerへ `ALVIS_GET_BUILD_INFO` を送り、`alvis-cache-v288-integrated` の応答を確認してから `index-integrated.html?refresh=288` へ移動する。旧Worker/更新失敗時は誤って最新版と表示せず、エラーを画面に残す。
 ## v288 画面コードと制御中Service Workerの実バージョン表示（2026-11-18）
 - 端末診断へHTML画面自身のコード版を追加し、Service WorkerへMessageChannelで問い合わせて、実際にページを制御しているWorkerのキャッシュ版を取得する。古い画面HTMLと古いWorkerキャッシュを区別して表示できる。
 - Service Worker app shell cache v288。バージョン文字列だけを表示するのではなく、稼働中Workerから応答を取得する。応答がない場合はその旨を表示し、古いWorkerまたは未制御の可能性を示す。
