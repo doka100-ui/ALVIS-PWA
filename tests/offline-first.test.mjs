@@ -45,9 +45,9 @@ assert.match(sw,/const shell = await cache\.match\("\.\/index-integrated\.html"\
 assert.match(sw,/await self\.skipWaiting\(\)/);
 assert.match(app,/navigator\.serviceWorker\.register\("\.\/service-worker\.js",\{updateViaCache:"none"\}\)/);
 assert.match(app,/await registration\.update\(\)/);
-assert.match(app,/window\.__alvisEarlyServiceWorkerReady=\(\(\)=>/);
-assert.ok(app.indexOf("window.__alvisEarlyServiceWorkerReady")<app.indexOf("</head>"),"Service Worker update must start before app scripts are parsed");
-assert.match(app,/alvisServiceWorkerReady=window\.__alvisEarlyServiceWorkerReady\|\|Promise\.resolve\(false\)/);
+assert.match(app,/function waitForAlvisServiceWorkerActivation\(registration,timeoutMs=12000\)/);
+assert.ok(app.indexOf("navigator.serviceWorker.register(\"./service-worker.js\",{updateViaCache:\"none\"})")>app.indexOf("updateHudClock();"),"Service Worker update must start after the main page scripts have been parsed");
+assert.match(app,/alvisServiceWorkerReady=\(async\(\)=>\{/);
 assert.doesNotMatch(app,/await navigator\.serviceWorker\.ready/,"page startup must not wait indefinitely for Service Worker activation");
 // v280: a network-served refresh bridge escapes a stale v258 app-shell cache without clearing user data.
 assert.match(refresh,/navigator\.serviceWorker\.getRegistration\("\.\/"\)/);
@@ -502,7 +502,7 @@ assert.ok(!app.includes("パスワードは忘れないように保管してね"
 // The integrated page must have balanced script tags and no source text after the HTML document.
 const openingScriptCount=(app.match(/<script\b/gi)||[]).length;
 const closingScriptCount=(app.match(/<\/script\s*>/gi)||[]).length;
-assert.equal(openingScriptCount,5,"integrated page keeps its early Service Worker bootstrap and four app script blocks");
+assert.equal(openingScriptCount,4,"integrated page keeps four app script blocks; Service Worker setup stays in the late app bootstrap");
 assert.equal(closingScriptCount,openingScriptCount,"integrated page script tags must be balanced");
 const htmlEnd = app.toLowerCase().lastIndexOf("</html>");
 assert.ok(htmlEnd >= 0, "integrated page must close its HTML document");
