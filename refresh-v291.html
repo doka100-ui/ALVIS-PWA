@@ -52,15 +52,13 @@
     try{
       if(!("serviceWorker" in navigator))throw new Error("このブラウザはService Workerに対応していません");
       status.textContent="登録済みWorkerを確認しています…";
-      let registration=await withTimeout(
-        navigator.serviceWorker.getRegistration("./"),
-        8000,
-        "登録確認に時間がかかっています。通信状態を確認して再試行してください"
-      );
-      if(!registration)registration=await withTimeout(
+      // Re-apply updateViaCache:none even when an older registration already exists.
+      // Existing registrations retain their previous update policy unless register()
+      // is called again with the new options.
+      const registration=await withTimeout(
         navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}),
         12000,
-        "Worker登録に時間がかかっています。再試行してください"
+        "Worker登録の更新に時間がかかっています。再試行してください"
       );
       status.textContent="最新のアプリ更新を取得しています…";
       await withTimeout(
