@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v283-integrated";
+const CACHE_NAME = "alvis-cache-v284-integrated";
 // v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
@@ -84,36 +84,45 @@ self.addEventListener("fetch", (event) => {
       url.origin === self.location.origin &&
       /\/index-integrated\.html$/.test(url.pathname);
 
-    // The integrated page is network-first while online so a stale app-shell
-    // cache cannot hide a newly deployed ALVIS interface. Offline navigation
-    // still falls back to the last verified app-shell response.
+    const appCache = await caches.open(CACHE_NAME);
+
+    // v284: serve the verified app shell immediately on repeat visits.
+    // The page registers/updates this versioned worker after first paint, and
+    // the install step precaches each new deployed shell before skipWaiting.
     if (isIntegratedShellNavigation) {
+      const cachedShell = await appCache.match("./index-integrated.html");
+      if (cachedShell) return makeServiceWorkerSafeResponse(cachedShell);
       try {
         const response = makeServiceWorkerSafeResponse(await fetch(request));
         if (response.ok && response.type !== "opaque") {
-          try {
-            const appCache = await caches.open(CACHE_NAME);
-            const shellUrl = new URL("./index-integrated.html", self.registration.scope).href;
-            await appCache.put(shellUrl, response.clone());
-          } catch (cacheError) {
-            // A cache write failure must not block the live page response.
-          }
+          const shellUrl = new URL("./index-integrated.html", self.registration.scope).href;
+          try { await appCache.put(shellUrl, response.clone()); } catch (cacheError) {}
           return response;
         }
-        const cachedShell =
-          await caches.match(request, { ignoreSearch: true }) ||
-          await caches.match("./index-integrated.html");
-        return cachedShell ? makeServiceWorkerSafeResponse(cachedShell) : response;
+        return response;
       } catch (networkError) {
-        const cachedShell =
-          await caches.match(request, { ignoreSearch: true }) ||
-          await caches.match("./index-integrated.html");
-        if (cachedShell) return makeServiceWorkerSafeResponse(cachedShell);
+        const fallback = await appCache.match("./index.html");
+        if (fallback) return makeServiceWorkerSafeResponse(fallback);
       }
     }
 
-    const cached = await caches.match(request, { ignoreSearch: true });
-    if (cached) return makeServiceWorkerSafeResponse(cached);
+    // Search only ALVIS-owned caches for normal app assets. CacheStorage.match()
+    // scans every origin cache, including the many large WebLLM model entries.
+    const cachedAppAsset = await appCache.match(request, { ignoreSearch: true });
+    if (cachedAppAsset) return makeServiceWorkerSafeResponse(cachedAppAsset);
+    const dependencyCache = await caches.open(DEPENDENCY_CACHE_NAME);
+    const cachedDependency = await dependencyCache.match(request, { ignoreSearch: true });
+    if (cachedDependency) return makeServiceWorkerSafeResponse(cachedDependency);
+
+    // Preserve the library-managed offline model cache without scanning every
+    // CacheStorage namespace for every ALVIS page, CSS, image, or script request.
+    if (url.origin !== self.location.origin) {
+      for (const cacheName of ["webllm/model", "webllm/config", "webllm/wasm"]) {
+        const libraryCache = await caches.open(cacheName);
+        const cachedLibraryAsset = await libraryCache.match(request, { ignoreSearch: true });
+        if (cachedLibraryAsset) return makeServiceWorkerSafeResponse(cachedLibraryAsset);
+      }
+    }
 
     // module import / Worker / WASM fetches may have an empty destination.
     // Cache successful assets from explicitly trusted CDNs, including Kokoro's
@@ -133,8 +142,8 @@ self.addEventListener("fetch", (event) => {
       // オフライン時にHTMLをJavaScript/WASM等の代わりに返さない。
       if (request.mode === "navigate") {
         const appShell =
-          await caches.match("./index-integrated.html") ||
-          await caches.match("./index.html");
+          await appCache.match("./index-integrated.html") ||
+          await appCache.match("./index.html");
         if (appShell) return makeServiceWorkerSafeResponse(appShell);
       }
       return new Response(
