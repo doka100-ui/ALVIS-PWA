@@ -1,3 +1,10 @@
+## v280 iPhone Safariで旧Service Workerを安全に更新する中継ページ（2026-11-18）
+- 端末診断で `alvis-cache-v258-integrated` が残り、開発ブランチのCloudflare Pagesデプロイ成功後も旧Workerが継続していることを確認。
+- 旧アプリシェルのキャッシュに存在しない `refresh.html` を追加。ページ内で既存スコープのService Worker登録を取得し、`registration.update()` を明示実行、新Workerのinstall/activateを待ってから統合画面へ戻す。
+- 既存のWorker登録がない場合のみ同じスコープへ登録する。更新待ちは最大30秒。失敗時は状態と再試行ボタンを表示する。
+- このページはCache Storage、IndexedDB、localStorage、WebLLM/Kokoroキャッシュ、記憶/履歴/暗号化/同期/バックアップを削除しない。既存のALVIS画面、モデル設定、Avatar、音声機能も変更しない。
+- 追加した中継ページのHTTP配信と静的回帰検査をCIで確認する。実機iPhone Safariでv278への切替とQwen起動を確認するまでは完了扱いにしない。
+
 ## v278 iOS SafariでService Worker準備待ちがページ全体を止めないよう修正（2026-11-17）
 - Service Worker登録後の更新確認・有効化待機は維持しつつ、無期限に解決しない場合がある `navigator.serviceWorker.ready` の追加待機を削除。12秒の有界な有効化待機後は、Service Workerが未準備でもページ本体の初期化を続行する。
 - Service Workerが利用できる場合のオフライン機能・キャッシュ更新は従来どおり維持。モデルキャッシュ、記憶/履歴、暗号化、同期/バックアップ、Avatar、音声機能は変更しない。既存キャッシュやユーザーデータの削除を要求しない。
