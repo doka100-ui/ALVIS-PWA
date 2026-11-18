@@ -1615,3 +1615,8 @@
 ## v291.1 - Service Worker refresh follow-up
 - Reapply `updateViaCache: "none"` when registering an existing Service Worker registration, then request an update. This addresses stale update policies on previously registered clients.
 - Update preview smoke checks to validate the v291 refresh page rather than the legacy refresh bridge.
+
+
+## 2026-11-19 — v291.2：更新ページの実動作テスト
+- ChromiumとWebKitの新規ブラウザ環境で `refresh-v291.html` を実際に開き、ALVIS画面への遷移後にactive Service Workerへ問い合わせてv291の実バージョンを検証する。
+- 文字列の静的検査だけでなく、登録・更新・有効化・バージョン確認・リダイレクトの一連の動作をCIで確認する。実機iPhoneの既存登録状態は別途確認が必要。
