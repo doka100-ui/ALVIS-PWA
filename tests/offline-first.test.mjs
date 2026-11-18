@@ -65,7 +65,7 @@ assert.match(refresh,/ALVIS_GET_BUILD_INFO/);
 assert.match(refresh,/alvis-cache-v288-integrated/);
 assert.match(refresh,/refresh=288/);
 assert.match(refresh,/Workerのバージョン応答がありません/);
-assert.match(refresh,/index-integrated\.html\?refresh=280/);
+assert.match(refresh,/index-integrated\.html\?refresh=288/);
 assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 
 
