@@ -1,4 +1,4 @@
-const CACHE_NAME = "alvis-cache-v287-integrated";
+const CACHE_NAME = "alvis-cache-v288-integrated";
 // v251: keep the integrated PWA launch path available after the first online visit.
 const DEPENDENCY_CACHE_NAME = "alvis-deps-v2";
 const DEPENDENCY_ORIGINS = new Set([
@@ -20,6 +20,12 @@ const FILES_TO_CACHE = [
   "./assets/alvis-18-preview-clean-400.jpg",
   "./assets/alvis-18-preview-clean-hq.jpg"
 ];
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "ALVIS_GET_BUILD_INFO") return;
+  const reply = event.ports?.[0];
+  if (reply) reply.postMessage({ cacheName: CACHE_NAME });
+});
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
