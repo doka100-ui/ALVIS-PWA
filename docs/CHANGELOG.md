@@ -1579,3 +1579,9 @@
 - v285でheadへ移動したService Worker登録・更新処理を、メイン画面のHTML/スクリプト読込後へ戻す。更新用プリキャッシュ通信がログイン初期表示と競合する可能性を抑える。
 - app shell cacheをv286へ更新。updateViaCache:none、明示的な更新確認、最大12秒のactivate待機、既存Workerへのフォールバックは維持。無期限のnavigator.serviceWorker.ready待機は行わない。
 - モデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ、ALVIS/AvatarのUIとAI設定は変更しない。iPhone実機の速度改善は未確認。
+
+
+## 2026-11-18 — ログイン中の画像取得を遅延 v287
+- ログイン前は非表示のダッシュボード画像・アバター画像をlazy loading / low priorityへ変更し、初回パスワード画面と高優先度画像取得の競合を抑える。
+- 認証後は画像を通常どおり読み込み、Service Workerのプリキャッシュは残してオフライン表示を維持。
+- デプロイ後のChromium/WebKitテストでログイン前の遅延指定と、アプリ表示後の画像読み込みを検証。実機iPhoneの速度は未確認。
