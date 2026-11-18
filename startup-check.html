@@ -84,7 +84,7 @@ small{color:#9db4c8}
           try{
             const response=await frame.contentWindow.fetch("./service-worker.js?startup-check="+Date.now(),{cache:"no-store"});
             const source=await response.text();
-            report.deployedWorkerCache=(source.match(/alvis-cache-v\\d+-integrated/)||[])[0]||"version not found";
+            report.deployedWorkerCache=(source.match(/alvis-cache-v\d+-integrated/)||[])[0]||"version not found";
             report.workerFetchStatus=response.status;
           }catch(error){report.workerFetchError=String(error?.message||error);}
           write();
