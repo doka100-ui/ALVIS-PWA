@@ -547,6 +547,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
+const ALVIS_APP_BUILD_ID="v288";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -3816,6 +3817,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
   const lines=[];
   const yesNo=value=>value?"利用可能":"利用不可";
   try{
+    lines.push("この画面のコード版："+ALVIS_APP_BUILD_ID);
     lines.push("接続状態の目安："+(navigator.onLine?"オンライン":"オフライン/接続なし"));
     lines.push("ALVIS端末プロファイル："+ALVIS_DEVICE_PROFILE.deviceType);
     lines.push("自動選択モデル："+ALVIS_MODEL_LABEL+"（コンテキスト "+ALVIS_CONTEXT_WINDOW+"）");
@@ -3892,6 +3894,29 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
       lines.push("Service Worker登録："+(registration?"登録あり":"登録なし"));
       lines.push("Service Worker制御："+(navigator.serviceWorker.controller?"制御中":"まだ制御していない"));
       lines.push("Service Worker状態："+(registration?.active?.state||registration?.waiting?.state||registration?.installing?.state||"状態不明"));
+      const activeWorker=navigator.serviceWorker.controller||registration?.active;
+      if(activeWorker){
+        lines.push("制御中Worker："+(activeWorker.state||"状態不明"));
+        if(typeof MessageChannel==="function"){
+          const channel=new MessageChannel();
+          try{
+            const workerCache=await Promise.race([
+              new Promise(resolve=>{
+                channel.port1.onmessage=event=>resolve(event.data?.cacheName||"応答形式不明");
+                activeWorker.postMessage({type:"ALVIS_GET_BUILD_INFO"},[channel.port2]);
+              }),
+              new Promise(resolve=>setTimeout(()=>resolve("応答なし（旧Workerまたは更新待ちの可能性）"),1500))
+            ]);
+            lines.push("制御中Workerのキャッシュ版："+workerCache);
+          }catch(workerInfoError){
+            lines.push("制御中Workerのキャッシュ版：取得失敗");
+          }finally{
+            try{channel.port1.close();}catch(closeError){}
+          }
+        }
+      }else{
+        lines.push("制御中Worker：なし（このページはWorkerに制御されていません）");
+      }
     }
     // Read-only check of WebLLM's tensor cache for this device's active model.
     // hasModelInCache checks model tensors only; it does not prove config/tokenizer/WASM are all cached.
