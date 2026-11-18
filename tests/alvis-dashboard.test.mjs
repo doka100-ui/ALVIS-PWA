@@ -31,7 +31,7 @@ check("legacy HUD motion stops while the approved image stage is active", app.in
 check("the actual chat composer remains outside the static artwork", app.includes('id="chatInput"') && app.includes('id="sendChat"'));
 check("ALVIS and Avatar display modes remain separate", app.includes('id="jarvisModeButton"') && app.includes('id="avatarModeButton"') && app.includes('id="alvisAvatarCanvas"'));
 check("encrypted memory, history, synchronization, backup and Kokoro code remain", app.includes("encryptData") && app.includes("data.history") && app.includes("saveCloudCore") && app.toLowerCase().includes("backup") && app.includes("Kokoro"));
-check("the app shell cache is v286 and precaches the approved artwork", sw.includes('alvis-cache-v286-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
+check("the app shell cache is v286 and precaches the approved artwork", sw.includes('alvis-cache-v287-integrated') && sw.includes('"./assets/alvis-dashboard-reference.avif"'));
 check("Service Worker update starts after the initial page scripts", app.indexOf("function waitForAlvisServiceWorkerActivation") > app.indexOf("updateHudClock();") && app.includes("alvisServiceWorkerReady=(async()=>{") && !app.includes("__alvisEarlyServiceWorkerReady"));
 check("the independent dependency cache remains separate", sw.includes('const DEPENDENCY_CACHE_NAME = "alvis-deps-v2"') && sw.includes('key.startsWith("alvis-deps-")'));
 check("the on-device startup diagnostic measures the real integrated login screen", startupCheck.includes('frame.src="./index-integrated.html?startup-check="') && startupCheck.includes('getElementById("lockPanel")') && startupCheck.includes("loginVisibleMs"));
