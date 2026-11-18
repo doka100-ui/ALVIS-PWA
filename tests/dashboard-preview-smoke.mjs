@@ -40,6 +40,12 @@ async function verifyBrowser(browserType, verifyOffline) {
       timeout: 120000
     });
     assert.ok(response && response.ok(), browserName + ": preview document must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": safe Service Worker refresh bridge must return HTTP 200");
+    const refreshHtml = await refreshResponse.text();
+    assert.ok(refreshHtml.includes("await registration.update()"), browserName + ": refresh bridge must explicitly request a Service Worker update");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=280"), browserName + ": refresh bridge must return to the integrated app");
+
     await waitForDashboardImage(page);
 
     const imageState = await page.evaluate(() => {
