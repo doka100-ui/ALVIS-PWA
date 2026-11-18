@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
+const appCss = await readFile(new URL("../assets/alvis-app.css", import.meta.url), "utf8");
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
@@ -27,7 +28,16 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v282-integrated/);
+assert.match(sw,/alvis-cache-v283-integrated/);
+// v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
+const inlineStyle=app.match(/<style>([\\s\\S]*?)<\\/style>/)?.[1]||"";
+assert.ok(inlineStyle.length<12000,"critical inline CSS must stay small enough for a fast login first paint");
+assert.match(inlineStyle,/\\.hidden\\{display:none!important\\}/,"the locked app panel must remain hidden before authentication");
+assert.match(inlineStyle,/#lockPanel\\{/,"the login screen must retain its critical inline styling");
+assert.match(app,/rel="preload" as="style" href="\\.\\/assets\\/alvis-app\\.css"/,"noncritical app styles must load without blocking the login screen");
+assert.match(appCss,/\\.jarvis-stage\\{/,"the deferred stylesheet must retain ALVIS mode styling");
+assert.match(appCss,/\\.avatar-stage\\{/,"the deferred stylesheet must retain Avatar mode styling");
+assert.match(sw,/\\.\\/assets\\/alvis-app\\.css/,"the deferred stylesheet must be cached for offline use");
 // v278: optional precache failures must not abort the app-shell update.
 assert.match(sw,/Promise\.allSettled\(FILES_TO_CACHE\.map/);
 assert.match(sw,/const shell = await cache\.match\("\.\/index-integrated\.html"\)/);
