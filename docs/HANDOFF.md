@@ -1,3 +1,7 @@
+## v281 iPhone更新ページの待機を有限化（2026-11-18）
+- v280更新中継ページで、Service Worker登録取得・登録・更新確認・新Worker有効化の各待機に上限を設定。更新確認が長引いても画面が無期限に待ち続けず、段階別のエラーと再試行ボタンを表示する。
+- キャッシュ削除、Service Worker登録解除、モデル/依存キャッシュ、記憶・履歴・暗号化・同期・バックアップには触れない。更新処理の成否はiPhone Safari実機で確認する。
+ 
 ## v280 iPhone Safariで旧Service Workerを安全に更新する中継ページ（2026-11-18）
 - 端末診断で `alvis-cache-v258-integrated` が残り、開発ブランチのCloudflare Pagesデプロイ成功後も旧Workerが継続していることを確認。
 - 旧アプリシェルのキャッシュに存在しない `refresh.html` を追加。ページ内で既存スコープのService Worker登録を取得し、`registration.update()` を明示実行、新Workerのinstall/activateを待ってから統合画面へ戻す。
