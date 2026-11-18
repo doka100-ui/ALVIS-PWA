@@ -1018,5 +1018,5 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 
 ## v286 起動処理の競合回避
 - Service Workerの登録・更新開始はログイン画面の初期読込後に行い、初期表示のネットワーク/CPU負荷との競合を避ける。
-- 更新確認と最大12秒のactivate待機は維持する。無期限のService Worker ready待機は禁止。
+- app shell cacheはv286。更新確認と最大12秒のactivate待機は維持する。無期限のService Worker ready待機は禁止。
 - モデル・記憶・履歴・同期・バックアップ・ALVIS/Avatar機能には変更を加えない。
