@@ -64,11 +64,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       const link = document.querySelector('link[href*="alvis-app.css"]');
       return !!link && link.rel === "stylesheet" && !!link.sheet;
     }, null, { timeout: 15000 });
-    const refreshResponse = await page.request.get(new URL("refresh.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": safe Service Worker refresh bridge must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v291.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v291 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
-    assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh bridge must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=289"), browserName + ": refresh bridge must return to the integrated app");
+    assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
+    assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
+    assert.ok(refreshHtml.includes("alvis-cache-v291-integrated"), browserName + ": refresh page must verify the v291 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=291"), browserName + ": refresh page must return to the integrated app only after v291 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
