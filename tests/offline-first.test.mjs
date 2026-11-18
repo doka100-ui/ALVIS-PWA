@@ -65,6 +65,14 @@ assert.match(sw, /alvis-cache-v278-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
+// v282: Qwen startup must expose the exact pending stage and elapsed time without cancelling initialization.
+assert.match(app,/function setAlvisLoadStage\(stage\)/);
+assert.match(app,/WebLLMライブラリを取得中/);
+assert.match(app,/保存済みモデルキャッシュを確認中/);
+assert.match(app,/WebGPU・モデルエンジンを初期化中/);
+assert.match(app,/停止段階：\+"\+alvisLoadStage\+"／経過：\+"\+alvisLoadElapsed\(\)/);
+assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
+assert.match(sw,/alvis-cache-v282-integrated/);
 assert.match(app,/Service Workerの準備が長引いているため、待機を終了してAIモデルの読み込みを続けます/);
 // v264: fetch the integrated app shell from the network first when online,
 // while retaining the cached shell as the offline fallback.
