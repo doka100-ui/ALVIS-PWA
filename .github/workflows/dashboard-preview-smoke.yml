@@ -8,6 +8,7 @@ on:
       - "assets/alvis-app.css"
       - "service-worker.js"
       - "refresh.html"
+      - "startup-check.html"
       - "assets/alvis-dashboard-reference.avif"
       - "tests/alvis-dashboard.test.mjs"
       - "tests/dashboard-preview-smoke.mjs"
