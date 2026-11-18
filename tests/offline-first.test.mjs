@@ -158,7 +158,7 @@ assert.match(app,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngi
 assert.match(app,/保存済みモデルキャッシュと記憶・会話履歴は変更していません/);
 assert.doesNotMatch(app,/deleteModelAllInfoInCache|deleteModelInCache\(/);
 assert.match(sw,/alvis-cache-v\d+-integrated/);
-assert.match(sw,/\.\/assets\/alvis-vrm-runtime\.js/,"avatar runtime must remain in the app shell cache");
+assert.ok(sw.includes("url.origin === self.location.origin") && sw.includes("cache.put(cacheRequest, response.clone())"),"Avatar runtime and artwork must be cached when requested, not block worker installation");
 
 
 const sendStart = app.indexOf("async function sendToAlvis()");
