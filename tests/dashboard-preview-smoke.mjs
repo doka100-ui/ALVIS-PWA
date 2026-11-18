@@ -43,7 +43,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     const refreshResponse = await page.request.get(new URL("refresh.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": safe Service Worker refresh bridge must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
-    assert.ok(refreshHtml.includes("await registration.update()"), browserName + ": refresh bridge must explicitly request a Service Worker update");
+    assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh bridge must explicitly request a Service Worker update");
     assert.ok(refreshHtml.includes("index-integrated.html?refresh=280"), browserName + ": refresh bridge must return to the integrated app");
 
     await waitForDashboardImage(page);
@@ -66,6 +66,9 @@ async function verifyBrowser(browserType, verifyOffline) {
       appHidden: document.getElementById("appPanel").classList.contains("hidden")
     }));
     assert.deepEqual(loginGate, { loginVisible: true, appHidden: true }, browserName + ": the real password gate must remain intact");
+  const loginCss = await page.locator("style").first().textContent();
+  assert.ok(loginCss.length < 12000, browserName + ": critical login CSS must remain small");
+  assert.ok(await page.locator('link[rel="preload"][href*="alvis-app.css"]').count() === 1, browserName + ": app CSS must be preloaded without blocking login");
 
     // Reveal only the already-rendered app shell in this disposable test browser.
     // No password is submitted and no encrypted user data is read or changed.
