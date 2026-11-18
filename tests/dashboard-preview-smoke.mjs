@@ -280,6 +280,47 @@ async function verifyBrowser(browserType, verifyOffline) {
 }
 
 
+async function verifyRefreshFlow(browserType) {
+  const browserName = browserType.name();
+  const browser = await browserType.launch({ headless: true });
+  const context = await browser.newContext({ serviceWorkers: "allow" });
+  const page = await context.newPage();
+  page.setDefaultTimeout(60000);
+  try {
+    const refreshUrl = new URL("refresh-v291.html", previewUrl).href;
+    await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.waitForURL(url =>
+      url.pathname.endsWith("/index-integrated.html") &&
+      url.searchParams.get("refresh") === "291",
+      { timeout: 60000 }
+    );
+    const state = await page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.getRegistration("./");
+      const worker = registration?.active;
+      if (!worker) return { active: false, cacheName: "" };
+      const cacheName = await new Promise(resolve => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = event => {
+          channel.port1.close();
+          resolve(event.data?.cacheName || "");
+        };
+        worker.postMessage({ type: "ALVIS_GET_BUILD_INFO" }, [channel.port2]);
+      });
+      return {
+        active: worker.state === "activated",
+        controller: !!navigator.serviceWorker.controller,
+        cacheName
+      };
+    });
+    assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
+    assert.equal(state.cacheName, "alvis-cache-v291-integrated",
+      browserName + ": refresh flow must verify the actual v291 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v291 before redirect");
+  } finally {
+    await browser.close();
+  }
+}
+
 async function verifyMobileWebKit() {
   const browser = await webkit.launch({ headless: true });
   const context = await browser.newContext({
@@ -361,6 +402,8 @@ async function verifyMobileWebKit() {
   }
 }
 
+await verifyRefreshFlow(chromium);
+await verifyRefreshFlow(webkit);
 await verifyBrowser(chromium, true);
 await verifyBrowser(webkit, false);
 await verifyMobileWebKit();
