@@ -2201,3 +2201,10 @@
 - v284の起動改善後もユーザー実機で初回から遅いとの報告を受け、既存のモバイルWebKitスモークテストへNavigation Timing / Paint Timingを追加。
 - ログイン画面がDOM上で可視になるまでの時間、responseStart、DOM interactive、DOMContentLoaded、load、first-paint、first-contentful-paintを記録する。画面の表示条件や認証動作は変更しない。
 - この値はPlaywright WebKitの参考計測であり、iPhone実機の所要時間とは区別する。モデルキャッシュ、暗号化記憶、履歴、同期、バックアップ、Avatar/ALVIS表示は変更しない。
+
+
+## 2026-11-18 — 実機起動診断ページを追加
+- `startup-check.html` を追加。ページ内iframeで統合アプリを実際に起動し、ログイン画面がDOM上で見えるまでの実測時間、Navigation Timing、Service Workerの制御/状態、ALVISアプリキャッシュ名、配信中Service Workerのcache versionを表示・コピーできる。
+- 診断はキャッシュ名と状態のみを読み取り、IndexedDB/localStorage、暗号化記憶、会話履歴、パスワード、Qwen/Kokoroモデルの内容を読まない。更新・削除・登録解除・再取得も実行しない。
+- 以前の端末診断では `alvis-cache-v258-integrated` が表示されていた一方、開発版コードはv284であるため、端末側の旧Service Worker残存を切り分ける。現時点で実機v284適用は未確認。
+- `tests/alvis-dashboard.test.mjs` で診断ページの計測対象と非破壊性を検査。Cloudflare Pages配信後にiPhone実機で診断結果を確認する。
