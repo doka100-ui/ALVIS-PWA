@@ -40,7 +40,9 @@ assert.doesNotMatch(app,/await navigator\.serviceWorker\.ready/,"page startup mu
 assert.match(refresh,/navigator\.serviceWorker\.getRegistration\("\.\/"\)/);
 assert.match(refresh,/registration\.update\(\)/);
 assert.match(refresh,/const withTimeout=\(promise,timeout,message\)=>Promise\.race\(\[/);
-assert.match(refresh,/8000[\s\S]*?15000[\s\S]*?25000/,"refresh bridge operations must have finite waits and actionable timeouts");
+assert.match(refresh,/8000/,"registration lookup must have a timeout");
+assert.match(refresh,/15000/,"update check must have a timeout");
+assert.match(refresh,/timeout=25000/,"worker activation must have a timeout");
 assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
 assert.match(refresh,/location\.replace\(target\)/);
 assert.match(refresh,/index-integrated\.html\?refresh=280/);
