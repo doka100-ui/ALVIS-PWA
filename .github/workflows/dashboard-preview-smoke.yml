@@ -5,6 +5,7 @@ on:
     branches: [development]
     paths:
       - "index-integrated.html"
+      - "assets/alvis-app.css"
       - "service-worker.js"
       - "refresh.html"
       - "assets/alvis-dashboard-reference.avif"
