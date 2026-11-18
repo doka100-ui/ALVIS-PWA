@@ -27,7 +27,11 @@
   const status=document.getElementById("status");
   const retry=document.getElementById("retry");
   const target="./index-integrated.html?refresh=280";
-  const wait=(worker,timeout=30000)=>new Promise((resolve,reject)=>{
+  const withTimeout=(promise,timeout,message)=>Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),timeout))
+  ]);
+  const wait=(worker,timeout=25000)=>new Promise((resolve,reject)=>{
     if(worker.state==="activated"){resolve();return;}
     if(worker.state==="redundant"){reject(new Error("新しいWorkerの準備に失敗しました"));return;}
     let done=false;
@@ -40,7 +44,7 @@
       if(worker.state==="activated")finish();
       else if(worker.state==="redundant")finish(new Error("新しいWorkerの準備に失敗しました"));
     };
-    const timer=setTimeout(()=>finish(new Error("更新に時間がかかっています。通信状態を確認して再試行してください")),timeout);
+    const timer=setTimeout(()=>finish(new Error("新しいWorkerの有効化に時間がかかっています。再試行してください")),timeout);
     worker.addEventListener("statechange",change);change();
   });
   async function update(){
@@ -48,14 +52,26 @@
     try{
       if(!("serviceWorker" in navigator))throw new Error("このブラウザはService Workerに対応していません");
       status.textContent="登録済みWorkerを確認しています…";
-      let registration=await navigator.serviceWorker.getRegistration("./");
-      if(!registration)registration=await navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"});
+      let registration=await withTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        8000,
+        "登録確認に時間がかかっています。通信状態を確認して再試行してください"
+      );
+      if(!registration)registration=await withTimeout(
+        navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}),
+        12000,
+        "Worker登録に時間がかかっています。再試行してください"
+      );
       status.textContent="最新のアプリ更新を取得しています…";
-      await registration.update();
+      await withTimeout(
+        registration.update(),
+        15000,
+        "更新確認がタイムアウトしました。通信状態を確認して再試行してください"
+      );
       let worker=registration.installing||registration.waiting;
       if(!worker){
         await new Promise(resolve=>{
-          const timer=setTimeout(resolve,5000);
+          const timer=setTimeout(resolve,4000);
           registration.addEventListener("updatefound",()=>{clearTimeout(timer);resolve();},{once:true});
         });
         worker=registration.installing||registration.waiting;
