@@ -2259,3 +2259,9 @@
 - `refresh-v291.html` now re-registers the existing Service Worker with `updateViaCache: "none"` before calling `registration.update()`. Existing registrations may retain an older update policy, so the refresh page explicitly reapplies the no-cache policy rather than only doing so when no registration exists.
 - The refresh page still waits for the active worker to report `alvis-cache-v291-integrated` before redirecting. It does not clear caches or touch WebLLM/Kokoro model storage, encrypted memories, history, or backups.
 - Preview smoke assertions now target `refresh-v291.html` and verify the registration policy and v291 build check.
+
+
+## v291.2 — 実際の更新ページ遷移をブラウザで検証
+- Preview smoke test now opens `refresh-v291.html` in fresh Chromium and WebKit contexts, waits for its redirect, and queries the active Service Worker for its actual cache version.
+- This supplements source-string checks: the refresh bridge must complete its register/update/activate/version-check/redirect sequence in both browser engines before the dashboard smoke tests run.
+- Fresh-context coverage does not replace an iPhone user's existing-registration test; it validates the deployed update flow without touching personal storage.
