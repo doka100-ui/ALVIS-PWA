@@ -29,8 +29,8 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v288-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v288"/);
+assert.match(sw,/alvis-cache-v289-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v289"/);
 assert.match(app,/ALVIS_GET_BUILD_INFO/);
 assert.match(sw,/ALVIS_GET_BUILD_INFO/);
 // v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
@@ -42,8 +42,12 @@ assert.ok(app.includes('rel="preload" as="style" href="./assets/alvis-app.css"')
 assert.ok(appCss.includes(".jarvis-stage{"),"the deferred stylesheet must retain ALVIS mode styling");
 assert.ok(appCss.includes(".avatar-stage{"),"the deferred stylesheet must retain Avatar mode styling");
 assert.ok(sw.includes('"./assets/alvis-app.css"'),"the deferred stylesheet must be cached for offline use");
-// v278: optional precache failures must not abort the app-shell update.
-assert.match(sw,/Promise\.allSettled\(FILES_TO_CACHE\.map/);
+// v289: only the login shell and critical stylesheet block worker activation.
+assert.match(sw,/const REQUIRED_FILES_TO_CACHE = \[/);
+assert.match(sw,/Promise\.all\(REQUIRED_FILES_TO_CACHE\.map/);
+assert.doesNotMatch(sw,/Promise\.allSettled\(FILES_TO_CACHE\.map/);
+assert.match(sw,/await self\.skipWaiting\(\)/);
+assert.match(sw,/url\.origin === self\.location\.origin/);
 assert.match(sw,/const shell = await cache\.match\("\.\/index-integrated\.html"\)/);
 assert.match(sw,/await self\.skipWaiting\(\)/);
 assert.match(app,/navigator\.serviceWorker\.register\("\.\/service-worker\.js",\{updateViaCache:"none"\}\)/);
@@ -62,10 +66,10 @@ assert.match(refresh,/timeout=25000/,"worker activation must have a timeout");
 assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
 assert.match(refresh,/location\.replace\(target\)/);
 assert.match(refresh,/ALVIS_GET_BUILD_INFO/);
-assert.match(refresh,/alvis-cache-v288-integrated/);
-assert.match(refresh,/refresh=288/);
+assert.match(refresh,/alvis-cache-v289-integrated/);
+assert.match(refresh,/refresh=289/);
 assert.match(refresh,/Workerのバージョン応答がありません/);
-assert.match(refresh,/index-integrated\.html\?refresh=288/);
+assert.match(refresh,/index-integrated\.html\?refresh=289/);
 assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 
 
@@ -81,7 +85,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v288-integrated/);
+assert.match(sw, /alvis-cache-v289-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -92,7 +96,7 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v288-integrated/);
+assert.match(sw,/alvis-cache-v289-integrated/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
@@ -1129,7 +1133,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v288-integrated"),"v263 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v289-integrated"),"v263 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
