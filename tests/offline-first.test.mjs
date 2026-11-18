@@ -70,7 +70,7 @@ assert.match(app,/const setAlvisLoadStage=stage=>/);
 assert.match(app,/WebLLMライブラリを取得中/);
 assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
-assert.match(app,/停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed\(\)/);
+assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
 assert.match(sw,/alvis-cache-v282-integrated/);
 assert.match(app,/Service Workerの準備が長引いているため、待機を終了してAIモデルの読み込みを続けます/);
