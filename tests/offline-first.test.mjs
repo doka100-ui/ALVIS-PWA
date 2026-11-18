@@ -72,9 +72,9 @@ assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
 assert.match(refresh,/location\.replace\(target\)/);
 assert.match(refresh,/ALVIS_GET_BUILD_INFO/);
 assert.match(refresh,/alvis-cache-v290-integrated/);
-assert.match(refresh,/refresh=289/);
+assert.match(refresh,/refresh=290/);
 assert.match(refresh,/Workerのバージョン応答がありません/);
-assert.match(refresh,/index-integrated\.html\?refresh=289/);
+assert.match(refresh,/index-integrated\.html\?refresh=290/);
 assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 
 
