@@ -675,8 +675,8 @@ assert.match(app,/hudAiPercent/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/class="hud-info-action hud-interface-action" data-hud-action="memory"/);
 assert.match(app,/class="hud-info-action hud-interface-action" data-hud-action="growth"/);
-assert.match(app,/v109: spatial hologram control room/);
-assert.match(app,/#(?:[0-9a-fA-F]{3,8})\b/);
+assert.match(appStyles,/v109: spatial hologram control room/);
+assert.match(appStyles,/#(?:[0-9a-fA-F]{3,8})\b/);
 assert.match(sw,/const CACHE_NAME = "alvis-cache-v\d+-integrated"/);
 
 // A single user turn must own the conversation pipeline until its finally block.
@@ -835,7 +835,7 @@ assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain 
 
 
 // v250: portrait sizing rules remain scoped to the ALVIS live HUD.
-assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
+assert.match(appStyles,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
 assert.match(appStyles,/min-height:450px!important/);
 assert.match(appStyles,/min-height:390px!important/);
