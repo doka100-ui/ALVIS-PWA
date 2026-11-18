@@ -502,7 +502,7 @@ assert.ok(!app.includes("パスワードは忘れないように保管してね"
 // The integrated page must have balanced script tags and no source text after the HTML document.
 const openingScriptCount=(app.match(/<script\b/gi)||[]).length;
 const closingScriptCount=(app.match(/<\/script\s*>/gi)||[]).length;
-assert.equal(openingScriptCount,4,"integrated page keeps its four current script blocks");
+assert.equal(openingScriptCount,5,"integrated page keeps its early Service Worker bootstrap and four app script blocks");
 assert.equal(closingScriptCount,openingScriptCount,"integrated page script tags must be balanced");
 const htmlEnd = app.toLowerCase().lastIndexOf("</html>");
 assert.ok(htmlEnd >= 0, "integrated page must close its HTML document");
