@@ -30,7 +30,12 @@ assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
 assert.match(sw,/alvis-cache-v289-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v289"/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v290"/);
+assert.match(sw,/alvis-cache-v290-integrated/);
+assert.match(app,/現在この画面を制御するWorker版/);
+assert.match(app,/登録済みactive Worker版/);
+assert.match(app,/ALVISアプリキャッシュ一覧/);
+assert.match(app,/現Worker以外のALVISキャッシュ/);
 assert.match(app,/ALVIS_GET_BUILD_INFO/);
 assert.match(sw,/ALVIS_GET_BUILD_INFO/);
 // v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
