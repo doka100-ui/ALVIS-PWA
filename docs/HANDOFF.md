@@ -1,3 +1,8 @@
+## v291 更新ページを旧Service Workerのキャッシュから分離（2026-11-18）
+- 旧Workerが更新ページ自身の旧版をキャッシュから返す可能性へ対応。旧キャッシュに存在しない固有URL `refresh-v291.html` を追加し、最新の更新中継ページをネットワークから取得できるようにする。
+- 新ページは登録済みWorkerへ更新確認を行い、実際のWorker応答が `alvis-cache-v291-integrated` と一致した場合だけALVISへ戻す。
+- 診断の画面コード版をv291へ更新。モデル/依存キャッシュ、暗号化記憶、会話履歴、同期/バックアップ、Avatar/ALVISの表示設定は変更しない。既存キャッシュの一括削除・登録解除・モデル再取得は行わない。
+
 - v288更新導線：`refresh.html` はService Workerの更新後、稼働中Workerへ `ALVIS_GET_BUILD_INFO` を送り、`alvis-cache-v288-integrated` の応答を確認してから `index-integrated.html?refresh=288` へ移動する。旧Worker/更新失敗時は誤って最新版と表示せず、エラーを画面に残す。
 ## v288 画面コードと制御中Service Workerの実バージョン表示（2026-11-18）
 - 端末診断へHTML画面自身のコード版を追加し、Service WorkerへMessageChannelで問い合わせて、実際にページを制御しているWorkerのキャッシュ版を取得する。古い画面HTMLと古いWorkerキャッシュを区別して表示できる。
