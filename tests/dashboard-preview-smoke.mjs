@@ -35,11 +35,35 @@ async function verifyBrowser(browserType, verifyOffline) {
   });
 
   try {
+    let releaseAppCss;
+    const appCssGate = new Promise(resolve => { releaseAppCss = resolve; });
+    let appCssRequested = false;
+    await page.route("**/assets/alvis-app.css", async route => {
+      appCssRequested = true;
+      await appCssGate;
+      await route.continue();
+    });
     const response = await page.goto(previewUrl, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "commit",
       timeout: 120000
     });
     assert.ok(response && response.ok(), browserName + ": preview document must return HTTP 200");
+    await page.waitForSelector("#lockPanel", { state: "visible", timeout: 15000 });
+    const loginGate = await page.evaluate(() => ({
+      loginVisible: !document.getElementById("lockPanel").classList.contains("hidden"),
+      appHidden: document.getElementById("appPanel").classList.contains("hidden")
+    }));
+    assert.deepEqual(loginGate, { loginVisible: true, appHidden: true }, browserName + ": the real password gate must remain intact before app CSS finishes");
+    const loginCss = await page.locator("style").first().textContent();
+    assert.ok(loginCss.length < 12000, browserName + ": critical login CSS must remain small");
+    assert.ok(appCssRequested, browserName + ": deferred app CSS request must be observed");
+    assert.equal(await page.locator('link[href*="alvis-app.css"]').count(), 1, browserName + ": app CSS preload must exist");
+    releaseAppCss();
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForFunction(() => {
+      const link = document.querySelector('link[href*="alvis-app.css"]');
+      return !!link && link.rel === "stylesheet" && !!link.sheet;
+    }, null, { timeout: 15000 });
     const refreshResponse = await page.request.get(new URL("refresh.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": safe Service Worker refresh bridge must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
@@ -60,15 +84,6 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(imageState.width, 700, browserName + ": approved artwork width");
     assert.equal(imageState.height, 564, browserName + ": approved artwork height");
     assert.ok(imageResponses.some(item => item.status === 200), browserName + ": approved artwork request must return HTTP 200");
-
-    const loginGate = await page.evaluate(() => ({
-      loginVisible: !document.getElementById("lockPanel").classList.contains("hidden"),
-      appHidden: document.getElementById("appPanel").classList.contains("hidden")
-    }));
-    assert.deepEqual(loginGate, { loginVisible: true, appHidden: true }, browserName + ": the real password gate must remain intact");
-  const loginCss = await page.locator("style").first().textContent();
-  assert.ok(loginCss.length < 12000, browserName + ": critical login CSS must remain small");
-  assert.ok(await page.locator('link[rel="preload"][href*="alvis-app.css"]').count() === 1, browserName + ": app CSS must be preloaded without blocking login");
 
     // Reveal only the already-rendered app shell in this disposable test browser.
     // No password is submitted and no encrypted user data is read or changed.
