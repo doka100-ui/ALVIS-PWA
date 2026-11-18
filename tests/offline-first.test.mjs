@@ -7,6 +7,7 @@ const appStyles = app + "\n" + appCss;
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
+const refresh291 = await readFile(new URL("../refresh-v291.html", import.meta.url), "utf8");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -29,9 +30,9 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v290-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v290"/);
-assert.match(sw,/alvis-cache-v290-integrated/);
+assert.match(sw,/alvis-cache-v291-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v291"/);
+assert.match(sw,/alvis-cache-v291-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
 assert.match(app,/登録済みactive Worker版/);
 assert.match(app,/ALVISアプリキャッシュ一覧/);
@@ -79,6 +80,14 @@ assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|i
 
 
 
+// v291: use a never-before-cached URL to escape stale refresh.html responses served by old workers.
+assert.match(refresh291,/alvis-cache-v291-integrated/);
+assert.match(refresh291,/refresh=291/);
+assert.match(refresh291,/registration\.update\(\)/);
+assert.match(refresh291,/ALVIS_GET_BUILD_INFO/);
+assert.match(refresh291,/location\.replace\(target\)/);
+assert.doesNotMatch(refresh291,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
+
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
 // v255: pause the actual Web Animations API ring animations during pinch-zoom.
@@ -101,7 +110,7 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v290-integrated/);
+assert.match(sw,/alvis-cache-v291-integrated/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
