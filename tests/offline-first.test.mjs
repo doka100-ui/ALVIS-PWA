@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appHtml = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
+const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const appCss = await readFile(new URL("../assets/alvis-app.css", import.meta.url), "utf8");
-const app = appHtml + "\n" + appCss;
+const appStyles = app + "\n" + appCss;
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
@@ -31,7 +31,7 @@ assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
 assert.match(sw,/alvis-cache-v283-integrated/);
 // v283: keep only the base/login styles render-blocking; defer the full app stylesheet.
-const inlineStyle=appHtml.match(/<style>([\s\S]*?)<\/style>/)?.[1]||"";
+const inlineStyle=app.match(/<style>([\s\S]*?)<\/style>/)?.[1]||"";
 assert.ok(inlineStyle.length<12000,"critical inline CSS must stay small enough for a fast login first paint");
 assert.ok(inlineStyle.includes(".hidden{display:none!important}"),"the locked app panel must remain hidden before authentication");
 assert.ok(inlineStyle.includes("#lockPanel{"),"the login screen must retain its critical inline styling");
@@ -100,18 +100,18 @@ assert.match(app,/alvisHudPinchGestureActive\|\|\(\!\!viewport&&Number\(viewport
 assert.match(app,/window\.addEventListener\("gesturestart"/);
 assert.match(app,/window\.addEventListener\("gesturechange"/);
 assert.match(app,/window\.addEventListener\("gestureend"/);
-assert.match(app,/v257: use a low-compositing ALVIS HUD while Safari magnifies the page/);
-assert.match(app,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-core\{\s*background:#062746!important;\s*box-shadow:none!important;/);
-assert.match(app,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-beam[\s\S]*?display:none!important/);
-assert.match(app,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-globe-map[\s\S]*?mix-blend-mode:normal!important/);
+assert.match(appStyles,/v257: use a low-compositing ALVIS HUD while Safari magnifies the page/);
+assert.match(appStyles,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-core\{\s*background:#062746!important;\s*box-shadow:none!important;/);
+assert.match(appStyles,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-beam[\s\S]*?display:none!important/);
+assert.match(appStyles,/html\.alvis-zooming #chatPage\[data-display-mode="jarvis"\] \.display-dock \.hud-globe-map[\s\S]*?mix-blend-mode:normal!important/);
 
 
 assert.match(app,/animations\.forEach\(animation=>\{\s*try\{if\(zoomed\)animation\.pause\(\);else animation\.play\(\)/);
 assert.match(app,/if\(document\.documentElement\.classList\.contains\("alvis-zooming"\)\)[\s\S]*?setAlvisHudZoomAnimationState\(true\)/);
 assert.match(app,/visualViewport\.addEventListener\("resize",updateAlvisZoomRenderMode/);
 assert.match(app,/visualViewport\.addEventListener\("scroll",updateAlvisZoomRenderMode/);
-assert.match(app,/html\.alvis-zooming \.display-dock \.hud-center \.hud-orbit\{[\s\S]*?animation-play-state:paused!important/);
-assert.match(app,/html\.alvis-zooming \.display-dock \.hud-core\{/);
+assert.match(appStyles,/html\.alvis-zooming \.display-dock \.hud-center \.hud-orbit\{[\s\S]*?animation-play-state:paused!important/);
+assert.match(appStyles,/html\.alvis-zooming \.display-dock \.hud-core\{/);
 
 // v251: the integrated page is installable from the iOS/iPadOS home screen and keeps offline navigation stable.
 assert.match(app, /<link rel="manifest" href="\.\/manifest-integrated\.json">/);
@@ -169,13 +169,13 @@ assert.match(send,/const isBriefConversationalTurn=text\.length<=180/);
 assert.match(send, /!userIsGreeting&&!userIsAssistantActivityQuestion&&!userIsAlvisNameQuestion/);
 assert.match(send, /if\(userIsAssistantActivityQuestion\)[\s\S]*?Qwen3未使用・オフライン対応/);
 // v116: restrained cinematic awakening replaces the game-like radial starburst.
-assert.match(app,/#appPanel\.auth-enter\{[^}]*animation:alvisWorkspaceAwake/,"workspace must fade into focus without a circular game-like wipe");
+assert.match(appStyles,/#appPanel\.auth-enter\{[^}]*animation:alvisWorkspaceAwake/,"workspace must fade into focus without a circular game-like wipe");
 assert.match(app,/@keyframes alvisWorkspaceAwake\{0%\{opacity:0;filter:none\}45%\{opacity:\.82;filter:none\}100%\{opacity:1;filter:none\}\}/,"workspace must resolve without blur or brightness filters");
-assert.match(app,/radial-gradient\(ellipse at 50% 46%/,"a restrained central ambient glow must remain");
-assert.match(app,/@keyframes alvisQuietWave[\s\S]*?transform:scale\(1\.85\)/,"one subtle expanding light wave must originate at the center");
+assert.match(appStyles,/radial-gradient\(ellipse at 50% 46%/,"a restrained central ambient glow must remain");
+assert.match(appStyles,/@keyframes alvisQuietWave[\s\S]*?transform:scale\(1\.85\)/,"one subtle expanding light wave must originate at the center");
 assert.doesNotMatch(app,/conic-gradient\(from 0deg at 50% 46%/,"no starburst rays");
 assert.doesNotMatch(app,/clip-path:circle\(0% at 50% 46%\)/,"no game-like circular mask reveal");
-assert.match(app,/prefers-reduced-motion:reduce[\s\S]*?body\.auth-transitioning:before,body\.auth-transitioning:after/,"transition must respect reduced-motion preference");
+assert.match(appStyles,/prefers-reduced-motion:reduce[\s\S]*?body\.auth-transitioning:before,body\.auth-transitioning:after/,"transition must respect reduced-motion preference");
 assert.match(app,/\},980\)/,"transition cleanup must allow the refined reveal to finish");
 assert.ok(app.includes("質問には直接答え"));
 assert.ok(app.includes("analyzeConversationRepetition(reply,data.history).repeated"),"response repetition check must remain active");
@@ -603,15 +603,15 @@ assert.match(app,/await inferenceQueue\.catch\(\(\)=>\{\}\)/,"unload must wait f
 
 
 // ALVIS dual display mode foundation: UI preference is separate from encrypted vault data.
-assert.match(app,/\.display-dock\{background:linear-gradient\(145deg,#101b2dF2,#071321F5\)/);
-assert.match(app,/\.jarvis-stage:before\{content:""/);
-assert.match(app,/\.avatar-stage:before\{content:""/);
-assert.match(app,/\.hud-core span\{font-weight:800/);
+assert.match(appStyles,/\.display-dock\{background:linear-gradient\(145deg,#101b2dF2,#071321F5\)/);
+assert.match(appStyles,/\.jarvis-stage:before\{content:""/);
+assert.match(appStyles,/\.avatar-stage:before\{content:""/);
+assert.match(appStyles,/\.hud-core span\{font-weight:800/);
 
 assert.match(app,/class="display-dock" aria-label="固定表示エリア"/);
-assert.match(app,/\.display-dock\{position:relative;top:auto;z-index:30/);
-assert.match(app,/\.display-dock \.mode-stage\{margin-bottom:0\}/);
-assert.match(app,/@media\(max-width:600px\)\{\.display-dock/);
+assert.match(appStyles,/\.display-dock\{position:relative;top:auto;z-index:30/);
+assert.match(appStyles,/\.display-dock \.mode-stage\{margin-bottom:0\}/);
+assert.match(appStyles,/@media\(max-width:600px\)\{\.display-dock/);
 
 assert.match(app,/id="jarvisModeButton"/);
 assert.match(app,/>ALVISモード<\/button>/);
@@ -624,9 +624,9 @@ assert.match(app,/function lockApp\(\)[\s\S]*?updateHudAiStatus\("ログアウ�
 assert.match(app,/detail=ALVIS_MODEL_LABEL\+" 稼働中・端末内推論"/);
 assert.match(app,/if\(id==="aiStatus"\)updateHudAiStatus\(output\)/);
 assert.match(app,/hudAiAction.*addEventListener/s);
-assert.match(app,/\.hud-ai-metric\[data-state="loading"\]:before[\s\S]*?animation:alvisLoadRing/);
+assert.match(appStyles,/\.hud-ai-metric\[data-state="loading"\]:before[\s\S]*?animation:alvisLoadRing/);
 assert.match(app,/@keyframes alvisLoadRing/);
-assert.match(app,/prefers-reduced-motion:reduce[^}]*hud-ai-metric\[data-state="loading"\]:before/);
+assert.match(appStyles,/prefers-reduced-motion:reduce[^}]*hud-ai-metric\[data-state="loading"\]:before/);
 assert.match(app,/if\(aiLoading\|\|aiEngine\)return;[\s\S]*?const loadButton=\$\("loadAiModel"\);[\s\S]*?loadButton\.click\(\)/);
 assert.doesNotMatch(app,/hudModelAction/);
 assert.match(app,/data-hud-action="memory"/);
@@ -638,7 +638,7 @@ assert.match(app,/const ALVIS_DISPLAY_MODE_KEY="ALVIS_DISPLAY_MODE"/);
 assert.match(app,/localStorage\.setItem\(ALVIS_DISPLAY_MODE_KEY,safeMode\)/);
 assert.match(app,/localStorage\.getItem\(ALVIS_DISPLAY_MODE_KEY\)/);
 assert.match(app,/aria-pressed/);
-assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{display:none}'));
+assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .avatar-stage{display:none}'));
 assert.match(app,/id="alvisAvatarStatus"[^>]*>ALVIS AVATAR \/ STANDBY/);
 assert.match(app,/id="alvisLoadGlbButton"[^>]*>3D \/ VRMモデルを読み込む/);
 assert.match(app,/ALVIS_ENCRYPTED_V1/);
@@ -822,11 +822,11 @@ assert.match(app,/class="hud-side hud-side-right"/);
 assert.match(app,/id="hudAiAction"/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/duration:27500[\s\S]*?duration:38750/);
-assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
-assert.match(app,/hud-orbit-a\{\s*width:60.75%!important;height:22.5%!important/,"v267 must shrink the first rotating inner ellipse directly");
-assert.match(app,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!important/,"v267 must shrink the second rotating inner ellipse directly");
-assert.match(app,/border-color:#b8f5ffdd!important/,"the first orbit keeps its refined cyan glow");
-assert.match(app,/border-color:#38bdf8bb!important/,"the second orbit keeps its refined blue glow");
+assert.match(appStyles,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
+assert.match(appStyles,/hud-orbit-a\{\s*width:60.75%!important;height:22.5%!important/,"v267 must shrink the first rotating inner ellipse directly");
+assert.match(appStyles,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!important/,"v267 must shrink the second rotating inner ellipse directly");
+assert.match(appStyles,/border-color:#b8f5ffdd!important/,"the first orbit keeps its refined cyan glow");
+assert.match(appStyles,/border-color:#38bdf8bb!important/,"the second orbit keeps its refined blue glow");
 assert.doesNotMatch(app,/scale:\.65!important/,"the previous stacked scale transform must be removed");
 assert.match(app,/class="alvis-reference-image"/);
 assert.doesNotMatch(app,/class="alvis-reference-right-hotspots"/);
@@ -837,8 +837,8 @@ assert.match(app,/class="hud-orbit hud-orbit-c"/,"the outer ellipse must remain 
 // v250: portrait sizing rules remain scoped to the ALVIS live HUD.
 assert.match(app,/v250: extend the live ALVIS hologram downward on iPhone portrait/);
 assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{'));
-assert.match(app,/min-height:450px!important/);
-assert.match(app,/min-height:390px!important/);
+assert.match(appStyles,/min-height:450px!important/);
+assert.match(appStyles,/min-height:390px!important/);
 assert.match(sw,/alvis-cache-v\d+-integrated/);
 
 // v201: VRM capability diagnostics must be read-only and visible in avatar mode.
@@ -1120,9 +1120,9 @@ assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
 assert.ok(sw.includes("alvis-cache-v283-integrated"),"v263 app shell cache must be refreshed");
 assert.ok(app.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
-assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && app.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
-assert.ok(app.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && app.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
-assert.ok(app.includes('#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{') && app.includes("id=\"alvisAvatarCanvas\""), "v249 does not alter Avatar mode");
+assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
+assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
+assert.ok(appStyles.includes('#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{') && appStyles.includes("id=\"alvisAvatarCanvas\""), "v249 does not alter Avatar mode");
 
 
 
@@ -1143,11 +1143,11 @@ assert.match(app,/window\.ALVISAvatarSetHeadGesture\?\.\("nod"\)/,"avatar replie
 assert.match(app,/window\.ALVISAvatarSetHeadGesture=null/,"head gesture bridge must be cleared when avatar runtime is disposed");
 assert.match(app,/report\.headMotion&&"HEAD MOTION"/,"avatar diagnostics must show head motion support");
 
-assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
-assert.match(app,/hud-orbit-a\{\s*width:60.75%!important;height:22.5%!important/,"v267 must size the first rotating inner orbit to the compact geometry");
-assert.match(app,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!important/,"v267 must size the second rotating inner orbit to the compact geometry");
+assert.match(appStyles,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
+assert.match(appStyles,/hud-orbit-a\{\s*width:60.75%!important;height:22.5%!important/,"v267 must size the first rotating inner orbit to the compact geometry");
+assert.match(appStyles,/hud-orbit-b\{\s*width:56.25%!important;height:30.375%!important/,"v267 must size the second rotating inner orbit to the compact geometry");
 assert.doesNotMatch(app,/scale:\.65!important/,"v267 must not use the previous stacked scale property");
-assert.match(app,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
+assert.match(appStyles,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
 assert.match(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
