@@ -10,40 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="ALVIS">
 <link rel="manifest" href="./manifest-integrated.json">
 <title>ALVIS</title>
-<script>
-/* v285: begin Service Worker registration/update before the large app scripts are parsed. */
-window.__alvisEarlyServiceWorkerReady=(()=>{
-  if(!("serviceWorker" in navigator)||!location.protocol.startsWith("http"))return Promise.resolve(false);
-  return (async()=>{
-    try{
-      const registration=await navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"});
-      try{await registration.update();}catch(updateError){}
-      const worker=registration.installing||registration.waiting;
-      if(!worker)return !!registration.active;
-      const activated=await new Promise(resolve=>{
-        let settled=false;
-        const finish=value=>{
-          if(settled)return;
-          settled=true;
-          clearTimeout(timer);
-          worker.removeEventListener("statechange",change);
-          resolve(!!value);
-        };
-        const change=()=>{
-          if(worker.state==="activated")finish(true);
-          else if(worker.state==="redundant")finish(false);
-        };
-        const timer=setTimeout(()=>finish(false),12000);
-        worker.addEventListener("statechange",change);
-        change();
-      });
-      return activated||!!registration.active;
-    }catch(error){
-      return !!navigator.serviceWorker.controller;
-    }
-  })();
-})();
-</script>
+
 
 <style>
 
@@ -4212,8 +4179,41 @@ function updateHudClock(){
 updateHudClock();
 setInterval(updateHudClock,30000);
 
-// Service Worker registration/update starts in the document head; reuse its non-blocking Promise.
-alvisServiceWorkerReady=window.__alvisEarlyServiceWorkerReady||Promise.resolve(false);
+function waitForAlvisServiceWorkerActivation(registration,timeoutMs=12000){
+  const worker=registration.installing||registration.waiting;
+  if(!worker)return Promise.resolve(!!registration.active);
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=activated=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      worker.removeEventListener("statechange",onStateChange);
+      resolve(!!activated);
+    };
+    const onStateChange=()=>{
+      if(worker.state==="activated")finish(true);
+      else if(worker.state==="redundant")finish(false);
+    };
+    const timer=setTimeout(()=>finish(false),timeoutMs);
+    worker.addEventListener("statechange",onStateChange);
+    onStateChange();
+  });
+}
+
+// 画面のHTMLを読み進めた後にService Worker更新を開始し、初期ログイン表示と競合させない。
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  alvisServiceWorkerReady=(async()=>{
+    try{
+      const registration=await navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"});
+      try{await registration.update();}catch(updateError){}
+      const activated=await waitForAlvisServiceWorkerActivation(registration);
+      return activated||!!registration.active;
+    }catch(error){
+      return !!navigator.serviceWorker.controller;
+    }
+  })();
+}
 </script>
 <!-- v180: always release chat send lock after any send attempt, including UI setup failures. -->
 <script type="module">
