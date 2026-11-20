@@ -78,13 +78,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
       return !!ring && ring.getAnimations().length > 0;
     }, null, { timeout: 10000 });
-    const refreshResponse = await page.request.get(new URL("refresh-v293.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v293 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v294.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v294 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v293-integrated"), browserName + ": refresh page must verify the v293 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=293"), browserName + ": refresh page must return to the integrated app only after v293 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v294-integrated"), browserName + ": refresh page must verify the v294 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=294"), browserName + ": refresh page must return to the integrated app only after v294 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -120,6 +120,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       const globe = stage.querySelector(".hud-globe-map");
       const ringA = stage.querySelector(".hud-orbit-a");
       const ringB = stage.querySelector(".hud-orbit-b");
+      const ringC = stage.querySelector(".hud-orbit-c");
+      const point = element => {
+        const rect = element.getBoundingClientRect();
+        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      };
+      const coreCenter = point(stage.querySelector(".hud-core"));
+      const ringCenters = [point(ringA), point(ringB), point(ringC)];
       return {
         stageDisplay: getComputedStyle(stage).display,
         imageDisplay: getComputedStyle(image).display,
@@ -127,7 +134,11 @@ async function verifyBrowser(browserType, verifyOffline) {
         globeDisplay: getComputedStyle(globe).display,
         globeWidth: globe.getBoundingClientRect().width,
         ringAAnimations: ringA.getAnimations().length,
-        ringBAnimations: ringB.getAnimations().length
+        ringBAnimations: ringB.getAnimations().length,
+        ringCenterOffsets: ringCenters.map(p => ({
+          x: Math.round((p.x - coreCenter.x) * 10) / 10,
+          y: Math.round((p.y - coreCenter.y) * 10) / 10
+        }))
       };
     });
     assert.notEqual(liveHud.stageDisplay, "none", browserName + ": live ALVIS stage must be visible");
@@ -137,6 +148,8 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(liveHud.globeWidth > 80, browserName + ": hologram globe must have a real rendered size");
     assert.ok(liveHud.ringAAnimations > 0 && liveHud.ringBAnimations > 0,
       browserName + ": both orbital rings must be animated; state=" + JSON.stringify(liveHud));
+    assert.ok(liveHud.ringCenterOffsets.every(offset => Math.abs(offset.x) < 3 && Math.abs(offset.y) < 3),
+      browserName + ": all three orbital rings must share the globe center; offsets=" + JSON.stringify(liveHud.ringCenterOffsets));
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
@@ -272,11 +285,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v293.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v294.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "293",
+      url.searchParams.get("refresh") === "294",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -298,9 +311,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v293-integrated",
-      browserName + ": refresh flow must verify the actual v293 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v293 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v294-integrated",
+      browserName + ": refresh flow must verify the actual v294 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v294 before redirect");
   } finally {
     await browser.close();
   }
