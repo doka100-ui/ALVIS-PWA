@@ -1,3 +1,7 @@
+## Latest update — v297 outer ALVIS ring
+- v296 disabled the outer ring animation; v297 animates only its independent `rotate` component, preserving the existing `translate` centering and 48% vertical position.
+- Avatar mode remains untouched. Confirm the deployed preview browser test before asking the user to verify on iPhone/iPad.
+
 ## v296 ALVISモード外側リングCの位置・回転修正（2026-11-20）
 - v295のCSS transformアニメーションは、v267の高詳細度!important transformに負けて動作しなかった。v294のtop:42%も中心位置をずらしていた。
 - v296はtop:48%へ戻し、ring Cのtransformをnone!importantにして二重translateを除去。既存のtranslate:-50% -50%で中央配置を維持し、startAlvisHudMotion()から独立rotateをWAAPIで42秒周期（9deg→369deg）に回す。
