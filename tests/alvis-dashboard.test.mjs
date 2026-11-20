@@ -20,8 +20,8 @@ const stage = stageStart >= 0 && stageEnd > stageStart ? app.slice(stageStart, s
 const menuCount = (stage.match(/class="hud-shortcut" data-page=/g) || []).length;
 
 check("the approved dashboard asset exists as a valid AVIF file", image.length > 20000 && image.toString("ascii", 4, 12) === "ftypavif");
-check("ALVIS mode uses the approved 700x564 dashboard artwork", stage.includes('src="./assets/alvis-dashboard-reference.avif"') && stage.includes('width="700" height="564"'));
-check("ALVIS mode restores the responsive live HUD stage and globe", appStyles.includes(' #chatPage[data-display-mode="jarvis"]') || appStyles.includes('display:grid!important') && appStyles.includes("hud-globe-map"));
+check("the approved 700x564 reference artwork remains available without replacing the live HUD", stage.includes('src="./assets/alvis-dashboard-reference.avif"') && stage.includes('width="700" height="564"'));
+check("ALVIS mode restores the responsive live HUD stage and globe", appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{') && appStyles.includes("hud-globe-map") && appStyles.includes("display:grid!important"));
 check("the static reference image is hidden while the live globe and rings are displayed", appStyles.includes(">.alvis-reference-image{display:none!important}") && appStyles.includes(">.hud-center{display:grid!important;visibility:visible!important}"));
 check("the original live left and right HUD panels remain visible", appStyles.includes(">.hud-side{") && appStyles.includes(">.hud-center{display:grid!important;visibility:visible!important}"));
 check("the left navigation keeps all five existing page destinations", menuCount === 5 && ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage"].every(id => stage.includes('data-page="' + id + '"')));
