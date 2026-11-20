@@ -1,3 +1,9 @@
+## v296 ALVISモード外側リングCの位置・回転修正（2026-11-20）
+- v295のCSS transformアニメーションは、v267の高詳細度!important transformに負けて動作しなかった。v294のtop:42%も中心位置をずらしていた。
+- v296はtop:48%へ戻し、ring Cのtransformをnone!importantにして二重translateを除去。既存のtranslate:-50% -50%で中央配置を維持し、startAlvisHudMotion()から独立rotateをWAAPIで42秒周期（9deg→369deg）に回す。
+- tests/dashboard-preview-smoke.mjs は実アニメーションのkeyframes/duration、top、translate、transformをChromium/WebKitで検証する。
+- Service Worker cache alvis-cache-v296-integrated。更新ページ refresh-v296.html。実機での位置・回転確認待ち。Avatarモードと個人データ領域は変更しない。
+
 ## v295 ALVISモードの外側リングC回転を復旧（2026-11-20）
 - v294の中心位置修正時に、外側リングCの回転アニメーション指定が欠落していた問題を修正。
 - `.hud-orbit-c` にALVISモード限定の42秒周期CSSアニメーションを追加。transformは9度から369度へ回転し、既存の個別translateによる中心位置合わせを維持。
