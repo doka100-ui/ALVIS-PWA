@@ -547,7 +547,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v295";
+const ALVIS_APP_BUILD_ID="v296";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4086,14 +4086,17 @@ function startAlvisHudMotion(){
     return;
   }
   const orbitNodes=Array.from(stage.querySelectorAll(".hud-center .hud-orbit:not(.hud-orbit-c)"));
-  if(orbitNodes.length<2)return;
+  const outerOrbit=stage.querySelector(".hud-center .hud-orbit-c");
+  if(orbitNodes.length<2||!outerOrbit)return;
   stopAlvisHudMotion();
   // The orbital rings are a defining, always-on ALVIS display element.
   // Keep their gentle continuous rotation even when the OS requests reduced motion;
   // page transitions and other non-essential effects still respect that preference.
   const motions=[
     {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"-24deg",to:"336deg",duration:27500},
-    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:38750}
+    {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:38750},
+    // Ring C keeps its centered translate property; WAAPI rotates only the independent rotate component.
+    {node:outerOrbit,from:"9deg",to:"369deg",duration:42000}
   ];
   motions.forEach(motion=>{
     if(!motion.node || typeof motion.node.animate!=="function")return;
