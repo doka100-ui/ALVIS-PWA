@@ -1731,3 +1731,14 @@ header .status{margin-top:2px}
   animation:none!important;
 }
 /* end v296 */
+
+/* v297: animate only the independent rotate component; preserve the centered translate. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  rotate:9deg;
+  animation:alvisHudOuterRotate297 42s linear infinite!important;
+}
+@keyframes alvisHudOuterRotate297{
+  from{rotate:9deg}
+  to{rotate:369deg}
+}
+/* end v297 */
