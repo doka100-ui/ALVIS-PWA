@@ -2265,3 +2265,10 @@
 - Preview smoke test now opens `refresh-v291.html` in fresh Chromium and WebKit contexts, waits for its redirect, and queries the active Service Worker for its actual cache version.
 - This supplements source-string checks: the refresh bridge must complete its register/update/activate/version-check/redirect sequence in both browser engines before the dashboard smoke tests run.
 - Fresh-context coverage does not replace an iPhone user's existing-registration test; it validates the deployed update flow without touching personal storage.
+
+
+## v292 ALVISモードのライブホログラム復元（2026-11-20）
+- v273の静止画ダッシュボード上書きCSSを除去し、v262/v267で復元済みのライブHUD（球体SVG・左右パネル・投影台・リング）を再表示。アバターモードのCSS/DOM/描画処理は変更しない。
+- `startAlvisHudMotion()` の停止条件を修正。HTML内に参照画像要素が存在するだけでは停止せず、参照画像が実際に表示されている場合だけ停止する。非表示画像が残っていても2本のリングのWAAPI回転を開始できる。
+- Playwright Chromium/WebKit/iPhone WebKitの検査を静止画表示前提からライブ球体・リング表示/アニメーション検査へ変更。オフライン検査は必須CSSのキャッシュとアプリシェル再読込を検証する。
+- Service Worker cache `alvis-cache-v292-integrated`。Qwen/Kokoroモデル、依存キャッシュ、暗号化記憶、会話履歴、同期/バックアップ、Avatarモードは変更・削除しない。iPhone実機での表示確認は配信後に一度だけ行う。
