@@ -1720,19 +1720,14 @@ header .status{margin-top:2px}
    in the DOM for reference only; v262's display:none rule keeps it from replacing the live globe.
    Avatar mode is intentionally unaffected. */
 
-/* v294: align all three orbital rings to the actual hologram core center.
-   The core is positioned at 42% of the display stage; legacy orbit rules used 48%.
-   Ring C also used a second translate() on top of the individual translate property,
-   which displaced it twice. Keep the existing sizes, angles and motion. */
+/* v296: restore ring C center and rotate only its independent CSS rotate component.
+   The old important transform included a second translate and blocked transform keyframe animation.
+   The individual translate property already centers the ring; do not translate it again. */
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit{
-  top:42%!important;
+  top:48%!important;
 }
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
-  transform:rotate(9deg);
-  animation:alvisHudOuterSpin 42s linear infinite!important;
+  transform:none!important;
+  animation:none!important;
 }
-@keyframes alvisHudOuterSpin{
-  from{transform:rotate(9deg)}
-  to{transform:rotate(369deg)}
-}
-/* end v294 */
+/* end v296 */
