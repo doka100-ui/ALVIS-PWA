@@ -547,7 +547,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v292";
+const ALVIS_APP_BUILD_ID="v293";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4108,6 +4108,26 @@ function startAlvisHudMotion(){
     setAlvisHudZoomAnimationState(true);
   }
 }
+
+/* v293: the app stylesheet is intentionally deferred so the login screen appears
+   immediately. If the user unlocks before that stylesheet finishes, the first HUD
+   motion start can see the reference image as visible and exit. Restart once the
+   ALVIS stylesheet has applied, but only while the ALVIS mode is actually open. */
+function restartAlvisHudMotionAfterStylesheet(){
+  const stylesheet=document.querySelector('link[href*="assets/alvis-app.css"]');
+  if(!stylesheet)return;
+  const restart=()=>{
+    const chatPage=$("chatPage");
+    const appPanel=$("appPanel");
+    if(chatPage?.dataset.displayMode==="jarvis"&&appPanel&&!appPanel.classList.contains("hidden")){
+      requestAnimationFrame(startAlvisHudMotion);
+    }
+  };
+  if(stylesheet.rel==="stylesheet"&&stylesheet.sheet)restart();
+  else stylesheet.addEventListener("load",restart,{once:true});
+}
+restartAlvisHudMotionAfterStylesheet();
+
 window.addEventListener("pageshow",()=>{
   if(alvisHudMotionAnimations.length)setAlvisHudMotionPaused(false);
   else requestAnimationFrame(startAlvisHudMotion);
