@@ -1728,6 +1728,11 @@ header .status{margin-top:2px}
   top:42%!important;
 }
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
-  transform:rotate(9deg)!important;
+  transform:rotate(9deg);
+  animation:alvisHudOuterSpin 42s linear infinite!important;
+}
+@keyframes alvisHudOuterSpin{
+  from{transform:rotate(9deg)}
+  to{transform:rotate(369deg)}
 }
 /* end v294 */
