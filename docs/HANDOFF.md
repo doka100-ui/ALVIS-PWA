@@ -1,3 +1,9 @@
+## v295 ALVISモードの外側リングC回転を復旧（2026-11-20）
+- v294の中心位置修正時に、外側リングCの回転アニメーション指定が欠落していた問題を修正。
+- `.hud-orbit-c` にALVISモード限定の42秒周期CSSアニメーションを追加。transformは9度から369度へ回転し、既存の個別translateによる中心位置合わせを維持。
+- 内側リングA/B、球体、Avatarモード、会話/記憶/履歴/暗号化/同期/バックアップ、WebLLM/Kokoroモデル・キャッシュは変更なし。
+- Service Worker cache `alvis-cache-v295-integrated`。PlaywrightとCloudflare Pages配信、Safari実機確認待ち。
+
 ## v294 ALVISホログラム3リングの中心位置を修正（2026-11-20）
 - ユーザー実機でリングが中心からずれていることを確認。原因：球体コアはdisplay stageのtop:42%、リング群はv153でtop:48%。外側ring Cはv262のtransform:translate(...) rotate(...)がv153の個別translate:-50% -50%と重なり、二重移動になる。
 - v294でALVISモードに限定して全リングのtopを42%へ揃え、ring Cのtransformをrotate(9deg)だけにする。サイズ・角度・色・速度は維持。
