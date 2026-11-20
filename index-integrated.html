@@ -547,7 +547,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v291";
+const ALVIS_APP_BUILD_ID="v292";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4079,7 +4079,8 @@ function startAlvisHudMotion(){
     return;
   }
   const stage=chatPage.querySelector(".display-dock .jarvis-stage");
-  if(!stage || getComputedStyle(stage).display==="none" || stage.querySelector(".alvis-reference-image")){
+  const referenceImage=stage?.querySelector(".alvis-reference-image");
+  if(!stage || getComputedStyle(stage).display==="none" || (referenceImage && getComputedStyle(referenceImage).display!=="none")){
     // The approved artwork already contains its orbital rings; do not animate hidden legacy HUD rings.
     stopAlvisHudMotion();
     return;
