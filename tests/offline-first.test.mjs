@@ -924,7 +924,8 @@ assert.doesNotMatch(app, /class="alvis-motion-layer"/, "obsolete overlay layer m
 assert.match(app, /stage\.querySelectorAll\("\.hud-center \.hud-orbit:not\(\.hud-orbit-c\)"\)/, "only the two visible rings are animated");
 assert.match(app, /classList\.contains\("hud-orbit-a"\)/, "legacy orbit state bindings remain available");
 assert.match(app, /class="hud-side hud-side-left"[\s\S]*?id="hudAiAction"[\s\S]*?class="hud-center"/, "existing AI state controls remain connected");
-assert.match(app, /class="alvis-reference-image"/, "the approved artwork must be the visible ALVIS surface");
+assert.match(app, /class="alvis-reference-image"/, "the reference artwork remains available in the DOM");
+assert.match(appStyles, />\.alvis-reference-image\{display:none!important\}/, "the reference artwork must not replace the live ALVIS HUD");
 assert.doesNotMatch(app, /class="alvis-reference-right-hotspots"/, "obsolete image-only hotspots must be absent");
 assert.match(app, /class="hud-globe-map"/, "legacy globe nodes remain available but hidden");
 assert.match(sw, /alvis-cache-v\d+-integrated/, "service worker cache is versioned");
@@ -1179,7 +1180,9 @@ assert.doesNotMatch(app,/scale:\.65!important/,"v267 must not use the previous s
 assert.match(appStyles,/hud-orbit-c\{\s*display:block!important;width:125%!important;height:31%!important/);
 assert.match(app,/orbitNodes\.length<2/);
 assert.match(app,/class="hud-orbit hud-orbit-c"/);
-assert.match(app,/stage\.querySelector\("\.alvis-reference-image"\)/);
+assert.match(app,/const referenceImage=stage\?\.querySelector\("\.alvis-reference-image"\)/);
+assert.match(app,/getComputedStyle\(referenceImage\)\.display!=="none"/);
+assert.doesNotMatch(appStyles,/v273: use the user-approved full-frame dashboard artwork/);
 assert.ok(app.includes("./assets/alvis-dashboard-reference.avif") && sw.includes("url.origin === self.location.origin") && sw.includes("cache.put(cacheRequest, response.clone())"),"dashboard artwork must be cached on demand after it is requested");
 
 // v272: expose WebLLM's real stage/progress instead of a generic LOADING label.
