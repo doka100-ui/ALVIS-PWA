@@ -78,6 +78,12 @@ async function verifyBrowser(browserType, verifyOffline) {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
       return !!ring && ring.getAnimations().length > 0;
     }, null, { timeout: 10000 });
+    const outerRingMotion = await page.locator(".jarvis-stage .hud-orbit-c").evaluate(node => ({
+      animations: node.getAnimations().length,
+      duration: getComputedStyle(node).animationDuration
+    }));
+    assert.ok(outerRingMotion.animations > 0, browserName + ": outer orbital ring C must have an active rotation animation");
+    assert.equal(outerRingMotion.duration, "42s", browserName + ": outer orbital ring C must rotate on the 42-second cycle");
     const refreshResponse = await page.request.get(new URL("refresh-v295.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v295 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
