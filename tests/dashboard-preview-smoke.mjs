@@ -88,6 +88,7 @@ async function verifyBrowser(browserType, verifyOffline) {
       lockPanel.classList.remove("auth-exit");
       appPanel.classList.remove("hidden", "auth-enter");
       document.body.classList.remove("auth-transitioning");
+      window.startAlvisHudMotion?.(); // mirrors the real unlock() post-transition startup
     });
     await page.waitForFunction(() => {
       const chat = document.getElementById("chatPage");
@@ -361,6 +362,7 @@ async function verifyMobileWebKit() {
     await page.evaluate(() => {
       document.getElementById("lockPanel")?.classList.add("hidden");
       document.getElementById("appPanel")?.classList.remove("hidden");
+      window.startAlvisHudMotion?.(); // mirrors the real unlock() post-transition startup
     });
     await page.waitForFunction(() => {
       const stage = document.querySelector(".jarvis-stage");
