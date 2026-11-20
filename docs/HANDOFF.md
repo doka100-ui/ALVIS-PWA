@@ -1,3 +1,9 @@
+## v294 ALVISホログラム3リングの中心位置を修正（2026-11-20）
+- ユーザー実機でリングが中心からずれていることを確認。原因：球体コアはdisplay stageのtop:42%、リング群はv153でtop:48%。外側ring Cはv262のtransform:translate(...) rotate(...)がv153の個別translate:-50% -50%と重なり、二重移動になる。
+- v294でALVISモードに限定して全リングのtopを42%へ揃え、ring Cのtransformをrotate(9deg)だけにする。サイズ・角度・色・速度は維持。
+- Playwrightで3リングのgetBoundingClientRect中心と球体コア中心の差が各軸3px未満であることを追加検査。
+- Service Worker cache alvis-cache-v294-integrated。記憶/履歴/暗号化/同期/バックアップ、Qwen/Kokoroモデル・キャッシュ、Avatarモードには変更なし。CIとiPhone実機確認待ち。
+
 ## v293 ALVISモードの遅延CSS読込とHUD起動競合を修正（2026-11-20）
 - 原因候補を特定：ログイン画面を速く表示するため assets/alvis-app.css を遅延読込している。ログイン完了後の startAlvisHudMotion() がCSS適用前に呼ばれると、参照画像がまだ表示中と判定され、リング起動を中止する。その後CSSが適用されても自動再試行がなく、ライブHUDの動きが始まらない。
 - v293ではスタイルシートのloadを監視し、ALVISモードかつアプリ表示中の場合だけ、CSS適用後にリング起動を再試行する。Avatarモードには触れない。
