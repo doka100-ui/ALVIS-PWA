@@ -1,3 +1,10 @@
+## v293 ALVISモードの遅延CSS読込とHUD起動競合を修正（2026-11-20）
+- 原因候補を特定：ログイン画面を速く表示するため assets/alvis-app.css を遅延読込している。ログイン完了後の startAlvisHudMotion() がCSS適用前に呼ばれると、参照画像がまだ表示中と判定され、リング起動を中止する。その後CSSが適用されても自動再試行がなく、ライブHUDの動きが始まらない。
+- v293ではスタイルシートのloadを監視し、ALVISモードかつアプリ表示中の場合だけ、CSS適用後にリング起動を再試行する。Avatarモードには触れない。
+- PlaywrightテストにCSS読込を意図的に遅らせた状態での起動テストを追加。テスト結果はGitHub Actionsで確認する。
+- 変更対象：index-integrated.html、service-worker.js、refresh-v293.html、tests/dashboard-preview-smoke.mjs。Service Worker cache alvis-cache-v293-integrated。
+- 既存の記憶・履歴・候補、AES-GCM暗号化、同期/バックアップ、WebLLM/Kokoroモデル・キャッシュ、Avatar表示/音声は変更・削除しない。実機iPhoneでの表示確認はユーザー確認待ち。
+
 ## v291 更新ページを旧Service Workerのキャッシュから分離（2026-11-18）
 - 旧Workerが更新ページ自身の旧版をキャッシュから返す可能性へ対応。旧キャッシュに存在しない固有URL `refresh-v291.html` を追加し、最新の更新中継ページをネットワークから取得できるようにする。
 - 新ページは登録済みWorkerへ更新確認を行い、実際のWorker応答が `alvis-cache-v291-integrated` と一致した場合だけALVISへ戻す。
