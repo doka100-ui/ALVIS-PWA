@@ -1719,3 +1719,15 @@ header .status{margin-top:2px}
 /* v292: restore the live ALVIS hologram stage. The approved reference artwork remains
    in the DOM for reference only; v262's display:none rule keeps it from replacing the live globe.
    Avatar mode is intentionally unaffected. */
+
+/* v294: align all three orbital rings to the actual hologram core center.
+   The core is positioned at 42% of the display stage; legacy orbit rules used 48%.
+   Ring C also used a second translate() on top of the individual translate property,
+   which displaced it twice. Keep the existing sizes, angles and motion. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit{
+  top:42%!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  transform:rotate(9deg)!important;
+}
+/* end v294 */
