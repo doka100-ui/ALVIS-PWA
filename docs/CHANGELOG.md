@@ -1,3 +1,4 @@
+- v297: Restore the outer ALVIS ring rotation using the independent CSS `rotate` component, preserving its centered `translate`; restore the ring's 48% vertical position. Refresh build/cache identifiers and update regression checks.
 ## 2026-11-20 — ALVIS外側リングCの位置と回転を修正 v296
 - v295で追加したtransformアニメーションは、既存の!important指定に阻まれていた。さらにv294のtop:42%指定が既存の配置をずらしていた。
 - v296ではリングCを元のtop:48%へ戻し、二重translateを無効化。既存の個別translateで中央配置を維持し、Web Animations APIの独立rotateプロパティで9度から369度へ42秒周期で回転させる。
