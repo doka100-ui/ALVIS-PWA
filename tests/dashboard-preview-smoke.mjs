@@ -69,7 +69,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v291-integrated"), browserName + ": refresh page must verify the v291 worker before redirecting");
+    assert.ok(refreshHtml.includes("alvis-cache-v292-integrated"), browserName + ": refresh page must verify the v291 worker before redirecting");
     assert.ok(refreshHtml.includes("index-integrated.html?refresh=291"), browserName + ": refresh page must return to the integrated app only after v291 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
@@ -79,7 +79,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.deepEqual(deferredImageState, { loading: "lazy", fetchPriority: "low" },
       browserName + ": hidden dashboard artwork must not compete with the initial login screen");
 
-    // Reveal only the already-rendered app shell in this disposable test browser.
+    // Reveal the existing app shell in this disposable test browser.
     // No password is submitted and no encrypted user data is read or changed.
     await page.evaluate(() => {
       const lockPanel = document.getElementById("lockPanel");
@@ -91,62 +91,37 @@ async function verifyBrowser(browserType, verifyOffline) {
     });
     await page.waitForFunction(() => {
       const chat = document.getElementById("chatPage");
-      return !!chat && !chat.classList.contains("hidden");
+      return !!chat && !chat.classList.contains("hidden") &&
+        chat.dataset.displayMode === "jarvis";
     });
-    await waitForDashboardImage(page);
-    const imageState = await page.evaluate(() => {
-      const image = document.querySelector(".alvis-reference-image");
-      return {
-        src: image.currentSrc,
-        width: image.naturalWidth,
-        height: image.naturalHeight
-      };
-    });
-    assert.ok(imageState.src.includes("/assets/alvis-dashboard-reference.avif"), browserName + ": the approved AVIF must be requested after unlock");
-    assert.equal(imageState.width, 700, browserName + ": approved artwork width");
-    assert.equal(imageState.height, 564, browserName + ": approved artwork height");
-    assert.ok(imageResponses.some(item => item.status === 200), browserName + ": approved artwork request must return HTTP 200 after unlock");
-
-    const layout = await page.evaluate(() => {
+    await page.waitForFunction(() => {
+      const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
+      return !!ring && ring.getAnimations().length > 0;
+    }, null, { timeout: 10000 });
+    const liveHud = await page.evaluate(() => {
       const stage = document.querySelector(".mode-stage.jarvis-stage");
-      const image = document.querySelector(".alvis-reference-image");
-      const rect = stage.getBoundingClientRect();
+      const image = stage.querySelector(".alvis-reference-image");
+      const center = stage.querySelector(".hud-center");
+      const globe = stage.querySelector(".hud-globe-map");
+      const ringA = stage.querySelector(".hud-orbit-a");
+      const ringB = stage.querySelector(".hud-orbit-b");
       return {
+        stageDisplay: getComputedStyle(stage).display,
         imageDisplay: getComputedStyle(image).display,
-        objectFit: getComputedStyle(image).objectFit,
-        ratio: rect.width / rect.height,
-        legacyCenterDisplay: getComputedStyle(stage.querySelector(".hud-center")).display,
-        imageOpacity: getComputedStyle(image).opacity,
-        stageOpacity: getComputedStyle(stage).opacity,
-        sidePseudoContent: [".hud-side-left", ".hud-side-right"].flatMap(selector => {
-          const side = stage.querySelector(selector);
-          return ["::before", "::after"].map(pseudo => getComputedStyle(side, pseudo).content);
-        }),
-        ancestorOpacity: (() => {
-          const values = [];
-          for (let node = stage; node; node = node.parentElement) {
-            values.push({ id: node.id, className: typeof node.className === "string" ? node.className : "", opacity: getComputedStyle(node).opacity });
-          }
-          return values;
-        })(),
-        artworkSamples: (() => {
-          const canvas = document.createElement("canvas");
-          canvas.width = 700; canvas.height = 564;
-          const context = canvas.getContext("2d", { willReadFrequently: true });
-          context.drawImage(image, 0, 0, 700, 564);
-          return [[350,280],[350,480]].map(([x,y]) => Array.from(context.getImageData(x,y,1,1).data));
-        })()
+        centerDisplay: getComputedStyle(center).display,
+        globeDisplay: getComputedStyle(globe).display,
+        globeWidth: globe.getBoundingClientRect().width,
+        ringAAnimations: ringA.getAnimations().length,
+        ringBAnimations: ringB.getAnimations().length
       };
     });
-    assert.equal(layout.imageDisplay, "block", browserName + ": the approved image must be visible in ALVIS mode");
-    assert.equal(layout.objectFit, "fill", browserName + ": the complete artwork must not be cropped");
-    assert.ok(Math.abs(layout.ratio - 700 / 564) < 0.01, browserName + ": stage ratio must match the image");
-    assert.equal(layout.legacyCenterDisplay, "none", browserName + ": legacy globe/rings must not be drawn over the artwork");
-    assert.equal(layout.imageOpacity, "1", browserName + ": approved artwork must remain at full opacity");
-    assert.equal(layout.stageOpacity, "1", browserName + ": image stage must remain at full opacity");
-    assert.ok(layout.sidePseudoContent.every(value => value === "none"), browserName + ": legacy side glass/chart pseudo-elements must not cover the artwork");
-    assert.ok(layout.ancestorOpacity.every(item => item.opacity === "1"), browserName + ": the unlocked workspace and artwork must not remain dimmed by a transition");
-    assert.ok(layout.artworkSamples.every(pixel => pixel[0] + pixel[1] + pixel[2] > 420), browserName + ": the approved artwork must retain its original luminous colors");
+    assert.notEqual(liveHud.stageDisplay, "none", browserName + ": live ALVIS stage must be visible");
+    assert.equal(liveHud.imageDisplay, "none", browserName + ": static reference image must not replace the live hologram");
+    assert.notEqual(liveHud.centerDisplay, "none", browserName + ": live globe/ring center must be visible");
+    assert.notEqual(liveHud.globeDisplay, "none", browserName + ": hologram globe SVG must be visible");
+    assert.ok(liveHud.globeWidth > 80, browserName + ": hologram globe must have a real rendered size");
+    assert.ok(liveHud.ringAAnimations > 0 && liveHud.ringBAnimations > 0,
+      browserName + ": both orbital rings must be animated; state=" + JSON.stringify(liveHud));
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
@@ -188,10 +163,12 @@ async function verifyBrowser(browserType, verifyOffline) {
     }, null, { timeout: 10000 });
     const finalDisplayState = await page.evaluate(() => ({
       chatOpacity: getComputedStyle(document.getElementById("chatPage")).opacity,
-      imageOpacity: getComputedStyle(document.querySelector(".alvis-reference-image")).opacity
+      centerDisplay: getComputedStyle(document.querySelector(".hud-center")).display,
+      ringAnimations: document.querySelector(".hud-orbit-a").getAnimations().length
     }));
     assert.equal(finalDisplayState.chatOpacity, "1", browserName + ": page transition must finish before the preview screenshot");
-    assert.equal(finalDisplayState.imageOpacity, "1", browserName + ": artwork must remain fully opaque after navigation");
+    assert.notEqual(finalDisplayState.centerDisplay, "none", browserName + ": live hologram remains visible after navigation");
+    assert.ok(finalDisplayState.ringAnimations > 0, browserName + ": orbital motion remains active after navigation");
     const aiHitArea = await page.locator("#hudAiAction").evaluate(element => {
       const rect = element.getBoundingClientRect();
       return {
@@ -239,19 +216,15 @@ async function verifyBrowser(browserType, verifyOffline) {
         const names = await caches.keys();
         for (const name of names.filter(value => value.startsWith("alvis-cache-"))) {
           const cache = await caches.open(name);
-          const cached = await cache.match(new URL("./assets/alvis-dashboard-reference.avif", location.href).href);
+          const cached = await cache.match(new URL("./assets/alvis-app.css", location.href).href);
           if (cached) return { name, status: cached.status };
         }
         return null;
       });
-      assert.ok(cacheInfo && cacheInfo.status === 200, "Chromium: approved artwork must be in the app-shell cache");
+      assert.ok(cacheInfo && cacheInfo.status === 200, "Chromium: critical ALVIS stylesheet must be in the app-shell cache");
 
       const cdp = await context.newCDPSession(page);
       await cdp.send("Network.setCacheDisabled", { cacheDisabled: true });
-      const offlineImageResponsePromise = page.waitForResponse(
-        response => response.url().includes("/assets/alvis-dashboard-reference.avif"),
-        { timeout: 45000 }
-      );
       await context.setOffline(true);
       const offlineNavigation = await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });
       assert.ok(offlineNavigation && offlineNavigation.ok(), "Chromium: integrated app shell must reload offline");
@@ -259,10 +232,7 @@ async function verifyBrowser(browserType, verifyOffline) {
         document.getElementById("lockPanel")?.classList.add("hidden");
         document.getElementById("appPanel")?.classList.remove("hidden");
       });
-      const offlineImageResponse = await offlineImageResponsePromise;
-      assert.equal(offlineImageResponse.status(), 200, "Chromium: dashboard image must load offline");
-      assert.equal(offlineImageResponse.fromServiceWorker(), true, "Chromium: offline image must come from the Service Worker cache");
-      await waitForDashboardImage(page);
+      await page.waitForFunction(() => getComputedStyle(document.querySelector(".hud-center")).display !== "none");
       const offlineProbe = await page.evaluate(async () => {
         const response = await fetch("./__alvis_offline_probe__?nonce=" + Date.now(), { cache: "no-store" });
         return { status: response.status, body: await response.text() };
@@ -271,7 +241,7 @@ async function verifyBrowser(browserType, verifyOffline) {
       assert.match(offlineProbe.body, /ALVIS: オフライン/, "Chromium: the offline fallback response must be served");
     }
 
-    console.log("PASS " + browserName + ": deployed image, no-crop layout, menu navigation, memory/growth actions, AI hit area, and chat composer");
+    console.log("PASS " + browserName + ": live hologram globe, animated orbital rings, menu navigation, memory/growth actions, AI hit area, and chat composer");
     if (verifyOffline) console.log("PASS Chromium: Service Worker precache and offline reload");
     if (pageErrors.length) console.log(browserName + " page errors observed: " + JSON.stringify(pageErrors));
   } finally {
@@ -287,11 +257,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v291.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v292.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "291",
+      url.searchParams.get("refresh") === "292",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -392,10 +362,15 @@ async function verifyMobileWebKit() {
       document.getElementById("lockPanel")?.classList.add("hidden");
       document.getElementById("appPanel")?.classList.remove("hidden");
     });
-    await waitForDashboardImage(page);
-    const imageLoadedAfterUnlock = await page.locator(".alvis-reference-image").evaluate(image => image.complete && image.naturalWidth === 700);
-    assert.equal(imageLoadedAfterUnlock, true, "iPhone WebKit: approved ALVIS artwork must load after the app is revealed");
-    console.log("PASS iPhone WebKit: initial password screen and ALVIS artwork render without uncaught errors");
+    await page.waitForFunction(() => {
+      const stage = document.querySelector(".jarvis-stage");
+      const globe = stage?.querySelector(".hud-globe-map");
+      return !!globe && getComputedStyle(globe).display !== "none" &&
+        globe.getBoundingClientRect().width > 80;
+    }, null, { timeout: 15000 });
+    const ringMotion = await page.locator(".jarvis-stage .hud-orbit-a").evaluate(ring => ring.getAnimations().length);
+    assert.ok(ringMotion > 0, "iPhone WebKit: orbital ring animation must start in the live ALVIS mode");
+    console.log("PASS iPhone WebKit: initial password screen and live ALVIS hologram render without uncaught errors");
     if (consoleErrors.length) console.log("iPhone WebKit console errors: " + JSON.stringify(consoleErrors));
   } finally {
     await browser.close();
