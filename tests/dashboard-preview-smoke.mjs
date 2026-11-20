@@ -64,13 +64,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       const link = document.querySelector('link[href*="alvis-app.css"]');
       return !!link && link.rel === "stylesheet" && !!link.sheet;
     }, null, { timeout: 15000 });
-    const refreshResponse = await page.request.get(new URL("refresh-v291.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v291 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v292.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v292 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v292-integrated"), browserName + ": refresh page must verify the v291 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=291"), browserName + ": refresh page must return to the integrated app only after v291 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v292-integrated"), browserName + ": refresh page must verify the v292 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=292"), browserName + ": refresh page must return to the integrated app only after v292 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -283,9 +283,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v291-integrated",
-      browserName + ": refresh flow must verify the actual v291 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v291 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v292-integrated",
+      browserName + ": refresh flow must verify the actual v292 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v292 before redirect");
   } finally {
     await browser.close();
   }
