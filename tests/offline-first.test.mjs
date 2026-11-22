@@ -1283,12 +1283,16 @@ assert.match(app,/detail=ALVIS_MODEL_LABEL\+" "\+\(progressMatch\?"読み込み�
 assert.match(app,/stage\.slice\(0,64\)/);
 
  
-// v326: if engine.unload fails during initialization loss/logout, captured GPU devices are individually destroyed before references are cleared.
-assert.match(app,/function releaseCapturedAlvisModelDevices\(\{destroy=false,reason=""\}=\{\}\)[\s\S]*?modelDevices\.splice\(0\)[\s\S]*?if\(destroy\)[\s\S]*?device\?\.destroy\?\.\(\)/,"captured GPU devices must have a targeted fallback destroy path");
-assert.match(app,/if\(alvisGpuLossDuringLoad\)[\s\S]*?catch\(error\)\{[\s\S]*?cleanupError=error;[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"GPU loss during initialization must destroy captured devices if engine unload fails");
-assert.match(app,/if\(!unlocked\)\{[\s\S]*?catch\(error\)\{[\s\S]*?cleanupError=error;[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"logout during initialization must destroy captured devices if engine unload fails");
-assert.match(app,/failedModelDeviceCount=releaseCapturedAlvisModelDevices\(\{destroy:true,reason:"モデル初期化失敗"\}\)/,"rejected model initialization must use the same targeted GPU cleanup helper");
+// v326: captured GPU devices get a targeted fallback destroy path.
+assert.ok(app.includes("function releaseCapturedAlvisModelDevices") && app.includes("device?.destroy?.()"),"captured GPU devices must have a targeted fallback destroy path");
+assert.ok(app.includes("if(alvisGpuLossDuringLoad)") && app.includes("releaseCapturedAlvisModelDevices({destroy:!!cleanupError"),"GPU loss during initialization must destroy captured devices if engine unload fails");
+assert.ok(app.includes("if(!unlocked)") && app.includes("releaseCapturedAlvisModelDevices({destroy:!!cleanupError"),"logout during initialization must destroy captured devices if engine unload fails");
+assert.ok(app.includes("failedModelDeviceCount=releaseCapturedAlvisModelDevices({destroy:true,reason:" + String.fromCharCode(34) + "モデル初期化失敗" + String.fromCharCode(34) + "})"),"rejected model initialization must use the same targeted GPU cleanup helper");
 
+// v327: a failed unload after GPU loss must block a second engine in the same page.
+assert.ok(app.includes("alvisEngineCleanupError=String(error?.message") && app.includes("GPU停止後のモデル解放を確認できませんでした。"),"unexpected GPU loss must persist an unload failure and require reload");
+assert.ok(app.includes("$(" + String.fromCharCode(34) + "loadAiModel" + String.fromCharCode(34) + ").disabled=!!cleanupError") && app.includes("$(" + String.fromCharCode(34) + "loadAiModel" + String.fromCharCode(34) + ").disabled=!!alvisEngineCleanupError"),"the model start button must remain disabled while cleanup is uncertain");
+assert.ok(app.includes("if(alvisGpuLossDuringLoad)") && app.includes("if(!unlocked)") && app.includes("ログアウト後のモデル解放に失敗しました"),"initialization-time GPU loss and logout cleanup failures must also be retained");
 
 // v327: a failed unload after GPU loss must block a second engine in the same page.
 assert.match(app,/alvisEngineCleanupError=String\\(error\\?\\.message/,"unexpected GPU loss must persist an unload failure");
