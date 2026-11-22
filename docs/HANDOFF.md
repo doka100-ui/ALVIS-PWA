@@ -1,3 +1,8 @@
+## Latest update — v309 WebGPUモデル初期化失敗時の部分GPU確保を解放
+- WebLLMのCreateMLCEngineがGPUDeviceを確保した後、エンジンを返す前に失敗する場合、従来はGPUDeviceの参照を保持・解放できない経路があった。
+- モデル初期化中にALVISが監視下で捕捉したGPUDeviceだけを一時追跡し、初期化失敗時にdestroy()を呼び出して部分確保を解放する。正常にエンジンが返った場合は参照を直ちに破棄し、通常のエンジン所有権・unload処理を維持。
+- 自動で別モデルを重ねて起動する処理は追加しない。初期化失敗時に古いGPU確保が残ったまま軽量モデルを起動すると、二重確保でOOMを悪化させる可能性があるため。モデルID/量子化/context window、保存済みモデルキャッシュ、記憶/履歴/暗号化/同期/バックアップ、Avatarモード、ALVIS完成形v308の表示は変更しない。キャッシュ削除・モデル再取得強制なし。
+- 回帰テストで失敗時のGPUDevice解放経路を検査。Service Worker cache alvis-cache-v309-integrated、更新ページ refresh-v309.html。
 ## Latest update — v302 align the outer gear to the actual globe center
 - v301 positioned ring C at the center of the full `.hud-center` container. Inspection of the effective live CSS showed the globe core itself is intentionally positioned at `left:50% / top:42%`, so centering the ring at the container's 50%/50% left it visibly below the globe center.
 - v302 changes only ring C's anchor to `left:50% / top:42%` and centers the ring's own bounds with `translate:-50% -50%`. Its circular 1:1 shape, diameter rules, gear teeth, border/glow, and independent 42-second rotation remain unchanged.
