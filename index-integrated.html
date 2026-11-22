@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v317";
+const ALVIS_APP_BUILD_ID="v318";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -1502,6 +1502,24 @@ function scoreAutonomyIssue(item){
   };
 }
 
+function buildAutonomyPriorityPlan(issues,tasks){
+  const existing=Array.isArray(tasks)?tasks:[];
+  const candidates=(Array.isArray(issues)?issues:[]).map((issue,index)=>{
+    const title=String(issue?.title||"").trim(),action=String(issue?.nextAction||"").trim();
+    const duplicateIndex=findDuplicateAutonomyTask(existing,title,action);
+    const score=Number.isFinite(issue?.score)?Math.max(0,Math.min(100,Math.round(issue.score))):scoreAutonomyIssue(issue).score;
+    return {title,reason:String(issue?.reason||"").slice(0,350),nextAction:action,score,
+      priority:["high","medium","low"].includes(issue?.priority)?issue.priority:(score>=75?"high":score>=50?"medium":"low"),
+      status:issue?.status||"pending",duplicateTask:duplicateIndex!==-1,originalIndex:index};
+  }).filter(item=>item.title&&item.nextAction&&item.status!=="dismissed"&&item.status!=="adopted"&&!item.duplicateTask)
+    .sort((a,b)=>b.score-a.score||a.originalIndex-b.originalIndex);
+  const top=candidates[0]||null;
+  return {candidateCount:candidates.length,
+    topIssue:top?{title:top.title,reason:top.reason,nextAction:top.nextAction,score:top.score,priority:top.priority}:null,
+    rankedIssues:candidates.slice(0,5).map((item,index)=>({rank:index+1,title:item.title,reason:item.reason,nextAction:item.nextAction,score:item.score,priority:item.priority})),
+    selectionRules:["未解決かつ既存タスクと重複しない課題だけを候補にする。","優先スコア順に検討し、同点なら登録順を維持する。","候補がなければ課題を捏造せず、記録不足の確認を提案する。","実現可能性が低い場合は安全な事前確認へ分割する。"]};
+}
+
 function buildAutonomyDecisionEvidence(tasks){
   const completed=(Array.isArray(tasks)?tasks:[]).filter(task=>task?.status==="done");
   const reviewed=completed.filter(task=>task?.retrospective&&typeof task.retrospective==="object");
@@ -1601,7 +1619,7 @@ function renderAutonomyIssues(){
   box.replaceChildren();
   const issues=(Array.isArray(data.autonomyIssues)?data.autonomyIssues:[])
     .filter(item=>item.status!=="dismissed")
-    .sort((a,b)=>({high:0,medium:1,low:2}[a.priority]??3)-({high:0,medium:1,low:2}[b.priority]??3));
+    .sort((a,b)=>(Number.isFinite(b.score)?b.score:scoreAutonomyIssue(b).score)-(Number.isFinite(a.score)?a.score:scoreAutonomyIssue(a).score));
   if(!issues.length){const p=document.createElement("p");p.className="small";p.textContent="発見された課題はまだありません。上のボタンから分析できます。";box.appendChild(p);return;}
   issues.forEach(issue=>{
     const card=document.createElement("div");card.className="growth-item";
@@ -3750,14 +3768,15 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
       .map(task=>({goal:task.goal,action:task.action,note:task.note||"",review:task.review||"",retrospective:task.retrospective||null}));
     const openTasks=data.autonomyTasks.filter(task=>task.status==="proposed"||task.status==="active").slice(-10)
       .map(task=>({goal:task.goal,action:task.action,status:task.status}));
-    const issues=data.autonomyIssues.filter(item=>item.status!=="dismissed").slice(-12)
-      .map(item=>({title:item.title,reason:item.reason,priority:item.priority,status:item.status,nextAction:item.nextAction}));
+    const priorityPlan=buildAutonomyPriorityPlan(data.autonomyIssues,data.autonomyTasks);
+    const issues=priorityPlan.rankedIssues;
     const plans=data.improvements.slice(-8).map(item=>({title:item.title,reason:item.reason,action:item.action,status:item.status,review:item.aiReview||""}));
     const lessons=data.learnings.filter(item=>item.status==="approved").slice(-10).map(formatApprovedLearningForPrompt);
     const decisionEvidence=buildAutonomyDecisionEvidence(data.autonomyTasks);
     const promptText=[
       "あなたはALVIS自身の成長責任者です。ユーザーに目標を聞き返さず、与えられた記録からALVIS自身が次に取り組むべき目標を1つ決めてください。",
       "最も重要な未解決課題を優先し、既存の未完了タスクと重複しない目標にしてください。過去に同じ課題へ取り組んで失敗・停滞している場合は、その事実を踏まえて別の小さな検証方法を選んでください。完了タスクのretrospectiveにあるoutcome/evidence/nextExperiment/confidenceを必ず参照し、blockedやunclearの課題を成功扱いせず、次の目標へ反映してください。",
+       "次の優先順位表はALVIS側で計算したものです。原則として1位の課題を今回の目標にしてください。ただし重複、実現不能、根拠不足、安全上の問題がある場合は理由を示して次点または確認作業を選んでください。",
       "根拠が弱い場合は大きな目標を作らず、記録の不足を確かめる小さな確認作業を目標にしてください。実行していない成果を作らないでください。",
       "必ずJSONオブジェクトだけで返してください。形式："+JSON.stringify({goal:"次の目標",reason:"記録に基づく理由",firstAction:"最初に行う具体的な一歩",successCriteria:"完了を判断する条件",priority:"high|medium|low"}),
       "コード変更、データ削除、記憶の自動承認、設定変更、外部送信、課金、バックグラウンド実行を目標にしないでください。調査が必要なら、まず何を確認すべきかを最初の一歩にしてください。",
@@ -3766,7 +3785,8 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
       "完了タスク：",JSON.stringify(completed),
       "過去の実験結果から作った判断材料（未振り返りは成功扱いしない）：",JSON.stringify(decisionEvidence),
       "未完了タスク：",JSON.stringify(openTasks),
-      "発見済み課題：",JSON.stringify(issues),
+      "ALVISが計算した改善優先順位：",JSON.stringify(priorityPlan),
+       "優先候補：",JSON.stringify(issues),
       "改善計画：",JSON.stringify(plans),
       "承認済み学習：",JSON.stringify(lessons)
     ].join("\n");
