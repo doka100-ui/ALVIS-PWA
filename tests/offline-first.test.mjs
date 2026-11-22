@@ -30,7 +30,7 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v307-integrated/);
+assert.match(sw,/alvis-cache-v308-integrated/);
 assert.match(app,/const ALVIS_APP_BUILD_ID="v307"/);
 assert.match(sw,/alvis-cache-v307-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
