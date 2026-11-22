@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v320";
+const ALVIS_APP_BUILD_ID="v321";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -769,6 +769,16 @@ let alvisHasModelInCache = null;
 let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
 let alvisStoragePersistenceStatus = "未要求";
+// 技術情報だけをメモリ内に保持し、モデル再取得とGPU初期化失敗を切り分ける。
+// localStorage/IndexedDB/Cache Storageへは保存しない。
+let alvisModelLoadTrace=[];
+let alvisModelCacheAtStart=null;
+let alvisModelCacheAfterInit=null;
+function recordAlvisModelLoadTrace(message){
+  const entry=new Date().toISOString()+" "+String(message||"").replace(/\\s+/g," ").slice(0,180);
+  alvisModelLoadTrace.push(entry);
+  if(alvisModelLoadTrace.length>32)alvisModelLoadTrace.splice(0,alvisModelLoadTrace.length-32);
+}
 
 // Service Workerのinstall/cache.addAllが失敗するとreadyが長時間pendingになる環境がある。
 // アプリシェルのキャッシュ準備は待ち過ぎず、AIモデル取得そのものは直接続行する。
@@ -794,15 +804,18 @@ function waitForAlvisServiceWorkerReady(timeoutMs=3500){
 function requestAlvisStoragePersistence(){
   if(typeof navigator.storage?.persist!=="function"){
     alvisStoragePersistenceStatus="このブラウザでは要求非対応";
+    recordAlvisModelLoadTrace("保存領域の永続化要求：非対応");
     return Promise.resolve(false);
   }
   alvisStoragePersistenceStatus="要求中";
   try{
     return Promise.resolve(navigator.storage.persist()).then(granted=>{
       alvisStoragePersistenceStatus=granted?"ブラウザから許可済み":"ブラウザが未許可";
+      recordAlvisModelLoadTrace("保存領域の永続化要求："+alvisStoragePersistenceStatus);
       return granted;
     }).catch(error=>{
       alvisStoragePersistenceStatus="要求失敗（"+String(error?.message||error||"不明").slice(0,100)+"）";
+      recordAlvisModelLoadTrace("保存領域の永続化要求："+alvisStoragePersistenceStatus);
       return false;
     });
   }catch(error){
@@ -841,6 +854,8 @@ const ALVIS_IS_IPHONE=ALVIS_DEVICE_PROFILE.deviceType==="iPhone";
 const ALVIS_MODEL_ID=ALVIS_DEVICE_PROFILE.modelId;
 const ALVIS_MODEL_LABEL=ALVIS_DEVICE_PROFILE.modelLabel;
 const ALVIS_CONTEXT_WINDOW=ALVIS_DEVICE_PROFILE.contextWindow;
+// WebLLM v0.2.87公式モデル定義の必要VRAM目安。端末の実メモリ容量ではない。
+const ALVIS_MODEL_VRAM_ESTIMATE_MB=ALVIS_MODEL_ID==="Qwen3-4B-q4f16_1-MLC"?3431.59:2037;
 if($("loadAiModel"))$("loadAiModel").textContent=ALVIS_MODEL_LABEL+"を読み込む";
 
 
@@ -2547,10 +2562,14 @@ $("loadAiModel").addEventListener("click",async()=>{
   aiLoadProgress=0;
   let alvisLoadStage="起動処理を開始";
   let alvisLoadProgressText="";
+  alvisModelLoadTrace=[];
+  alvisModelCacheAtStart=null;
+  alvisModelCacheAfterInit=null;
   const alvisLoadStartedAt=Date.now();
   const alvisLoadElapsed=()=>Math.max(0,Math.floor((Date.now()-alvisLoadStartedAt)/1000));
   const setAlvisLoadStage=stage=>{
     alvisLoadStage=String(stage||"処理中");
+    recordAlvisModelLoadTrace("段階："+alvisLoadStage+"（"+alvisLoadElapsed()+"秒）");
     setStatus("aiStatus",ALVIS_MODEL_LABEL+" 読み込み中："+alvisLoadStage+"（"+alvisLoadElapsed()+"秒）");
   };
   updateHudAiStatus("モデル読み込み中 0%");
@@ -2596,10 +2615,13 @@ $("loadAiModel").addEventListener("click",async()=>{
       try{
         setAlvisLoadStage("保存済みモデルキャッシュを確認中");
         const cachedWeights=await alvisHasModelInCache(ALVIS_MODEL_ID);
+        alvisModelCacheAtStart=!!cachedWeights;
+        recordAlvisModelLoadTrace("モデル重みキャッシュ事前確認："+(cachedWeights?"検出":"未検出"));
         setStatus("aiStatus",cachedWeights
           ?"保存済みモデル重みを確認しました。既存キャッシュを使って起動します…"
           :"モデル重みキャッシュは未検出です。初回取得または再取得が必要な場合があります…");
       }catch(cacheCheckError){
+        recordAlvisModelLoadTrace("モデル重みキャッシュ事前確認：失敗（"+String(cacheCheckError?.message||cacheCheckError||"不明").slice(0,100)+"）");
         setStatus("aiStatus","モデル重みキャッシュの状態を確認できません。既存キャッシュを保持したまま起動を試します…");
       }
     }
@@ -2617,11 +2639,18 @@ $("loadAiModel").addEventListener("click",async()=>{
           aiLoadProgress=percent;
           alvisLoadProgressText=percent+"% "+String(p.text||"").slice(0,90);
           alvisLoadStage="モデル初期化";
+          recordAlvisModelLoadTrace("WebLLM進捗 "+percent+"%："+String(p.text||"進捗説明なし"));
           setStatus("aiStatus","モデル読み込み中 "+percent+"% "+(p.text||""));
         }
       },{context_window_size:ALVIS_CONTEXT_WINDOW});
     }finally{
       alvisGpuDiagnostics.captureModelDevices=false;
+    }
+    try{
+      alvisModelCacheAfterInit=typeof alvisHasModelInCache==="function"?!!(await alvisHasModelInCache(ALVIS_MODEL_ID)):null;
+      recordAlvisModelLoadTrace("モデル重みキャッシュ初期化後："+(alvisModelCacheAfterInit===null?"確認不可":alvisModelCacheAfterInit?"検出":"未検出"));
+    }catch(cacheAfterError){
+      recordAlvisModelLoadTrace("モデル重みキャッシュ初期化後：確認失敗");
     }
     const engine=serializeAlvisInference(loadedEngine);
     // GPU loss can arrive before CreateMLCEngine resolves, while aiEngine is still null.
@@ -2651,6 +2680,7 @@ $("loadAiModel").addEventListener("click",async()=>{
      const failedModelDevices=alvisGpuDiagnostics.modelDevices.splice(0);
      failedModelDevices.forEach(device=>{try{device?.destroy?.();}catch(cleanupError){}});
      const detail=String(error?.message||error||"不明なエラー")+"（停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()+"秒）";
+    recordAlvisModelLoadTrace("起動失敗："+detail);
     const lower=detail.toLowerCase();
     let guidance="エラー内容を確認し、必要ならページを再読み込みしてから再試行してください。";
     if(/device was lost|device lost|gpu.*lost|out of memory|oom|allocation failed|memory access out of bounds/.test(lower)){
@@ -4187,6 +4217,12 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
       lines.push("保存領域の永続化：このブラウザでは状態を確認できません");
     }
     lines.push("モデル起動時の永続化要求："+alvisStoragePersistenceStatus);
+    lines.push("選択モデル："+ALVIS_MODEL_ID+" / context "+ALVIS_CONTEXT_WINDOW);
+    lines.push("WebLLM必要VRAM目安："+ALVIS_MODEL_VRAM_ESTIMATE_MB.toFixed(0)+" MB（モデル定義値。端末の空きGPUメモリではありません）");
+    lines.push("モデル重みキャッシュ事前確認："+(alvisModelCacheAtStart===null?"未記録":alvisModelCacheAtStart?"検出":"未検出"));
+    lines.push("モデル重みキャッシュ初期化後："+(alvisModelCacheAfterInit===null?"未記録":alvisModelCacheAfterInit?"検出":"未検出"));
+    lines.push("モデル起動時の読み込み記録（最新32件・この画面のメモリ内のみ）：");
+    lines.push(...(alvisModelLoadTrace.length?alvisModelLoadTrace:["この画面での起動記録はありません"]));
     lines.push("AIモデルの保存状態：モデル重みキャッシュの存在のみ確認。完全なオフライン再利用は未確認");
     lines.push("Kokoroモデルの保存状態：この画面から個別判定できません");
     lines.push("");
