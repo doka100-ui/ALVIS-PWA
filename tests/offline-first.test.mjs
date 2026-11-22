@@ -8,7 +8,7 @@ const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
 const refresh292 = await readFile(new URL("../refresh-v292.html", import.meta.url), "utf8");
-const refresh326 = await readFile(new URL("../refresh-v326.html", import.meta.url), "utf8");
+const refresh327 = await readFile(new URL("../refresh-v327.html", import.meta.url), "utf8");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -31,8 +31,8 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v326-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v326"/);
+assert.match(sw,/alvis-cache-v327-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v327"/);
 assert.match(app,/alvisModelLoadTrace/);
 assert.match(app,/ALVIS_DIAGNOSTIC_SESSION_KEY/);
 assert.match(app,/id="copyDeviceDiagnostics"/);
@@ -49,7 +49,7 @@ assert.match(app,/recordAlvisModelLoadTrace/);
 assert.match(app,/WebLLM進捗/);
 assert.match(app,/モデル起動時の読み込み記録/);
 assert.match(app,/ALVIS_MODEL_VRAM_ESTIMATE_MB/);
-assert.match(sw,/alvis-cache-v326-integrated/);
+assert.match(sw,/alvis-cache-v327-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
 assert.match(app,/登録済みactive Worker版/);
 assert.match(app,/ALVISアプリキャッシュ一覧/);
@@ -116,7 +116,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v326-integrated/);
+assert.match(sw, /alvis-cache-v327-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -127,13 +127,13 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v326-integrated/);
-assert.match(refresh326,/alvis-cache-v326-integrated/);
-assert.match(refresh326,/refresh=326/);
-assert.match(refresh326,/registration\.update\(\)/);
-assert.match(refresh326,/ALVIS_GET_BUILD_INFO/);
-assert.match(refresh326,/location\.replace\(target\)/);
-assert.doesNotMatch(refresh326,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
+assert.match(sw,/alvis-cache-v327-integrated/);
+assert.match(refresh327,/alvis-cache-v327-integrated/);
+assert.match(refresh327,/refresh=326/);
+assert.match(refresh327,/registration\.update\(\)/);
+assert.match(refresh327,/ALVIS_GET_BUILD_INFO/);
+assert.match(refresh327,/location\.replace\(target\)/);
+assert.doesNotMatch(refresh327,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
@@ -1241,7 +1241,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v326-integrated"),"v300 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v327-integrated"),"v300 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1288,3 +1288,11 @@ assert.match(app,/function releaseCapturedAlvisModelDevices\(\{destroy=false,rea
 assert.match(app,/if\(alvisGpuLossDuringLoad\)[\s\S]*?catch\(error\)\{cleanupError=error;\}[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"GPU loss during initialization must destroy captured devices if engine unload fails");
 assert.match(app,/if\(!unlocked\)\{[\s\S]*?catch\(error\)\{cleanupError=error;\}[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"logout during initialization must destroy captured devices if engine unload fails");
 assert.match(app,/failedModelDeviceCount=releaseCapturedAlvisModelDevices\(\{destroy:true,reason:"モデル初期化失敗"\}\)/,"rejected model initialization must use the same targeted GPU cleanup helper");
+
+
+// v327: a failed unload after GPU loss must block a second engine in the same page.
+assert.match(app,/alvisEngineCleanupError=String\\(error\\?\\.message/,"unexpected GPU loss must persist an unload failure");
+assert.match(app,/GPU停止後のモデル解放を確認できませんでした[\\s\\S]*?ページを再読み込みしてから再試行/,"GPU unload failure must instruct a page reload instead of allowing an immediate second engine");
+assert.match(app,/\\$\\("loadAiModel"\\)\\.disabled=!!alvisEngineCleanupError/,"the model start button must remain disabled while cleanup is uncertain");
+assert.match(app,/if\\(alvisGpuLossDuringLoad\\)[\\s\\S]*?alvisEngineCleanupError=String\\(error\\?\\.message/,"initialization-time GPU unload failure must also block a second engine");
+assert.match(app,/if\\(!unlocked\\)\\{[\\s\\S]*?alvisEngineCleanupError=String\\(error\\?\\.message/,"logout-time initialization cleanup failure must also be retained");

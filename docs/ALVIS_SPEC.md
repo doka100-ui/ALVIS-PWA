@@ -1058,3 +1058,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - 認証前は非表示のALVISダッシュボード画像とアバター画像をlazy loading / low fetch priorityにする。ログイン画面に不要な大きな画像要求が初期表示の通信と競合しにくくする。
 - 認証後に画像を表示する際は通常どおり取得し、Service Workerによる画像プリキャッシュとオフライン対応は維持する。
 - 画像素材、ALVIS/Avatarのデザイン、AIモデル、記憶・履歴・暗号化・同期・バックアップは変更しない。
+
+
+## v327 — GPU解放失敗時の再起動ガード
+- WebGPU device loss後のengine.unload()が失敗した場合、失敗状態をページ内に保持し、同じページでのモデル再起動を禁止する。
+- 初期化途中のGPU停止とログアウト時も、engine解放失敗を保持して二重起動を防止する。
+- ページ再読み込み後の手動再試行を案内し、モデルキャッシュやユーザーデータの削除は行わない。
