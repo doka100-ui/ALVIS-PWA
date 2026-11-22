@@ -1743,24 +1743,24 @@ header .status{margin-top:2px}
 }
 /* end v297 */
  
-/* v299: make the outer ALVIS gear a true circle, then cut fine teeth around its rim.
-   A square aspect-ratio box prevents the old flattened 125% x 31% ellipse.
-   Keep the existing center and independent 42-second rotation. */
+/* v300: align the circular outer gear exactly with the globe and make each tooth legible.
+   Keep the 1:1 geometry and independent 42-second rotation; only ALVIS mode is affected. */
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
-  left:50%!important;top:48%!important;
+  left:50%!important;top:50%!important;
   width:min(100%,280px)!important;height:auto!important;aspect-ratio:1/1!important;
-  border-radius:50%!important;
+  border:1.5px solid #b8f5ffcc!important;border-radius:50%!important;
+  box-shadow:0 0 10px #38bdf8aa,0 0 24px #0ea5e966!important;
   translate:-50% -50%!important;
   transform:none!important;
 }
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
-  content:""!important;position:absolute!important;inset:-6px!important;
+  content:""!important;position:absolute!important;inset:-10px!important;
   display:block!important;border:0!important;border-radius:50%!important;
-  background:repeating-conic-gradient(from 0deg,#b8f5ff 0deg 2.2deg,transparent 2.2deg 5.625deg)!important;
-  -webkit-mask:radial-gradient(circle at center,transparent 0 91%,#000 92% 100%)!important;
-  mask:radial-gradient(circle at center,transparent 0 91%,#000 92% 100%)!important;
-  opacity:1!important;filter:drop-shadow(0 0 3px #38bdf8)!important;
+  background:repeating-conic-gradient(from 0deg,#e4fcff 0deg 3.5deg,#54dfff 3.5deg 3.9deg,transparent 3.9deg 7.5deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 84%,#000 85% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 84%,#000 85% 100%)!important;
+  opacity:1!important;filter:drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 9px #0ea5e9)!important;
   pointer-events:none!important;
 }
-/* end v299 */
+/* end v300 */
 
