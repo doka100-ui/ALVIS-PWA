@@ -328,7 +328,7 @@ async function verifyRefreshFlow(browserType) {
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "299",
+      url.searchParams.get("refresh") === "303",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -351,8 +351,8 @@ async function verifyRefreshFlow(browserType) {
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
     assert.equal(state.cacheName, "alvis-cache-v303-integrated",
-      browserName + ": refresh flow must verify the actual v300 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v299 before redirect");
+      browserName + ": refresh flow must verify the actual v303 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v303 before redirect");
   } finally {
     await browser.close();
   }
