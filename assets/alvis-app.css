@@ -1735,25 +1735,32 @@ header .status{margin-top:2px}
 /* v297: animate only the independent rotate component; preserve the centered translate. */
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
   rotate:9deg;
-  animation:alvisHudOuterRotate298 42s linear infinite!important;
+  animation:alvisHudOuterRotate299 42s linear infinite!important;
 }
-@keyframes alvisHudOuterRotate298{
+@keyframes alvisHudOuterRotate299{
   from{rotate:9deg}
   to{rotate:369deg}
 }
 /* end v297 */
  
-/* v298: give the rotating outer ALVIS orbit a fine precision-gear rim.
-   The evenly spaced radial teeth are a decorative pseudo-element and rotate
-   with ring C; the ring's center, size, tilt and 42-second motion stay intact. */
+/* v299: make the outer ALVIS gear a true circle, then cut fine teeth around its rim.
+   A square aspect-ratio box prevents the old flattened 125% x 31% ellipse.
+   Keep the existing center and independent 42-second rotation. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  left:50%!important;top:48%!important;
+  width:min(100%,280px)!important;height:auto!important;aspect-ratio:1/1!important;
+  border-radius:50%!important;
+  translate:-50% -50%!important;
+  transform:none!important;
+}
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
-  content:""!important;position:absolute!important;inset:-5px!important;
+  content:""!important;position:absolute!important;inset:-6px!important;
   display:block!important;border:0!important;border-radius:50%!important;
-  background:repeating-conic-gradient(from 0deg,#a5f3ff 0deg 2.1deg,transparent 2.1deg 5.625deg)!important;
-  -webkit-mask:radial-gradient(ellipse at center,transparent 0 91%,#000 92% 100%)!important;
-  mask:radial-gradient(ellipse at center,transparent 0 91%,#000 92% 100%)!important;
-  opacity:.9!important;filter:drop-shadow(0 0 3px #38bdf8)!important;
+  background:repeating-conic-gradient(from 0deg,#b8f5ff 0deg 2.2deg,transparent 2.2deg 5.625deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 91%,#000 92% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 91%,#000 92% 100%)!important;
+  opacity:1!important;filter:drop-shadow(0 0 3px #38bdf8)!important;
   pointer-events:none!important;
 }
-/* end v298 */
+/* end v299 */
 
