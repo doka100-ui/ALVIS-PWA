@@ -96,20 +96,20 @@ async function verifyBrowser(browserType, verifyOffline) {
       && animation.keyframes.some(frame => frame.rotate === "9deg")
       && animation.keyframes.some(frame => frame.rotate === "369deg")),
       browserName + ": outer ring C must have a 42-second independent rotate animation");
-    assert.equal(outerRingMotion.top, "48%", browserName + ": outer ring C must retain its original vertical center");
+    assert.equal(outerRingMotion.top, "50%", browserName + ": outer ring C must align vertically with the globe center");
     assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must retain its individual centering translate");
     assert.equal(outerRingMotion.transform, "none", browserName + ": outer ring C must not receive a second transform translate");
     assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
     assert.ok(Math.abs(outerRingMotion.width - outerRingMotion.height) < 1.5,
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
-    assert.ok(outerRingMotion.toothBackground.includes("repeating-conic-gradient") && outerRingMotion.toothMask.includes("radial-gradient"), browserName + ": outer ring C must render the fine gear-tooth rim");
-    const refreshResponse = await page.request.get(new URL("refresh-v299.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v299 Service Worker refresh page must return HTTP 200");
+    assert.ok(outerRingMotion.toothBackground.includes("repeating-conic-gradient") && outerRingMotion.toothBackground.includes("7.5deg") && outerRingMotion.toothMask.includes("radial-gradient") && outerRingMotion.toothMask.includes("84%"), browserName + ": outer ring C must render clearly spaced, thicker gear teeth");
+    const refreshResponse = await page.request.get(new URL("refresh-v300.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v300 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v299-integrated"), browserName + ": refresh page must verify the v299 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=299"), browserName + ": refresh page must return to the integrated app only after v299 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v300-integrated"), browserName + ": refresh page must verify the v300 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=300"), browserName + ": refresh page must return to the integrated app only after v299 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -310,7 +310,7 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v299.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v300.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
@@ -336,8 +336,8 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v299-integrated",
-      browserName + ": refresh flow must verify the actual v299 worker before redirecting");
+    assert.equal(state.cacheName, "alvis-cache-v300-integrated",
+      browserName + ": refresh flow must verify the actual v300 worker before redirecting");
     console.log("PASS " + browserName + ": deployed refresh page activates and verifies v299 before redirect");
   } finally {
     await browser.close();
