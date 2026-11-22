@@ -4296,6 +4296,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
           if(Object.prototype.hasOwnProperty.call(webllmCacheCounts,key))webllmCacheCounts[key]=entries.length+"件";
         }catch(cacheError){
           lines.push("  "+key+"：内容を確認できません");
+          if(Object.prototype.hasOwnProperty.call(webllmCacheCounts,key))webllmCacheCounts[key]="確認不可";
         }
       }
       lines.push("WebLLM保存方式：Cache API（WebLLMの既定方式。保存先の変更なし）");

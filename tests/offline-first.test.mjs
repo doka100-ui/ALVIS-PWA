@@ -45,6 +45,7 @@ assert.match(app,/ALVIS_DIAGNOSTIC_STATE_KEY/);
 assert.match(app,/WebLLM保存方式：Cache API（WebLLMの既定方式。保存先の変更なし）/,"diagnostics must state that the existing WebLLM Cache API backend is preserved");
 assert.match(app,/webllmCacheCounts=\{\"webllm\/model\":\"キャッシュなし\",\"webllm\/config\":\"キャッシュなし\",\"webllm\/wasm\":\"キャッシュなし\"\}/,"diagnostics must distinguish WebLLM model, config, and WASM caches");
 assert.match(app,/WebLLMキャッシュ内訳：モデル重み /,"diagnostics must display the read-only WebLLM cache breakdown");
+assert.match(app,/catch\(cacheError\)\{[\s\S]*?webllmCacheCounts\[key\]="確認不可"/,"cache read failures must be distinguished from an absent cache");
 
 assert.match(app,/sessionStorage\.setItem\(ALVIS_DIAGNOSTIC_STATE_KEY/);
 assert.match(app,/sessionStorage\.getItem\(ALVIS_DIAGNOSTIC_STATE_KEY/);
