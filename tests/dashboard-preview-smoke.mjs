@@ -97,7 +97,7 @@ async function verifyBrowser(browserType, verifyOffline) {
       width: node.getBoundingClientRect().width,
       height: node.getBoundingClientRect().height,
       aspectRatio: getComputedStyle(node).aspectRatio,
-      toothBackground: getComputedStyle(node, "::before").backgroundImage,
+      gearTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-tick").length,\n      majorTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-major").length,
       toothInset: getComputedStyle(node, "::before").inset,
       toothMask: getComputedStyle(node, "::before").maskImage
     }));
@@ -114,14 +114,14 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
     assert.ok(Math.abs(outerRingMotion.width - outerRingMotion.height) < 1.5,
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
-    assert.ok(outerRingMotion.toothBackground.includes("repeating-conic-gradient") && outerRingMotion.toothBackground.includes("7.5deg") && outerRingMotion.toothBackground.includes("1.9deg") && outerRingMotion.toothMask.includes("radial-gradient") && outerRingMotion.toothMask.includes("77%") && outerRingMotion.toothInset === "-14px", browserName + ": outer ring C must render clock-like radial gear marks with stronger contrast and visible rotation");
-    const refreshResponse = await page.request.get(new URL("refresh-v304.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v304 Service Worker refresh page must return HTTP 200");
+    assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer gear must render 48 individually visible radial teeth");\n    assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer gear must render 8 longer clock-index teeth");
+    const refreshResponse = await page.request.get(new URL("refresh-v305.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v305 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v304-integrated"), browserName + ": refresh page must verify the v300 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=304"), browserName + ": refresh page must return to the integrated app only after v304 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v305-integrated"), browserName + ": refresh page must verify the v300 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=305"), browserName + ": refresh page must return to the integrated app only after v305 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -322,11 +322,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v304.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v305.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "303",
+      url.searchParams.get("refresh") === "305",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -348,9 +348,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v304-integrated",
-      browserName + ": refresh flow must verify the actual v304 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v304 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v305-integrated",
+      browserName + ": refresh flow must verify the actual v305 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v305 before redirect");
   } finally {
     await browser.close();
   }
