@@ -1798,3 +1798,21 @@ header .status{margin-top:2px}
   filter:drop-shadow(0 0 5px #7cecff) drop-shadow(0 0 11px #0ea5e9)!important;
 }
 /* end v303 */
+
+
+/* v304: replace the soft outer ring with distinct clock-like radial index teeth.
+   The 48 short marks and 8 longer cardinal markers rotate with the existing gear. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  animation:alvisHudOuterRotate299 18s linear infinite!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  inset:-14px!important;
+  background:
+    repeating-conic-gradient(from 0deg,#f7feff 0deg 1.35deg,#35d5ff 1.35deg 1.9deg,transparent 1.9deg 7.5deg),
+    repeating-conic-gradient(from 0deg,#e8fbff 0deg 2.4deg,transparent 2.4deg 45deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 77%,#000 78% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 77%,#000 78% 100%)!important;
+  opacity:1!important;
+  filter:drop-shadow(0 0 6px #a5f3fc) drop-shadow(0 0 13px #0ea5e9)!important;
+}
+/* end v304 */
