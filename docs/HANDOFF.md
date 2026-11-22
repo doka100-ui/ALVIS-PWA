@@ -1,3 +1,10 @@
+## Latest update — v301 true auto-margin centering for outer ALVIS gear
+- User confirmed v300 ring was still visually off-center after top:50%.
+- Root issue: percentage top + individual translate is not robust enough across responsive stage sizing. v301 anchors the square ring to all four edges of its actual .hud-center containing block (inset:0) and uses auto margins to center it; percentage translate is removed. Since .hud-core is grid-centered in the same .hud-center, this aligns the gear's geometric center directly with the globe core.
+- Preserve 1:1 geometry, visible 48-tooth rim, and independent 42-second rotate animation. Only ALVIS mode outer ring C changes.
+- Avatar mode, globe artwork, inner rings, projector/platform, chat, memory/history/encryption/sync/backup, WebLLM/Kokoro model storage untouched. No user data/cache clearing.
+- Refresh bridge: refresh-v301.html; Service Worker shell cache: alvis-cache-v301-integrated. Browser smoke test checks inset 0, auto margins, circular geometry, and measured ring/core center offsets. Await CI/deployment and user confirmation.
+
 ## Latest update — v300 outer ALVIS gear centered and made more visible
 - User confirmed v299 finally rendered a true circle, but reported that it was off-center and the fine gear teeth were hard to distinguish.
 - v300 moves only the ALVIS-mode outer ring C from top:48% to top:50%, aligning its center with the globe core. The 1:1 circular geometry and independent 42-second rotation remain.
