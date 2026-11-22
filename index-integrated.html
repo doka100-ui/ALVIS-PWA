@@ -516,6 +516,8 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <p class="small">この診断は端末の機能とキャッシュの存在を確認します。AIモデルのオフライン再利用を保証するものではありません。</p>
 <button id="runDeviceDiagnostics">この端末を診断する</button>
 <div id="deviceDiagnosticsStatus" class="small" style="margin:12px 0;white-space:pre-wrap;line-height:1.8">まだ診断していません。</div>
+<button id="copyDeviceDiagnostics" class="secondary" type="button" disabled>診断結果をコピー</button>
+<p id="copyDeviceDiagnosticsStatus" class="small" aria-live="polite" style="margin-top:8px">診断を実行するとコピーできます。</p>
 </div>
 <div class="panel">
 <h2>オフライン動作の確認方法</h2>
@@ -561,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v322";
+const ALVIS_APP_BUILD_ID="v323";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4243,9 +4245,45 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     output.textContent="診断中にエラーが発生しました："+(error?.message||String(error));
   }finally{
     button.disabled=false;button.textContent="この端末を診断する";
+    const copyButton=$("copyDeviceDiagnostics");
+    if(copyButton)copyButton.disabled=!output.textContent.trim();
   }
 });
 
+$("copyDeviceDiagnostics").addEventListener("click",async()=>{
+  const output=$("deviceDiagnosticsStatus");
+  const status=$("copyDeviceDiagnosticsStatus");
+  const button=$("copyDeviceDiagnostics");
+  const textToCopy=output?.textContent||"";
+  if(!textToCopy.trim()){
+    if(status)status.textContent="先に端末診断を実行してください。";
+    return;
+  }
+  button.disabled=true;
+  try{
+    if(navigator.clipboard?.writeText&&window.isSecureContext){
+      await navigator.clipboard.writeText(textToCopy);
+    }else{
+      const temporary=document.createElement("textarea");
+      temporary.value=textToCopy;
+      temporary.setAttribute("readonly","");
+      temporary.style.position="fixed";
+      temporary.style.opacity="0";
+      temporary.style.fontSize="16px";
+      document.body.appendChild(temporary);
+      temporary.select();
+      temporary.setSelectionRange(0,temporary.value.length);
+      const copied=document.execCommand("copy");
+      temporary.remove();
+      if(!copied)throw new Error("このSafariでは自動コピーできません");
+    }
+    if(status)status.textContent="診断結果をコピーしました。ここに貼り付けて送れます。";
+  }catch(error){
+    if(status)status.textContent="コピーできませんでした。診断結果を長押ししてコピーしてください。";
+  }finally{
+    button.disabled=false;
+  }
+});
 
 
 /* v246: conversation-driven expressions are isolated to the avatar mode. */
