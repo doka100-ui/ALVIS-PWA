@@ -1085,23 +1085,6 @@ assert.equal(ellipticalContext[2].content,"妻は？","elliptical current questi
 assert.match(app,/「妻は？」「料金は？」のような短い名詞句の追加質問は直前の話題と照合する/,"system prompt must guide resolution of elliptical follow-ups");
 assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\(recent,text\)/,"generation must use the bounded context builder");
 
- // v311: an elliptical follow-up should retrieve memories and approved learning through the preceding user topic.
- const scoreHelperStart=app.indexOf("function scoreContextMatch(query, candidate){");
- const scoreHelperEnd=app.indexOf("function selectRelevantMemories(",scoreHelperStart);
- const scoreHelper=new Function(app.slice(scoreHelperStart,scoreHelperEnd)+"; return scoreContextMatch;")();
- const memorySelectorStart=app.indexOf("function selectRelevantMemories(query, memories, history){");
- const memorySelectorEnd=app.indexOf("function selectRelevantLearnings(",memorySelectorStart);
- const memorySelector=new Function("buildContextualQuery","scoreContextMatch","isEllipticalFollowUpMessage",app.slice(memorySelectorStart,memorySelectorEnd)+"; return selectRelevantMemories;")(contextualQueryForTest,scoreHelper,ellipticalClassifier);
- const followupMemory=memorySelector("妻は？",[{title:"妻の在留資格",body:"日本人の配偶者等の在留資格を申請中。"}],storedAlvisHistory);
- assert.equal(followupMemory.length,1,"short follow-up must find the memory related to the preceding user topic");
- assert.match(followupMemory[0].text,/日本人の配偶者等の在留資格/);
- const learningSelectorStart=app.indexOf("function selectRelevantLearnings(query, history, learnings){");
- const learningSelectorEnd=app.indexOf("function formatApprovedLearningForPrompt(",learningSelectorStart);
- const learningSelector=new Function("buildContextualQuery","scoreContextMatch",app.slice(learningSelectorStart,learningSelectorEnd)+"; return selectRelevantLearnings;")(contextualQueryForTest,scoreHelper);
- const followupLearning=learningSelector("妻は？",storedAlvisHistory,[{status:"approved",text:"日本人の配偶者等の在留資格では、入国後に住民登録等の手続きが必要。"}]);
- assert.equal(followupLearning.length,1,"short follow-up must retrieve approved learning from the preceding user topic");
- const pendingLearning=learningSelector("妻は？",storedAlvisHistory,[{status:"pending",text:"日本人の配偶者等の在留資格では、入国後に住民登録等の手続きが必要。"}]);
- assert.equal(pendingLearning.length,0,"contextual retrieval must never bypass the learning approval workflow");
 assert.match(sw,/alvis-cache-v\d+-integrated/,"v233 app shell must use refreshed cache");
 
  // v310: contextual memory lookup must recognize real stored ALVIS turns as elliptical follow-up context.
@@ -1123,6 +1106,23 @@ assert.match(sw,/alvis-cache-v\d+-integrated/,"v233 app shell must use refreshed
  const standaloneQuery=contextualQueryForTest("富士山の高さは？",storedAlvisHistory);
  assert.equal(standaloneQuery.usedContext,false,"complete independent questions must not inherit unrelated history");
  assert.match(app,/item\?\.role==="assistant"\|\|item\?\.role==="alvis"/,"elliptical follow-up classifier must accept the persisted ALVIS assistant role");
+ // v311: an elliptical follow-up should retrieve memories and approved learning through the preceding user topic.
+ const scoreHelperStart=app.indexOf("function scoreContextMatch(query, candidate){");
+ const scoreHelperEnd=app.indexOf("function selectRelevantMemories(",scoreHelperStart);
+ const scoreHelper=new Function(app.slice(scoreHelperStart,scoreHelperEnd)+"; return scoreContextMatch;")();
+ const memorySelectorStart=app.indexOf("function selectRelevantMemories(query, memories, history){");
+ const memorySelectorEnd=app.indexOf("function selectRelevantLearnings(",memorySelectorStart);
+ const memorySelector=new Function("buildContextualQuery","scoreContextMatch","isEllipticalFollowUpMessage",app.slice(memorySelectorStart,memorySelectorEnd)+"; return selectRelevantMemories;")(contextualQueryForTest,scoreHelper,ellipticalClassifier);
+ const followupMemory=memorySelector("妻は？",[{title:"妻の在留資格",body:"日本人の配偶者等の在留資格を申請中。"}],storedAlvisHistory);
+ assert.equal(followupMemory.length,1,"short follow-up must find the memory related to the preceding user topic");
+ assert.match(followupMemory[0].text,/日本人の配偶者等の在留資格/);
+ const learningSelectorStart=app.indexOf("function selectRelevantLearnings(query, history, learnings){");
+ const learningSelectorEnd=app.indexOf("function formatApprovedLearningForPrompt(",learningSelectorStart);
+ const learningSelector=new Function("buildContextualQuery","scoreContextMatch",app.slice(learningSelectorStart,learningSelectorEnd)+"; return selectRelevantLearnings;")(contextualQueryForTest,scoreHelper);
+ const followupLearning=learningSelector("妻は？",storedAlvisHistory,[{status:"approved",text:"日本人の配偶者等の在留資格では、入国後に住民登録等の手続きが必要。"}]);
+ assert.equal(followupLearning.length,1,"short follow-up must retrieve approved learning from the preceding user topic");
+ const pendingLearning=learningSelector("妻は？",storedAlvisHistory,[{status:"pending",text:"日本人の配偶者等の在留資格では、入国後に住民登録等の手続きが必要。"}]);
+ assert.equal(pendingLearning.length,0,"contextual retrieval must never bypass the learning approval workflow");
 
 
 // v241: asynchronous chat and voice work from a logged-out session must not mutate or speak into a later session.
