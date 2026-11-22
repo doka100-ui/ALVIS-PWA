@@ -748,8 +748,8 @@ const taskMetadataEnd=app.indexOf("\nfunction parseAutonomyGoalProposal",taskMet
 assert.ok(taskMetadataStart>=0&&taskMetadataEnd>taskMetadataStart,"autonomy task metadata helper must exist");
 const getAutonomyTaskMetadata=new Function(app.slice(taskMetadataStart,taskMetadataEnd)+"; return getAutonomyTaskMetadata;")();
 const generatedDraft={dataset:{sourceGoal:"会話の文脈理解を強化",sourceAction:"直近の会話を確認する",goalReason:"訂正反映の確認が必要",successCriteria:"訂正後の返答が自然になる",priority:"high",origin:"self_goal"}};
-assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"会話の文脈理解を強化","直近の会話を確認する"),{reason:"訂正反映の確認が必要",successCriteria:"訂正後の返答が自然になる",priority:"high",origin:"self_goal",sourceIssueCreatedAt:"",sourceIssueTitle:""});
-assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"別の目標","直近の会話を確認する"),{reason:"",successCriteria:"",priority:"medium",origin:"user_goal",sourceIssueCreatedAt:"",sourceIssueTitle:""},"edited goal must not retain stale AI metadata");
+assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"会話の文脈理解を強化","直近の会話を確認する"),{reason:"訂正反映の確認が必要",successCriteria:"訂正後の返答が自然になる",priority:"high",origin:"self_goal",sourceIssueKey:"",sourceIssueTitle:""});
+assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"別の目標","直近の会話を確認する"),{reason:"",successCriteria:"",priority:"medium",origin:"user_goal",sourceIssueKey:"",sourceIssueTitle:""},"edited goal must not retain stale AI metadata");
 assert.deepEqual(getAutonomyTaskMetadata(generatedDraft,"会話の文脈理解を強化","別の行動"),{reason:"",successCriteria:"",priority:"medium",origin:"user_goal"},"edited action must not retain stale AI metadata");
 assert.match(app,/dataset\.sourceGoal=proposal\.goal/);
 assert.match(app,/dataset\.sourceAction=proposal\.firstAction/);
