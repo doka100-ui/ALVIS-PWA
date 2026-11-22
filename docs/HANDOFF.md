@@ -1,3 +1,8 @@
+## Latest update — v299 ALVIS outer ring corrected to a true circle
+- User reported v298 looked unchanged and the ring was not round. Root cause: ring C remained a flattened 125% x 31% ellipse; v298 only added teeth around that ellipse.
+- v299 replaces ring C geometry in ALVIS mode only with a square aspect-ratio 1:1 box (max 280px), preserving left/top centering and 42-second independent rotation; fine radial gear teeth are masked to a circular rim.
+- Avatar mode, globe, inner rings, memory/history/encryption/sync/backup, model caches and voice are untouched. Safe refresh page refresh-v299.html; app shell cache alvis-cache-v299-integrated. Wait for CI and user visual confirmation before treating as final.
+
 
 ## Latest update — v298 ALVIS outer ring gear rim
 - v297 rotation and centered placement were confirmed by the user. v298 adds 64 evenly spaced fine radial teeth to the existing outer ring using a masked conic-gradient pseudo-element; the ellipse geometry, center, tilt, 42-second rotation and existing marker remain unchanged.
