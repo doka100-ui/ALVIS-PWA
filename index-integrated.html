@@ -2751,7 +2751,7 @@ function selectRelevantMemories(query, memories, history){
     const phraseMatch=q.length>=3&&compact(value).includes(q);
     const direct=Math.max(titleScore*1.2,bodyScore)+(phraseMatch?3:0);
     const contextual=contextLines.length
-      ?Math.max(...contextLines.map(line=>scoreContextMatch(line,value)),0)*0.32
+      ?Math.max(...contextLines.map(line=>scoreContextMatch(line,value)),0)
       :0;
     let topicBoost=0;
     groups.forEach(group=>{
@@ -2759,7 +2759,7 @@ function selectRelevantMemories(query, memories, history){
     });
     // 会話文脈は現在の質問に直接関連する記憶の順位付けだけを補助する。
     // 文脈だけで無関係な記憶が候補へ浮上するのを防ぐ。
-    const score=direct+(direct>0?contextual:(context.usedContext?contextual*0.45:0))+topicBoost;
+    const score=direct+contextual*(direct>0?0.32:0.45)+topicBoost;
     if(score>=1.6){
       const timestamp=Date.parse(item?.updatedAt||item?.createdAt||"");
       ranked.push({text:value,score,index,timestamp:Number.isFinite(timestamp)?timestamp:0});
