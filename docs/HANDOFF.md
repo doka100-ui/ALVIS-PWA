@@ -1,3 +1,10 @@
+## Latest update — v322 Safariクラッシュ後も残る一時診断ログ
+- v321のモデル起動ログがページメモリ内だけで、Safariがページを再読み込みするクラッシュ時に失われる弱点を修正。
+- 技術ログ最大32件を同一タブのsessionStorageへ保存し、再読み込み後の端末診断で復元する。GPU device lost理由、モデル読み込み段階、WebLLM進捗、キャッシュ判定を対象とする。
+- 会話本文、プロンプト、記憶、個人情報は記録しない。localStorage/IndexedDB/Cache Storage/クラウド同期は使用せず、タブを閉じると消える一時ログのみ。
+- 以前の起動記録を次の起動開始時に消さず、最大32件で保持する。ユーザーは診断内容を確認するまで再試行しない。
+- Service Worker cache alvis-cache-v322-integrated、更新ページ refresh-v322.html。自動テストで確認。Safariの実機クラッシュ後にsessionStorageが保持されるかは実機依存で未確認。
+
 ## Latest update — v321 Qwen起動時のキャッシュ/GPU診断記録
 - Safariでのモデル再取得疑いを安全に切り分けるため、Qwen起動時の段階、WebLLM進捗コールバック文、モデル重みキャッシュの起動前/初期化後判定、永続化要求の結果、失敗内容を最大32件だけメモリ内に記録し、端末診断へ表示する。
 - 記録はこのページのJavaScriptメモリ内だけに保持し、localStorage、IndexedDB、Cache Storage、クラウド同期へ保存しない。ログアウト/ページ再読み込みで消える。記憶、会話履歴、暗号化、同期、バックアップ、既存モデルキャッシュには触れない。

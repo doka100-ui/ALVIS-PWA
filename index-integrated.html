@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v321";
+const ALVIS_APP_BUILD_ID="v322";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -675,6 +675,7 @@ function installAlvisWebGpuDiagnostics(){
             alvisGpuDiagnostics.deviceLostReasonCode=String(info?.reason||"unknown").slice(0,40);
             alvisGpuDiagnostics.deviceLostReason=String(info?.message||"理由なし").slice(0,180);
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
+            if(info?.reason!=="destroyed")recordAlvisModelLoadTrace("WebGPU device lost："+alvisGpuDiagnostics.deviceLostReasonCode+" / "+alvisGpuDiagnostics.deviceLostReason);
             // Explicit engine unload also destroys its GPUDevice; do not treat that as a crash.
             if(info?.reason!=="destroyed"){
               if(alvisGpuDiagnostics.captureModelDevices)alvisGpuLossDuringLoad=info;
@@ -685,6 +686,7 @@ function installAlvisWebGpuDiagnostics(){
             alvisGpuDiagnostics.deviceLostReasonCode="promise-rejected";
             alvisGpuDiagnostics.deviceLostReason=String(error?.message||error||"lost promise rejected").slice(0,180);
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
+            recordAlvisModelLoadTrace("WebGPU device lost promise rejected："+alvisGpuDiagnostics.deviceLostReason);
             const lossInfo={reason:"promise-rejected",message:error?.message||String(error)};
             if(alvisGpuDiagnostics.captureModelDevices)alvisGpuLossDuringLoad=lossInfo;
             void handleAlvisUnexpectedGpuLoss(lossInfo);
@@ -769,16 +771,24 @@ let alvisHasModelInCache = null;
 let alvisWebLLMVersion = "未読み込み";
 let alvisServiceWorkerReady = Promise.resolve(false);
 let alvisStoragePersistenceStatus = "未要求";
-// 技術情報だけをメモリ内に保持し、モデル再取得とGPU初期化失敗を切り分ける。
-// localStorage/IndexedDB/Cache Storageへは保存しない。
+// 技術情報だけをSafariの同一タブsessionStorageへ一時保存し、ページ再読込後も診断できるようにする。
+// 会話内容・プロンプト・記憶・個人情報は記録しない。タブを閉じると消え、クラウド同期もしない。
+const ALVIS_DIAGNOSTIC_SESSION_KEY="alvis-qwen-diagnostic-v1";
 let alvisModelLoadTrace=[];
+try{
+  const saved=JSON.parse(sessionStorage.getItem(ALVIS_DIAGNOSTIC_SESSION_KEY)||"[]");
+  if(Array.isArray(saved))alvisModelLoadTrace=saved.filter(x=>typeof x==="string").slice(-32);
+}catch(error){}
 let alvisModelCacheAtStart=null;
 let alvisModelCacheAfterInit=null;
 function recordAlvisModelLoadTrace(message){
   const entry=new Date().toISOString()+" "+String(message||"").replace(/\s+/g," ").slice(0,180);
   alvisModelLoadTrace.push(entry);
   if(alvisModelLoadTrace.length>32)alvisModelLoadTrace.splice(0,alvisModelLoadTrace.length-32);
+  try{sessionStorage.setItem(ALVIS_DIAGNOSTIC_SESSION_KEY,JSON.stringify(alvisModelLoadTrace));}catch(error){}
 }
+window.addEventListener("pagehide",()=>recordAlvisModelLoadTrace("ページ非表示/終了イベント（visibility："+(document.visibilityState||"unknown")+"）"));
+window.addEventListener("pageshow",event=>{if(event.persisted)recordAlvisModelLoadTrace("Safari BFCacheから復帰");});
 
 // Service Workerのinstall/cache.addAllが失敗するとreadyが長時間pendingになる環境がある。
 // アプリシェルのキャッシュ準備は待ち過ぎず、AIモデル取得そのものは直接続行する。
@@ -2562,7 +2572,7 @@ $("loadAiModel").addEventListener("click",async()=>{
   aiLoadProgress=0;
   let alvisLoadStage="起動処理を開始";
   let alvisLoadProgressText="";
-  alvisModelLoadTrace=[];
+  recordAlvisModelLoadTrace("===== 新しいモデル起動試行 =====");
   alvisModelCacheAtStart=null;
   alvisModelCacheAfterInit=null;
   const alvisLoadStartedAt=Date.now();
@@ -4221,8 +4231,9 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
     lines.push("WebLLM必要VRAM目安："+ALVIS_MODEL_VRAM_ESTIMATE_MB.toFixed(0)+" MB（モデル定義値。端末の空きGPUメモリではありません）");
     lines.push("モデル重みキャッシュ事前確認："+(alvisModelCacheAtStart===null?"未記録":alvisModelCacheAtStart?"検出":"未検出"));
     lines.push("モデル重みキャッシュ初期化後："+(alvisModelCacheAfterInit===null?"未記録":alvisModelCacheAfterInit?"検出":"未検出"));
-    lines.push("モデル起動時の読み込み記録（最新32件・この画面のメモリ内のみ）：");
-    lines.push(...(alvisModelLoadTrace.length?alvisModelLoadTrace:["この画面での起動記録はありません"]));
+    lines.push("モデル起動時の読み込み記録（最新32件・このSafariタブ内に一時保存）：");
+    lines.push(...(alvisModelLoadTrace.length?alvisModelLoadTrace:["このタブに保存済みの起動記録はありません"]));
+    lines.push("診断ログ保存先：Safari sessionStorage（一時保存・同一タブのみ・タブを閉じると消去・クラウド同期なし）");
     lines.push("AIモデルの保存状態：モデル重みキャッシュの存在のみ確認。完全なオフライン再利用は未確認");
     lines.push("Kokoroモデルの保存状態：この画面から個別判定できません");
     lines.push("");
