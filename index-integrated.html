@@ -850,6 +850,7 @@ function requestAlvisStoragePersistence(){
   }catch(error){
     // persist()がPromiseを返す前に同期例外を投げても、AIモデルの起動を止めない。
     alvisStoragePersistenceStatus="要求失敗（"+String(error?.message||error||"不明").slice(0,100)+"）";
+    persistAlvisDiagnosticState();
     return Promise.resolve(false);
   }
 }
