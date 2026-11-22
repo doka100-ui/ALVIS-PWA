@@ -856,8 +856,8 @@ assert.match(app,/CreateMLCEngine\(ALVIS_MODEL_ID,/);
 assert.match(app,/modelDevices:\[\]/,"GPU devices created during model initialization must be tracked temporarily");
 assert.match(app,/captureModelDevices\|\|alvisGpuDiagnostics\.modelDevices\.includes\(device\)/,"GPU loss immediately after CreateMLCEngine resolves must still be captured until the engine takes ownership");
 assert.match(app,/if\(alvisGpuDiagnostics\.captureModelDevices\|\|alvisGpuDiagnostics\.modelDevices\.includes\(device\)\)alvisGpuLossDuringLoad=lossInfo/,"rejected GPU lost promises must also be captured during the ownership handoff");
-assert.match(app,/failedModelDevices=alvisGpuDiagnostics\.modelDevices\.splice\(0\)/,"failed initialization must release partially allocated GPU devices");
-assert.match(app,/failedModelDevices\.forEach\(device=>\{try\{device\?\.destroy\?\.\(\)/,"partial GPU allocations must be explicitly destroyed after initialization failure");
+assert.match(app,/failedModelDeviceCount=releaseCapturedAlvisModelDevices\(\{destroy:true,reason:"モデル初期化失敗"\}\)/,"failed initialization must release partially allocated GPU devices");
+assert.match(app,/function releaseCapturedAlvisModelDevices\([\s\S]*?device\?\.destroy\?\.\(\)/,"partial GPU allocations must be explicitly destroyed after initialization failure");
 
 // v326: model lifecycle must reject duplicate starts synchronously and preserve WebLLM-managed caches.
 const modelLoadHandler=app.slice(app.indexOf('$("loadAiModel").addEventListener("click",async()=>{'),app.indexOf('$("unloadAiModel").addEventListener("click",async()=>{'));
@@ -875,7 +875,7 @@ assert.match(unloadHandler,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engi
 const loadHandler=app.slice(app.indexOf('$("loadAiModel").addEventListener("click",async()=>{'),app.indexOf('$("unloadAiModel").addEventListener("click",async()=>{'));
 assert.match(loadHandler,/await alvisEngineCleanupPromise;[\s\S]*?if\(alvisEngineCleanupError\)throw new Error/,"new model initialization must wait for previous GPU cleanup and stop on cleanup failure");
 assert.match(loadHandler,/if\(!unlocked\)[\s\S]*?await engine\.unload\(\)[\s\S]*?return;/,"an engine that finishes initializing after logout must be unloaded instead of published");
-assert.match(loadHandler,/const failedModelDevices=alvisGpuDiagnostics\.modelDevices\.splice\(0\);[\s\S]*?failedModelDevices\.forEach\(device=>\{try\{device\?\.destroy\?\.\(\)/,"partial GPU devices must be destroyed when model initialization fails");
+assert.match(loadHandler,/failedModelDeviceCount=releaseCapturedAlvisModelDevices\(\{destroy:true,reason:"モデル初期化失敗"\}\)/,"partial GPU devices must be destroyed when model initialization fails");
 
 
 assert.match(sw,/key\.startsWith\("alvis-cache-"\)[\s\S]*?key\.startsWith\("alvis-deps-"\)/,"activation cleanup must be restricted to ALVIS-owned caches");
