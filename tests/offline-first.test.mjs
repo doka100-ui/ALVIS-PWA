@@ -8,7 +8,7 @@ const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
 const refresh292 = await readFile(new URL("../refresh-v292.html", import.meta.url), "utf8");
-const refresh329 = await readFile(new URL("../refresh-v330.html", import.meta.url), "utf8");
+const refresh330 = await readFile(new URL("../refresh-v330.html", import.meta.url), "utf8");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -132,12 +132,12 @@ assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
 assert.match(sw,/alvis-cache-v330-integrated/);
-assert.match(refresh329,/alvis-cache-v330-integrated/);
-assert.match(refresh329,/refresh=329/);
-assert.match(refresh329,/registration\.update\(\)/);
-assert.match(refresh329,/ALVIS_GET_BUILD_INFO/);
-assert.match(refresh329,/location\.replace\(target\)/);
-assert.doesNotMatch(refresh329,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
+assert.match(refresh330,/alvis-cache-v330-integrated/);
+assert.match(refresh330,/refresh=330/);
+assert.match(refresh330,/registration\.update\(\)/);
+assert.match(refresh330,/ALVIS_GET_BUILD_INFO/);
+assert.match(refresh330,/location\.replace\(target\)/);
+assert.doesNotMatch(refresh330,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
