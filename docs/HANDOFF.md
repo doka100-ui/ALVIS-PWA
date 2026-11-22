@@ -1,3 +1,10 @@
+## Latest update — v300 outer ALVIS gear centered and made more visible
+- User confirmed v299 finally rendered a true circle, but reported that it was off-center and the fine gear teeth were hard to distinguish.
+- v300 moves only the ALVIS-mode outer ring C from top:48% to top:50%, aligning its center with the globe core. The 1:1 circular geometry and independent 42-second rotation remain.
+- The gear rim now uses 48 more visible radial teeth (7.5-degree pitch), a thicker radial band (85–100%), brighter cyan/white contrast and stronger restrained glow.
+- Avatar mode, globe artwork, inner rings, projector/platform, chat, memory/history/encryption/sync/backup, WebLLM/Kokoro models and caches are untouched. No user data or model caches are cleared.
+- Safe update page: refresh-v300.html; Service Worker app shell cache: alvis-cache-v300-integrated. Browser smoke tests now verify top:50%, circular geometry, shared globe/ring centers and the clearer tooth spacing. Wait for CI/deployment and user visual confirmation before treating as complete.
+
 ## Latest update — v299 ALVIS outer ring corrected to a true circle
 - User reported v298 looked unchanged and the ring was not round. Root cause: ring C remained a flattened 125% x 31% ellipse; v298 only added teeth around that ellipse.
 - v299 replaces ring C geometry in ALVIS mode only with a square aspect-ratio 1:1 box (max 280px), preserving left/top centering and 42-second independent rotation; fine radial gear teeth are masked to a circular rim.
