@@ -1074,5 +1074,5 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 
 ## v329 — Kokoro一時音声リソースの後始末
 - WebAudio再生完了・停止時にAudioBufferSourceNodeとAnalyserNodeを切断し、source.bufferをnullにしてデコード済み音声バッファへの参照を解放する。
-- HTMLAudioElement再生完了時はsrcとイベントハンドラを解除し、load()でメディアリソースをリセット。一時Object URLをrevokeする。
+- HTMLAudioElement再生完了時はsrcとイベントハンドラを解除し、load()でメディアリソースをリセット。一時Object URLをrevokeする。 ログアウト時も共通解放処理を実行する。
 - Kokoroモデル本体やモデルキャッシュの破棄は行わない。公開APIに安全なunloadが確認できないため。
