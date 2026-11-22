@@ -183,7 +183,7 @@ assert.match(app,/前回のモデル解放に失敗しています[\s\S]*?ペー
 
 // v239: GPU loss during CreateMLCEngine startup must be recorded and the resolved stale engine unloaded.
 assert.match(app,/let alvisGpuLossDuringLoad=null/);
-assert.match(app,/if\(alvisGpuDiagnostics\.captureModelDevices\)alvisGpuLossDuringLoad=info/);
+assert.match(app,/if\(alvisGpuDiagnostics\.captureModelDevices\|\|alvisGpuDiagnostics\.modelDevices\.includes\(device\)\)alvisGpuLossDuringLoad=info/);
 assert.match(app,/alvisGpuLossDuringLoad=null;[\s\S]*?captureModelDevices=true/);
 assert.match(app,/const engine=serializeAlvisInference\(loadedEngine\);[\s\S]*?if\(alvisGpuLossDuringLoad\)[\s\S]*?await engine\.unload\(\);[\s\S]*?throw new Error\("モデル読み込み中にWebGPUが停止しました/);
 
