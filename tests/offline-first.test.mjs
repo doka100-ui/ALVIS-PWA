@@ -1193,6 +1193,7 @@ assert.match(send,/if\(!isCurrentSession\(\)\)return;[\s\S]*?const citationResul
 assert.match(send,/if\(isCurrentSession\(\)\)\{[\s\S]*?alvisResponseInProgress=false/,"an old request's finally block must not unlock a newer session's send operation");
 assert.match(send,/setTimeout\(\(\)=>\{if\(isCurrentSession\(\)\)speakAlvis\(reply\);\},80\)/,"delayed auto-speech must be ignored after logout");
 assert.match(app,/function lockApp\(\)[\s\S]*?speechSynthesis\.cancel\(\)[\s\S]*?stopAlvisLipSync\(\)/,"logout must stop active speech and lip-sync");
+assert.match(app,/function lockApp\(\)[\s\S]*?releaseKokoroAudioSource\(\)[\s\S]*?releaseKokoroMediaPlayback\(\)/,"logout must release Kokoro audio nodes, media resources and temporary object URLs");
 assert.match(app,/function speakAlvis\(text,options=\{\}\)\{[\s\S]*?if\(!unlocked\)return/,"speech must not start while logged out");
 assert.match(app,/prepareKokoroTTS\(\)\.then\(engine=>\{if\(engine&&unlocked&&speechSessionGeneration===alvisSessionGeneration\)speakKokoro\(text\);\}\)/,"late Kokoro preparation must not start speech in a later session");
 assert.match(send,/if\(failedEngine\)\{try\{await failedEngine\.unload\(\);\}catch\(unloadError\)\{\}\}[\s\S]*?if\(!isCurrentSession\(\)\)return/,"late inference-error cleanup must not write into a later session");

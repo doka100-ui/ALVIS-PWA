@@ -2596,10 +2596,8 @@ function lockApp(){
   alvisResponseStartedAt=0;
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
   stopAlvisLipSync();
-  if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
-  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;}
-  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
-  const voicePlayer=$("kokoroPlayer");if(voicePlayer){voicePlayer.pause();voicePlayer.removeAttribute("src");voicePlayer.classList.add("hidden");}
+  releaseKokoroAudioSource();
+  releaseKokoroMediaPlayback();
   stopPolling();
   if(aiEngine){
     const engine=aiEngine;
