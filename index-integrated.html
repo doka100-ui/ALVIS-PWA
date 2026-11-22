@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v314";
+const ALVIS_APP_BUILD_ID="v315";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -1483,6 +1483,21 @@ function findDuplicateAutonomyIssue(issues,candidate){
     normalizeAutonomyTaskText(issue?.title)===title &&
     normalizeAutonomyTaskText(issue?.nextAction)===action
   );
+}
+
+function buildAutonomyDuplicateRetryPrompt(promptText,previousTask){
+  return [
+    promptText,
+    "重要：直前の目標案は既存タスクと重複していたため採用できません。今回は必ず異なる目標、または過去に試していない具体的な最初の行動を1つ提案してください。",
+    "重複していた既存タスク："+JSON.stringify({
+      goal:previousTask?.goal||"",
+      action:previousTask?.action||"",
+      status:previousTask?.status||"",
+      note:previousTask?.note||"",
+      retrospective:previousTask?.retrospective||null
+    }),
+    "完了済みなら同じ行動を言い換えるだけにせず、retrospectiveの根拠と次の検証方法を踏まえた別の小さな実験にしてください。未完了なら既存タスクを再利用せず、別の確認方法を選んでください。"
+  ].join("\n");
 }
 
 function parseAutonomyGoalProposal(value){
@@ -3704,13 +3719,22 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
       "改善計画：",JSON.stringify(plans),
       "承認済み学習：",JSON.stringify(lessons)
     ].join("\n");
-    const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠・安全性・継続改善を重視する自律型個人AIです。指定されたJSONだけを返してください。"},{role:"user",content:promptText}],temperature:0.25,max_tokens:260,extra_body:{enable_thinking:false}});
-    const proposal=parseAutonomyGoalProposal(result.choices?.[0]?.message?.content||"");
-    const repeatedTaskIndex=findDuplicateAutonomyTask(data.autonomyTasks,proposal.goal,proposal.firstAction);
+    let result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠・安全性・継続改善を重視する自律型個人AIです。指定されたJSONだけを返してください。"},{role:"user",content:promptText}],temperature:0.25,max_tokens:260,extra_body:{enable_thinking:false}});
+    let proposal=parseAutonomyGoalProposal(result.choices?.[0]?.message?.content||"");
+    let repeatedTaskIndex=findDuplicateAutonomyTask(data.autonomyTasks,proposal.goal,proposal.firstAction);
     if(repeatedTaskIndex!==-1){
       const repeatedTask=data.autonomyTasks[repeatedTaskIndex];
-      const stateLabel=repeatedTask.status==="done"?"完了済み":"未完了";
-      throw new Error("同じ目標と最初の行動は"+stateLabel+"タスクに登録済みです。過去の結果を確認し、別の検証方法を選んでください。");
+      const retryPrompt=buildAutonomyDuplicateRetryPrompt(promptText,repeatedTask);
+      result=await aiEngine.chat.completions.create({messages:[
+        {role:"system",content:"あなたは過去の失敗や重複を避けて改善案を作る自律型個人AIです。指定されたJSONだけを返してください。"},
+        {role:"user",content:retryPrompt}
+      ],temperature:0.35,max_tokens:260,extra_body:{enable_thinking:false}});
+      proposal=parseAutonomyGoalProposal(result.choices?.[0]?.message?.content||"");
+      repeatedTaskIndex=findDuplicateAutonomyTask(data.autonomyTasks,proposal.goal,proposal.firstAction);
+      if(repeatedTaskIndex!==-1){
+        const stateLabel=data.autonomyTasks[repeatedTaskIndex].status==="done"?"完了済み":"未完了";
+        throw new Error("別案を1回再提案しましたが、"+stateLabel+"タスクとの重複を解消できませんでした。既存タスクの結果を確認してから再実行してください。");
+      }
     }
     $("autonomyGoal").value=proposal.goal;
     $("autonomyTaskDraft").value=proposal.firstAction;
