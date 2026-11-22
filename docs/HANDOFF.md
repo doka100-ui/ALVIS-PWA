@@ -1,3 +1,9 @@
+## Latest update — v302 align the outer gear to the actual globe center
+- v301 positioned ring C at the center of the full `.hud-center` container. Inspection of the effective live CSS showed the globe core itself is intentionally positioned at `left:50% / top:42%`, so centering the ring at the container's 50%/50% left it visibly below the globe center.
+- v302 changes only ring C's anchor to `left:50% / top:42%` and centers the ring's own bounds with `translate:-50% -50%`. Its circular 1:1 shape, diameter rules, gear teeth, border/glow, and independent 42-second rotation remain unchanged.
+- Avatar mode, globe/core, inner rings, projector/platform, chat, AI/model loading, encrypted memories, history, sync, backup, WebLLM/Kokoro caches are not changed. No caches or user data are cleared.
+- Refresh bridge: `refresh-v302.html`; Service Worker shell cache: `alvis-cache-v302-integrated`. Browser smoke now measures ring C against the globe core's actual center (50%/42%) in Chromium/WebKit/iPhone-width WebKit.
+
 ## Latest update — v301 true auto-margin centering for outer ALVIS gear
 - User confirmed v300 ring was still visually off-center after top:50%.
 - Root issue: percentage top + individual translate is not robust enough across responsive stage sizing. v301 anchors the square ring to all four edges of its actual .hud-center containing block (inset:0) and uses auto margins to center it; percentage translate is removed. Since .hud-core is grid-centered in the same .hud-center, this aligns the gear's geometric center directly with the globe core.
