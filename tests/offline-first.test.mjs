@@ -30,9 +30,9 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v309-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v309"/);
-assert.match(sw,/alvis-cache-v309-integrated/);
+assert.match(sw,/alvis-cache-v310-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v310"/);
+assert.match(sw,/alvis-cache-v310-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
 assert.match(app,/登録済みactive Worker版/);
 assert.match(app,/ALVISアプリキャッシュ一覧/);
@@ -99,7 +99,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v309-integrated/);
+assert.match(sw, /alvis-cache-v310-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -110,7 +110,7 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v309-integrated/);
+assert.match(sw,/alvis-cache-v310-integrated/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
@@ -1086,6 +1086,26 @@ assert.match(app,/「妻は？」「料金は？」のような短い名詞句�
 assert.match(app,/const conversationForGeneration=buildBoundedGenerationMessages\(recent,text\)/,"generation must use the bounded context builder");
 assert.match(sw,/alvis-cache-v\d+-integrated/,"v233 app shell must use refreshed cache");
 
+ // v310: contextual memory lookup must recognize real stored ALVIS turns as elliptical follow-up context.
+ const contextualHelperStart=app.indexOf("function buildContextualQuery(query, history){");
+ const contextualHelperEnd=app.indexOf("\\nfunction ",contextualHelperStart+20);
+ assert.ok(contextualHelperStart>=0&&contextualHelperEnd>contextualHelperStart,"contextual query helper must exist");
+ const contextualSource=app.slice(contextualHelperStart,contextualHelperEnd);
+ const ellipticalSourceStart=app.indexOf("function isEllipticalFollowUpMessage(text,priorTurns=[]){");
+ const ellipticalSourceEnd=app.indexOf("\\nfunction ",ellipticalSourceStart+20);
+ const ellipticalClassifier=new Function(app.slice(ellipticalSourceStart,ellipticalSourceEnd)+"; return isEllipticalFollowUpMessage;")();
+ const followupClassifierStart=app.indexOf("function isFollowUpMessage(text){");
+ const followupClassifierEnd=app.indexOf("\\nfunction ",followupClassifierStart+20);
+ const followupClassifier=new Function(app.slice(followupClassifierStart,followupClassifierEnd)+"; return isFollowUpMessage;")();
+ const contextualQueryForTest=new Function("isFollowUpMessage","isEllipticalFollowUpMessage",contextualSource+"; return buildContextualQuery;")(followupClassifier,ellipticalClassifier);
+ const storedAlvisHistory=[{role:"user",text:"妻の日本人の配偶者等の在留資格を申請したよ。"},{role:"alvis",text:"申請後は審査結果を待つ流れだよ。"},{role:"user",text:"妻は？"}];
+ const storedFollowup=contextualQueryForTest("妻は？",storedAlvisHistory);
+ assert.equal(storedFollowup.usedContext,true,"short follow-up must recognize persisted role:alvis history");
+ assert.match(storedFollowup.context,/日本人の配偶者等の在留資格/,"follow-up context must retain the actual preceding topic");
+ const standaloneQuery=contextualQueryForTest("富士山の高さは？",storedAlvisHistory);
+ assert.equal(standaloneQuery.usedContext,false,"complete independent questions must not inherit unrelated history");
+ assert.match(app,/item\?\.role==="assistant"\|\|item\?\.role==="alvis"/,"elliptical follow-up classifier must accept the persisted ALVIS assistant role");
+
 
 // v241: asynchronous chat and voice work from a logged-out session must not mutate or speak into a later session.
 assert.match(app,/let alvisSessionGeneration=0/,"chat session generation must be tracked");
@@ -1152,7 +1172,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v309-integrated"),"v300 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v310-integrated"),"v300 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
