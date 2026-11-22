@@ -1076,3 +1076,8 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - WebAudio再生完了・停止時にAudioBufferSourceNodeとAnalyserNodeを切断し、source.bufferをnullにしてデコード済み音声バッファへの参照を解放する。
 - HTMLAudioElement再生完了時はsrcとイベントハンドラを解除し、load()でメディアリソースをリセット。一時Object URLをrevokeする。 ログアウト時も共通解放処理を実行する。
 - Kokoroモデル本体やモデルキャッシュの破棄は行わない。公開APIに安全なunloadが確認できないため。
+
+
+## v330 — WebLLMキャッシュ診断
+- 端末診断へCache APIを維持していることと、`webllm/model`・`webllm/config`・`webllm/wasm`のエントリー数を読み取り専用で追加表示する。
+- キャッシュの存在と完全オフライン再利用を混同しない。キャッシュの削除・移行・保存形式変更は禁止。

@@ -2541,3 +2541,11 @@
 - v328ブラウザテストで更新URLの期待値が327のまま残っていたため、v329の実際のリダイレクト先と一致するよう修正。
 - Kokoroモデル本体の解放APIは追加せず、モデル初期化/キャッシュ、Qwen、記憶・履歴・同期・バックアップ、デザインは変更しない。
 - Service Worker cache: `alvis-cache-v329-integrated`。更新ページ: `refresh-v329.html`。
+
+
+## v330 — WebLLMキャッシュの内訳診断（2026-11-23）
+- 端末診断にWebLLMの既定保存方式（Cache API）を明示し、既存の保存先を変更していないことを表示する。
+- `webllm/model`（モデル重み）、`webllm/config`（設定）、`webllm/wasm`（実行ファイル）の各Cache Storageエントリー数を読み取り専用で表示する。存在しない場合は「キャッシュなし」、読み取り失敗は「確認不可」と区別する。
+- 既存のhasModelInCacheによるモデル重み確認と合わせ、再起動時の再取得原因を切り分けやすくする。完全オフライン再利用を保証する表示にはしない。
+- モデルID/context/WebLLMバージョン/Cache APIデータ/記憶・履歴・同期・バックアップ・画面デザインは変更しない。キャッシュ削除・移行・再取得は行わない。
+- Service Worker cache: `alvis-cache-v330-integrated`。更新ページ: `refresh-v330.html`。

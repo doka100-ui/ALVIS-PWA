@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v329";
+const ALVIS_APP_BUILD_ID="v330";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4281,6 +4281,7 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
       const workerCaches=new Set([controllingWorkerCache,registeredActiveWorkerCache].filter(value=>value.startsWith("alvis-cache-")));
       const otherAppCaches=appCaches.filter(key=>!workerCaches.has(key));
       const otherCaches=keys.filter(key=>!key.startsWith("alvis-cache-")&&!key.startsWith("alvis-deps-"));
+      const webllmCacheCounts={"webllm/model":"キャッシュなし","webllm/config":"キャッシュなし","webllm/wasm":"キャッシュなし"};
       lines.push("ALVISアプリキャッシュ一覧："+(appCaches.join(", ")||"見つかりません"));
       lines.push("制御中Workerのキャッシュ："+(controllingWorkerCache.startsWith("alvis-cache-")?controllingWorkerCache:"特定できません"));
       lines.push("登録済みactive Workerのキャッシュ："+(registeredActiveWorkerCache.startsWith("alvis-cache-")?registeredActiveWorkerCache:"特定できません"));
@@ -4292,12 +4293,16 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
           const cache=await caches.open(key);
           const entries=await cache.keys();
           lines.push("  "+key+"："+entries.length+"件");
+          if(Object.prototype.hasOwnProperty.call(webllmCacheCounts,key))webllmCacheCounts[key]=entries.length+"件";
         }catch(cacheError){
           lines.push("  "+key+"：内容を確認できません");
         }
       }
+      lines.push("WebLLM保存方式：Cache API（WebLLMの既定方式。保存先の変更なし）");
+      lines.push("WebLLMキャッシュ内訳：モデル重み "+webllmCacheCounts["webllm/model"]+" / 設定 "+webllmCacheCounts["webllm/config"]+" / WASM "+webllmCacheCounts["webllm/wasm"]);
     }else{
       lines.push("Cache Storage：利用不可");
+      lines.push("WebLLM保存方式：Cache Storageを確認できません");
     }
     if(navigator.storage?.estimate){
       const estimate=await navigator.storage.estimate();
