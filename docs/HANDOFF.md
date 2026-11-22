@@ -2524,3 +2524,11 @@
 - 正常なunload、既存モデルキャッシュ、モデルID/量子化/context 1024/WebLLM 0.2.87、記憶・履歴・同期・バックアップ、ALVIS完成形v308、Avatarモードは変更しない。自動再読み込みやキャッシュ削除は行わない。
 - Service Worker cache: `alvis-cache-v327-integrated`。更新ページ: `refresh-v327.html`。
 - CIでGPU停止後のunload失敗、初期化中の停止/ログアウト、同一ページ内の二重起動防止を検査する。
+
+ 
+## v328 — Kokoro音声モデルの遅延初期化（2026-11-22）
+- 音声エンジン設定でKokoroを選んだだけではKokoroJP.load()を呼ばず、実際にKokoro読み上げが必要になった時だけ初期化する。
+- Qwen3-4B起動中は従来どおり標準音声へフォールバックし、Kokoroを同時にロードしない。設定値と音声選択は保持する。
+- kokoro-js-jp 0.2.0の公開APIにモデル解放メソッドが確認できないため、擬似的なnull代入や危険な破棄処理は追加しない。Kokoroが実際にロード済みの場合の既存のページ再読み込みガードを維持。
+- モデルID/量子化/context 1024/WebLLM 0.2.87/Cache API、記憶・履歴・同期・バックアップ、デザインは変更しない。
+- Service Worker cache: `alvis-cache-v328-integrated`。更新ページ: `refresh-v328.html`。

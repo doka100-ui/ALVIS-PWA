@@ -1064,3 +1064,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - WebGPU device loss後のengine.unload()が失敗した場合、失敗状態をページ内に保持し、同じページでのモデル再起動を禁止する。
 - 初期化途中のGPU停止とログアウト時も、engine解放失敗を保持して二重起動を防止する。
 - ページ再読み込み後の手動再試行を案内し、モデルキャッシュやユーザーデータの削除は行わない。
+
+ 
+## v328 — Kokoro遅延初期化
+- Kokoro選択操作ではモデルを初期化せず、実際の読み上げ要求時のみ初期化する。
+- Qwen実行中は標準音声へフォールバックし、KokoroとQwenを同時に初期化しない。
+- Kokoro公開APIに安全な解放処理が確認できない限り、擬似的なモデル破棄は行わない。

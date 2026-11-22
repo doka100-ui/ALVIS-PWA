@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v327";
+const ALVIS_APP_BUILD_ID="v328";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -3792,7 +3792,15 @@ $("previewKokoroTuned")?.addEventListener("click",async()=>{unlockAlvisAudioFrom
 $("ttsEngine").value=localStorage.getItem("ALVIS_TTS_ENGINE")||"standard";
 $("kokoroVoice").value=localStorage.getItem("ALVIS_KOKORO_VOICE")||"jf_alpha";
 $("kokoroRate").value=localStorage.getItem("ALVIS_KOKORO_RATE")||"1.04";updateKokoroRateLabel();
-$("ttsEngine").addEventListener("change",()=>{localStorage.setItem("ALVIS_TTS_ENGINE",$("ttsEngine").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));if($("ttsEngine").value==="kokoro"&&!kokoroTts)prepareKokoroTTS();});
+$("ttsEngine").addEventListener("change",()=>{
+  localStorage.setItem("ALVIS_TTS_ENGINE",$("ttsEngine").value);
+  persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));
+  if($("ttsEngine").value==="kokoro"){
+    setStatus("voiceStatus",aiEngine||aiLoading
+      ?"Kokoroを選択しました。Qwen3-4B使用中は標準音声に切り替え、Kokoroモデルは起動しません。Qwen終了後、実際の読み上げ時に準備します。"
+      :"Kokoroを選択しました。音声モデルは実際の読み上げ時にだけ準備します。");
+  }
+});
 $("kokoroVoice").addEventListener("change",()=>{localStorage.setItem("ALVIS_KOKORO_VOICE",$("kokoroVoice").value);persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
 $("autoSpeak").checked=localStorage.getItem("ALVIS_AUTO_SPEAK")!=="false";
 $("autoSpeak").addEventListener("change",()=>{localStorage.setItem("ALVIS_AUTO_SPEAK",$("autoSpeak").checked?"true":"false");persistVoiceSettings().catch(error=>setStatus("voiceStatus","音声設定の保管庫保存に失敗しました: "+error.message));});
