@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v323";
+const ALVIS_APP_BUILD_ID="v324";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -783,6 +783,19 @@ try{
 }catch(error){}
 let alvisModelCacheAtStart=null;
 let alvisModelCacheAfterInit=null;
+// 同一タブ内で診断メタデータを保持し、Safari再読込後の「未記録」表示を防ぐ。
+const ALVIS_DIAGNOSTIC_STATE_KEY="alvis-qwen-diagnostic-state-v1";
+function persistAlvisDiagnosticState(){
+  try{sessionStorage.setItem(ALVIS_DIAGNOSTIC_STATE_KEY,JSON.stringify({storagePersistenceStatus:alvisStoragePersistenceStatus,modelCacheAtStart:alvisModelCacheAtStart,modelCacheAfterInit:alvisModelCacheAfterInit}));}catch(error){}
+}
+try{
+  const savedState=JSON.parse(sessionStorage.getItem(ALVIS_DIAGNOSTIC_STATE_KEY)||"null");
+  if(savedState&&typeof savedState==="object"){
+    if(typeof savedState.storagePersistenceStatus==="string")alvisStoragePersistenceStatus=savedState.storagePersistenceStatus==="要求中"?"前回の要求結果不明（画面再読み込み）":savedState.storagePersistenceStatus;
+    if(typeof savedState.modelCacheAtStart==="boolean")alvisModelCacheAtStart=savedState.modelCacheAtStart;
+    if(typeof savedState.modelCacheAfterInit==="boolean")alvisModelCacheAfterInit=savedState.modelCacheAfterInit;
+  }
+}catch(error){}
 function recordAlvisModelLoadTrace(message){
   const entry=new Date().toISOString()+" "+String(message||"").replace(/\s+/g," ").slice(0,180);
   alvisModelLoadTrace.push(entry);
@@ -816,17 +829,21 @@ function waitForAlvisServiceWorkerReady(timeoutMs=3500){
 function requestAlvisStoragePersistence(){
   if(typeof navigator.storage?.persist!=="function"){
     alvisStoragePersistenceStatus="このブラウザでは要求非対応";
+    persistAlvisDiagnosticState();
     recordAlvisModelLoadTrace("保存領域の永続化要求：非対応");
     return Promise.resolve(false);
   }
   alvisStoragePersistenceStatus="要求中";
+  persistAlvisDiagnosticState();
   try{
     return Promise.resolve(navigator.storage.persist()).then(granted=>{
       alvisStoragePersistenceStatus=granted?"ブラウザから許可済み":"ブラウザが未許可";
+      persistAlvisDiagnosticState();
       recordAlvisModelLoadTrace("保存領域の永続化要求："+alvisStoragePersistenceStatus);
       return granted;
     }).catch(error=>{
       alvisStoragePersistenceStatus="要求失敗（"+String(error?.message||error||"不明").slice(0,100)+"）";
+      persistAlvisDiagnosticState();
       recordAlvisModelLoadTrace("保存領域の永続化要求："+alvisStoragePersistenceStatus);
       return false;
     });
@@ -2577,6 +2594,7 @@ $("loadAiModel").addEventListener("click",async()=>{
   recordAlvisModelLoadTrace("===== 新しいモデル起動試行 =====");
   alvisModelCacheAtStart=null;
   alvisModelCacheAfterInit=null;
+  persistAlvisDiagnosticState();
   const alvisLoadStartedAt=Date.now();
   const alvisLoadElapsed=()=>Math.max(0,Math.floor((Date.now()-alvisLoadStartedAt)/1000));
   const setAlvisLoadStage=stage=>{
@@ -2628,6 +2646,7 @@ $("loadAiModel").addEventListener("click",async()=>{
         setAlvisLoadStage("保存済みモデルキャッシュを確認中");
         const cachedWeights=await alvisHasModelInCache(ALVIS_MODEL_ID);
         alvisModelCacheAtStart=!!cachedWeights;
+        persistAlvisDiagnosticState();
         recordAlvisModelLoadTrace("モデル重みキャッシュ事前確認："+(cachedWeights?"検出":"未検出"));
         setStatus("aiStatus",cachedWeights
           ?"保存済みモデル重みを確認しました。既存キャッシュを使って起動します…"
@@ -2660,6 +2679,7 @@ $("loadAiModel").addEventListener("click",async()=>{
     }
     try{
       alvisModelCacheAfterInit=typeof alvisHasModelInCache==="function"?!!(await alvisHasModelInCache(ALVIS_MODEL_ID)):null;
+      persistAlvisDiagnosticState();
       recordAlvisModelLoadTrace("モデル重みキャッシュ初期化後："+(alvisModelCacheAfterInit===null?"確認不可":alvisModelCacheAfterInit?"検出":"未検出"));
     }catch(cacheAfterError){
       recordAlvisModelLoadTrace("モデル重みキャッシュ初期化後：確認失敗");

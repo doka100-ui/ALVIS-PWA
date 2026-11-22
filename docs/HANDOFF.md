@@ -1,3 +1,8 @@
+## Latest update — v324 再読込後もモデル診断の判定値を保持
+- v323の診断ログはsessionStorageで再読込後も残る一方、キャッシュ事前/事後判定と永続化要求の状態はJavaScript変数だけにあり、再読込後の診断表示が「未記録／未要求」に戻る不整合があった。
+- 技術メタデータ（永続化要求状態、モデル重みキャッシュ事前/事後判定）も同一タブsessionStorageへ保存・復元。要求中に再読込された場合は成功/失敗を推測せず「前回の要求結果不明」と表示する。
+- 会話/記憶/履歴/暗号化/同期/バックアップ、モデル重みキャッシュ、GPU初期化/解放、音声、ALVIS v308表示は変更しない。localStorage/IndexedDB/Cache Storage/クラウドには保存しない。Service Worker cache alvis-cache-v324-integrated、更新ページ refresh-v324.html。
+
 ## v323 公開ブラウザテストの更新漏れ修正
 - v323アプリの更新ページとService Workerは正常にデプロイされたが、Playwrightの公開確認テストが古い `refresh-v320.html`／`refresh=320`／`alvis-cache-v320-integrated` を参照し、更新フロー検証でタイムアウトしていた。
 - テスト参照をv323へ同期。アプリ本体・保存データ・モデルキャッシュには変更なし。v323の更新中継ページから実際のWorker有効化と遷移を再検証する。
