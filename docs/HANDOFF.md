@@ -1,3 +1,9 @@
+## Latest update — v310 短い追加質問と保存済み会話文脈の接続
+- 会話履歴はassistant発言をrole:"alvis"として保存するが、短い名詞句の追加質問判定はrole:"assistant"だけを見ていたため、実際の保存履歴では文脈検索が働かない経路があった。
+- 追加質問判定でrole:"alvis"もassistant相当として認識し、buildContextualQueryが「妻は？」「料金は？」などの短い追加質問でも直前の保存済み会話を参照するよう修正。これにより承認済み記憶・学びの関連検索も同じ文脈を利用できる。
+- 完全な独立質問は従来どおり無関係な履歴を引き継がない。会話履歴そのもの、暗号化、保存形式、承認フロー、モデル設定、モデルキャッシュ、同期・バックアップ、Avatarモード、ALVIS完成形v308の表示は変更しない。
+- 実際の保存ロールrole:"alvis"を使う回帰テストを追加。Service Worker cache alvis-cache-v310-integrated、更新ページ refresh-v310.html。
+
 ## Latest update — v309 WebGPUモデル初期化失敗時の部分GPU確保を解放
 - WebLLMのCreateMLCEngineがGPUDeviceを確保した後、エンジンを返す前に失敗する場合、従来はGPUDeviceの参照を保持・解放できない経路があった。
 - モデル初期化中にALVISが監視下で捕捉したGPUDeviceだけを一時追跡し、初期化失敗時にdestroy()を呼び出して部分確保を解放する。正常にエンジンが返った場合は参照を直ちに破棄し、通常のエンジン所有権・unload処理を維持。
