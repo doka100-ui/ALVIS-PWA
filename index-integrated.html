@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v319";
+const ALVIS_APP_BUILD_ID="v320";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -1431,7 +1431,7 @@ function renderGrowthPlans(){
         if(!aiEngine){alert("先にQwen3-4Bを読み込んでください。");return;}
         reflect.disabled=true;reflect.textContent="振り返り中…";
         try{const promptText=["あなたはALVISの改善コーチです。次の計画について、実行メモを踏まえて短く振り返ってください。","達成できた点、残った課題、次の小さな一歩を日本語で各1行にまとめてください。事実にない成果を作らないでください。","計画："+plan.title,"理由："+(plan.reason||"未記入"),"実行内容："+(plan.action||"未記入"),"実行メモ："+(plan.userReflection||"未記入")].join("\n");
-          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは慎重で実務的な改善コーチです。"},{role:"user",content:promptText}],temperature:0.3,max_tokens:220,extra_body:{enable_thinking:false}});
+          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは慎重で実務的な改善コーチです。"},{role:"user",content:promptText}],temperature:0.3,max_tokens:260,extra_body:{enable_thinking:false}});
           plan.aiReview=String(result.choices?.[0]?.message?.content||"振り返りを取得できませんでした。").trim();await saveLocal();renderAll();
         }catch(error){alert("振り返りを作成できませんでした: "+(error?.message||String(error)));reflect.disabled=false;reflect.textContent="AIで振り返る";}
       });actions.append(reflect);
@@ -1608,6 +1608,7 @@ function parseAutonomyRetrospective(value){
     outcome:["success","partial","blocked","unclear"].includes(parsed.outcome)?parsed.outcome:"unclear",
     evidence:String(parsed.evidence||"").trim().slice(0,600),
     lesson:String(parsed.lesson||"").trim().slice(0,700),
+    comparison:String(parsed.comparison||"").trim().slice(0,500),
     nextExperiment:String(parsed.nextExperiment||"").trim().slice(0,600),
     confidence:["high","medium","low"].includes(parsed.confidence)?parsed.confidence:"low"
   };
@@ -1689,6 +1690,7 @@ function renderAutonomy(){
     const action=document.createElement("p");action.className="growth-copy";action.textContent=task.action||"";
     card.append(state,title,goal,action);
     if(task.sourceIssue){const source=document.createElement("p");source.className="small";source.textContent="関連する改善課題："+task.sourceIssue;card.appendChild(source);}
+    if(task.baselineNote){const baseline=document.createElement("p");baseline.className="small";baseline.textContent="開始前の状態："+task.baselineNote;card.appendChild(baseline);}
     if(task.reason){const reason=document.createElement("p");reason.className="small";reason.textContent="目標を選んだ理由："+task.reason;card.appendChild(reason);}
     if(task.successCriteria){const criteria=document.createElement("p");criteria.className="small";criteria.textContent="完了条件："+task.successCriteria;card.appendChild(criteria);}
     if(task.note){const note=document.createElement("p");note.className="small";note.textContent="実行メモ："+task.note;card.appendChild(note);}
@@ -1699,12 +1701,21 @@ function renderAutonomy(){
       const evidence=document.createElement("p");evidence.className="small";evidence.textContent="根拠："+task.retrospective.evidence;
       const experiment=document.createElement("p");experiment.className="small";experiment.textContent="次の検証："+task.retrospective.nextExperiment;
       card.append(outcome,evidence,experiment);
+      if(task.retrospective.comparison){const comparison=document.createElement("p");comparison.className="small";comparison.textContent="開始前後の比較："+task.retrospective.comparison;card.appendChild(comparison);}
     }
     const actions=document.createElement("div");actions.className="actions";
     if(task.status==="proposed"){
-      const start=document.createElement("button");start.textContent="タスク開始";start.addEventListener("click",async()=>{task.status="active";task.startedAt=new Date().toISOString();await saveLocal();renderAll();});actions.appendChild(start);
+      const start=document.createElement("button");start.textContent="タスク開始";start.addEventListener("click",async()=>{
+        const baseline=prompt("開始前の状態・現在の数値・困っている点などを入力してください（任意。空欄でも開始できます）。");
+        if(baseline===null)return;
+        task.baselineNote=baseline.trim().slice(0,600);
+        task.status="active";task.startedAt=new Date().toISOString();await saveLocal();renderAll();
+      });actions.appendChild(start);
     }else if(task.status==="active"){
-      const done=document.createElement("button");done.textContent="実行完了";done.addEventListener("click",async()=>{const note=prompt("実行して分かったことを入力してください（空欄でも可）。");if(note===null)return;task.note=note.trim();task.status="done";task.completedAt=new Date().toISOString();await saveLocal();renderAll();});actions.appendChild(done);
+      const done=document.createElement("button");done.textContent="実行完了";done.addEventListener("click",async()=>{
+        const note=prompt("実行後の状態・変化・確認できた数値や事実を入力してください（空欄でも可）。");
+        if(note===null)return;task.note=note.trim().slice(0,600);task.status="done";task.completedAt=new Date().toISOString();await saveLocal();renderAll();
+      });actions.appendChild(done);
     }else if(!task.review){
       const reflect=document.createElement("button");reflect.textContent="AIで学習を振り返る";
       reflect.addEventListener("click",async()=>{
@@ -1712,13 +1723,13 @@ function renderAutonomy(){
         reflect.disabled=true;reflect.textContent="分析中…";
         try{
           const promptText=[
-            "タスクの結果を厳密に振り返り、JSONオブジェクトだけを返してください。",
+            "タスクの結果を厳密に振り返り、JSONオブジェクトだけを返してください。開始前と実行後の情報が両方ある場合は比較も行ってください。",
             "outcomeはsuccess（成功）/partial（一部達成）/blocked（阻害）/unclear（判断不能）。実行メモに書かれた事実だけをevidenceに記載し、情報がなければ空文字にしてください。",
             "lessonは次回に活かせる具体的な学び。nextExperimentは次に試す小さく安全な検証。confidenceはhigh/medium/low。",
-            "実行メモにない成果を作らない。ユーザーの自己申告を外部検証済みと表現しない。成功と断定できない場合はunclearかpartialにする。",
-            "形式："+JSON.stringify({outcome:"success|partial|blocked|unclear",evidence:"確認できた根拠",lesson:"今回の学び",nextExperiment:"次に試すこと",confidence:"high|medium|low"}),
+            "実行メモにない成果を作らない。ユーザーの自己申告を外部検証済みと表現しない。開始前の情報がない場合は比較不能と明記し、成功と断定できない場合はunclearかpartialにする。",
+            "形式："+JSON.stringify({outcome:"success|partial|blocked|unclear",evidence:"確認できた根拠",comparison:"開始前と実行後の差。比較できなければその旨",lesson:"今回の学び",nextExperiment:"次に試すこと",confidence:"high|medium|low"}),
             "目標："+(task.goal||""),"行動："+(task.action||""),"完了条件："+(task.successCriteria||"未設定"),
-            "実行メモ："+(task.note||"未記入")
+            "開始前の状態："+(task.baselineNote||"未記録（比較不可）"),"実行後の状態："+(task.note||"未記入")
           ].join("\n");
           const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠と不確実性を重視する学習評価AIです。JSON以外は返しません。"},{role:"user",content:promptText}],temperature:0.2,max_tokens:220,extra_body:{enable_thinking:false}});
           const retrospective=parseAutonomyRetrospective(result.choices?.[0]?.message?.content||"");
