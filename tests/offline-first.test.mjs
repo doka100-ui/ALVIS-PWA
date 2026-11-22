@@ -8,7 +8,7 @@ const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
 const refresh292 = await readFile(new URL("../refresh-v292.html", import.meta.url), "utf8");
-const refresh325 = await readFile(new URL("../refresh-v325.html", import.meta.url), "utf8");
+const refresh325 = await readFile(new URL("../refresh-v326.html", import.meta.url), "utf8");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -49,7 +49,7 @@ assert.match(app,/recordAlvisModelLoadTrace/);
 assert.match(app,/WebLLM進捗/);
 assert.match(app,/モデル起動時の読み込み記録/);
 assert.match(app,/ALVIS_MODEL_VRAM_ESTIMATE_MB/);
-assert.match(sw,/alvis-cache-v325-integrated/);
+assert.match(sw,/alvis-cache-v326-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
 assert.match(app,/登録済みactive Worker版/);
 assert.match(app,/ALVISアプリキャッシュ一覧/);
@@ -116,7 +116,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v325-integrated/);
+assert.match(sw, /alvis-cache-v326-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -127,8 +127,8 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v325-integrated/);
-assert.match(refresh325,/alvis-cache-v325-integrated/);
+assert.match(sw,/alvis-cache-v326-integrated/);
+assert.match(refresh325,/alvis-cache-v326-integrated/);
 assert.match(refresh325,/refresh=325/);
 assert.match(refresh325,/registration\.update\(\)/);
 assert.match(refresh325,/ALVIS_GET_BUILD_INFO/);
@@ -859,7 +859,7 @@ assert.match(app,/if\(alvisGpuDiagnostics\.captureModelDevices\|\|alvisGpuDiagno
 assert.match(app,/failedModelDevices=alvisGpuDiagnostics\.modelDevices\.splice\(0\)/,"failed initialization must release partially allocated GPU devices");
 assert.match(app,/failedModelDevices\.forEach\(device=>\{try\{device\?\.destroy\?\.\(\)/,"partial GPU allocations must be explicitly destroyed after initialization failure");
 
-// v325: model lifecycle must reject duplicate starts synchronously and preserve WebLLM-managed caches.
+// v326: model lifecycle must reject duplicate starts synchronously and preserve WebLLM-managed caches.
 const modelLoadHandler=app.slice(app.indexOf('$("loadAiModel").addEventListener("click",async()=>{'),app.indexOf('$("unloadAiModel").addEventListener("click",async()=>{'));
 assert.match(modelLoadHandler,/if\(aiLoading\)return;[\s\S]*?aiLoading=true;[\s\S]*?await /,"a second model-start tap must be rejected before any asynchronous yield");
 assert.match(modelLoadHandler,/\$\("loadAiModel"\)\.disabled=true;[\s\S]*?\$\("unloadAiModel"\)\.disabled=true/,"model controls must be locked while initialization is active");
@@ -1241,7 +1241,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v325-integrated"),"v300 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v326-integrated"),"v300 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
