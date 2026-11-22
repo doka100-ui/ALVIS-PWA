@@ -1456,13 +1456,14 @@ function findDuplicateAutonomyTask(tasks,goal,action){
 function getAutonomyTaskMetadata(draft,goal,action){
   const matchesSource=String(draft?.dataset?.sourceGoal||"").trim()===String(goal||"").trim() &&
     String(draft?.dataset?.sourceAction||"").trim()===String(action||"").trim();
-  if(!matchesSource)return {reason:"",successCriteria:"",priority:"medium",origin:"user_goal",sourceIssueCreatedAt:""};
+  if(!matchesSource)return {reason:"",successCriteria:"",priority:"medium",origin:"user_goal",sourceIssueCreatedAt:"",sourceIssueTitle:""};
   return {
     reason:String(draft.dataset.goalReason||""),
     successCriteria:String(draft.dataset.successCriteria||""),
     priority:["high","medium","low"].includes(draft.dataset.priority)?draft.dataset.priority:"medium",
     origin:draft.dataset.origin==="self_goal"?"self_goal":"user_goal",
-    sourceIssueCreatedAt:String(draft.dataset.sourceIssueCreatedAt||"")
+    sourceIssueCreatedAt:String(draft.dataset.sourceIssueCreatedAt||""),
+    sourceIssueTitle:String(draft.dataset.sourceIssueTitle||"")
   };
 }
 
@@ -3853,6 +3854,7 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
       normalizeAutonomyTaskText(item.nextAction)===normalizeAutonomyTaskText(proposal.firstAction)
     );
     $("autonomyTaskDraft").dataset.sourceIssueCreatedAt=linkedIssue?.sourceIssueCreatedAt||"";
+    $("autonomyTaskDraft").dataset.sourceIssueTitle=linkedIssue?.title||"";
   }catch(error){setStatus("autonomyCycleStatus","次の目標を作成できませんでした: "+(error?.message||String(error)));}
   finally{button.disabled=false;button.textContent="自分で次の目標を立てる";}
 });
@@ -3880,11 +3882,12 @@ $("saveAutonomyTask").addEventListener("click",async()=>{
     priority:taskMetadata.priority,
     origin:taskMetadata.origin,
     sourceIssueCreatedAt:taskMetadata.sourceIssueCreatedAt,
+    sourceIssue:taskMetadata.sourceIssueTitle,
     createdAt:new Date().toISOString()});
   $("autonomyTaskDraft").value="";
   delete $("autonomyTaskDraft").dataset.goalReason;delete $("autonomyTaskDraft").dataset.successCriteria;
   delete $("autonomyTaskDraft").dataset.priority;delete $("autonomyTaskDraft").dataset.origin;
-  delete $("autonomyTaskDraft").dataset.sourceGoal;delete $("autonomyTaskDraft").dataset.sourceAction;delete $("autonomyTaskDraft").dataset.sourceIssueCreatedAt;
+  delete $("autonomyTaskDraft").dataset.sourceGoal;delete $("autonomyTaskDraft").dataset.sourceAction;delete $("autonomyTaskDraft").dataset.sourceIssueCreatedAt;delete $("autonomyTaskDraft").dataset.sourceIssueTitle;
   setStatus("autonomyStatus","タスクを登録しました。開始ボタンを押すまで実行されません。");await saveLocal();renderAll();
 });
 
