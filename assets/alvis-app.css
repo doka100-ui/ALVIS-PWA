@@ -1735,9 +1735,9 @@ header .status{margin-top:2px}
 /* v297: animate only the independent rotate component; preserve the centered translate. */
 #chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
   rotate:9deg;
-  animation:alvisHudOuterRotate297 42s linear infinite!important;
+  animation:alvisHudOuterRotate298 42s linear infinite!important;
 }
-@keyframes alvisHudOuterRotate297{
+@keyframes alvisHudOuterRotate298{
   from{rotate:9deg}
   to{rotate:369deg}
 }
