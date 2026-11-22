@@ -94,7 +94,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.top, "48%", browserName + ": outer ring C must retain its original vertical center");
     assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must retain its individual centering translate");
     assert.equal(outerRingMotion.transform, "none", browserName + ": outer ring C must not receive a second transform translate");
-    const refreshResponse = await page.request.get(new URL("refresh-v296.html", previewUrl).href);
+    const refreshResponse = await page.request.get(new URL("refresh-v297.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v296 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
@@ -305,7 +305,7 @@ async function verifyRefreshFlow(browserType) {
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "294",
+      url.searchParams.get("refresh") === "297",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
