@@ -858,6 +858,18 @@ assert.match(app,/captureModelDevices\|\|alvisGpuDiagnostics\.modelDevices\.incl
 assert.match(app,/if\(alvisGpuDiagnostics\.captureModelDevices\|\|alvisGpuDiagnostics\.modelDevices\.includes\(device\)\)alvisGpuLossDuringLoad=lossInfo/,"rejected GPU lost promises must also be captured during the ownership handoff");
 assert.match(app,/failedModelDevices=alvisGpuDiagnostics\.modelDevices\.splice\(0\)/,"failed initialization must release partially allocated GPU devices");
 assert.match(app,/failedModelDevices\.forEach\(device=>\{try\{device\?\.destroy\?\.\(\)/,"partial GPU allocations must be explicitly destroyed after initialization failure");
+
+// v325: model lifecycle must reject duplicate starts synchronously and preserve WebLLM-managed caches.
+const modelLoadHandler=app.slice(app.indexOf('$("loadAiModel").addEventListener("click",async()=>{'),app.indexOf('$("unloadAiModel").addEventListener("click",async()=>{'));
+assert.match(modelLoadHandler,/if\(aiLoading\)return;[\s\S]*?aiLoading=true;[\s\S]*?await /,"a second model-start tap must be rejected before any asynchronous yield");
+assert.match(modelLoadHandler,/\$\("loadAiModel"\)\.disabled=true;[\s\S]*?\$\("unloadAiModel"\)\.disabled=true/,"model controls must be locked while initialization is active");
+assert.match(modelLoadHandler,/if\(kokoroTts\|\|kokoroLoading\)/,"Kokoro and Qwen must not initialize concurrently on memory-constrained devices");
+assert.match(sw,/key\.startsWith\("alvis-cache-"\)[\s\S]*?key\.startsWith\("alvis-deps-"\)/,"activation cleanup must be restricted to ALVIS-owned caches");
+assert.match(sw,/for\(const cacheName of \["webllm\/model","webllm\/config","webllm\/wasm"\]\)/,"offline model cache lookups must retain WebLLM's own cache namespaces");
+assert.doesNotMatch(sw,/caches\.delete\(["']webllm\//,"Service Worker must never delete WebLLM model artifacts");
+assert.match(app,/alvisHasModelInCache\(ALVIS_MODEL_ID\)/,"model startup must check the existing WebLLM cache before initialization");
+assert.doesNotMatch(modelLoadHandler,/caches\.delete|cache\.delete\(|deleteDatabase\(/,"model startup must not clear or migrate existing model cache data");
+
 assert.match(app,/context_window_size:ALVIS_CONTEXT_WINDOW/);
 assert.match(app,/ALVIS_MODEL_LABEL\+"を読み込む"/);
 assert.match(app,/自動選択モデル：/);
