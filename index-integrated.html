@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v318";
+const ALVIS_APP_BUILD_ID="v319";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -1456,12 +1456,13 @@ function findDuplicateAutonomyTask(tasks,goal,action){
 function getAutonomyTaskMetadata(draft,goal,action){
   const matchesSource=String(draft?.dataset?.sourceGoal||"").trim()===String(goal||"").trim() &&
     String(draft?.dataset?.sourceAction||"").trim()===String(action||"").trim();
-  if(!matchesSource)return {reason:"",successCriteria:"",priority:"medium",origin:"user_goal"};
+  if(!matchesSource)return {reason:"",successCriteria:"",priority:"medium",origin:"user_goal",sourceIssueCreatedAt:""};
   return {
     reason:String(draft.dataset.goalReason||""),
     successCriteria:String(draft.dataset.successCriteria||""),
     priority:["high","medium","low"].includes(draft.dataset.priority)?draft.dataset.priority:"medium",
-    origin:draft.dataset.origin==="self_goal"?"self_goal":"user_goal"
+    origin:draft.dataset.origin==="self_goal"?"self_goal":"user_goal",
+    sourceIssueCreatedAt:String(draft.dataset.sourceIssueCreatedAt||"")
   };
 }
 
@@ -1483,6 +1484,21 @@ function findDuplicateAutonomyIssue(issues,candidate){
     normalizeAutonomyTaskText(issue?.title)===title &&
     normalizeAutonomyTaskText(issue?.nextAction)===action
   );
+}
+
+function summarizeAutonomyIssueProgress(issue,tasks){
+  const sourceKey=String(issue?.createdAt||"");
+  const related=(Array.isArray(tasks)?tasks:[]).filter(task=>
+    (sourceKey&&task?.sourceIssueCreatedAt===sourceKey) ||
+    (!task?.sourceIssueCreatedAt&&String(task?.sourceIssue||"")===String(issue?.title||""))
+  );
+  const completed=related.filter(task=>task?.status==="done");
+  const active=related.filter(task=>task?.status==="active");
+  const proposed=related.filter(task=>task?.status==="proposed");
+  const latest=completed.slice().sort((a,b)=>String(b.completedAt||"").localeCompare(String(a.completedAt||"")))[0]||null;
+  return {total:related.length,completed:completed.length,active:active.length,proposed:proposed.length,
+    latestOutcome:latest?.retrospective?.outcome||"",latestEvidence:String(latest?.retrospective?.evidence||"").slice(0,240),
+    latestNextExperiment:String(latest?.retrospective?.nextExperiment||"").slice(0,200)};
 }
 
 function scoreAutonomyIssue(item){
@@ -1515,8 +1531,8 @@ function buildAutonomyPriorityPlan(issues,tasks){
     .sort((a,b)=>b.score-a.score||a.originalIndex-b.originalIndex);
   const top=candidates[0]||null;
   return {candidateCount:candidates.length,
-    topIssue:top?{title:top.title,reason:top.reason,nextAction:top.nextAction,score:top.score,priority:top.priority}:null,
-    rankedIssues:candidates.slice(0,5).map((item,index)=>({rank:index+1,title:item.title,reason:item.reason,nextAction:item.nextAction,score:item.score,priority:item.priority})),
+    topIssue:top?{title:top.title,reason:top.reason,nextAction:top.nextAction,score:top.score,priority:top.priority,sourceIssueCreatedAt:String((Array.isArray(issues)?issues[top.originalIndex]:null)?.createdAt||"")}:null,
+    rankedIssues:candidates.slice(0,5).map((item,index)=>({rank:index+1,title:item.title,reason:item.reason,nextAction:item.nextAction,score:item.score,priority:item.priority,sourceIssueCreatedAt:String((Array.isArray(issues)?issues[item.originalIndex]:null)?.createdAt||"")})),
     selectionRules:["未解決かつ既存タスクと重複しない課題だけを候補にする。","優先スコア順に検討し、同点なら登録順を維持する。","候補がなければ課題を捏造せず、記録不足の確認を提案する。","実現可能性が低い場合は安全な事前確認へ分割する。"]};
 }
 
@@ -1628,14 +1644,26 @@ function renderAutonomyIssues(){
     const title=document.createElement("strong");title.textContent=issue.title||"改善課題";
     const reason=document.createElement("p");reason.className="growth-copy";reason.textContent=issue.reason||"";
     const next=document.createElement("p");next.className="small";next.textContent="推奨する最初の一歩："+(issue.nextAction||"");
-    card.append(priority,title,reason,score,next);
+    const progress=summarizeAutonomyIssueProgress(issue,data.autonomyTasks);
+    const progressText=document.createElement("p");progressText.className="small";
+    progressText.textContent=progress.total
+      ?"関連タスク："+progress.total+"件（未着手 "+progress.proposed+"・実行中 "+progress.active+"・完了 "+progress.completed+"）"
+      :"関連タスク：まだありません";
+    card.append(priority,title,reason,score,next,progressText);
+    if(progress.latestOutcome){
+      const outcome=document.createElement("p");outcome.className="small";
+      outcome.textContent="最新の評価："+({success:"成功",partial:"一部達成",blocked:"阻害あり",unclear:"判断不能"}[progress.latestOutcome]||"判断不能");
+      card.appendChild(outcome);
+      if(progress.latestEvidence){const evidence=document.createElement("p");evidence.className="small";evidence.textContent="確認した根拠："+progress.latestEvidence;card.appendChild(evidence);}
+      if(progress.latestNextExperiment){const experiment=document.createElement("p");experiment.className="small";experiment.textContent="次の検証："+progress.latestNextExperiment;card.appendChild(experiment);}
+    }
     const actions=document.createElement("div");actions.className="actions";
     if(issue.status==="pending"){
       const adopt=document.createElement("button");adopt.textContent="課題を採用してタスク化";
       adopt.addEventListener("click",async()=>{
         const goal=issue.title||"発見した改善課題",action=issue.nextAction||issue.reason||goal;
         if(findDuplicateAutonomyTask(data.autonomyTasks,goal,action)!==-1){alert("同じ内容のタスクが登録済みです（全角・半角や空白の違いも確認します）。");return;}
-        data.autonomyTasks.push({title:action.slice(0,60),goal,action,status:"proposed",priority:issue.priority,sourceIssue:issue.title,createdAt:new Date().toISOString()});
+        data.autonomyTasks.push({title:action.slice(0,60),goal,action,status:"proposed",priority:issue.priority,sourceIssue:issue.title,sourceIssueCreatedAt:String(issue.createdAt||""),createdAt:new Date().toISOString()});
         issue.status="adopted";issue.adoptedAt=new Date().toISOString();await saveLocal();renderAll();
       });actions.appendChild(adopt);
       const dismiss=document.createElement("button");dismiss.className="secondary";dismiss.textContent="今回は見送る";
@@ -1659,6 +1687,7 @@ function renderAutonomy(){
     const goal=document.createElement("p");goal.className="small";goal.textContent="目標："+(task.goal||"未設定");
     const action=document.createElement("p");action.className="growth-copy";action.textContent=task.action||"";
     card.append(state,title,goal,action);
+    if(task.sourceIssue){const source=document.createElement("p");source.className="small";source.textContent="関連する改善課題："+task.sourceIssue;card.appendChild(source);}
     if(task.reason){const reason=document.createElement("p");reason.className="small";reason.textContent="目標を選んだ理由："+task.reason;card.appendChild(reason);}
     if(task.successCriteria){const criteria=document.createElement("p");criteria.className="small";criteria.textContent="完了条件："+task.successCriteria;card.appendChild(criteria);}
     if(task.note){const note=document.createElement("p");note.className="small";note.textContent="実行メモ："+task.note;card.appendChild(note);}
@@ -3819,6 +3848,11 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
     $("autonomyTaskDraft").dataset.origin="self_goal";
     $("autonomyTaskDraft").dataset.sourceGoal=proposal.goal;
     $("autonomyTaskDraft").dataset.sourceAction=proposal.firstAction;
+    const linkedIssue=priorityPlan.rankedIssues.find(item=>
+      normalizeAutonomyTaskText(item.title)===normalizeAutonomyTaskText(proposal.goal) ||
+      normalizeAutonomyTaskText(item.nextAction)===normalizeAutonomyTaskText(proposal.firstAction)
+    );
+    $("autonomyTaskDraft").dataset.sourceIssueCreatedAt=linkedIssue?.sourceIssueCreatedAt||"";
   }catch(error){setStatus("autonomyCycleStatus","次の目標を作成できませんでした: "+(error?.message||String(error)));}
   finally{button.disabled=false;button.textContent="自分で次の目標を立てる";}
 });
@@ -3845,11 +3879,12 @@ $("saveAutonomyTask").addEventListener("click",async()=>{
     successCriteria:taskMetadata.successCriteria,
     priority:taskMetadata.priority,
     origin:taskMetadata.origin,
+    sourceIssueCreatedAt:taskMetadata.sourceIssueCreatedAt,
     createdAt:new Date().toISOString()});
   $("autonomyTaskDraft").value="";
   delete $("autonomyTaskDraft").dataset.goalReason;delete $("autonomyTaskDraft").dataset.successCriteria;
   delete $("autonomyTaskDraft").dataset.priority;delete $("autonomyTaskDraft").dataset.origin;
-  delete $("autonomyTaskDraft").dataset.sourceGoal;delete $("autonomyTaskDraft").dataset.sourceAction;
+  delete $("autonomyTaskDraft").dataset.sourceGoal;delete $("autonomyTaskDraft").dataset.sourceAction;delete $("autonomyTaskDraft").dataset.sourceIssueCreatedAt;
   setStatus("autonomyStatus","タスクを登録しました。開始ボタンを押すまで実行されません。");await saveLocal();renderAll();
 });
 
