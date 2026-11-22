@@ -1816,3 +1816,27 @@ header .status{margin-top:2px}
   filter:drop-shadow(0 0 6px #a5f3fc) drop-shadow(0 0 13px #0ea5e9)!important;
 }
 /* end v304 */
+
+
+/* v305: draw the outer gear as real SVG clock teeth, not a masked gradient.
+   SVG tick geometry stays crisp at every screen size; only the outer ring rotates. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  width:min(100%,280px)!important;height:auto!important;aspect-ratio:1/1!important;
+  animation:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  content:none!important;display:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth{
+  position:absolute!important;inset:-14px!important;
+  display:block!important;width:calc(100% + 28px)!important;height:calc(100% + 28px)!important;
+  overflow:visible!important;pointer-events:none!important;
+  filter:drop-shadow(0 0 5px #9af2ff) drop-shadow(0 0 12px #0ea5e9)!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .hud-gear-tick{
+  stroke:#65dcff;stroke-width:2.4;vector-effect:non-scaling-stroke;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .hud-gear-major{
+  stroke:#f4feff;stroke-width:3.8;
+}
+/* end v305 */
