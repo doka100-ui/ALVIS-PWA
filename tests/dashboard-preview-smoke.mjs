@@ -97,13 +97,13 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must retain its individual centering translate");
     assert.equal(outerRingMotion.transform, "none", browserName + ": outer ring C must not receive a second transform translate");
     assert.ok(outerRingMotion.toothBackground.includes("repeating-conic-gradient") && outerRingMotion.toothMask.includes("radial-gradient"), browserName + ": outer ring C must render the fine gear-tooth rim");
-    const refreshResponse = await page.request.get(new URL("refresh-v298.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v298 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v299.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v299 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v298-integrated"), browserName + ": refresh page must verify the v298 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=298"), browserName + ": refresh page must return to the integrated app only after v298 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v299-integrated"), browserName + ": refresh page must verify the v299 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=299"), browserName + ": refresh page must return to the integrated app only after v299 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -304,11 +304,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v298.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v299.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "298",
+      url.searchParams.get("refresh") === "299",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -330,9 +330,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v298-integrated",
-      browserName + ": refresh flow must verify the actual v298 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v298 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v299-integrated",
+      browserName + ": refresh flow must verify the actual v299 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v299 before redirect");
   } finally {
     await browser.close();
   }
