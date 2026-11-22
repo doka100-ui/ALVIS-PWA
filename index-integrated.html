@@ -1731,7 +1731,7 @@ function renderAutonomy(){
             "目標："+(task.goal||""),"行動："+(task.action||""),"完了条件："+(task.successCriteria||"未設定"),
             "開始前の状態："+(task.baselineNote||"未記録（比較不可）"),"実行後の状態："+(task.note||"未記入")
           ].join("\n");
-          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠と不確実性を重視する学習評価AIです。JSON以外は返しません。"},{role:"user",content:promptText}],temperature:0.2,max_tokens:220,extra_body:{enable_thinking:false}});
+          const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠と不確実性を重視する学習評価AIです。JSON以外は返しません。"},{role:"user",content:promptText}],temperature:0.2,max_tokens:300,extra_body:{enable_thinking:false}});
           const retrospective=parseAutonomyRetrospective(result.choices?.[0]?.message?.content||"");
           task.retrospective=retrospective;
           task.review=retrospective.lesson;
