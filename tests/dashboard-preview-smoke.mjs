@@ -328,7 +328,7 @@ async function verifyRefreshFlow(browserType) {
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "326",
+      url.searchParams.get("refresh") === "327",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
