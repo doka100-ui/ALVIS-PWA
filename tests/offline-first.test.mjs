@@ -1200,8 +1200,8 @@ assert.match(app,/async function playKokoroBlob\(blob,clean\)[\s\S]*?playbackSes
 
 
 // v242: delayed Kokoro playback callbacks must not update a logged-out or newer session.
-assert.match(app,/source\.onended=\(\)=>\{\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late WebAudio completion must not mutate a later session");
-assert.match(app,/kokoroAudio\.onended=\(\)=>\{if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio completion must not mutate a later session");
+assert.match(app,/source\.onended=\(\)=>\{\s*if\(kokoroAudioSource===source\)kokoroAudioSource=null;[\s\S]*?if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late WebAudio completion must release its own nodes before leaving a later session untouched");
+assert.match(app,/playbackAudio\.onended=\(\)=>\{\s*if\(kokoroAudio===playbackAudio\)releaseKokoroMediaPlayback\(\);[\s\S]*?if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio completion must release its own media resources before leaving a later session untouched");
 assert.match(app,/kokoroAudio\.onerror=\(\)=>\{if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"late HTMLAudio errors must not update a later session");
 assert.match(app,/await kokoroAudio\.play\(\);\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"play promise completion must be session-checked");
 assert.match(app,/async function playKokoroBlob[\s\S]*?catch\(error\)\{\s*if\(!unlocked\|\|playbackSessionGeneration!==alvisSessionGeneration\)return;/,"playback errors must be session-checked");
