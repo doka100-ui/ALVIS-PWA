@@ -1,3 +1,8 @@
+
+## Latest update — v298 ALVIS outer ring gear rim
+- v297 rotation and centered placement were confirmed by the user. v298 adds 64 evenly spaced fine radial teeth to the existing outer ring using a masked conic-gradient pseudo-element; the ellipse geometry, center, tilt, 42-second rotation and existing marker remain unchanged.
+- Change is scoped to ALVIS/Jarvis mode. Avatar mode, globe, inner rings, memory/history/encryption/sync/backup, model caches and voice are untouched. New safe refresh page: refresh-v298.html; app-shell cache: alvis-cache-v298-integrated.
+- Browser smoke tests also correct the stale refresh-v296 path/cache expectations and check the pseudo-element gear rim in Chromium/WebKit. Wait for CI and user visual confirmation before treating the shape as final.
 ## Latest update — v297 outer ALVIS ring
 - v296 disabled the outer ring animation; v297 animates only its independent `rotate` component, preserving the existing `translate` centering and 48% vertical position.
 - Avatar mode remains untouched. Confirm the deployed preview browser test before asking the user to verify on iPhone/iPad.
