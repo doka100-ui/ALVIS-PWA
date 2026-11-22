@@ -775,7 +775,7 @@ let alvisModelLoadTrace=[];
 let alvisModelCacheAtStart=null;
 let alvisModelCacheAfterInit=null;
 function recordAlvisModelLoadTrace(message){
-  const entry=new Date().toISOString()+" "+String(message||"").replace(/\\s+/g," ").slice(0,180);
+  const entry=new Date().toISOString()+" "+String(message||"").replace(/\s+/g," ").slice(0,180);
   alvisModelLoadTrace.push(entry);
   if(alvisModelLoadTrace.length>32)alvisModelLoadTrace.splice(0,alvisModelLoadTrace.length-32);
 }
