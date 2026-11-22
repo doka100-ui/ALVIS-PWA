@@ -404,8 +404,8 @@ const retrospectiveParserStart=app.indexOf("function parseAutonomyRetrospective(
 const retrospectiveParserEnd=app.indexOf("\n}\n\nfunction renderAutonomyIssues",retrospectiveParserStart);
 assert.ok(retrospectiveParserStart>=0&&retrospectiveParserEnd>retrospectiveParserStart,"retrospective parser must exist");
 const parseAutonomyRetrospective=new Function(app.slice(retrospectiveParserStart,retrospectiveParserEnd+2)+"; return parseAutonomyRetrospective;")();
-assert.deepEqual(parseAutonomyRetrospective(JSON.stringify({outcome:"partial",evidence:"実行メモに1件の確認結果",lesson:"手順を分けると確認しやすい",nextExperiment:"次回は1手順ずつ検証",confidence:"medium"})),{
-  outcome:"partial",evidence:"実行メモに1件の確認結果",lesson:"手順を分けると確認しやすい",nextExperiment:"次回は1手順ずつ検証",confidence:"medium"
+assert.deepEqual(parseAutonomyRetrospective(JSON.stringify({outcome:"partial",evidence:"実行メモに1件の確認結果",lesson:"手順を分けると確認しやすい",comparison:"開始前より確認が1件増えた",nextExperiment:"次回は1手順ずつ検証",confidence:"medium"})),{
+  outcome:"partial",evidence:"実行メモに1件の確認結果",lesson:"手順を分けると確認しやすい",comparison:"開始前より確認が1件増えた",nextExperiment:"次回は1手順ずつ検証",confidence:"medium"
 });
 assert.equal(parseAutonomyRetrospective(JSON.stringify({outcome:"invalid",lesson:"学びのみ"})).outcome,"unclear");
 assert.equal(parseAutonomyRetrospective(JSON.stringify({lesson:"学びのみ"})).evidence,"実行メモに客観的な根拠の記載なし");
