@@ -1,3 +1,4 @@
+- プレビューの更新フロー検証もrefresh-v310.html／refresh=310／alvis-cache-v310-integratedへ同期し、実際のWorker有効化と遷移先を確認する。
 ## Latest update — v310 短い追加質問と保存済み会話文脈の接続
 - 会話履歴はassistant発言をrole:"alvis"として保存するが、短い名詞句の追加質問判定はrole:"assistant"だけを見ていたため、実際の保存履歴では文脈検索が働かない経路があった。
 - 追加質問判定でrole:"alvis"もassistant相当として認識し、buildContextualQueryが「妻は？」「料金は？」などの短い追加質問でも直前の保存済み会話を参照するよう修正。これにより承認済み記憶・学びの関連検索も同じ文脈を利用できる。
