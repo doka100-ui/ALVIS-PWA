@@ -86,6 +86,9 @@ async function verifyBrowser(browserType, verifyOffline) {
       top: getComputedStyle(node).top,
       translate: getComputedStyle(node).translate,
       transform: getComputedStyle(node).transform,
+      width: node.getBoundingClientRect().width,
+      height: node.getBoundingClientRect().height,
+      aspectRatio: getComputedStyle(node).aspectRatio,
       toothBackground: getComputedStyle(node, "::before").backgroundImage,
       toothMask: getComputedStyle(node, "::before").maskImage
     }));
@@ -96,6 +99,9 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.top, "48%", browserName + ": outer ring C must retain its original vertical center");
     assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must retain its individual centering translate");
     assert.equal(outerRingMotion.transform, "none", browserName + ": outer ring C must not receive a second transform translate");
+    assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
+    assert.ok(Math.abs(outerRingMotion.width - outerRingMotion.height) < 1.5,
+      browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.ok(outerRingMotion.toothBackground.includes("repeating-conic-gradient") && outerRingMotion.toothMask.includes("radial-gradient"), browserName + ": outer ring C must render the fine gear-tooth rim");
     const refreshResponse = await page.request.get(new URL("refresh-v299.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v299 Service Worker refresh page must return HTTP 200");
