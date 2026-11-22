@@ -1774,3 +1774,13 @@ header .status{margin-top:2px}
   margin:auto!important;translate:none!important;transform:none!important;
 }
 /* end v301 */
+
+
+/* v302: align the outer gear to the globe's actual center, not the HUD container center.
+   The live globe core is positioned at left:50% / top:42% inside .hud-center.
+   Keep the circular gear size, teeth, and independent 42-second rotation unchanged. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  inset:auto!important;left:50%!important;top:42%!important;right:auto!important;bottom:auto!important;
+  margin:0!important;translate:-50% -50%!important;transform:none!important;
+}
+/* end v302 */
