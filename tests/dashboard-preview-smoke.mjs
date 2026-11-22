@@ -97,15 +97,15 @@ async function verifyBrowser(browserType, verifyOffline) {
       width: node.getBoundingClientRect().width,
       height: node.getBoundingClientRect().height,
       aspectRatio: getComputedStyle(node).aspectRatio,
-      gearTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-tick").length,
-      majorTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-major").length,
+      gearTickCount: node.querySelectorAll(".hud-gear-teeth .gear-tick").length,
+      majorTickCount: node.querySelectorAll(".hud-gear-teeth .gear-tick-major").length,
       toothInset: getComputedStyle(node, "::before").inset,
       toothMask: getComputedStyle(node, "::before").maskImage
     }));
-    assert.ok(outerRingMotion.animations.some(animation => animation.duration === 18000
+    assert.ok(outerRingMotion.animations.some(animation => animation.duration === 22000
       && animation.keyframes.some(frame => frame.rotate === "9deg")
       && animation.keyframes.some(frame => frame.rotate === "369deg")),
-      browserName + ": outer ring C must have a 18-second independent rotate animation");
+      browserName + ": outer ring C must have a 22-second independent rotate animation");
     assert.ok(Math.abs(outerRingMotion.topRatio - 0.42) < 0.01,
       browserName + ": outer ring C must share the globe core's 42% vertical anchor");
     assert.ok(Math.abs(outerRingMotion.leftRatio - 0.5) < 0.01,
@@ -115,8 +115,8 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
     assert.ok(Math.abs(outerRingMotion.width - outerRingMotion.height) < 1.5,
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
-    assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer gear must render 48 individually visible radial teeth");
-    assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer gear must render 8 longer clock-index teeth");
+    assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
+    assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
     const refreshResponse = await page.request.get(new URL("refresh-v311.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v311 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
