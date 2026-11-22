@@ -8,7 +8,7 @@ const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
 const refresh292 = await readFile(new URL("../refresh-v292.html", import.meta.url), "utf8");
-const refresh328 = await readFile(new URL("../refresh-v328.html", import.meta.url), "utf8");
+const refresh328 = await readFile(new URL("../refresh-v329.html", import.meta.url), "utf8");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -31,8 +31,8 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v328-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v328"/);
+assert.match(sw,/alvis-cache-v329-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v329"/);
 assert.match(app,/alvisModelLoadTrace/);
 assert.match(app,/ALVIS_DIAGNOSTIC_SESSION_KEY/);
 assert.match(app,/id="copyDeviceDiagnostics"/);
@@ -49,7 +49,7 @@ assert.match(app,/recordAlvisModelLoadTrace/);
 assert.match(app,/WebLLM進捗/);
 assert.match(app,/モデル起動時の読み込み記録/);
 assert.match(app,/ALVIS_MODEL_VRAM_ESTIMATE_MB/);
-assert.match(sw,/alvis-cache-v328-integrated/);
+assert.match(sw,/alvis-cache-v329-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
 assert.match(app,/登録済みactive Worker版/);
 assert.match(app,/ALVISアプリキャッシュ一覧/);
@@ -116,7 +116,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v328-integrated/);
+assert.match(sw, /alvis-cache-v329-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -127,8 +127,8 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v328-integrated/);
-assert.match(refresh328,/alvis-cache-v328-integrated/);
+assert.match(sw,/alvis-cache-v329-integrated/);
+assert.match(refresh328,/alvis-cache-v329-integrated/);
 assert.match(refresh328,/refresh=328/);
 assert.match(refresh328,/registration\.update\(\)/);
 assert.match(refresh328,/ALVIS_GET_BUILD_INFO/);
@@ -568,6 +568,12 @@ assert.match(app,/let alvisLipSyncEnvelope=0/,"Kokoro lip-sync must keep a smoot
 assert.match(app,/alvisLipSyncNoiseFloor\+=\(rms-alvisLipSyncNoiseFloor\)\*0\.025/,"Kokoro lip-sync must adapt its silence floor");
 assert.match(app,/const smoothing=target>alvisLipSyncEnvelope\?0\.52:0\.19/,"Kokoro lip-sync must use faster attack and slower release");
 assert.match(app,/const gate=Math\.max\(0\.012,alvisLipSyncNoiseFloor\*2\.0\)/,"Kokoro lip-sync must gate background noise");
+assert.match(app,/function releaseKokoroAudioSource\(\)/,"Kokoro WebAudio cleanup helper must exist");
+assert.match(app,/source\.buffer=null/,"Kokoro WebAudio must release its decoded AudioBuffer after playback");
+assert.match(app,/function releaseKokoroMediaPlayback\(\)/,"Kokoro media cleanup helper must exist");
+assert.match(app,/audio\.removeAttribute\("src"\);audio\.load\(\)/,"Kokoro HTML audio must release its media resource");
+assert.match(app,/URL\.revokeObjectURL\(kokoroObjectUrl\)/,"Kokoro cleanup must revoke its temporary object URL");
+assert.match(app,/if\(kokoroAudio===playbackAudio\)releaseKokoroMediaPlayback\(\)/,"Kokoro playback completion must clean up the active media element");
 
 // Approved public research remains untrusted reference material, never executable instructions.
 assert.match(app, /外部資料は承認済みでも未検証/);
@@ -1241,7 +1247,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v328-integrated"),"v300 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v329-integrated"),"v300 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1295,7 +1301,7 @@ assert.ok(app.includes("$(" + String.fromCharCode(34) + "loadAiModel" + String.f
 assert.ok(app.includes("if(alvisGpuLossDuringLoad)") && app.includes("if(!unlocked)") && app.includes("ログアウト後のモデル解放に失敗しました"),"initialization-time GPU loss and logout cleanup failures must also be retained");
 
 
-// v328: selecting Kokoro must not eagerly allocate its ONNX/worker model.
+// v329: selecting Kokoro must not eagerly allocate its ONNX/worker model.
 const ttsEngineChangeStart=app.indexOf('$("ttsEngine").addEventListener("change"');
 const ttsEngineChangeEnd=app.indexOf('$("kokoroVoice").addEventListener("change"',ttsEngineChangeStart);
 assert.ok(ttsEngineChangeStart>=0&&ttsEngineChangeEnd>ttsEngineChangeStart,"TTS engine preference handler must remain present");

@@ -1070,3 +1070,9 @@ ALVIS mode uses a dark navy spatial HUD with a central blue glass-like sphere, f
 - Kokoro選択操作ではモデルを初期化せず、実際の読み上げ要求時のみ初期化する。
 - Qwen実行中は標準音声へフォールバックし、KokoroとQwenを同時に初期化しない。
 - Kokoro公開APIに安全な解放処理が確認できない限り、擬似的なモデル破棄は行わない。
+
+
+## v329 — Kokoro一時音声リソースの後始末
+- WebAudio再生完了・停止時にAudioBufferSourceNodeとAnalyserNodeを切断し、source.bufferをnullにしてデコード済み音声バッファへの参照を解放する。
+- HTMLAudioElement再生完了時はsrcとイベントハンドラを解除し、load()でメディアリソースをリセット。一時Object URLをrevokeする。
+- Kokoroモデル本体やモデルキャッシュの破棄は行わない。公開APIに安全なunloadが確認できないため。

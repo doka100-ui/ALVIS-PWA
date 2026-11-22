@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v328";
+const ALVIS_APP_BUILD_ID="v329";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -2111,17 +2111,39 @@ async function getKokoroSpeechBlob(clean,voiceId){
   }
   return blob;
 }
+function releaseKokoroAudioSource(){
+  const source=kokoroAudioSource;
+  if(!source)return;
+  kokoroAudioSource=null;
+  source.onended=null;
+  try{source.stop();}catch(error){}
+  try{source.disconnect();}catch(error){}
+  try{source.buffer=null;}catch(error){}
+}
+function releaseKokoroMediaPlayback(){
+  const audio=kokoroAudio;
+  kokoroAudio=null;
+  if(audio){
+    audio.onended=null;audio.onerror=null;
+    try{audio.pause();}catch(error){}
+    try{audio.removeAttribute("src");audio.load();}catch(error){}
+  }
+  const player=$("kokoroPlayer");
+  if(player&&player!==audio){
+    try{player.pause();player.removeAttribute("src");player.load();}catch(error){}
+  }
+  if(player)player.classList.add("hidden");
+  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
+}
 async function playKokoroBlob(blob,clean){
   const playbackSessionGeneration=alvisSessionGeneration;
   if(!unlocked)return;
   try{
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
     stopAlvisLipSync();
-    if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
+    releaseKokoroAudioSource();
+    releaseKokoroMediaPlayback();
     const player=$("kokoroPlayer");
-    if(kokoroAudio){kokoroAudio.pause();kokoroAudio=null;}
-    if(player){player.pause();player.removeAttribute("src");player.classList.add("hidden");}
-    if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
     const rate=Number($("kokoroRate")?.value||0.98);
     // Safariの再生制限対策：ログイン/送信/ボタン操作で事前に解放したAudioContextから再生する。
     if(alvisAudioContext&&alvisAudioContext.state==="running"){
@@ -2136,8 +2158,12 @@ async function playKokoroBlob(blob,clean){
         source.connect(lipAnalyser);
         lipAnalyser.connect(alvisAudioContext.destination);
         source.onended=()=>{
-          if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
           if(kokoroAudioSource===source)kokoroAudioSource=null;
+          source.onended=null;
+          try{source.disconnect();}catch(error){}
+          try{source.buffer=null;}catch(error){}
+          try{lipAnalyser.disconnect();}catch(error){}
+          if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
           stopAlvisLipSync();
           setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
           if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");
@@ -2160,7 +2186,14 @@ async function playKokoroBlob(blob,clean){
     if("preservesPitch" in kokoroAudio)kokoroAudio.preservesPitch=false;
     if("webkitPreservesPitch" in kokoroAudio)kokoroAudio.webkitPreservesPitch=false;
     if(player){player.classList.remove("hidden");player.load();}
-    kokoroAudio.onended=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;stopAlvisLipSync();setStatus("voiceStatus","Kokoroの読み上げが完了しました。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");};
+    const playbackAudio=kokoroAudio;
+    playbackAudio.onended=()=>{
+      if(kokoroAudio===playbackAudio)releaseKokoroMediaPlayback();
+      if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;
+      stopAlvisLipSync();
+      setStatus("voiceStatus","Kokoroの読み上げが完了しました。");
+      if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.add("hidden");
+    };
     kokoroAudio.onerror=()=>{if(!unlocked||playbackSessionGeneration!==alvisSessionGeneration)return;stopAlvisLipSync();setStatus("voiceStatus","Kokoro音声の再生に失敗しました。プレーヤーの再生ボタンを押してもう一度試してください。");if(clean==="おかえりなさい")$("welcomeVoiceButton")?.classList.remove("hidden");};
     try{
       await kokoroAudio.play();
@@ -2231,10 +2264,8 @@ function speakAlvis(text,options={}){
       return;
     }
   }
-  if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
-  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;kokoroAudio=null;}
-  const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
-  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
+  releaseKokoroAudioSource();
+  releaseKokoroMediaPlayback();
   if(!("speechSynthesis" in window)){setStatus("voiceStatus","このブラウザでは音声読み上げを利用できません。");return;}
   const clean=normalizeAlvisSpeechText(String(text||"").replace(/<[^>]*>/g," ")).trim();
   if(!clean)return;
@@ -2269,10 +2300,8 @@ function speakAlvis(text,options={}){
 function stopAlvisSpeech(){
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
   window.ALVISAvatarSetMouthOpen?.(0);
-  if(kokoroAudioSource){try{kokoroAudioSource.stop();}catch(error){}kokoroAudioSource=null;}
-  if(kokoroAudio){kokoroAudio.pause();kokoroAudio.currentTime=0;}
-  if(kokoroObjectUrl){URL.revokeObjectURL(kokoroObjectUrl);kokoroObjectUrl=null;}
-  const player=$("kokoroPlayer");if(player){player.removeAttribute("src");player.classList.add("hidden");}
+  releaseKokoroAudioSource();
+  releaseKokoroMediaPlayback();
   setStatus("voiceStatus","読み上げを停止しました。");
 }
 

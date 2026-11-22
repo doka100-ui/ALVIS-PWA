@@ -2532,3 +2532,12 @@
 - kokoro-js-jp 0.2.0の公開APIにモデル解放メソッドが確認できないため、擬似的なnull代入や危険な破棄処理は追加しない。Kokoroが実際にロード済みの場合の既存のページ再読み込みガードを維持。
 - モデルID/量子化/context 1024/WebLLM 0.2.87/Cache API、記憶・履歴・同期・バックアップ、デザインは変更しない。
 - Service Worker cache: `alvis-cache-v328-integrated`。更新ページ: `refresh-v328.html`。
+
+
+## v329 — Kokoro読み上げ後の一時音声メモリ解放（2026-11-23）
+- WebAudio再生終了時にAudioBufferをsourceから切り離し、AudioBufferSourceNode/AnalyserNodeをdisconnect。停止時もsourceを停止・切断し、参照を解放する。
+- HTMLAudioElementの再生完了時にイベントハンドラ、src、読み込みリソースを解放し、一時Object URLをrevoke。停止・標準音声への切替時も同じ後始末を行う。
+- 古い再生イベントでもノード側の解放を行い、世代が切り替わった後のUI状態を誤って変更しない。
+- v328ブラウザテストで更新URLの期待値が327のまま残っていたため、v329の実際のリダイレクト先と一致するよう修正。
+- Kokoroモデル本体の解放APIは追加せず、モデル初期化/キャッシュ、Qwen、記憶・履歴・同期・バックアップ、デザインは変更しない。
+- Service Worker cache: `alvis-cache-v329-integrated`。更新ページ: `refresh-v329.html`。
