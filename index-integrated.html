@@ -182,7 +182,7 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
   <div class="hud-beam"></div>
   <div class="hud-orbit hud-orbit-a"></div>
   <div class="hud-orbit hud-orbit-b"></div>
-  <div class="hud-orbit hud-orbit-c"></div>
+  <div class="hud-orbit hud-orbit-c"><svg class="hud-gear-teeth" viewBox="0 0 320 320" aria-hidden="true" focusable="false"><g fill="none" stroke-linecap="round"><path class="hud-gear-tick hud-gear-major" d="M160.00 28.00L160.00 0.00"/><path class="hud-gear-tick hud-gear-minor" d="M178.27 21.20L180.49 4.34"/><path class="hud-gear-tick hud-gear-minor" d="M196.23 24.77L200.63 8.35"/><path class="hud-gear-tick hud-gear-minor" d="M213.58 30.66L220.08 14.95"/><path class="hud-gear-tick hud-gear-minor" d="M230.00 38.76L238.50 24.03"/><path class="hud-gear-tick hud-gear-minor" d="M245.23 48.93L255.58 35.44"/><path class="hud-gear-tick hud-gear-major" d="M253.34 66.66L273.14 46.86"/><path class="hud-gear-tick hud-gear-minor" d="M271.07 74.77L284.56 64.42"/><path class="hud-gear-tick hud-gear-minor" d="M281.24 90.00L295.97 81.50"/><path class="hud-gear-tick hud-gear-minor" d="M289.34 106.42L305.05 99.92"/><path class="hud-gear-tick hud-gear-minor" d="M295.23 123.77L311.65 119.37"/><path class="hud-gear-tick hud-gear-minor" d="M298.80 141.73L315.66 139.51"/><path class="hud-gear-tick hud-gear-major" d="M292.00 160.00L320.00 160.00"/><path class="hud-gear-tick hud-gear-minor" d="M298.80 178.27L315.66 180.49"/><path class="hud-gear-tick hud-gear-minor" d="M295.23 196.23L311.65 200.63"/><path class="hud-gear-tick hud-gear-minor" d="M289.34 213.58L305.05 220.08"/><path class="hud-gear-tick hud-gear-minor" d="M281.24 230.00L295.97 238.50"/><path class="hud-gear-tick hud-gear-minor" d="M271.07 245.23L284.56 255.58"/><path class="hud-gear-tick hud-gear-major" d="M253.34 253.34L273.14 273.14"/><path class="hud-gear-tick hud-gear-minor" d="M245.23 271.07L255.58 284.56"/><path class="hud-gear-tick hud-gear-minor" d="M230.00 281.24L238.50 295.97"/><path class="hud-gear-tick hud-gear-minor" d="M213.58 289.34L220.08 305.05"/><path class="hud-gear-tick hud-gear-minor" d="M196.23 295.23L200.63 311.65"/><path class="hud-gear-tick hud-gear-minor" d="M178.27 298.80L180.49 315.66"/><path class="hud-gear-tick hud-gear-major" d="M160.00 292.00L160.00 320.00"/><path class="hud-gear-tick hud-gear-minor" d="M141.73 298.80L139.51 315.66"/><path class="hud-gear-tick hud-gear-minor" d="M123.77 295.23L119.37 311.65"/><path class="hud-gear-tick hud-gear-minor" d="M106.42 289.34L99.92 305.05"/><path class="hud-gear-tick hud-gear-minor" d="M90.00 281.24L81.50 295.97"/><path class="hud-gear-tick hud-gear-minor" d="M74.77 271.07L64.42 284.56"/><path class="hud-gear-tick hud-gear-major" d="M66.66 253.34L46.86 273.14"/><path class="hud-gear-tick hud-gear-minor" d="M48.93 245.23L35.44 255.58"/><path class="hud-gear-tick hud-gear-minor" d="M38.76 230.00L24.03 238.50"/><path class="hud-gear-tick hud-gear-minor" d="M30.66 213.58L14.95 220.08"/><path class="hud-gear-tick hud-gear-minor" d="M24.77 196.23L8.35 200.63"/><path class="hud-gear-tick hud-gear-minor" d="M21.20 178.27L4.34 180.49"/><path class="hud-gear-tick hud-gear-major" d="M28.00 160.00L0.00 160.00"/><path class="hud-gear-tick hud-gear-minor" d="M21.20 141.73L4.34 139.51"/><path class="hud-gear-tick hud-gear-minor" d="M24.77 123.77L8.35 119.37"/><path class="hud-gear-tick hud-gear-minor" d="M30.66 106.42L14.95 99.92"/><path class="hud-gear-tick hud-gear-minor" d="M38.76 90.00L24.03 81.50"/><path class="hud-gear-tick hud-gear-minor" d="M48.93 74.77L35.44 64.42"/><path class="hud-gear-tick hud-gear-major" d="M66.66 66.66L46.86 46.86"/><path class="hud-gear-tick hud-gear-minor" d="M74.77 48.93L64.42 35.44"/><path class="hud-gear-tick hud-gear-minor" d="M90.00 38.76L81.50 24.03"/><path class="hud-gear-tick hud-gear-minor" d="M106.42 30.66L99.92 14.95"/><path class="hud-gear-tick hud-gear-minor" d="M123.77 24.77L119.37 8.35"/><path class="hud-gear-tick hud-gear-minor" d="M141.73 21.20L139.51 4.34"/></g></svg></div>
   
   <div class="hud-core">
     <svg class="hud-globe-map" viewBox="0 0 420 420" role="img" aria-label="青く輝くホログラム球体">
@@ -547,7 +547,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v304";
+const ALVIS_APP_BUILD_ID="v305";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4096,7 +4096,7 @@ function startAlvisHudMotion(){
     {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-a")),from:"-24deg",to:"336deg",duration:27500},
     {node:orbitNodes.find(node=>node.classList.contains("hud-orbit-b")),from:"58deg",to:"-302deg",duration:38750},
     // Ring C keeps its centered translate property; WAAPI rotates only the independent rotate component.
-    {node:outerOrbit,from:"9deg",to:"369deg",duration:42000}
+    {node:outerOrbit,from:"9deg",to:"369deg",duration:18000}
   ];
   motions.forEach(motion=>{
     if(!motion.node || typeof motion.node.animate!=="function")return;
