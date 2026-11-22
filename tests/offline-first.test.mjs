@@ -1088,14 +1088,14 @@ assert.match(sw,/alvis-cache-v\d+-integrated/,"v233 app shell must use refreshed
 
  // v310: contextual memory lookup must recognize real stored ALVIS turns as elliptical follow-up context.
  const contextualHelperStart=app.indexOf("function buildContextualQuery(query, history){");
- const contextualHelperEnd=app.indexOf("\\nfunction ",contextualHelperStart+20);
+ const contextualHelperEnd=app.indexOf("\nfunction ",contextualHelperStart+20);
  assert.ok(contextualHelperStart>=0&&contextualHelperEnd>contextualHelperStart,"contextual query helper must exist");
  const contextualSource=app.slice(contextualHelperStart,contextualHelperEnd);
  const ellipticalSourceStart=app.indexOf("function isEllipticalFollowUpMessage(text,priorTurns=[]){");
- const ellipticalSourceEnd=app.indexOf("\\nfunction ",ellipticalSourceStart+20);
+ const ellipticalSourceEnd=app.indexOf("\nfunction ",ellipticalSourceStart+20);
  const ellipticalClassifier=new Function(app.slice(ellipticalSourceStart,ellipticalSourceEnd)+"; return isEllipticalFollowUpMessage;")();
  const followupClassifierStart=app.indexOf("function isFollowUpMessage(text){");
- const followupClassifierEnd=app.indexOf("\\nfunction ",followupClassifierStart+20);
+ const followupClassifierEnd=app.indexOf("\nfunction ",followupClassifierStart+20);
  const followupClassifier=new Function(app.slice(followupClassifierStart,followupClassifierEnd)+"; return isFollowUpMessage;")();
  const contextualQueryForTest=new Function("isFollowUpMessage","isEllipticalFollowUpMessage",contextualSource+"; return buildContextualQuery;")(followupClassifier,ellipticalClassifier);
  const storedAlvisHistory=[{role:"user",text:"妻の日本人の配偶者等の在留資格を申請したよ。"},{role:"alvis",text:"申請後は審査結果を待つ流れだよ。"},{role:"user",text:"妻は？"}];
