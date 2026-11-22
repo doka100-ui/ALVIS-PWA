@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v309";
+const ALVIS_APP_BUILD_ID="v310";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -2640,7 +2640,7 @@ function isEllipticalFollowUpMessage(text,priorTurns=[]){
   if(!value||value.length>14||/(?:何|なに|どこ|いつ|誰|だれ|どれ|どっち|どう|なぜ|どうして|いくら|高さ|意味|理由|方法)/u.test(value))return false;
   if(!/^[\p{L}\p{N}ー・]{1,12}(?:は|なら|については|の方は|の場合は)[?？。！!]*$/u.test(value))return false;
   const turns=Array.isArray(priorTurns)?priorTurns.slice(-4):[];
-  return turns.some(item=>item?.role==="user")&&turns.some(item=>item?.role==="assistant");
+  return turns.some(item=>item?.role==="user")&&turns.some(item=>item?.role==="assistant"||item?.role==="alvis");
 }
 
 function buildBoundedGenerationMessages(recent,currentText){
@@ -2692,12 +2692,14 @@ function buildCompactConversationVariationGuidance(value,history=[]){
 
 function buildContextualQuery(query, history){
   const current=String(query||"").trim();
-  const followUp=isFollowUpMessage(current);
-  if(!followUp)return {text:current,usedContext:false,context:""};
   const turns=(Array.isArray(history)?history:[])
-    .filter(item=>item.role==="user"||item.role==="alvis")
-    .slice(0,-1).slice(-6);
-  const context=turns.map(item=>(item.role==="user"?"ユーザー":"ALVIS")+"："+String(item.text||"").slice(0,700)).join("\n");
+    .filter(item=>item.role==="user"||item.role==="alvis");
+  // 保存履歴のassistant相当はrole:"alvis"。短い名詞句の追加質問でも直前の話題を参照する。
+  const priorTurns=turns.slice(0,-1);
+  const followUp=isFollowUpMessage(current)||isEllipticalFollowUpMessage(current,priorTurns);
+  if(!followUp)return {text:current,usedContext:false,context:""};
+  const contextTurns=priorTurns.slice(-6);
+  const context=contextTurns.map(item=>(item.role==="user"?"ユーザー":"ALVIS")+"："+String(item.text||"").slice(0,700)).join("\n");
   return {text:[current,context].filter(Boolean).join("\n"),usedContext:!!context,context};
 }
 
