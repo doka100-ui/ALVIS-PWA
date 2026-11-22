@@ -1866,3 +1866,10 @@ header .status{margin-top:2px}
   filter:drop-shadow(0 1px 1px #020b14);
 }
 /* end v306 */
+
+
+/* v308: restrained precision index on the ALVIS outer ring; no gear teeth. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth{filter:drop-shadow(0 0 1px #8ddfff55)!important;}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-tick{fill:none;stroke:#82c8df;stroke-opacity:.52;stroke-width:1.05;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-tick-major{stroke:#d8f4ff;stroke-opacity:.72;stroke-width:1.45;}
+/* end v308 */
