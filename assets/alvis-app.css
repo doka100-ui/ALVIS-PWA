@@ -1742,3 +1742,18 @@ header .status{margin-top:2px}
   to{rotate:369deg}
 }
 /* end v297 */
+ 
+/* v298: give the rotating outer ALVIS orbit a fine precision-gear rim.
+   The evenly spaced radial teeth are a decorative pseudo-element and rotate
+   with ring C; the ring's center, size, tilt and 42-second motion stay intact. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  content:""!important;position:absolute!important;inset:-5px!important;
+  display:block!important;border:0!important;border-radius:50%!important;
+  background:repeating-conic-gradient(from 0deg,#a5f3ff 0deg 2.1deg,transparent 2.1deg 5.625deg)!important;
+  -webkit-mask:radial-gradient(ellipse at center,transparent 0 91%,#000 92% 100%)!important;
+  mask:radial-gradient(ellipse at center,transparent 0 91%,#000 92% 100%)!important;
+  opacity:.9!important;filter:drop-shadow(0 0 3px #38bdf8)!important;
+  pointer-events:none!important;
+}
+/* end v298 */
+
