@@ -1784,3 +1784,17 @@ header .status{margin-top:2px}
   margin:0!important;translate:-50% -50%!important;transform:none!important;
 }
 /* end v302 */
+
+
+/* v303: make the existing ALVIS outer gear teeth unmistakable.
+   Keep the confirmed globe-center anchor, circular geometry, and 42-second rotation.
+   The 48 teeth now project farther beyond the rim with wider luminous faces and deeper gaps. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  inset:-12px!important;
+  background:repeating-conic-gradient(from 0deg,#f1fdff 0deg 4.6deg,#39c9f4 4.6deg 5deg,#0b5d8b 5deg 5.4deg,transparent 5.4deg 7.5deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 82%,#000 83% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 82%,#000 83% 100%)!important;
+  opacity:1!important;
+  filter:drop-shadow(0 0 5px #7cecff) drop-shadow(0 0 11px #0ea5e9)!important;
+}
+/* end v303 */
