@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v312";
+const ALVIS_APP_BUILD_ID="v313";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -1463,6 +1463,16 @@ function getAutonomyTaskMetadata(draft,goal,action){
     priority:["high","medium","low"].includes(draft.dataset.priority)?draft.dataset.priority:"medium",
     origin:draft.dataset.origin==="self_goal"?"self_goal":"user_goal"
   };
+}
+
+function findDuplicateAutonomyIssue(issues,candidate){
+  const title=normalizeAutonomyTaskText(candidate?.title);
+  const action=normalizeAutonomyTaskText(candidate?.nextAction);
+  if(!title||!action)return -1;
+  return (Array.isArray(issues)?issues:[]).findIndex(issue=>
+    normalizeAutonomyTaskText(issue?.title)===title &&
+    normalizeAutonomyTaskText(issue?.nextAction)===action
+  );
 }
 
 function parseAutonomyGoalProposal(value){
@@ -3642,8 +3652,11 @@ $("scanAutonomyIssues").addEventListener("click",async()=>{
     const parsed=JSON.parse(output.slice(start,end+1));if(!Array.isArray(parsed))throw new Error("課題一覧の形式が正しくありません。");
     const fresh=parsed.slice(0,3).map(item=>({title:String(item.title||"").trim().slice(0,100),reason:String(item.reason||"").trim().slice(0,500),priority:["high","medium","low"].includes(item.priority)?item.priority:"medium",nextAction:String(item.nextAction||"").trim().slice(0,500),status:"pending",createdAt:new Date().toISOString()})).filter(item=>item.title&&item.nextAction);
     if(!fresh.length)throw new Error("根拠のある新しい課題は見つかりませんでした。");
-    const existing=new Set(data.autonomyIssues.map(item=>(item.title||"").normalize("NFKC").toLowerCase()));
-    const unique=fresh.filter(item=>!existing.has(item.title.normalize("NFKC").toLowerCase()));
+    const unique=[];
+    fresh.forEach(item=>{
+      if(findDuplicateAutonomyIssue(data.autonomyIssues,item)===-1 &&
+         findDuplicateAutonomyIssue(unique,item)===-1)unique.push(item);
+    });
     data.autonomyIssues.push(...unique);await saveLocal();renderAll();
     setStatus("autonomyIssueStatus",unique.length+"件の課題候補を追加しました。優先度と根拠を確認し、採用する課題だけタスク化してください。");
   }catch(error){setStatus("autonomyIssueStatus","課題分析に失敗しました: "+(error?.message||String(error)));}
