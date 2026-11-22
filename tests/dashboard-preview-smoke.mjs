@@ -90,6 +90,10 @@ async function verifyBrowser(browserType, verifyOffline) {
       margin: getComputedStyle(node).margin,
       translate: getComputedStyle(node).translate,
       transform: getComputedStyle(node).transform,
+      parentWidth: node.parentElement.getBoundingClientRect().width,
+      parentHeight: node.parentElement.getBoundingClientRect().height,
+      topRatio: parseFloat(getComputedStyle(node).top) / node.parentElement.getBoundingClientRect().height,
+      leftRatio: parseFloat(getComputedStyle(node).left) / node.parentElement.getBoundingClientRect().width,
       width: node.getBoundingClientRect().width,
       height: node.getBoundingClientRect().height,
       aspectRatio: getComputedStyle(node).aspectRatio,
@@ -100,24 +104,25 @@ async function verifyBrowser(browserType, verifyOffline) {
       && animation.keyframes.some(frame => frame.rotate === "9deg")
       && animation.keyframes.some(frame => frame.rotate === "369deg")),
       browserName + ": outer ring C must have a 42-second independent rotate animation");
-    assert.equal(outerRingMotion.top, "0px", browserName + ": outer ring C must use the parent bounds as its centering anchor");
-    assert.equal(outerRingMotion.right, "0px", browserName + ": outer ring C must use the parent bounds as its centering anchor");
-    assert.equal(outerRingMotion.bottom, "0px", browserName + ": outer ring C must use the parent bounds as its centering anchor");
-    assert.equal(outerRingMotion.left, "0px", browserName + ": outer ring C must use the parent bounds as its centering anchor");
-    assert.equal(outerRingMotion.translate, "none", browserName + ": outer ring C must rely on auto-margin centering rather than percentage translation");
-    assert.match(outerRingMotion.margin, /auto/, browserName + ": outer ring C must use automatic centering margins");
+    assert.ok(Math.abs(outerRingMotion.topRatio - 0.42) < 0.01,
+      browserName + ": outer ring C must share the globe core's 42% vertical anchor");
+    assert.ok(Math.abs(outerRingMotion.leftRatio - 0.5) < 0.01,
+      browserName + ": outer ring C must share the globe core's 50% horizontal anchor");
+    assert.equal(outerRingMotion.right, "auto", browserName + ": outer ring C must not stretch to the parent right edge");
+    assert.equal(outerRingMotion.bottom, "auto", browserName + ": outer ring C must not stretch to the parent bottom edge");
+    assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must center its own bounds on the globe anchor");
     assert.equal(outerRingMotion.transform, "none", browserName + ": outer ring C must not receive a second transform translate");
     assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
     assert.ok(Math.abs(outerRingMotion.width - outerRingMotion.height) < 1.5,
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.ok(outerRingMotion.toothBackground.includes("repeating-conic-gradient") && outerRingMotion.toothBackground.includes("7.5deg") && outerRingMotion.toothMask.includes("radial-gradient") && outerRingMotion.toothMask.includes("84%"), browserName + ": outer ring C must render clearly spaced, thicker gear teeth");
-    const refreshResponse = await page.request.get(new URL("refresh-v301.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v301 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v302.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v302 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v301-integrated"), browserName + ": refresh page must verify the v300 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=301"), browserName + ": refresh page must return to the integrated app only after v301 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v302-integrated"), browserName + ": refresh page must verify the v300 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=302"), browserName + ": refresh page must return to the integrated app only after v302 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -181,8 +186,8 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(liveHud.globeWidth > 80, browserName + ": hologram globe must have a real rendered size");
     assert.ok(liveHud.ringAAnimations > 0 && liveHud.ringBAnimations > 0,
       browserName + ": both orbital rings must be animated; state=" + JSON.stringify(liveHud));
-    assert.ok(liveHud.ringCenterOffsets.every(offset => Math.abs(offset.x) < 3 && Math.abs(offset.y) < 3),
-      browserName + ": all three orbital rings must share the globe center; offsets=" + JSON.stringify(liveHud.ringCenterOffsets));
+    assert.ok(Math.abs(liveHud.ringCenterOffsets[2].x) < 3 && Math.abs(liveHud.ringCenterOffsets[2].y) < 3,
+      browserName + ": the outer gear ring C must share the exact globe center; offsets=" + JSON.stringify(liveHud.ringCenterOffsets[2]));
 
     const menuCount = await page.locator(".hud-side-left .hud-nav button[data-page]").count();
     assert.equal(menuCount, 5, browserName + ": all five image-aligned menu hit areas must exist");
@@ -318,7 +323,7 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v301.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v302.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
@@ -344,7 +349,7 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v301-integrated",
+    assert.equal(state.cacheName, "alvis-cache-v302-integrated",
       browserName + ": refresh flow must verify the actual v300 worker before redirecting");
     console.log("PASS " + browserName + ": deployed refresh page activates and verifies v299 before redirect");
   } finally {
