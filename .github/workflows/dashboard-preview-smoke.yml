@@ -10,7 +10,7 @@ on:
       - "refresh.html"
       - "refresh-v291.html"
       - "refresh-v300.html"
-      - "refresh-v302.html"
+      - "refresh-v303.html"
       - "startup-check.html"
       - "assets/alvis-dashboard-reference.avif"
       - "tests/alvis-dashboard.test.mjs"
