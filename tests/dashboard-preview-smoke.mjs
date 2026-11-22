@@ -104,7 +104,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(outerRingMotion.animations.some(animation => animation.duration === 18000
       && animation.keyframes.some(frame => frame.rotate === "9deg")
       && animation.keyframes.some(frame => frame.rotate === "369deg")),
-      browserName + ": outer ring C must have a 42-second independent rotate animation");
+      browserName + ": outer ring C must have a 18-second independent rotate animation");
     assert.ok(Math.abs(outerRingMotion.topRatio - 0.42) < 0.01,
       browserName + ": outer ring C must share the globe core's 42% vertical anchor");
     assert.ok(Math.abs(outerRingMotion.leftRatio - 0.5) < 0.01,
