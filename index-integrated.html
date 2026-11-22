@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v311";
+const ALVIS_APP_BUILD_ID="v312";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -3680,6 +3680,12 @@ $("autonomyCycleButton").addEventListener("click",async()=>{
     ].join("\n");
     const result=await aiEngine.chat.completions.create({messages:[{role:"system",content:"あなたは根拠・安全性・継続改善を重視する自律型個人AIです。指定されたJSONだけを返してください。"},{role:"user",content:promptText}],temperature:0.25,max_tokens:260,extra_body:{enable_thinking:false}});
     const proposal=parseAutonomyGoalProposal(result.choices?.[0]?.message?.content||"");
+    const repeatedTaskIndex=findDuplicateAutonomyTask(data.autonomyTasks,proposal.goal,proposal.firstAction);
+    if(repeatedTaskIndex!==-1){
+      const repeatedTask=data.autonomyTasks[repeatedTaskIndex];
+      const stateLabel=repeatedTask.status==="done"?"完了済み":"未完了";
+      throw new Error("同じ目標と最初の行動は"+stateLabel+"タスクに登録済みです。過去の結果を確認し、別の検証方法を選んでください。");
+    }
     $("autonomyGoal").value=proposal.goal;
     $("autonomyTaskDraft").value=proposal.firstAction;
     setStatus("autonomyCycleStatus","【自分で選んだ目標】"+proposal.goal+"\n理由："+(proposal.reason||"記録に基づく課題")+
