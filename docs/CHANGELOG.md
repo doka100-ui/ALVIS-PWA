@@ -1,3 +1,8 @@
+## 2026-11-22 — ALVIS外側リングを精密ギア形状へ v298
+- ユーザー確認で回転と位置の修正を確認。ALVISモードの最外周リングに、マスク付きrepeating-conic-gradientで64個の細かな歯を追加。既存の楕円形状・中心位置・傾き・42秒周期の回転・発光マーカーは維持。
+- Avatarモード、球体、内側リング、記憶/履歴/暗号化/同期/バックアップ、モデルキャッシュ、音声には変更なし。Service Worker cacheはalvis-cache-v298-integrated、更新ページはrefresh-v298.html。
+- Playwrightの更新ページ検査に残っていたv296参照もv298へ修正し、歯形装飾の描画確認を追加。
+
 - v297: Restore the outer ALVIS ring rotation using the independent CSS `rotate` component, preserving its centered `translate`; restore the ring's 48% vertical position. Refresh build/cache identifiers and update regression checks.
 ## 2026-11-20 — ALVIS外側リングCの位置と回転を修正 v296
 - v295で追加したtransformアニメーションは、既存の!important指定に阻まれていた。さらにv294のtop:42%指定が既存の配置をずらしていた。
