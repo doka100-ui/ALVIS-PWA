@@ -97,7 +97,8 @@ async function verifyBrowser(browserType, verifyOffline) {
       width: node.getBoundingClientRect().width,
       height: node.getBoundingClientRect().height,
       aspectRatio: getComputedStyle(node).aspectRatio,
-      gearTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-tick").length,\n      majorTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-major").length,
+      gearTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-tick").length,
+      majorTickCount: node.querySelectorAll(".hud-gear-teeth .hud-gear-major").length,
       toothInset: getComputedStyle(node, "::before").inset,
       toothMask: getComputedStyle(node, "::before").maskImage
     }));
@@ -114,7 +115,8 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
     assert.ok(Math.abs(outerRingMotion.width - outerRingMotion.height) < 1.5,
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
-    assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer gear must render 48 individually visible radial teeth");\n    assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer gear must render 8 longer clock-index teeth");
+    assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer gear must render 48 individually visible radial teeth");
+    assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer gear must render 8 longer clock-index teeth");
     const refreshResponse = await page.request.get(new URL("refresh-v305.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v305 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
