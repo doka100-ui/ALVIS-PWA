@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v310";
+const ALVIS_APP_BUILD_ID="v311";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -2729,7 +2729,7 @@ function selectRelevantMemories(query, memories, history){
   const normalize=value=>String(value||"").normalize("NFKC").toLowerCase();
   const compact=value=>normalize(value).replace(/[\s　。、,.!！?？:：;；「」『』()（）]/g,"");
   const contextLines=context.usedContext
-    ?context.context.split("\n").filter(line=>line.startsWith("ユーザー：")).slice(-3).map(line=>line.replace(/^ユーザー：/,""))
+    ?context.context.split("\n").filter(line=>line.startsWith("ユーザー：")).slice(-1).map(line=>line.replace(/^ユーザー：/,""))
     :[];
   const groups=[
     {pattern:/食べ物|食事|料理|好物|好きなもの/,terms:["ラーメン","味噌","麺","食事","料理","食べる","肉","魚","野菜","甘い","辛い"]},
@@ -2759,7 +2759,7 @@ function selectRelevantMemories(query, memories, history){
     });
     // 会話文脈は現在の質問に直接関連する記憶の順位付けだけを補助する。
     // 文脈だけで無関係な記憶が候補へ浮上するのを防ぐ。
-    const score=direct+(direct>0?contextual:0)+topicBoost;
+    const score=direct+(direct>0?contextual:(context.usedContext?contextual*0.45:0))+topicBoost;
     if(score>=1.6){
       const timestamp=Date.parse(item?.updatedAt||item?.createdAt||"");
       ranked.push({text:value,score,index,timestamp:Number.isFinite(timestamp)?timestamp:0});
@@ -2773,7 +2773,8 @@ function selectRelevantLearnings(query, history, learnings){
   const approved=(Array.isArray(learnings)?learnings:[]).filter(item=>item.status==="approved"&&String(item.text||"").trim());
   const ranked=approved.map((item,index)=>{
     const direct=scoreContextMatch(query,item.text);
-    const contextual=direct>0&&context.usedContext?scoreContextMatch(context.text,item.text)*0.2:0;
+    const priorUserContext=context.usedContext?context.context.split("\n").filter(line=>line.startsWith("ユーザー：")).slice(-1):[];
+    const contextual=priorUserContext.length?Math.max(...priorUserContext.map(line=>scoreContextMatch(line.replace(/^ユーザー：/,""),item.text)),0)*(direct>0?0.2:0.45):0;
     return {...item,text:String(item.text),score:direct+contextual,index,createdAt:item.approvedAt||item.createdAt||""};
   });
   const relevant=ranked.filter(item=>item.score>=1.6).sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,3);
