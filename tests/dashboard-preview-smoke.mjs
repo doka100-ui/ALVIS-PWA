@@ -117,13 +117,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
-    const refreshResponse = await page.request.get(new URL("refresh-v313.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v313 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v314.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v314 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v313-integrated"), browserName + ": refresh page must verify the v313 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=313"), browserName + ": refresh page must return to the integrated app only after v313 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v314-integrated"), browserName + ": refresh page must verify the v314 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=313"), browserName + ": refresh page must return to the integrated app only after v314 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -324,11 +324,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v313.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v314.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "313",
+      url.searchParams.get("refresh") === "314",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -350,9 +350,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v313-integrated",
-      browserName + ": refresh flow must verify the actual v313 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v313 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v314-integrated",
+      browserName + ": refresh flow must verify the actual v314 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v314 before redirect");
   } finally {
     await browser.close();
   }
