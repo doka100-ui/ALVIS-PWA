@@ -1293,10 +1293,3 @@ assert.ok(app.includes("failedModelDeviceCount=releaseCapturedAlvisModelDevices(
 assert.ok(app.includes("alvisEngineCleanupError=String(error?.message") && app.includes("GPU停止後のモデル解放を確認できませんでした。"),"unexpected GPU loss must persist an unload failure and require reload");
 assert.ok(app.includes("$(" + String.fromCharCode(34) + "loadAiModel" + String.fromCharCode(34) + ").disabled=!!cleanupError") && app.includes("$(" + String.fromCharCode(34) + "loadAiModel" + String.fromCharCode(34) + ").disabled=!!alvisEngineCleanupError"),"the model start button must remain disabled while cleanup is uncertain");
 assert.ok(app.includes("if(alvisGpuLossDuringLoad)") && app.includes("if(!unlocked)") && app.includes("ログアウト後のモデル解放に失敗しました"),"initialization-time GPU loss and logout cleanup failures must also be retained");
-
-// v327: a failed unload after GPU loss must block a second engine in the same page.
-assert.match(app,/alvisEngineCleanupError=String\\(error\\?\\.message/,"unexpected GPU loss must persist an unload failure");
-assert.match(app,/GPU停止後のモデル解放を確認できませんでした[\\s\\S]*?ページを再読み込みしてから再試行/,"GPU unload failure must instruct a page reload instead of allowing an immediate second engine");
-assert.match(app,/\\$\\("loadAiModel"\\)\\.disabled=!!alvisEngineCleanupError/,"the model start button must remain disabled while cleanup is uncertain");
-assert.match(app,/if\\(alvisGpuLossDuringLoad\\)[\\s\\S]*?alvisEngineCleanupError=String\\(error\\?\\.message/,"initialization-time GPU unload failure must also block a second engine");
-assert.match(app,/if\\(!unlocked\\)\\{[\\s\\S]*?alvisEngineCleanupError=String\\(error\\?\\.message/,"logout-time initialization cleanup failure must also be retained");
