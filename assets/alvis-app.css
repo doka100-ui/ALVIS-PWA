@@ -1840,3 +1840,29 @@ header .status{margin-top:2px}
   stroke:#f4feff;stroke-width:3.8;
 }
 /* end v305 */
+
+
+/* v306: premium precision-metal sci-fi treatment for the ALVIS outer gear only.
+   Keep the confirmed circular anchor, globe, inner rings, and Avatar mode untouched. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth{
+  position:absolute!important;inset:-28px!important;
+  display:block!important;width:calc(100% + 56px)!important;height:calc(100% + 56px)!important;
+  overflow:visible!important;pointer-events:none!important;
+  filter:drop-shadow(0 0 2px #8ddfff88) drop-shadow(0 0 7px #168fc855)!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-tooth{
+  fill:url(#gearMetal);stroke:#bdeeff;stroke-opacity:.72;stroke-width:1.15;
+  stroke-linejoin:bevel;vector-effect:non-scaling-stroke;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-engrave{
+  fill:none;stroke:#d9f5ff;stroke-opacity:.58;stroke-width:1.1;
+  stroke-linecap:round;vector-effect:non-scaling-stroke;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-body{
+  filter:drop-shadow(0 1px 1px #020b14);
+}
+/* end v306 */
