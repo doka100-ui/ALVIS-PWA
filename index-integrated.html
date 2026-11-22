@@ -561,7 +561,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v313";
+const ALVIS_APP_BUILD_ID="v314";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -1465,6 +1465,16 @@ function getAutonomyTaskMetadata(draft,goal,action){
   };
 }
 
+function findDuplicateAutonomyLearning(learnings,candidate){
+  const text=normalizeAutonomyTaskText(candidate?.text);
+  const experiment=normalizeAutonomyTaskText(candidate?.nextExperiment);
+  if(!text||!experiment)return -1;
+  return (Array.isArray(learnings)?learnings:[]).findIndex(item=>
+    normalizeAutonomyTaskText(item?.text)===text &&
+    normalizeAutonomyTaskText(item?.nextExperiment)===experiment
+  );
+}
+
 function findDuplicateAutonomyIssue(issues,candidate){
   const title=normalizeAutonomyTaskText(candidate?.title);
   const action=normalizeAutonomyTaskText(candidate?.nextAction);
@@ -1602,13 +1612,16 @@ function renderAutonomy(){
           const retrospective=parseAutonomyRetrospective(result.choices?.[0]?.message?.content||"");
           task.retrospective=retrospective;
           task.review=retrospective.lesson;
-          data.learnings.push({
+          const learningCandidate={
             text:retrospective.lesson,sourceTask:task.title,status:"pending",
             outcome:retrospective.outcome,evidence:retrospective.evidence,
             nextExperiment:retrospective.nextExperiment,confidence:retrospective.confidence,
             createdAt:new Date().toISOString()
-          });
+          };
+          const duplicateLearningIndex=findDuplicateAutonomyLearning(data.learnings,learningCandidate);
+          if(duplicateLearningIndex===-1)data.learnings.push(learningCandidate);
           await saveLocal();renderAll();
+          if(duplicateLearningIndex!==-1)alert("同じ学びと次の検証方法は既に学習メモにあります。既存メモの承認状態は変更していません。");
         }catch(error){alert("振り返りに失敗しました: "+(error?.message||String(error)));reflect.disabled=false;reflect.textContent="AIで学習を振り返る";}
       });actions.appendChild(reflect);
     }
