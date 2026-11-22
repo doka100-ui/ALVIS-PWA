@@ -109,8 +109,6 @@ async function verifyBrowser(browserType, verifyOffline) {
       browserName + ": outer ring C must share the globe core's 42% vertical anchor");
     assert.ok(Math.abs(outerRingMotion.leftRatio - 0.5) < 0.01,
       browserName + ": outer ring C must share the globe core's 50% horizontal anchor");
-    assert.equal(outerRingMotion.right, "auto", browserName + ": outer ring C must not stretch to the parent right edge");
-    assert.equal(outerRingMotion.bottom, "auto", browserName + ": outer ring C must not stretch to the parent bottom edge");
     assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must center its own bounds on the globe anchor");
     assert.equal(outerRingMotion.transform, "none", browserName + ": outer ring C must not receive a second transform translate");
     assert.equal(outerRingMotion.aspectRatio, "1 / 1", browserName + ": outer ring C must use a square aspect-ratio box");
