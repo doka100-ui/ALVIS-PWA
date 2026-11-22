@@ -869,6 +869,14 @@ assert.match(inferenceSerializer,/if\(unloadRequested\)return Promise\.reject/,"
 assert.match(inferenceSerializer,/const request=inferenceQueue\.then\(\(\)=>\{[\s\S]*?return originalCreate\(\.\.\.args\)/,"inference calls must execute serially through one queue");
 assert.match(inferenceSerializer,/if\(unloadRequested\)throw new Error/,"queued inference must not start after unload has been requested");
 assert.match(inferenceSerializer,/if\(unloadPromise\)return unloadPromise;[\s\S]*?unloadRequested=true;[\s\S]*?await inferenceQueue\.catch/,"repeated unload requests must share one cleanup promise and wait for active inference");
+const unloadHandler=app.slice(app.indexOf('$("unloadAiModel").addEventListener("click",async()=>{'),app.indexOf('$("unlockButton").addEventListener("click",unlock)'));
+assert.match(unloadHandler,/if\(!aiEngine\|\|aiLoading\)return/,"manual unload must not race a model that is still initializing");
+assert.match(unloadHandler,/await engine\.unload\(\);[\s\S]*?if\(aiEngine===engine\)aiEngine=null/,"manual unload must detach only the engine it actually unloaded");
+const loadHandler=app.slice(app.indexOf('$("loadAiModel").addEventListener("click",async()=>{'),app.indexOf('$("unloadAiModel").addEventListener("click",async()=>{'));
+assert.match(loadHandler,/await alvisEngineCleanupPromise;[\s\S]*?if\(alvisEngineCleanupError\)throw new Error/,"new model initialization must wait for previous GPU cleanup and stop on cleanup failure");
+assert.match(loadHandler,/if\(!unlocked\)[\s\S]*?await engine\.unload\(\)[\s\S]*?return;/,"an engine that finishes initializing after logout must be unloaded instead of published");
+assert.match(loadHandler,/const failedModelDevices=alvisGpuDiagnostics\.modelDevices\.splice\(0\);[\s\S]*?failedModelDevices\.forEach\(device=>\{try\{device\?\.destroy\?\.\(\)/,"partial GPU devices must be destroyed when model initialization fails");
+
 
 assert.match(sw,/key\.startsWith\("alvis-cache-"\)[\s\S]*?key\.startsWith\("alvis-deps-"\)/,"activation cleanup must be restricted to ALVIS-owned caches");
 assert.match(sw,/for\s*\(const cacheName of \["webllm\/model",\s*"webllm\/config",\s*"webllm\/wasm"\]\)/,"offline model cache lookups must retain WebLLM's own cache namespaces");
