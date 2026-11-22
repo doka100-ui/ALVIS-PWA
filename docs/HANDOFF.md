@@ -1,3 +1,9 @@
+## Latest update — v326 初期化中のGPU解放失敗に対する個別破棄フォールバック
+- CreateMLCEngine完了後、GPU停止またはログアウトを検出してengine.unload()を呼び出した際、unload自体が失敗すると追跡中GPUDeviceの参照だけを消してしまう経路を修正。
+- unload成功時はエンジンに解放を任せて参照のみを破棄。unload失敗時は当該初期化試行で捕捉したGPUDeviceだけを個別destroyし、技術ログへ結果を記録。モデル初期化reject時の既存後始末も共通ヘルパーへ統一。
+- 他のGPU device、既存モデルキャッシュ、QwenモデルID/量子化/context window、WebLLM 0.2.87、記憶/履歴/AES-GCM/同期/バックアップ/Kokoro、ALVIS完成形v308、Avatar表示は変更しない。キャッシュ削除・モデル再取得なし。
+- Service Worker cache: alvis-cache-v326-integrated。更新ページ: refresh-v326.html。
+ 
 ## Latest update — v325 GPU停止通知とモデル所有権引き渡しの競合を修正
 - WebLLMのCreateMLCEngineがresolveした直後、ALVISがGPUDeviceの所有権を受け取る直前にdevice.lost通知が届くと、captureModelDevices解除後の通知を初期化中の停止として記録できない競合を修正。
 - 一時追跡中のmodelDevicesに対象GPUDeviceが残っている間は、captureModelDevices解除後もlost通知（通常resolve/reject両経路）をalvisGpuLossDuringLoadへ記録。エンジン引き渡し後は従来の通常GPU停止処理へ移行。

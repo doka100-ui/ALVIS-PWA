@@ -1,3 +1,8 @@
+## v326 — 初期化中のGPU device解放フォールバック
+- GPU停止またはログアウトがCreateMLCEngine完了直後に発生し、engine.unload()が失敗した場合、初期化試行で捕捉したGPUDeviceだけを個別destroyしてGPUリソースの残留を防ぐ。
+- unload成功時は重複destroyせず参照のみ解放。モデル初期化reject時も共通の限定的クリーンアップ処理を利用する。
+- 既存モデルキャッシュ、モデル設定、暗号化ユーザーデータ、同期/バックアップ、音声、ALVIS/Avatarデザインは変更しない。Service Worker app shell cache v326。
+ 
 ## v325 — WebGPU停止通知の所有権引き渡し競合を修正
 - CreateMLCEngine完了後からALVIS engine公開までの短い区間も、追跡中GPUDeviceのlost通知を初期化失敗として捕捉する。Promise resolve/reject両経路に対応。
 - GPUDeviceがALVIS engineへ引き渡された後は既存の稼働中GPU停止処理を使用。モデル設定、モデルキャッシュ、ユーザーデータ形式、UIは変更しない。Service Worker app shell cache v325。

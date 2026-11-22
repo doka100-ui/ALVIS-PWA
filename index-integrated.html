@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v325";
+const ALVIS_APP_BUILD_ID="v326";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -719,6 +719,19 @@ function installAlvisWebGpuDiagnostics(){
     alvisGpuDiagnostics.pageHideCount++;alvisGpuDiagnostics.lastPageEvent="pagehide";
   });
 }
+
+function releaseCapturedAlvisModelDevices({destroy=false,reason=""}={}){
+  const devices=alvisGpuDiagnostics.modelDevices.splice(0);
+  if(destroy){
+    devices.forEach(device=>{
+      try{device?.destroy?.();}
+      catch(error){recordAlvisModelLoadTrace("GPU device個別解放失敗："+String(error?.message||error||"不明").slice(0,120));}
+    });
+  }
+  if(devices.length)recordAlvisModelLoadTrace("初期化中GPU device参照を"+(destroy?"個別破棄後に":"")+"解放："+devices.length+"件"+(reason?"（"+reason+"）":""));
+  return devices.length;
+}
+
 function getAlvisGpuDiagnosticSummary(){
   const d=alvisGpuDiagnostics;
   return " / GPU "+d.deviceState+"（model device "+d.modelDeviceCreateCount+"回） / visibility "+d.visibilityState+" / page "+d.lastPageEvent+"（show "+d.pageShowCount+"・hide "+d.pageHideCount+"）"+
@@ -2689,14 +2702,19 @@ $("loadAiModel").addEventListener("click",async()=>{
     // GPU loss can arrive before CreateMLCEngine resolves, while aiEngine is still null.
     // Do not publish a successfully-resolved but already-lost engine as ready.
     if(alvisGpuLossDuringLoad){
-       try{await engine.unload();}catch(cleanupError){}
-       alvisGpuDiagnostics.modelDevices.length=0;
-       throw new Error("モデル読み込み中にWebGPUが停止しました。古い実行エンジンは解放しました。");
+       let cleanupError=null;
+       try{await engine.unload();}catch(error){cleanupError=error;}
+       releaseCapturedAlvisModelDevices({destroy:!!cleanupError,reason:cleanupError?"GPU停止後のengine unload失敗":"GPU停止後のengine unload完了"});
+       if(cleanupError)recordAlvisModelLoadTrace("GPU停止後のengine unload失敗："+String(cleanupError?.message||cleanupError).slice(0,160));
+       throw new Error("モデル読み込み中にWebGPUが停止しました。古い実行エンジンの終了処理を行いました。"+(cleanupError?" GPU deviceは個別解放を試みました。":""));
      }
     // 読み込み中にロックされた場合、エンジンを残さず解放する。
     if(!unlocked){
-      try{await engine.unload();}catch(cleanupError){}
-      setStatus("aiStatus","ログアウトを検出したため、モデルを解放しました。");
+      let cleanupError=null;
+      try{await engine.unload();}catch(error){cleanupError=error;}
+      releaseCapturedAlvisModelDevices({destroy:!!cleanupError,reason:cleanupError?"ログアウト後のengine unload失敗":"ログアウト後のengine unload完了"});
+      if(cleanupError)recordAlvisModelLoadTrace("ログアウト後のengine unload失敗："+String(cleanupError?.message||cleanupError).slice(0,160));
+      setStatus("aiStatus","ログアウトを検出したため、モデルを解放しました。"+(cleanupError?" GPU deviceの個別解放を試みました。":""));
       return;
     }
     aiEngine=engine;
@@ -2710,8 +2728,7 @@ $("loadAiModel").addEventListener("click",async()=>{
      aiEngine=null;
      // CreateMLCEngine may reject after requesting a GPUDevice but before returning an engine.
      // Explicitly destroy only devices captured during this model-load attempt to release partial allocations.
-     const failedModelDevices=alvisGpuDiagnostics.modelDevices.splice(0);
-     failedModelDevices.forEach(device=>{try{device?.destroy?.();}catch(cleanupError){}});
+     const failedModelDeviceCount=releaseCapturedAlvisModelDevices({destroy:true,reason:"モデル初期化失敗"});
      const detail=String(error?.message||error||"不明なエラー")+"（停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()+"秒）";
     recordAlvisModelLoadTrace("起動失敗："+detail);
     const lower=detail.toLowerCase();
