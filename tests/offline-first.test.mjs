@@ -129,7 +129,7 @@ assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoad
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
 assert.match(sw,/alvis-cache-v327-integrated/);
 assert.match(refresh327,/alvis-cache-v327-integrated/);
-assert.match(refresh327,/refresh=326/);
+assert.match(refresh327,/refresh=327/);
 assert.match(refresh327,/registration\.update\(\)/);
 assert.match(refresh327,/ALVIS_GET_BUILD_INFO/);
 assert.match(refresh327,/location\.replace\(target\)/);
