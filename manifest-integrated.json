@@ -1,0 +1,12 @@
+{
+  "name": "ALVIS Integrated",
+  "short_name": "ALVIS",
+  "description": "Integrated ALVIS chat, memory and encrypted sync prototype",
+  "lang": "ja",
+  "start_url": "./index-integrated.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "icons": []
+}

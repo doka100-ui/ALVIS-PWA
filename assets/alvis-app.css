@@ -1,0 +1,1875 @@
+.mode-switch button{width:100%;border:1px solid #31577b;background:#101c30;color:#a9d9ff}
+.mode-switch button[aria-pressed="true"]{background:#075985;border-color:#38bdf8;color:#fff;box-shadow:0 0 14px #0284c755}
+.mode-stage{position:relative;min-height:210px;overflow:hidden;border:1px solid #164e78;border-radius:14px;margin:0 0 14px;background:radial-gradient(ellipse at center,#0b2947 0%,#061426 52%,#020812 100%);color:#7dd3fc}
+.jarvis-stage{display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;gap:8px;padding:16px 10px}
+.hud-metric{border:1px solid #0878b7;border-radius:50%;width:64px;height:64px;display:grid;place-content:center;text-align:center;margin:auto;box-shadow:inset 0 0 12px #0891b255,0 0 12px #0284c755;font-size:12px;color:#a5f3fc}
+.hud-metric strong{font-size:16px;display:block}
+.hud-metric span{display:block;font-size:10px;line-height:1.35;margin-top:3px}
+.hud-ai-metric{position:relative;overflow:visible;appearance:none;-webkit-appearance:none;background:#061b30;cursor:pointer;font-family:inherit;transition:box-shadow .2s ease,border-color .2s ease}
+.hud-ai-metric:before{content:"";position:absolute;inset:-7px;border:2px solid #38bdf866;border-right-color:#38bdf8;border-radius:50%;pointer-events:none;opacity:.55}
+.hud-ai-metric[data-state="loading"]:before{border-color:#facc15 transparent #facc15 #facc15;opacity:1;animation:alvisLoadRing 1s linear infinite;box-shadow:0 0 12px #facc1566}
+.hud-ai-metric[data-state="online"]{border-color:#4ade80;box-shadow:inset 0 0 12px #22c55e33,0 0 16px #22c55e55}
+.hud-ai-metric[data-state="online"]:before{border-color:#4ade80;opacity:.85;box-shadow:0 0 12px #22c55e66}
+.hud-ai-metric[data-state="loading"]{border-color:#facc15;box-shadow:inset 0 0 12px #facc1533,0 0 16px #facc1555}
+.hud-ai-metric[data-state="error"]{border-color:#f87171;box-shadow:0 0 14px #ef444455}
+.hud-ai-metric[data-state="error"]:before{border-color:#f87171;opacity:.85}
+.hud-ai-metric:disabled{cursor:default;opacity:1}
+.hud-ai-metric:focus-visible{outline:2px solid #e0f2fe;outline-offset:10px}
+.hud-ai-metric strong{font-size:19px;display:block;line-height:1.05;letter-spacing:.02em}
+.hud-ai-metric span{display:block;font-size:9px;line-height:1.25;margin-top:2px}
+.hud-ai-metric #hudAiDetail{font-size:8px;opacity:.82}
+.hud-ai-metric[data-state="online"] strong{color:#86efac}
+.hud-ai-metric[data-state="offline"] strong{color:#bae6fd}
+.hud-ai-metric[data-state="loading"] strong{color:#fde68a}
+.hud-ai-metric[data-state="loading"] strong,.hud-ai-metric[data-state="stopping"] strong{color:#fcd34d}
+.hud-ai-metric[data-state="error"] strong{color:#fca5a5}
+@keyframes alvisLoadRing{to{transform:rotate(360deg)}}
+.hud-core{width:min(34vw,142px);aspect-ratio:1;border:2px solid #0ea5e9;border-radius:50%;margin:auto;display:grid;place-items:center;position:relative;box-shadow:0 0 22px #0284c777,inset 0 0 22px #0284c744}
+.hud-core:before,.hud-core:after{content:"";position:absolute;inset:10%;border:1px dashed #38bdf8;border-radius:50%;animation:alvisHudSpin 18s linear infinite}
+.hud-core:after{inset:23%;border-style:solid;animation-direction:reverse;animation-duration:12s}
+.hud-core span{font-size:13px;letter-spacing:3px;text-shadow:0 0 10px #38bdf8}
+.hud-caption{grid-column:1/-1;text-align:center;font-size:10px;letter-spacing:2px;color:#60a5fa;margin-top:4px}
+@keyframes alvisHudSpin{to{transform:rotate(360deg)}}
+.avatar-stage{display:flex;align-items:center;justify-content:center;gap:18px;padding:20px;min-height:210px;background:radial-gradient(ellipse at 50% 42%,#1e3a5f 0%,#101a2b 55%,#050b14 100%)}
+.avatar-placeholder{width:112px;height:142px;position:relative;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 18px #38bdf866)}
+.avatar-placeholder:before{content:"";position:absolute;top:5px;width:74px;height:88px;border-radius:48% 48% 44% 44%;background:linear-gradient(115deg,#f4d6c4,#d9b6a5 55%,#9b7c7d);box-shadow:inset -9px -4px 12px #654c5b55,0 0 0 3px #93c5fd55;}
+.avatar-placeholder:after{content:"";position:absolute;top:78px;width:112px;height:64px;border-radius:52% 52% 12px 12px;background:linear-gradient(110deg,#e2e8f0,#94a3b8 55%,#475569);clip-path:polygon(28% 0,72% 0,100% 100%,0 100%)}
+.avatar-eyes{z-index:1;position:absolute;top:39px;width:42px;height:7px;border-left:7px solid #334155;border-right:7px solid #334155;border-radius:50%;opacity:.8}
+.avatar-copy{max-width:190px}.avatar-copy strong{display:block;color:#e0f2fe;font-size:15px;margin-bottom:7px}.avatar-copy p{font-size:12px;line-height:1.6;color:#bfdbfe;margin:0}
+#chatPage[data-display-mode="jarvis"] .avatar-stage{display:none}
+#chatPage[data-display-mode="avatar"] .jarvis-stage{display:none}
+#chatPage[data-display-mode="avatar"] .mode-stage{border-color:#64748b;background:#111827}
+@media(prefers-reduced-motion:reduce){.hud-core:before,.hud-core:after,.hud-ai-metric[data-state="loading"]:before{animation:none}}
+
+/* v105 visual polish: premium glass HUD and a more dimensional avatar preview */
+.display-dock{background:linear-gradient(145deg,#101b2dF2,#071321F5);border:1px solid #38bdf833;box-shadow:0 14px 34px #02061799,0 0 22px #0284c722;}
+.mode-switch{padding:3px;background:#07111f;border:1px solid #1e4966;border-radius:12px}
+.mode-switch button{border-radius:9px;letter-spacing:.04em;font-weight:700;transition:background .25s,border-color .25s,box-shadow .25s}
+.mode-switch button[aria-pressed="true"]{background:linear-gradient(135deg,#075985,#0369a1 55%,#0e7490);border-color:#67e8f9;box-shadow:0 0 18px #0ea5e955,inset 0 1px #bae6fd55}
+.mode-stage{isolation:isolate;border-color:#38bdf866;box-shadow:inset 0 0 32px #0284c722,0 8px 24px #02061777}
+.jarvis-stage{background:radial-gradient(ellipse at 50% 45%,#123d60 0%,#071d34 48%,#020812 100%);overflow:hidden}
+.jarvis-stage:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.22;background-image:linear-gradient(#38bdf822 1px,transparent 1px),linear-gradient(90deg,#38bdf822 1px,transparent 1px);background-size:22px 22px;mask-image:radial-gradient(ellipse at center,#000 8%,transparent 78%)}
+.jarvis-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 48%,#38bdf80d 50%,transparent 52%);background-size:100% 8px;opacity:.45}
+.hud-metric{width:66px;height:66px;border-color:#22d3ee88;background:radial-gradient(circle,#0e749022,#020617aa);box-shadow:inset 0 0 18px #0891b566,0 0 18px #06b6d455;color:#cffafe}
+.hud-metric strong{font-size:17px;letter-spacing:.08em;text-shadow:0 0 12px #67e8f9}
+.hud-core{border-color:#67e8f9;box-shadow:0 0 32px #06b6d477,inset 0 0 28px #0891b566}
+.hud-core:before{inset:5%;border:1px dashed #a5f3fc;box-shadow:0 0 14px #22d3ee55}
+.hud-core:after{inset:19%;border:1px solid #38bdf8aa;box-shadow:inset 0 0 18px #0ea5e944}
+.hud-core span{font-weight:800;font-size:14px;letter-spacing:.22em;color:#e0faff;text-shadow:0 0 8px #22d3ee,0 0 22px #0ea5e9}
+.hud-caption{color:#7dd3fc;letter-spacing:.24em;text-shadow:0 0 10px #0ea5e9}
+.avatar-stage{position:relative;overflow:hidden;background:radial-gradient(ellipse at 48% 30%,#254b70 0%,#142b45 44%,#060d19 100%);border-color:#7dd3fc88}
+.avatar-stage:before{content:"";position:absolute;width:190px;height:190px;border:1px solid #93c5fd33;border-radius:50%;box-shadow:0 0 0 14px #93c5fd0b,0 0 0 30px #93c5fd08,0 0 45px #38bdf822;left:calc(50% - 95px);top:calc(50% - 95px);pointer-events:none}
+.avatar-placeholder{z-index:1;transform:translateY(3px);filter:drop-shadow(0 8px 14px #020617aa) drop-shadow(0 0 18px #7dd3fc88)}
+.avatar-placeholder:before{background:linear-gradient(110deg,#ffe0ce 0%,#e8c0ae 48%,#a77f83 100%);box-shadow:inset -10px -7px 15px #654c5b55,inset 5px 4px 10px #fff8,0 0 0 2px #bfdbfe99,0 0 26px #60a5fa55}
+.avatar-placeholder:after{background:linear-gradient(110deg,#f8fafc 0%,#cbd5e1 48%,#64748b 100%);box-shadow:inset 0 8px 14px #fff8}
+.avatar-eyes{height:5px;border-left-width:6px;border-right-width:6px;border-color:#26364a;box-shadow:0 1px 0 #fff8;opacity:.9}
+.avatar-eyes:after{content:"";position:absolute;left:13px;top:16px;width:14px;height:5px;border-bottom:1.5px solid #9f5963;border-radius:50%}
+.avatar-copy{z-index:1;padding:12px 14px;border:1px solid #93c5fd33;border-radius:12px;background:#07142688;box-shadow:inset 0 1px #fff1;}
+.avatar-copy strong{letter-spacing:.16em;color:#f0f9ff;text-shadow:0 0 12px #38bdf866}
+.avatar-copy p{color:#cbdff3}
+@media(max-width:600px){.display-dock{background:linear-gradient(145deg,#101b2df7,#071321f7)}.mode-switch{gap:5px;margin-bottom:8px}.mode-switch button{font-size:12px;padding:9px 4px}.hud-metric{width:52px;height:52px;font-size:10px}.hud-metric strong{font-size:14px}.hud-core{width:min(32vw,118px)}.hud-caption{font-size:8px;letter-spacing:.12em}.avatar-copy{padding:8px 9px}.avatar-copy strong{font-size:12px}.avatar-copy p{font-size:10px;line-height:1.4}}
+@media(prefers-reduced-motion:reduce){.mode-switch button{transition:none}}
+.hud-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}
+.hud-shortcut{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;padding:9px 5px;border:1px solid #1e7499;border-radius:9px;background:linear-gradient(145deg,#0b2942,#071525);color:#bae6fd;font-size:12px;font-weight:700;box-shadow:inset 0 1px #ffffff12,0 0 10px #0284c722}
+.hud-shortcut span{font-size:15px;color:#67e8f9}
+.hud-shortcut:active{background:#075985}
+@media(max-width:600px){.hud-shortcuts{gap:5px}.hud-shortcut{font-size:11px;padding:8px 2px;gap:4px}}
+
+
+/* v109: spatial hologram control room, blue-first with restrained red signal accents */
+.jarvis-stage{min-height:390px;display:grid;grid-template-columns:minmax(145px,.82fr) minmax(260px,1.5fr) minmax(145px,.82fr);align-items:center;gap:clamp(8px,2vw,24px);padding:24px clamp(12px,2vw,28px) 42px;background:radial-gradient(ellipse at 50% 47%,#0b3b60 0%,#071d34 42%,#020812 78%);isolation:isolate}
+.jarvis-stage:before{opacity:.19;background-size:28px 28px;mask-image:radial-gradient(ellipse at center,#000 4%,transparent 82%)}
+.jarvis-stage:after{opacity:.35;background:linear-gradient(180deg,transparent 48%,#38bdf812 50%,transparent 52%);background-size:100% 7px}
+.hud-side{position:relative;z-index:2;align-self:center;min-width:0;padding:13px 12px;border:1px solid #38bdf866;border-radius:8px 15px 8px 15px;background:linear-gradient(135deg,#0b294bbd,#061426a8 72%,#0b1e35b8);box-shadow:inset 0 1px #dff8ff19,inset 0 0 22px #0284c71b,0 0 20px #0284c722;clip-path:polygon(0 9px,9px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.hud-panel-heading{display:flex;align-items:center;gap:7px;padding-bottom:10px;border-bottom:1px solid #38bdf833;color:#9be7ff;font-size:10px;letter-spacing:.16em;font-weight:800}
+.hud-panel-heading i{width:6px;height:6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 9px #22d3ee}
+.hud-side-left .hud-ai-metric{margin:16px auto 14px}
+.hud-readout{display:flex;flex-direction:column;gap:3px;padding:7px 0;border-top:1px solid #38bdf822}
+.hud-readout span,.hud-interface-item small{font-size:8px;letter-spacing:.12em;color:#7eb8d8}
+.hud-readout b{font-size:10px;color:#d8f5ff;letter-spacing:.06em}
+.hud-side-foot{display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:9px;border-top:1px solid #38bdf833;color:#7dd3fc;font-size:8px;letter-spacing:.12em}
+.hud-status-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80}
+.hud-side-right{padding-bottom:10px}
+.hud-interface-item{display:flex;align-items:center;gap:7px;padding:10px 0;border-bottom:1px solid #38bdf822;min-width:0}
+.hud-interface-item>span{display:grid;place-items:center;flex:0 0 25px;height:25px;border:1px solid #38bdf866;border-radius:50%;color:#8be8ff;text-shadow:0 0 8px #38bdf8;font-size:14px}
+.hud-interface-item div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hud-interface-item b{font-size:9px;letter-spacing:.12em;color:#e0f7ff}
+.hud-interface-item small{white-space:nowrap;font-size:7px}
+.hud-interface-item em{margin-left:auto;font-size:7px;font-style:normal;color:#7dd3fc;letter-spacing:.06em}
+.hud-side-foot-right{justify-content:flex-end}
+.hud-center{position:relative;z-index:1;min-width:0;min-height:300px;display:grid;place-items:center;isolation:isolate}
+.hud-core{width:min(25vw,250px);min-width:170px;aspect-ratio:1;z-index:2;border:1px solid #8beaff;border-radius:50%;background:radial-gradient(circle at 34% 27%,#d8fbff55 0%,#38bdf833 13%,#07598555 42%,#020b1bdf 73%);box-shadow:0 0 18px #38bdf8aa,0 0 48px #0284c777,inset 0 0 34px #67e8f977,inset -18px -14px 35px #020617cc;overflow:visible}
+.hud-core:before{inset:5%;border:1px dashed #b9f5ff;box-shadow:0 0 16px #22d3ee77;background:repeating-linear-gradient(0deg,transparent 0 12px,#7dd3fc22 13px 14px),repeating-linear-gradient(90deg,transparent 0 18px,#7dd3fc1b 19px 20px);animation:alvisHudSpin 28s linear infinite}
+.hud-core:after{inset:17%;border:1px solid #7dd3fcaa;box-shadow:inset 0 0 24px #0ea5e966,0 0 20px #22d3ee55;background:radial-gradient(circle at 35% 30%,#dffbff22,transparent 38%)}
+.hud-core span{position:relative;z-index:3;font-weight:500;font-size:clamp(17px,2vw,25px);letter-spacing:.25em;color:#effcff;text-shadow:0 0 8px #fff,0 0 22px #38bdf8,0 0 40px #0ea5e9}
+.hud-core small{position:absolute;z-index:3;top:62%;font-size:7px;letter-spacing:.17em;color:#9deaff;text-shadow:0 0 8px #38bdf8}
+.hud-orbit{position:absolute;z-index:1;left:50%;top:48%;width:116%;height:43%;border:1px solid #38bdf899;border-radius:50%;box-shadow:0 0 10px #0ea5e933;pointer-events:none}
+.hud-orbit:after{content:"";position:absolute;left:13%;top:10%;width:5px;height:5px;border-radius:50%;background:#d8fbff;box-shadow:0 0 10px 3px #38bdf8}
+.hud-orbit-a{transform:translate(-50%,-50%) rotate(-24deg);animation:alvisHudSpin 22s linear infinite}
+.hud-orbit-b{width:108%;height:58%;transform:translate(-50%,-50%) rotate(58deg);border-color:#0ea5e977;animation:alvisHudSpin 31s linear infinite reverse}
+.hud-orbit-c{width:125%;height:31%;transform:translate(-50%,-50%) rotate(9deg);border-color:#7dd3fc55}
+.hud-projector{position:absolute;top:1%;left:50%;z-index:3;width:82px;height:22px;transform:translateX(-50%);border:1px solid #67e8f9aa;border-radius:50%;background:radial-gradient(ellipse,#38bdf855,#071d34 70%);box-shadow:0 0 16px #0ea5e977}
+.hud-projector span{position:absolute;inset:5px 15px;border:1px solid #baf6ff88;border-radius:50%}
+.hud-projector i{position:absolute;left:50%;top:18px;height:75px;border-left:1px solid #67e8f977;box-shadow:0 0 8px #38bdf8;transform:translateX(-50%)}
+.hud-beam{position:absolute;top:12%;left:50%;height:65%;width:34%;transform:translateX(-50%);z-index:0;background:linear-gradient(180deg,#38bdf800,#38bdf80c 48%,#fb718512 86%,transparent);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)}
+.hud-platform{position:absolute;left:50%;bottom:3%;width:92%;height:54px;transform:translateX(-50%);z-index:2;border-bottom:1px solid #38bdf899;border-radius:50%;background:radial-gradient(ellipse at center,#38bdf833 0%,#0ea5e91c 38%,transparent 70%);box-shadow:0 13px 18px -15px #38bdf8}
+.hud-platform:before,.hud-platform:after,.hud-platform i{content:"";position:absolute;left:50%;top:4px;width:76%;height:28px;transform:translateX(-50%);border:1px solid #38bdf8aa;border-radius:50%;box-shadow:0 0 12px #0ea5e955}
+.hud-platform:after{top:11px;width:58%;height:25px;border-color:#67e8f966}
+.hud-platform i{top:18px;width:38%;height:18px;border-color:#fb718577;box-shadow:0 0 9px #fb718533}
+.hud-platform b{position:absolute;left:50%;top:-15px;height:35px;border-left:1px solid #67e8f988;box-shadow:0 0 9px #38bdf8;transform:translateX(-50%)}
+.hud-platform span{position:absolute;left:50%;top:6px;width:5px;height:5px;border-radius:50%;background:#fda4af;box-shadow:0 0 9px 3px #fb7185;transform:translateX(-50%)}
+.hud-center-caption{position:absolute;bottom:-1px;z-index:3;color:#8bdfff;font-size:8px;letter-spacing:.18em;text-align:center;text-shadow:0 0 9px #0ea5e9;white-space:nowrap}
+.hud-caption{position:absolute;left:0;right:0;bottom:7px;font-size:8px;letter-spacing:.16em;color:#7dd3fc;text-align:center;opacity:.8}
+@media(max-width:760px){.jarvis-stage{min-height:290px;grid-template-columns:minmax(88px,.72fr) minmax(150px,1.35fr) minmax(88px,.72fr);gap:5px;padding:18px 7px 35px}.hud-side{padding:8px 6px}.hud-panel-heading{font-size:7px;letter-spacing:.08em}.hud-side-left .hud-ai-metric{width:52px;height:52px;margin:12px auto}.hud-side-left .hud-ai-metric strong{font-size:14px}.hud-side-left .hud-ai-metric span{font-size:7px}.hud-side-left .hud-ai-metric #hudAiDetail{font-size:6px}.hud-readout{padding:5px 0}.hud-readout span,.hud-interface-item small{font-size:6px}.hud-readout b,.hud-interface-item b{font-size:7px}.hud-interface-item{gap:3px;padding:7px 0}.hud-interface-item>span{flex-basis:18px;height:18px;font-size:10px}.hud-interface-item em{font-size:6px}.hud-center{min-height:235px}.hud-core{width:min(31vw,190px);min-width:132px}.hud-orbit{width:112%}.hud-platform{height:38px}.hud-caption{font-size:6px;letter-spacing:.08em}.hud-center-caption{font-size:6px;letter-spacing:.08em}}
+@media(max-width:430px){.jarvis-stage{min-height:255px;grid-template-columns:76px minmax(120px,1fr) 76px;gap:3px;padding:14px 4px 30px}.hud-side{padding:7px 4px}.hud-panel-heading{font-size:6px}.hud-interface-item em{display:none}.hud-interface-item>span{flex-basis:15px;height:15px;font-size:8px}.hud-interface-item{gap:2px}.hud-readout b{font-size:6px}.hud-center{min-height:205px}.hud-core{min-width:118px}.hud-caption{letter-spacing:.02em}}
+@media(prefers-reduced-motion:reduce){.hud-orbit-a,.hud-orbit-b,.hud-core:before{animation:none}}
+
+
+/* v113: live inference telemetry and dedicated ALVIS vault entrance. */
+.hud-thinking-readout{position:relative;overflow:hidden}
+.hud-thinking-readout b{display:flex;align-items:center;gap:6px}
+.hud-thinking-readout[data-state="thinking"] b{color:#a5f3fc;text-shadow:0 0 9px #22d3ee99}
+.hud-thinking-readout[data-state="thinking"] b:before{content:"";width:6px;height:6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 10px #22d3ee;animation:alvisThinkingPulse 1s ease-in-out infinite}
+@keyframes alvisThinkingPulse{50%{opacity:.25;transform:scale(.65)}}
+#hudResponseTime{font-variant-numeric:tabular-nums}
+.hud-readout-action{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;margin:0;padding:7px 0;border:0;border-top:1px solid #38bdf822;border-radius:0;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;transition:background .18s ease,filter .18s ease}
+.hud-readout-action:hover{background:linear-gradient(90deg,#38bdf81b,transparent);filter:brightness(1.16)}
+.hud-readout-action:focus-visible,.hud-side-foot-action:focus-visible{outline:1px solid #8beaff;outline-offset:2px}
+.hud-side-foot-action{width:100%;padding:9px 0 0;margin-top:10px;border:0;border-top:1px solid #38bdf833;border-radius:0;background:transparent;text-align:left;font:inherit;cursor:pointer}
+.hud-status-dot[data-state="offline"]{background:#fbbf24;box-shadow:0 0 8px #f59e0b}
+.hud-status-dot[data-state="online"]{background:#4ade80;box-shadow:0 0 8px #4ade80}
+
+@media(prefers-reduced-motion:reduce){.hud-thinking-readout[data-state="thinking"] b:before{animation:none}}
+
+
+/* v125: reference-led cinematic hologram composition */
+.jarvis-stage{
+  min-height:430px;
+  grid-template-columns:minmax(150px,.78fr) minmax(280px,1.55fr) minmax(150px,.78fr);
+  gap:clamp(10px,2.2vw,28px);
+  padding:26px clamp(14px,2.4vw,32px) 48px;
+  background:
+    radial-gradient(ellipse at 50% 48%,#0b4775 0%,#082744 34%,#031426 64%,#01060f 100%);
+}
+.jarvis-stage:before{opacity:.24;background-size:34px 34px;mask-image:radial-gradient(ellipse at center,#000 0%,transparent 78%)}
+.jarvis-stage:after{opacity:.24;background:repeating-linear-gradient(180deg,transparent 0 5px,#67dfff08 6px 7px)}
+.hud-side{
+  padding:14px 12px;
+  background:linear-gradient(145deg,#06182bd9,#071d32a8 58%,#061426c9);
+  border-color:#45bdf477;
+  box-shadow:inset 0 1px #e2faff20,inset 0 0 25px #0284c71b,0 0 24px #0284c71b;
+  
+}
+.hud-center{min-height:340px}
+.hud-core{
+  width:min(29vw,280px);min-width:190px;
+  background:
+    radial-gradient(ellipse at 34% 26%,#e5fbff88 0%,#80dfff35 8%,transparent 25%),
+    radial-gradient(circle at 48% 48%,#0e6fa8 0%,#075080 42%,#03213d 72%,#010a18 100%);
+  box-shadow:0 0 22px #38bdf8b8,0 0 64px #0284c766,inset 0 0 38px #67e8f977,inset -22px -18px 40px #020617dd;
+}
+.hud-core:before{
+  inset:4%;border:1px solid #b8f3ff99;
+  background:
+    repeating-radial-gradient(ellipse at 50% 50%,transparent 0 13px,#9deaff2b 14px 15px),
+    repeating-linear-gradient(90deg,transparent 0 24px,#9deaff20 25px 26px),
+    repeating-linear-gradient(0deg,transparent 0 19px,#9deaff1a 20px 21px);
+  box-shadow:inset 0 0 28px #38bdf855,0 0 18px #22d3ee66;
+}
+.hud-core:after{
+  inset:12%;border:1px solid #a5f3fc88;
+  background:radial-gradient(ellipse at 36% 28%,#e0faff2b,transparent 42%),radial-gradient(ellipse at 50% 50%,transparent 60%,#020b1d88 100%);
+  box-shadow:inset 0 0 30px #0ea5e977,0 0 24px #22d3ee44;
+}
+.hud-orbit-a{width:126%;height:48%;border-color:#75dcffbb}
+.hud-orbit-b{width:116%;height:66%;border-color:#0ea5e988}
+.hud-orbit-c{width:138%;height:34%;border-color:#b5efff66}
+.hud-projector{width:112px;height:27px;top:0;box-shadow:0 0 22px #0ea5e988}
+.hud-projector i{height:100px}
+.hud-beam{top:9%;height:76%;width:42%;background:linear-gradient(180deg,#38bdf800,#38bdf812 35%,#38bdf81b 72%,#fb71851c 94%,transparent)}
+.hud-platform{height:62px;width:100%;bottom:2%;background:radial-gradient(ellipse at 50% 35%,#38bdf84a 0%,#0ea5e925 40%,transparent 72%);box-shadow:0 15px 24px -14px #38bdf8}
+.hud-platform:before{width:84%;height:34px;border-color:#75dcffcc}
+.hud-platform:after{width:64%;height:29px;border-color:#67e8f999}
+.hud-platform i{width:42%;height:22px;border-color:#fb7185bb;box-shadow:0 0 13px #fb718566}
+.hud-platform span{background:#fff1f2;box-shadow:0 0 12px 4px #fb7185}
+.hud-center-caption{bottom:-5px;letter-spacing:.2em}
+.hud-caption{letter-spacing:.2em;color:#8bdfff}
+@media(max-width:760px){
+  .jarvis-stage{
+    min-height:350px;
+    grid-template-columns:minmax(76px,.66fr) minmax(150px,1.5fr) minmax(76px,.66fr);
+    gap:4px;padding:22px 6px 38px;
+    background:radial-gradient(ellipse at 50% 48%,#0a3b63 0%,#061d34 48%,#010711 100%);
+  }
+  .hud-side{padding:9px 6px;background:linear-gradient(145deg,#06182bdc,#071d32b5 58%,#061426d4)}
+  .hud-center{min-height:290px}
+  .hud-core{width:min(43vw,205px);min-width:142px}
+  .hud-orbit-a{width:138%;height:48%}
+  .hud-orbit-b{width:126%;height:68%}
+  .hud-orbit-c{width:148%;height:34%}
+  .hud-projector{width:92px;height:23px}
+  .hud-projector i{height:78px}
+  .hud-platform{height:48px}
+  .hud-platform:before{height:27px}.hud-platform:after{height:22px}.hud-platform i{height:17px}
+  .hud-caption{font-size:6px;letter-spacing:.08em}
+}
+@media(max-width:430px){
+  .jarvis-stage{min-height:340px;grid-template-columns:72px minmax(0,1fr) 72px;gap:3px;padding:21px 4px 36px}
+  .hud-side{padding:7px 4px}
+  .hud-center{min-height:282px}
+  .hud-core{width: min(48vw,184px);min-width:136px}
+  .hud-orbit-a{width:145%}.hud-orbit-b{width:132%}.hud-orbit-c{width:155%}
+  .hud-center-caption{font-size:5px;letter-spacing:.06em}
+  .hud-projector{width:82px;height:21px}
+  .hud-platform{height:43px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hud-orbit-a,.hud-orbit-b,.hud-core:before{animation:none}
+}
+/* end v125 hologram refinement */
+
+
+/* v126: rebuild mobile hologram proportions around supplied reference */
+.hud-core{position:relative;isolation:isolate}
+.hud-globe-map{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;z-index:1;filter:drop-shadow(0 0 10px #38bdf877);shape-rendering:geometricPrecision;text-rendering:geometricPrecision;backface-visibility:hidden}.hud-globe-map .hud-globe-detail{stroke-linecap:round;stroke-linejoin:round}
+.hud-core:before{z-index:2;pointer-events:none}.hud-core:after{z-index:2;pointer-events:none}
+.hud-core span,.hud-core small{z-index:4}
+@media(max-width:760px){
+.display-dock .mode-stage.jarvis-stage{min-height:330px!important;grid-template-columns:64px minmax(0,1fr) 64px!important;align-items:center!important;gap:2px!important;padding:18px 4px 34px!important;border-radius:2px!important;border:0!important;background:radial-gradient(ellipse at 50% 46%,#0a3d66 0%,#041a30 48%,#010711 100%)!important}
+.display-dock .hud-side{padding:8px 4px!important;border-radius:2px 9px 2px 9px!important;background:linear-gradient(145deg,#06182b9c,#071d326e)!important;box-shadow:inset 0 0 16px #0284c71a,0 0 12px #0284c71b!important}
+.display-dock .hud-panel-heading{font-size:6px!important;letter-spacing:.04em!important;gap:3px!important}
+.display-dock .hud-side-left .hud-ai-metric{width:48px!important;height:48px!important}
+.display-dock .hud-readout{padding:4px 0!important}
+.display-dock .hud-readout span,.display-dock .hud-interface-item small{font-size:5px!important}
+.display-dock .hud-readout b,.display-dock .hud-interface-item b{font-size:6px!important}
+.display-dock .hud-interface-item{padding:6px 0!important;gap:2px!important}
+.display-dock .hud-interface-item>span{flex-basis:14px!important;height:14px!important;font-size:8px!important}
+.display-dock .hud-center{min-height:275px!important}
+.display-dock .hud-core{width:min(48vw,190px)!important;min-width:132px!important}
+.display-dock .hud-orbit-a{width:145%!important;height:48%!important}
+.display-dock .hud-orbit-b{width:132%!important;height:66%!important}
+.display-dock .hud-orbit-c{width:155%!important;height:32%!important}
+.display-dock .hud-projector{width:82px!important;height:21px!important}
+.display-dock .hud-projector i{height:76px!important}
+.display-dock .hud-platform{height:44px!important;width:110%!important}
+.display-dock .hud-center-caption{font-size:5px!important;letter-spacing:.04em!important}
+.display-dock .hud-caption{font-size:5px!important;letter-spacing:0!important}
+}
+@media(max-width:390px){.display-dock .mode-stage.jarvis-stage{grid-template-columns:56px minmax(0,1fr) 56px!important;min-height:310px!important}.display-dock .hud-center{min-height:260px!important}.display-dock .hud-core{width:min(46vw,172px)!important;min-width:122px!important}}
+@media(prefers-reduced-motion:reduce){.hud-globe-map{filter:none}}
+/* end v126 */
+
+
+/* v127: match the reference image's full composition, not just its palette */
+.display-dock .mode-stage.jarvis-stage{
+  min-height:390px;
+  overflow:hidden;
+  border:1px solid #164a70;
+  background:
+    radial-gradient(ellipse at 50% 47%,#0b4b7c 0%,#062744 28%,#031426 57%,#01050d 100%);
+  box-shadow:inset 0 0 60px #020817,0 0 30px #0284c722;
+}
+.display-dock .mode-stage.jarvis-stage:before{
+  opacity:.22;
+  background-image:
+    linear-gradient(#38bdf81c 1px,transparent 1px),
+    linear-gradient(90deg,#38bdf81c 1px,transparent 1px),
+    radial-gradient(ellipse at 50% 48%,transparent 0 34%,#38bdf81c 35%,transparent 65%);
+  background-size:28px 28px,28px 28px,100% 100%;
+  mask-image:radial-gradient(ellipse at center,#000 8%,transparent 86%);
+}
+.display-dock .mode-stage.jarvis-stage:after{
+  opacity:.28;
+  background:repeating-linear-gradient(180deg,transparent 0 3px,#8beaff08 4px 5px);
+}
+.display-dock .hud-side{
+  align-self:stretch;
+  margin-block:16px 24px;
+  border:0;
+  border-radius:0;
+  clip-path:none;
+  padding:12px 8px;
+  background:linear-gradient(90deg,#06182b33,#082b4855 50%,#06182b33);
+  box-shadow:none;
+  
+}
+.display-dock .hud-side:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  border-top:1px solid #3fc9f477;border-bottom:1px solid #3fc9f433;
+  background:linear-gradient(135deg,#8beaff12,transparent 28%,transparent 72%,#8beaff08);
+  clip-path:polygon(0 7%,12% 0,100% 0,100% 100%,0 100%);
+}
+.display-dock .hud-side-left:after{
+  content:"";position:absolute;left:7px;bottom:17px;width:calc(100% - 14px);height:48px;pointer-events:none;
+  background:
+   linear-gradient(to top,#38bdf8aa 0 38%,transparent 38%) 0 100%/7% 100%,
+   linear-gradient(to top,#38bdf8cc 0 72%,transparent 72%) 14% 100%/7% 100%,
+   linear-gradient(to top,#38bdf877 0 52%,transparent 52%) 28% 100%/7% 100%,
+   linear-gradient(to top,#38bdf8bb 0 88%,transparent 88%) 42% 100%/7% 100%,
+   linear-gradient(to top,#38bdf888 0 62%,transparent 62%) 56% 100%/7% 100%,
+   linear-gradient(to top,#38bdf8cc 0 78%,transparent 78%) 70% 100%/7% 100%,
+   linear-gradient(to top,#38bdf899 0 45%,transparent 45%) 84% 100%/7% 100%;
+  background-repeat:no-repeat;
+  border-bottom:1px solid #38bdf877;
+  filter:drop-shadow(0 0 4px #0ea5e9);
+}
+.display-dock .hud-side-right:after{
+  content:"";position:absolute;right:7px;bottom:17px;width:calc(100% - 14px);height:52px;pointer-events:none;
+  background:
+   linear-gradient(to top,#38bdf899 0 46%,transparent 46%) 0 100%/8% 100%,
+   linear-gradient(to top,#38bdf8cc 0 84%,transparent 84%) 17% 100%/8% 100%,
+   linear-gradient(to top,#38bdf877 0 61%,transparent 61%) 34% 100%/8% 100%,
+   linear-gradient(to top,#38bdf8bb 0 94%,transparent 94%) 51% 100%/8% 100%,
+   linear-gradient(to top,#38bdf888 0 70%,transparent 70%) 68% 100%/8% 100%,
+   linear-gradient(to top,#38bdf8cc 0 54%,transparent 54%) 85% 100%/8% 100%;
+  background-repeat:no-repeat;border-bottom:1px solid #38bdf877;filter:drop-shadow(0 0 4px #0ea5e9);
+}
+.display-dock .hud-side-left .hud-panel-heading:before{
+  content:"";display:block;position:absolute;top:38px;left:50%;width:48px;height:48px;transform:translateX(-50%);
+  border:1px solid #5edaff99;border-radius:50%;
+  background:radial-gradient(circle at center,transparent 0 22%,#38bdf822 23% 24%,transparent 25% 48%,#38bdf866 49% 51%,transparent 52%),conic-gradient(from 20deg,transparent 0 12%,#38bdf899 13% 14%,transparent 15% 48%,#38bdf866 49% 50%,transparent 51%);
+  box-shadow:0 0 12px #0ea5e955,inset 0 0 10px #0ea5e933;
+}
+.display-dock .hud-center{min-height:330px}
+.display-dock .hud-core{
+  width:min(27vw,248px);min-width:180px;
+  background:radial-gradient(circle at 36% 26%,#d8fbff55,#168bc244 18%,#075080 47%,#02162d 78%,#010711 100%);
+  box-shadow:0 0 22px #38bdf8bb,0 0 68px #0284c777,inset 0 0 40px #67e8f977,inset -22px -18px 38px #020617dd;
+}
+.display-dock .hud-globe-map{opacity:.96;filter:drop-shadow(0 0 9px #38bdf899)}
+.display-dock .hud-core:before{
+  inset:3%;border:1px solid #c6f6ffbb;
+  background:repeating-linear-gradient(0deg,transparent 0 13px,#b8f4ff20 14px 15px),repeating-linear-gradient(90deg,transparent 0 15px,#b8f4ff1c 16px 17px);
+  box-shadow:0 0 17px #22d3ee88,inset 0 0 22px #38bdf855;
+}
+.display-dock .hud-core:after{inset:10%;border:1px solid #a5f3fc99;box-shadow:inset 0 0 28px #0ea5e988,0 0 18px #22d3ee66}
+.display-dock .hud-core span{font-size:clamp(18px,3vw,26px);font-weight:500;letter-spacing:.18em;text-shadow:0 0 10px #fff,0 0 25px #38bdf8,0 0 42px #0ea5e9}
+.display-dock .hud-core small{top:64%;font-size:6px;letter-spacing:.16em}
+.display-dock .hud-orbit{border-width:1px;box-shadow:0 0 12px #38bdf866}
+.display-dock .hud-orbit-a{width:132%;height:48%;border-color:#a8efffdd}
+.display-dock .hud-orbit-b{width:122%;height:67%;border-color:#38bdf8bb}
+.display-dock .hud-orbit-c{width:145%;height:31%;border-color:#d8fbff77}
+.display-dock .hud-projector{top:0;width:138px;height:26px;border-color:#a5f3fcdd;background:radial-gradient(ellipse,#38bdf877,#071d34 72%);box-shadow:0 0 20px #0ea5e9aa}
+.display-dock .hud-projector i{height:106px;box-shadow:0 0 12px #38bdf8}
+.display-dock .hud-beam{top:8%;height:80%;width:46%;background:linear-gradient(180deg,#38bdf800,#38bdf814 25%,#38bdf822 65%,#fb718533 94%,transparent)}
+.display-dock .hud-platform{bottom:1%;height:60px;width:112%;background:radial-gradient(ellipse at center,#38bdf855 0%,#0ea5e933 36%,transparent 72%);box-shadow:0 12px 25px -12px #38bdf8}
+.display-dock .hud-platform:before{width:88%;height:34px;border-color:#8beaffdd;box-shadow:0 0 16px #0ea5e988}
+.display-dock .hud-platform:after{width:66%;height:28px;border-color:#67e8f9bb}
+.display-dock .hud-platform i{width:42%;height:22px;border-color:#fb7185dd;box-shadow:0 0 15px #fb718588}
+.display-dock .hud-platform b{height:48px;border-color:#a5f3fcbb;box-shadow:0 0 10px #38bdf8}
+.display-dock .hud-platform span{background:#fff1f2;box-shadow:0 0 14px 5px #fb7185}
+@media(max-width:760px){
+ .display-dock .mode-stage.jarvis-stage{min-height:340px!important;grid-template-columns:66px minmax(0,1fr) 66px!important;padding:16px 3px 34px!important}
+ .display-dock .hud-side{margin-block:14px 22px;padding:9px 4px}
+ .display-dock .hud-side-left .hud-panel-heading:before{top:31px;width:38px;height:38px}
+ .display-dock .hud-side-left:after,.display-dock .hud-side-right:after{height:36px;bottom:12px}
+ .display-dock .hud-center{min-height:290px!important}
+ .display-dock .hud-core{width:min(47vw,194px)!important;min-width:136px!important}
+ .display-dock .hud-orbit-a{width:142%!important;height:48%!important}
+ .display-dock .hud-orbit-b{width:132%!important;height:66%!important}
+ .display-dock .hud-orbit-c{width:155%!important;height:31%!important}
+ .display-dock .hud-projector{width:92px;height:21px}
+ .display-dock .hud-projector i{height:82px}
+ .display-dock .hud-platform{height:47px;width:118%}
+ .display-dock .hud-center-caption{font-size:5px;letter-spacing:.04em}
+}
+@media(max-width:390px){
+ .display-dock .mode-stage.jarvis-stage{grid-template-columns:58px minmax(0,1fr) 58px!important;min-height:326px!important}
+ .display-dock .hud-center{min-height:276px!important}
+ .display-dock .hud-core{width:min(46vw,178px)!important;min-width:128px!important}
+}
+@media(prefers-reduced-motion:reduce){.display-dock .hud-orbit-a,.display-dock .hud-orbit-b{animation:none!important}}
+/* end v127 reference composition */
+
+
+/* v128: reference composition rebuilt as a single fixed-coordinate hologram scene */
+.display-dock .mode-stage.jarvis-stage{
+ display:block!important;position:relative!important;isolation:isolate!important;
+ width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:406/326!important;
+ min-height:0!important;height:auto!important;margin:12px auto 18px!important;padding:0!important;
+ overflow:hidden!important;border:0!important;border-radius:0!important;
+ background:#01040b!important;box-shadow:0 0 28px #0b6b9b33!important;
+}
+.alvis-reference-scene{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;image-rendering:auto}
+.display-dock .mode-stage.jarvis-stage>.hud-side,
+.display-dock .mode-stage.jarvis-stage>.hud-center,
+.display-dock .mode-stage.jarvis-stage>.hud-caption{visibility:hidden!important;pointer-events:none!important}
+.display-dock .mode-stage.jarvis-stage #hudAiAction{
+ visibility:visible!important;display:flex!important;position:absolute!important;z-index:5!important;
+ left:50%!important;top:50.5%!important;transform:translate(-50%,-50%)!important;
+ width:38%!important;height:45%!important;margin:0!important;padding:0!important;
+ opacity:.001!important;border:0!important;background:transparent!important;
+ cursor:pointer!important;pointer-events:auto!important;
+}
+.display-dock .mode-stage.jarvis-stage #hudAiAction>*{opacity:0!important}
+.display-dock .mode-stage.jarvis-stage #hudAiAction:focus-visible{
+ opacity:.18!important;outline:2px solid #8beaff!important;border-radius:50%!important
+}
+@media(max-width:600px){
+ .display-dock .mode-stage.jarvis-stage{width:100%!important;max-width:406px!important;margin:8px auto 14px!important}
+}
+@media(prefers-reduced-motion:reduce){.alvis-reference-scene{animation:none!important}}
+/* end v128 */
+
+
+/* v129: animated precision rings and micro-detail */
+.alvis-reference-scene .ref-orbit{transform-box:view-box;transform-origin:204px 155px;will-change:transform}
+.alvis-reference-scene .ref-orbit-slow{animation:alvisOrbitCW 42s linear infinite}
+.alvis-reference-scene .ref-orbit-fast{animation:alvisOrbitCCW 29s linear infinite}
+.alvis-reference-scene .ref-base-rotor{animation:alvisBaseCW 18s linear infinite}
+.alvis-reference-scene .ref-base-counter{animation:alvisBaseCCW 12s linear infinite}
+.alvis-reference-scene .ref-energy-pulse{transform-box:fill-box;transform-origin:center;animation:alvisEnergyPulse 2.4s ease-in-out infinite}
+@keyframes alvisOrbitCW{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes alvisOrbitCCW{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes alvisBaseCW{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes alvisBaseCCW{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes alvisEnergyPulse{0%,100%{opacity:.68;filter:drop-shadow(0 0 3px #fb7185)}50%{opacity:1;filter:drop-shadow(0 0 8px #ff4d9b)}}
+@media(prefers-reduced-motion:reduce){
+ .alvis-reference-scene .ref-orbit,.alvis-reference-scene .ref-base-rotor,.alvis-reference-scene .ref-base-counter,.alvis-reference-scene .ref-energy-pulse{animation:none!important}
+}
+
+
+/* v130: keep the lower projector platform still; only globe orbits move */
+.alvis-reference-scene .ref-base-rotor,
+.alvis-reference-scene .ref-base-counter,
+.alvis-reference-scene .ref-energy-pulse{animation:none!important;transform:none!important}
+.alvis-reference-scene #globeClip path{shape-rendering:geometricPrecision}
+.alvis-reference-scene [clip-path="url(#globeClip)"]{shape-rendering:geometricPrecision}
+
+
+/* v131: match the supplied 406x326 reference aspect ratio and sharpen the globe */
+.display-dock .mode-stage.jarvis-stage{
+ aspect-ratio:406/326!important;
+ width:min(100%,520px)!important;
+ max-width:520px!important;
+ min-height:0!important;
+ height:auto!important;
+}
+.alvis-reference-scene{aspect-ratio:406/326;object-fit:fill}
+.alvis-reference-scene #globeClip,
+.alvis-reference-scene #globeClip *{shape-rendering:geometricPrecision}
+.alvis-reference-scene #globeClip path{filter:none!important;vector-effect:non-scaling-stroke}
+.alvis-reference-scene #globeClip ellipse,
+.alvis-reference-scene #globeClip line,
+.alvis-reference-scene #globeClip path{stroke-linecap:round;stroke-linejoin:round}
+.alvis-reference-scene .ref-orbit{filter:none!important}
+.alvis-reference-scene text{filter:none!important}
+.alvis-reference-scene .ref-base-rotor,
+.alvis-reference-scene .ref-base-counter,
+.alvis-reference-scene .ref-energy-pulse{animation:none!important;transform:none!important}
+@media(max-width:600px){
+ .display-dock .mode-stage.jarvis-stage{width:100%!important;max-width:406px!important}
+}
+
+
+/* v134: Safari-safe crisp SVG rendering; avoid SVG Gaussian blur filter layers */
+.alvis-reference-scene,.alvis-reference-scene *{filter:none!important;}
+.alvis-reference-scene #globeClip path{shape-rendering:geometricPrecision;}
+.alvis-reference-scene .ref-orbit{filter:none!important;}
+
+/* v135: Safari sticky/backdrop compositing guard — never blur the hologram layer */
+#appPanel.auth-enter{filter:none!important}
+#appPanel .display-dock{
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#appPanel .display-dock .mode-stage,
+#appPanel .display-dock .alvis-reference-scene{
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* v136: restore crisp early ALVIS rendering — translucent glass without backdrop blur */
+#appPanel .display-dock,
+#appPanel .display-dock *,
+#appPanel .mode-stage,
+#appPanel .mode-stage *{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#appPanel .display-dock,
+#appPanel .display-dock *{
+  filter:none!important;
+}
+
+/* v137: align globe and orbit cluster to the supplied ALVIS hologram reference */
+.alvis-reference-scene #globeAssembly{transform-box:view-box;transform-origin:204px 141px}
+.alvis-reference-scene #natural-earth-globe{fill:#69d7ff;fill-opacity:.78;stroke:#d8f8ff;stroke-opacity:.78;stroke-width:.5}
+.alvis-reference-scene #globeAssembly>circle:first-of-type{opacity:.9}
+.alvis-reference-scene .ref-orbit{transform-origin:204px 155px}
+
+/* v138: use the user's exact 406x326 reference artwork as the hologram base. */
+.display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:block!important;box-sizing:border-box!important;
+  width:min(100%,400px)!important;max-width:400px!important;height:auto!important;min-height:0!important;aspect-ratio:400/323!important;
+  padding:0!important;margin:0 0 14px!important;overflow:hidden!important;
+  border:0!important;border-radius:0!important;background:#02050b!important;box-shadow:none!important;
+}
+.display-dock .mode-stage.jarvis-stage::before,.display-dock .mode-stage.jarvis-stage::after{content:none!important;display:none!important}
+.display-dock .alvis-reference-image{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:fill;object-position:center;filter:none!important;transform:none!important;}
+.display-dock .mode-stage.jarvis-stage>.hud-side,.display-dock .mode-stage.jarvis-stage>.hud-center{display:none!important}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction{
+  position:absolute!important;z-index:6!important;left:30%!important;top:26%!important;
+  width:40%!important;height:48%!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;
+  opacity:0!important;overflow:hidden!important;cursor:pointer!important;
+}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction strong,
+.display-dock .mode-stage.jarvis-stage>#hudAiAction span{color:transparent!important;opacity:0!important;font-size:0!important}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction:focus-visible{opacity:1!important;outline:2px solid #72e6ff!important;background:#36cfff18!important}
+.display-dock .alvis-motion-orbit{position:absolute;z-index:3;left:50%;top:41.2%;pointer-events:none;border:1px solid rgba(91,220,255,.58);border-radius:50%;transform-origin:center;will-change:transform;}
+.display-dock .alvis-motion-orbit-a{width:69%;height:24%;transform:translate(-50%,-50%) rotate(-9deg);border-left-color:rgba(91,220,255,.12);border-right-color:rgba(91,220,255,.92);box-shadow:0 0 8px rgba(56,189,248,.22);animation:alvisRefOrbitA 30s linear infinite;}
+.display-dock .alvis-motion-orbit-b{width:39%;height:58%;transform:translate(-50%,-50%) rotate(27deg);border-top-color:rgba(91,220,255,.12);border-bottom-color:rgba(91,220,255,.9);box-shadow:0 0 8px rgba(56,189,248,.18);animation:alvisRefOrbitB 41s linear infinite;}
+.display-dock .alvis-core-light{position:absolute;z-index:2;left:50%;top:41.2%;width:36%;height:36%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(93,218,255,.16) 0%,rgba(48,162,255,.06) 48%,transparent 72%);animation:alvisRefCorePulse 4.8s ease-in-out infinite;}
+.display-dock .alvis-projection-scan{position:absolute;z-index:2;left:50%;top:12%;width:13%;height:68%;transform:translateX(-50%);pointer-events:none;background:linear-gradient(180deg,transparent 0%,rgba(111,231,255,.02) 28%,rgba(111,231,255,.16) 48%,rgba(111,231,255,.03) 68%,transparent 100%);mix-blend-mode:screen;opacity:.45;animation:alvisProjectionScan 6.5s ease-in-out infinite;}
+@keyframes alvisRefOrbitA{from{transform:translate(-50%,-50%) rotate(-9deg)}to{transform:translate(-50%,-50%) rotate(351deg)}}
+@keyframes alvisRefOrbitB{from{transform:translate(-50%,-50%) rotate(27deg)}to{transform:translate(-50%,-50%) rotate(-333deg)}}
+@keyframes alvisRefCorePulse{0%,100%{opacity:.28}50%{opacity:.95}}
+@keyframes alvisProjectionScan{0%,100%{opacity:.16;transform:translateX(-50%) scaleX(.75)}50%{opacity:.68;transform:translateX(-50%) scaleX(1.18)}}
+
+/* v144: make orbital movement legible without changing the selected artwork */
+.display-dock .alvis-motion-orbit::after,
+.display-dock .alvis-motion-orbit::before{content:"";position:absolute;display:block;border-radius:50%;pointer-events:none}
+.display-dock .alvis-motion-orbit-a::after{width:7px;height:7px;left:50%;top:-4px;background:#d9fbff;box-shadow:0 0 5px 2px #8beaff,0 0 13px 5px rgba(40,190,255,.8)}
+.display-dock .alvis-motion-orbit-a::before{width:4px;height:4px;left:12%;bottom:5%;background:#ff9bfa;box-shadow:0 0 5px 2px #ff62dc,0 0 12px 4px rgba(255,65,207,.65)}
+.display-dock .alvis-motion-orbit-b::after{width:6px;height:6px;right:8%;top:48%;background:#e4ffff;box-shadow:0 0 5px 2px #8beaff,0 0 12px 4px rgba(40,190,255,.8)}
+.display-dock .alvis-globe-shimmer{position:absolute;z-index:4;left:32%;top:21%;width:36%;height:42%;border-radius:50%;overflow:hidden;pointer-events:none;clip-path:ellipse(50% 50% at 50% 50%);mix-blend-mode:screen}
+.display-dock .alvis-globe-shimmer::after{content:"";position:absolute;inset:-20% -65%;background:linear-gradient(105deg,transparent 38%,rgba(115,226,255,.02) 44%,rgba(165,245,255,.3) 50%,rgba(94,197,255,.08) 55%,transparent 62%);transform:translateX(-65%) rotate(8deg);animation:alvisGlobeShimmer 7.2s ease-in-out infinite}
+@keyframes alvisGlobeShimmer{0%,12%{transform:translateX(-65%) rotate(8deg);opacity:0}35%{opacity:.8}68%{opacity:.42}88%,100%{transform:translateX(65%) rotate(8deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.display-dock .alvis-globe-shimmer::after{animation:none!important;opacity:0!important}}
+
+@media(prefers-reduced-motion:reduce){.display-dock .alvis-motion-orbit,.display-dock .alvis-core-light,.display-dock .alvis-projection-scan{animation:none!important}}
+/* end v138 */
+/* v143: animated orbital light layers; preserve the selected artwork and keep its native pixel width */
+/* v143: make the independent motion layers visible above the reference image */
+.display-dock .mode-stage.jarvis-stage>.alvis-motion-orbit,
+.display-dock .mode-stage.jarvis-stage>.alvis-core-light,
+.display-dock .mode-stage.jarvis-stage>.alvis-projection-scan{display:block!important}
+
+/* v145: responsive hologram stage sizing across desktop, iPad and iPhone */
+.display-dock .mode-stage.jarvis-stage{
+  width:min(100%,520px)!important;
+  max-width:520px!important;
+  aspect-ratio:1397/1126!important;
+  height:auto!important;
+  margin:clamp(6px,1.5vw,14px) auto 14px!important;
+}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-image{
+  width:100%!important;height:100%!important;object-fit:fill!important;
+  object-position:center!important;image-rendering:auto!important;
+}
+@media(max-width:600px){
+  .display-dock .mode-stage.jarvis-stage{
+    width:100%!important;max-width:520px!important;
+    margin:8px auto 12px!important;
+  }
+}
+@media(min-width:900px){
+  .display-dock .mode-stage.jarvis-stage{width:min(100%,560px)!important;max-width:560px!important}
+}
+/* end v145 */
+/* v146: hologram interface rows are real controls */
+.hud-interface-action{width:100%;margin:0;border:0;border-radius:0;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;appearance:none;-webkit-appearance:none;transition:background .18s ease,filter .18s ease}
+.hud-interface-action:hover,.hud-interface-action:focus-visible{background:#0b3a5b66;filter:brightness(1.25);outline:none}
+.hud-interface-action:focus-visible{box-shadow:inset 0 0 0 1px #7dd3fc,0 0 10px #38bdf855}
+.hud-interface-action:active{background:#07598566}
+
+
+/* v148: remove the low-resolution raster artwork and restore the live vector hologram */
+.display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:grid!important;
+  grid-template-columns:minmax(132px,.82fr) minmax(240px,1.5fr) minmax(132px,.82fr)!important;
+  align-items:center!important;gap:clamp(8px,1.8vw,24px)!important;
+  width:100%!important;max-width:1100px!important;height:auto!important;min-height:410px!important;
+  aspect-ratio:auto!important;padding:24px clamp(12px,2vw,30px) 42px!important;
+  margin:10px auto 14px!important;overflow:hidden!important;
+  border:1px solid #164a70!important;border-radius:14px!important;
+  background:radial-gradient(ellipse at 50% 47%,#0b4b7c 0%,#062744 28%,#031426 57%,#01050d 100%)!important;
+  box-shadow:inset 0 0 60px #020817,0 0 30px #0284c722!important;
+}
+.display-dock .mode-stage.jarvis-stage::before,
+.display-dock .mode-stage.jarvis-stage::after{content:""!important;display:block!important;pointer-events:none!important}
+.display-dock .mode-stage.jarvis-stage>.alvis-reference-image{display:none!important}
+.display-dock .mode-stage.jarvis-stage>.hud-side{display:block!important;visibility:visible!important}
+.display-dock .mode-stage.jarvis-stage>.hud-center{display:grid!important;visibility:visible!important}
+.display-dock .hud-center>#hudAiAction{
+  position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;
+  z-index:5!important;width:76%!important;height:76%!important;min-width:0!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;
+  background:transparent!important;box-shadow:none!important;color:transparent!important;
+  opacity:0!important;overflow:hidden!important;cursor:pointer!important;
+}
+.display-dock .hud-center>#hudAiAction strong,
+.display-dock .hud-center>#hudAiAction span{color:transparent!important;opacity:0!important;font-size:0!important}
+.display-dock .hud-center>#hudAiAction:focus-visible{opacity:1!important;outline:2px solid #72e6ff!important;background:#36cfff18!important}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction strong,
+.display-dock .mode-stage.jarvis-stage>#hudAiAction span{color:inherit!important;opacity:1!important;font-size:inherit!important}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction strong{font-size:17px!important}
+.display-dock .mode-stage.jarvis-stage>#hudAiAction span{font-size:9px!important}
+.display-dock .hud-center{min-height:340px!important}
+.display-dock .hud-core{
+  width:min(27vw,280px)!important;min-width:190px!important;
+  background:radial-gradient(circle at 36% 26%,#d8fbff55,#168bc244 18%,#075080 47%,#02162d 78%,#010711 100%)!important;
+}
+.display-dock .hud-globe-map{
+  display:block!important;width:100%!important;height:100%!important;
+  opacity:1!important;filter:none!important;overflow:visible;
+  shape-rendering:geometricPrecision;text-rendering:geometricPrecision;
+}
+.display-dock .hud-globe-map path,
+.display-dock .hud-globe-map ellipse,
+.display-dock .hud-globe-map circle{vector-effect:non-scaling-stroke}
+@media(max-width:760px){
+  .display-dock .mode-stage.jarvis-stage{
+    grid-template-columns:64px minmax(0,1fr) 64px!important;
+    gap:3px!important;min-height:340px!important;padding:18px 5px 36px!important;
+    width:100%!important;max-width:100%!important;
+  }
+  .display-dock .hud-center{min-height:290px!important}
+  .display-dock .hud-core{width:min(48vw,210px)!important;min-width:132px!important}
+  .display-dock .hud-side{padding:8px 4px!important}
+  .display-dock .hud-panel-heading{font-size:6px!important;letter-spacing:.04em!important}
+  .display-dock .hud-readout{padding:5px 0!important}
+  .display-dock .hud-readout span,.display-dock .hud-interface-item small{font-size:5.5px!important}
+  .display-dock .hud-readout b,.display-dock .hud-interface-item b{font-size:6.5px!important}
+  .display-dock .hud-interface-item{gap:2px!important;padding:7px 0!important}
+  .display-dock .hud-interface-item>span{flex-basis:15px!important;height:15px!important;font-size:8px!important}
+  .display-dock .hud-side-left .hud-ai-metric{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important}
+  .display-dock .hud-side-left .hud-ai-metric strong{font-size:13px!important}
+  .display-dock .hud-side-left .hud-ai-metric span{font-size:6px!important}
+  .display-dock .hud-center-caption{font-size:5px!important;letter-spacing:.04em!important}
+}
+@media(max-width:390px){
+  .display-dock .mode-stage.jarvis-stage{grid-template-columns:56px minmax(0,1fr) 56px!important;min-height:320px!important}
+  .display-dock .hud-core{width:min(46vw,184px)!important;min-width:122px!important}
+  .display-dock .hud-center{min-height:270px!important}
+}
+
+
+
+/* v151 — rebuild the live hologram layout to match the approved reference composition */
+.display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:block!important;isolation:isolate!important;
+  width:100%!important;max-width:1200px!important;min-height:0!important;height:auto!important;
+  aspect-ratio:1397/1126!important;padding:0!important;margin:10px auto 14px!important;
+  overflow:hidden!important;border:1px solid #073d70!important;border-radius:16px!important;
+  background:radial-gradient(ellipse at 50% 43%,#063b75 0%,#031d43 36%,#010d23 70%,#010611 100%)!important;
+  box-shadow:inset 0 0 90px #00091c,0 0 34px #007dff35!important;
+}
+.display-dock .mode-stage.jarvis-stage:before{
+  content:""!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;
+  background-image:radial-gradient(circle at 4% 17%,#72dfff 0 1px,transparent 1.8px),radial-gradient(circle at 16% 61%,#2e9cff 0 1px,transparent 1.8px),radial-gradient(circle at 34% 12%,#b5f5ff 0 1px,transparent 1.8px),radial-gradient(circle at 68% 18%,#5edaff 0 1px,transparent 1.8px),radial-gradient(circle at 92% 38%,#42aaff 0 1px,transparent 1.8px),radial-gradient(circle at 82% 74%,#a3eaff 0 1px,transparent 1.8px),linear-gradient(180deg,#03142b22,#02091655);
+  background-size:100% 100%;opacity:.85;
+}
+.display-dock .mode-stage.jarvis-stage:after{content:""!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:27%!important;z-index:0!important;pointer-events:none!important;background:repeating-linear-gradient(90deg,transparent 0 8%,#168fff0b 8.1% 8.2%),linear-gradient(180deg,transparent,#061b35a8)!important;transform:perspective(260px) rotateX(58deg);transform-origin:bottom;}
+.display-dock .hud-center{position:absolute!important;inset:0!important;min-height:0!important;display:block!important;z-index:1!important;pointer-events:none!important;}
+.display-dock .hud-projector{position:absolute!important;left:50%!important;top:-4%!important;transform:translateX(-50%)!important;width:67%!important;height:15%!important;border-radius:50%!important;border:2px solid #1a9cff!important;background:radial-gradient(ellipse,#8af7ff 0%,#0878db 13%,#06295a 42%,#010b21 73%)!important;box-shadow:0 0 18px #14baff,0 0 46px #087cff,inset 0 0 26px #52eaff!important;z-index:3!important;}
+.display-dock .hud-projector:before,.display-dock .hud-projector:after{content:"";position:absolute;inset:9% 4%;border:2px solid #ff4caa;border-radius:50%;box-shadow:0 0 12px #ff4caa;}
+.display-dock .hud-projector:after{inset:18% 9%;border-color:#56eaff;box-shadow:0 0 16px #56eaff;}
+.display-dock .hud-projector span{inset:28% 37%!important;border:0!important;background:radial-gradient(ellipse,#eaffff,#2beaff 35%,#0874db 75%,transparent)!important;box-shadow:0 0 24px 12px #32eaff!important;}
+.display-dock .hud-projector i{top:12%!important;height:82%!important;border-left:2px solid #8af8ff!important;box-shadow:0 0 15px #37cfff!important;}
+.display-dock .hud-beam{position:absolute!important;left:50%!important;top:8%!important;bottom:13%!important;height:auto!important;width:38%!important;z-index:0!important;opacity:.9!important;background:linear-gradient(180deg,#16cfff00 0%,#18bfff1f 15%,#37cfff28 52%,#ff56c51b 86%,#18cfff00 100%)!important;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%)!important;}
+.display-dock .hud-orbit{left:50%!important;top:43%!important;width:72%!important;height:23%!important;border:2px solid #3acbff!important;border-radius:50%!important;box-shadow:0 0 12px #16aaff,0 0 30px #0c7dff55!important;z-index:2!important;}
+.display-dock .hud-orbit-a{transform:translate(-50%,-50%) rotate(-18deg)!important;border-color:#ff4cb5!important;animation:alvisHudSpin 24s linear infinite!important;}
+.display-dock .hud-orbit-b{width:77%!important;height:27%!important;transform:translate(-50%,-50%) rotate(18deg)!important;border-color:#32cfff!important;animation:alvisHudSpin 31s linear infinite reverse!important;}
+.display-dock .hud-orbit-c{width:68%!important;height:19%!important;transform:translate(-50%,-50%) rotate(72deg)!important;border-color:#168bff!important;}
+.display-dock .hud-core{position:absolute!important;left:50%!important;top:42%!important;transform:translate(-50%,-50%)!important;width:min(36%,470px)!important;min-width:0!important;aspect-ratio:1!important;overflow:visible!important;border:1px solid #a9f5ff!important;background:radial-gradient(circle at 35% 24%,#b8f8ff88,#167ec855 36%,#02132feF 79%)!important;box-shadow:0 0 18px #7deaff,0 0 52px #079bffbb,0 0 110px #087cff66,inset 0 0 32px #7ceaff!important;z-index:2!important;}
+.display-dock .hud-core:before{inset:2%!important;border:1px solid #c9faff!important;border-style:solid!important;background:repeating-linear-gradient(0deg,transparent 0 8px,#b5f5ff12 9px 10px),repeating-linear-gradient(90deg,transparent 0 8px,#b5f5ff12 9px 10px)!important;box-shadow:0 0 18px #37dfff!important;}
+.display-dock .hud-core:after{inset:7%!important;border:1px solid #68eaffaa!important;background:radial-gradient(circle at 30% 24%,#ffffff22,transparent 42%)!important;}
+.display-dock .hud-globe-map{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;filter:none!important;overflow:visible!important;shape-rendering:geometricPrecision!important;}
+.display-dock .hud-core>span{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;font-size:clamp(20px,3.4vw,42px)!important;letter-spacing:.34em!important;text-shadow:0 0 10px #fff,0 0 26px #35dfff,0 0 48px #168cff!important;white-space:nowrap!important;}
+.display-dock .hud-core>small{top:62%!important;left:50%!important;transform:translateX(-50%)!important;font-size:clamp(6px,.65vw,9px)!important;white-space:nowrap!important;}
+.display-dock .hud-platform{position:absolute!important;left:50%!important;bottom:2%!important;transform:translateX(-50%)!important;width:70%!important;height:17%!important;border:2px solid #168fff!important;border-radius:50%!important;background:radial-gradient(ellipse,#49eaff33 0%,#0869c944 28%,#03112b 65%,transparent 72%)!important;box-shadow:0 0 20px #0c9fff,inset 0 0 22px #0b8cff!important;z-index:2!important;}
+.display-dock .hud-platform:before,.display-dock .hud-platform:after,.display-dock .hud-platform i{top:12%!important;width:90%!important;height:70%!important;border:3px solid #1b9eff!important;box-shadow:0 0 16px #159fff,inset 0 0 12px #168cff!important;}
+.display-dock .hud-platform:after{top:22%!important;width:70%!important;height:56%!important;border-color:#ff4aa9!important;box-shadow:0 0 15px #ff4aa9!important;}
+.display-dock .hud-platform i{top:31%!important;width:48%!important;height:42%!important;border-color:#58eaff!important;}
+.display-dock .hud-platform b{position:absolute!important;left:50%!important;top:48%!important;width:18%!important;height:10%!important;transform:translate(-50%,-50%)!important;border-radius:50%!important;background:#baffff!important;box-shadow:0 0 25px 14px #29dfff!important;}
+.display-dock .hud-center-caption{position:absolute!important;bottom:19%!important;left:50%!important;transform:translateX(-50%)!important;font-size:clamp(6px,.7vw,9px)!important;letter-spacing:.2em!important;color:#77dfff!important;white-space:nowrap!important;}
+.display-dock .hud-side{position:absolute!important;top:12%!important;bottom:12%!important;width:25.5%!important;z-index:4!important;padding:2.2%!important;border:1px solid #087bd8!important;border-radius:12px!important;background:linear-gradient(145deg,#03132feF,#041d3de8 65%,#020d22f2)!important;box-shadow:inset 0 0 24px #087fff22,0 0 18px #008dff22!important;clip-path:polygon(0 14px,14px 0,calc(100% - 18px) 0,100% 18px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px))!important;}
+.display-dock .hud-side-left{left:2.2%!important;display:flex!important;flex-direction:column!important;}
+.display-dock .hud-side-right{right:2.2%!important;display:flex!important;flex-direction:column!important;gap:1.5%!important;}
+.display-dock .hud-brand{display:flex;align-items:center;gap:12px;padding:2% 1% 5%;border-bottom:1px solid #168bff55;color:#b9edff;}
+.display-dock .hud-brand>div{display:flex;flex-direction:column;gap:4px;}
+.display-dock .hud-brand strong{font-size:clamp(16px,2vw,27px);font-weight:400;letter-spacing:.08em;color:#c8f7ff;text-shadow:0 0 12px #28bfff;}
+.display-dock .hud-brand small{font-size:clamp(7px,.8vw,11px);line-height:1.45;color:#8acfff;}
+.display-dock .hud-brand-emblem{position:relative;display:grid;place-items:center;flex:0 0 clamp(36px,5vw,68px);aspect-ratio:1;border:1px solid #179eff;border-radius:50%;box-shadow:0 0 16px #128cff,inset 0 0 14px #128cff66;}
+.display-dock .hud-brand-emblem:before,.display-dock .hud-brand-emblem:after{content:"";position:absolute;inset:15%;border:1px solid #31cfff;border-radius:50%;}
+.display-dock .hud-brand-emblem:after{inset:34%;background:#7ef5ff;box-shadow:0 0 15px 5px #25cfff;}
+.display-dock .hud-nav{display:flex;flex-direction:column;margin:5% 0;padding:0 3%;border:1px solid #1179c5;border-radius:8px;background:#03142b88;}
+.display-dock .hud-nav .hud-shortcut{display:flex;align-items:center;gap:12px;min-height:0;padding:4.2% 3%;border:0;border-bottom:1px solid #168bff33;border-radius:0;background:transparent;color:#9bdcff;text-align:left;font-size:clamp(9px,1.05vw,15px);cursor:pointer;}
+.display-dock .hud-nav .hud-shortcut:last-child{border-bottom:0;}
+.display-dock .hud-nav .hud-shortcut span{width:24px;color:#62cfff;font-size:clamp(16px,1.8vw,24px);text-align:center;text-shadow:0 0 10px #168cff;}
+.display-dock .hud-nav .hud-shortcut:focus-visible,.display-dock .hud-nav .hud-shortcut:hover{outline:1px solid #54dfff;background:#0a4d7b66;}
+.display-dock .hud-ai-launch{display:flex;align-items:center;gap:12px;width:100%;margin:auto 0 3%;padding:4%;border:1px solid #168bff;border-radius:8px;background:linear-gradient(120deg,#03152d,#052b50);color:#9feaff;text-align:left;cursor:pointer;box-shadow:inset 0 0 20px #078bff22;}
+.display-dock .hud-ai-ring{display:grid;place-items:center;flex:0 0 clamp(42px,6vw,76px);aspect-ratio:1;border:4px solid #0d9cf3;border-right-color:#07528f;border-radius:50%;box-shadow:0 0 14px #168fff;}
+.display-dock .hud-ai-ring strong{font-size:clamp(11px,1.25vw,17px);color:#d8faff;}
+.display-dock .hud-ai-copy{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.display-dock .hud-ai-copy b{font-size:clamp(8px,.95vw,13px);font-weight:500;}
+.display-dock .hud-ai-copy small{font-size:clamp(6px,.7vw,10px);line-height:1.35;}
+.display-dock .hud-left-foot{margin:0;padding-top:3%;border-top:1px solid #168bff44;}
+.display-dock .hud-left-foot span{font-size:clamp(6px,.65vw,9px);}
+.display-dock .hud-left-foot b{font-size:clamp(7px,.8vw,11px);}
+.display-dock .hud-clock{display:flex;flex-direction:column;align-items:flex-end;padding:0 2% 4%;border-bottom:1px solid #168bff55;color:#9edfff;}
+.display-dock .hud-clock span{font-size:clamp(8px,.9vw,12px);}
+.display-dock .hud-clock strong{font-size:clamp(18px,2.2vw,30px);font-weight:400;letter-spacing:.04em;color:#c7f4ff;text-shadow:0 0 12px #169cff;}
+.display-dock .hud-info-card{padding:4%;border:1px solid #1179c5;border-radius:8px;background:linear-gradient(145deg,#03142b,#052247aa);box-shadow:inset 0 0 18px #078bff1c;}
+.display-dock .hud-info-card .hud-panel-heading{font-size:clamp(8px,.9vw,12px);padding-bottom:3%;letter-spacing:.08em;}
+.display-dock .hud-status-line{display:flex;align-items:center;gap:12px;padding:3% 0;}
+.display-dock .hud-status-gauge{display:grid;place-items:center;flex:0 0 clamp(48px,6.8vw,86px);aspect-ratio:1;border:5px solid #0d9cf3;border-right-color:#07528f;border-radius:50%;color:#d8faff;font-size:clamp(10px,1.1vw,15px);box-shadow:0 0 12px #168fff;}
+.display-dock .hud-status-line div{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.display-dock .hud-status-line b{font-size:clamp(8px,.95vw,13px);color:#b9efff;}
+.display-dock .hud-status-line small{font-size:clamp(6px,.7vw,10px);color:#7dbfe8;}
+.display-dock .hud-info-action{display:flex;align-items:center;gap:10px;width:100%;padding:4% 0;border:0;border-top:1px solid #168bff33;background:transparent;color:#a9dfff;text-align:left;cursor:pointer;}
+.display-dock .hud-info-action span{font-size:clamp(16px,1.8vw,24px);color:#55d8ff;}
+.display-dock .hud-info-action b{font-size:clamp(8px,.9vw,12px);font-weight:500;}
+.display-dock .hud-info-action em{margin-left:auto;font-size:clamp(6px,.65vw,9px);font-style:normal;color:#6ecbff;}
+.display-dock .hud-info-action:hover,.display-dock .hud-info-action:focus-visible{outline:1px solid #51dfff;background:#0a4d7b55;}
+.display-dock .hud-growth-card{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;padding:6%;}
+.display-dock .hud-growth-card p{margin:3% 0 4% 20%;font-size:clamp(9px,1.05vw,14px);line-height:1.8;color:#b7eaff;}
+.display-dock .hud-growth-card small{align-self:flex-end;font-size:clamp(7px,.8vw,11px);color:#70caff;}
+.display-dock .hud-growth-symbol{position:absolute;left:6%;top:22%;font-size:clamp(22px,3vw,38px);color:#55dcff;text-shadow:0 0 16px #078fff;}
+.display-dock .hud-caption{position:absolute!important;left:50%!important;bottom:1%!important;transform:translateX(-50%)!important;z-index:5!important;font-size:clamp(5px,.6vw,8px)!important;letter-spacing:.15em!important;color:#4da9e8!important;white-space:nowrap!important;}
+@media(max-width:760px){
+ .display-dock .mode-stage.jarvis-stage{aspect-ratio:1/1.18!important;max-width:100%!important;}
+ .display-dock .hud-side{top:8%!important;bottom:8%!important;width:29%!important;padding:2%!important;}
+ .display-dock .hud-side-left{left:1.5%!important}.display-dock .hud-side-right{right:1.5%!important}
+ .display-dock .hud-core{width:38%!important;top:42%!important;}
+ .display-dock .hud-projector{width:68%!important;height:11%!important;}
+ .display-dock .hud-platform{width:72%!important;height:14%!important;}
+ .display-dock .hud-nav .hud-shortcut{gap:3px;padding:8% 1%;font-size:clamp(7px,1.6vw,10px);}
+ .display-dock .hud-nav .hud-shortcut span{width:16px;font-size:14px;}
+ .display-dock .hud-brand{gap:5px}.display-dock .hud-brand-emblem{flex-basis:26px}
+ .display-dock .hud-ai-launch{gap:5px;padding:3%}.display-dock .hud-ai-ring{flex-basis:32px;border-width:2px}
+ .display-dock .hud-info-card{padding:3%}.display-dock .hud-info-action{gap:4px}
+ .display-dock .hud-growth-symbol{font-size:18px}.display-dock .hud-growth-card p{margin-left:20%;}
+}
+@media(max-width:390px){
+ .display-dock .mode-stage.jarvis-stage{aspect-ratio:1/1.25!important;}
+ .display-dock .hud-side{width:30%!important;}
+ .display-dock .hud-core{width:36%!important;}
+ .display-dock .hud-brand small{font-size:6px;}
+ .display-dock .hud-info-card .hud-panel-heading{font-size:6px;}
+}
+
+/* v152: refine motion, translucency, clock alignment and AI launch feedback */
+.display-dock .hud-orbit{
+  transform-box:border-box!important;
+  transform-origin:50% 50%!important;
+  will-change:transform;
+}
+.display-dock .hud-orbit-a{animation:alvisOrbitA152 24s linear infinite!important;}
+.display-dock .hud-orbit-b{animation:alvisOrbitB152 31s linear infinite!important;}
+.display-dock .hud-orbit-c{animation:alvisOrbitC152 38s linear infinite!important;}
+@keyframes alvisOrbitA152{
+  from{transform:translate(-50%,-50%) rotate(-18deg)}
+  to{transform:translate(-50%,-50%) rotate(342deg)}
+}
+@keyframes alvisOrbitB152{
+  from{transform:translate(-50%,-50%) rotate(18deg)}
+  to{transform:translate(-50%,-50%) rotate(-342deg)}
+}
+@keyframes alvisOrbitC152{
+  from{transform:translate(-50%,-50%) rotate(72deg)}
+  to{transform:translate(-50%,-50%) rotate(432deg)}
+}
+/* The globe itself is translucent; the ALVIS wordmark stays crisp and opaque. */
+.display-dock .hud-core{
+  background:radial-gradient(circle at 35% 24%,#b8f8ff42,#167ec82e 36%,#02132f91 79%)!important;
+  box-shadow:0 0 18px #7deaffbb,0 0 52px #079bff77,0 0 110px #087cff44,inset 0 0 32px #7ceaff88!important;
+}
+.display-dock .hud-globe-map{opacity:.82!important;}
+.display-dock .hud-core:before{opacity:.72!important;}
+.display-dock .hud-core:after{opacity:.78!important;}
+/* Keep the date and time in one stable right-aligned column. */
+.display-dock .hud-clock{
+  width:100%!important;min-width:0!important;flex:0 0 auto!important;
+  align-self:stretch!important;align-items:flex-end!important;text-align:right!important;
+  padding:2% 3% 4%!important;font-variant-numeric:tabular-nums lining-nums;
+  font-feature-settings:"tnum" 1;
+}
+.display-dock .hud-clock span,.display-dock .hud-clock strong{
+  display:block!important;width:100%!important;max-width:100%!important;
+  text-align:right!important;white-space:nowrap!important;line-height:1.35!important;
+}
+.display-dock .hud-clock strong{letter-spacing:.06em!important;}
+/* AI launch feedback follows the real model state and measured load progress. */
+.display-dock .hud-ai-launch{
+  position:relative!important;min-height:clamp(52px,6.8vw,82px)!important;
+  pointer-events:auto!important;touch-action:manipulation;
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+.display-dock .hud-ai-launch:disabled{opacity:.94!important;cursor:default!important;}
+.display-dock .hud-ai-ring{
+  position:relative!important;overflow:visible!important;
+  background:conic-gradient(#42e5ff var(--ai-progress,0%),#0b4775 0)!important;
+  border:0!important;padding:4px!important;
+}
+.display-dock .hud-ai-ring:before{
+  content:""!important;position:absolute!important;inset:4px!important;
+  border-radius:50%!important;background:#031a32!important;
+  box-shadow:inset 0 0 10px #0b85c9!important;
+}
+.display-dock .hud-ai-ring strong{position:relative!important;z-index:1!important;}
+.display-dock .hud-ai-launch[data-state="loading"]{
+  border-color:#facc15!important;box-shadow:0 0 16px #facc1555,inset 0 0 20px #facc1518!important;
+}
+.display-dock .hud-ai-launch[data-state="online"]{
+  border-color:#4ade80!important;box-shadow:0 0 14px #22c55e44,inset 0 0 18px #22c55e12!important;
+}
+.display-dock .hud-ai-launch[data-state="error"]{
+  border-color:#fb7185!important;box-shadow:0 0 14px #fb718555!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .display-dock .hud-orbit-a,.display-dock .hud-orbit-b,.display-dock .hud-orbit-c{animation:none!important;}
+}
+
+
+/* v153: correct the actual orbit transform and restore the left AI control */
+.display-dock .hud-center .hud-orbit{
+  left:50%!important;top:48%!important;
+  translate:-50% -50%!important;
+  transform:none!important;
+  transform-origin:50% 50%!important;
+  will-change:transform;
+}
+.display-dock .hud-center .hud-orbit-a{
+  width:116%!important;height:43%!important;
+  animation:alvisOrbitA153 22s linear infinite!important;
+}
+.display-dock .hud-center .hud-orbit-b{
+  width:108%!important;height:58%!important;
+  animation:alvisOrbitB153 31s linear infinite!important;
+}
+.display-dock .hud-center .hud-orbit-c{
+  width:116%!important;height:116%!important;
+  border-radius:50%!important;
+  border-color:#7dd3fc66!important;
+  animation:alvisOrbitC153 42s linear infinite!important;
+}
+@keyframes alvisOrbitA153{from{transform:rotate(-24deg)}to{transform:rotate(336deg)}}
+@keyframes alvisOrbitB153{from{transform:rotate(58deg)}to{transform:rotate(-302deg)}}
+@keyframes alvisOrbitC153{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* Old v128/v150 rules accidentally treated the left-hand launch button as
+   an invisible globe overlay. Override those exact legacy selectors. */
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction{
+  display:flex!important;visibility:visible!important;
+  position:relative!important;inset:auto!important;
+  left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;
+  z-index:4!important;transform:none!important;
+  width:100%!important;height:auto!important;min-height:58px!important;
+  margin:12px 0 3%!important;padding:4%!important;
+  opacity:1!important;overflow:visible!important;
+  border:1px solid #168bff!important;border-radius:8px!important;
+  background:linear-gradient(120deg,#03152d,#052b50)!important;
+  color:#9feaff!important;box-shadow:inset 0 0 20px #078bff22!important;
+  cursor:pointer!important;pointer-events:auto!important;
+  text-align:left!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction>*{
+  display:flex!important;visibility:visible!important;
+  position:relative!important;opacity:1!important;
+  color:inherit!important;font-size:inherit!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction .hud-ai-ring{
+  display:grid!important;place-items:center!important;flex:0 0 clamp(36px,4vw,54px)!important;
+  width:auto!important;height:auto!important;aspect-ratio:1!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction .hud-ai-copy{
+  display:flex!important;flex:1 1 auto!important;min-width:0!important;
+  flex-direction:column!important;align-items:flex-start!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction:disabled{
+  opacity:.88!important;cursor:default!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction:focus-visible{
+  outline:2px solid #8beaff!important;outline-offset:3px!important;
+}
+@media(max-width:760px){
+ .display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction{
+   min-height:46px!important;gap:5px!important;margin:8px 0 3%!important;padding:3%!important;
+ }
+ .display-dock .mode-stage.jarvis-stage .hud-side-left>#hudAiAction .hud-ai-ring{
+   flex-basis:30px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .display-dock .hud-center .hud-orbit{animation:none!important;}
+}
+
+/* v254: temporarily reduce compositing work while iOS home-screen pinch zoom is active. */
+html.alvis-zooming .display-dock .hud-center .hud-orbit{
+  animation-play-state:paused!important;
+  will-change:auto!important;
+}
+html.alvis-zooming .display-dock .hud-core{
+  box-shadow:0 0 14px #7deaff66,inset 0 0 20px #7ceaff55!important;
+}
+html.alvis-zooming .display-dock .hud-core:before,
+html.alvis-zooming .display-dock .hud-core:after{
+  box-shadow:none!important;
+}
+/* v257: use a low-compositing ALVIS HUD while Safari magnifies the page.
+   Preserve the globe, layout and orbital geometry; temporarily remove only
+   decorative multi-layer glows, scan effects and expensive shadow stacks. */
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .jarvis-stage::before,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .jarvis-stage::after{
+  opacity:0!important;background:none!important;box-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core{
+  background:#062746!important;
+  box-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core::before,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core::after{
+  background:none!important;box-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core span,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-core small,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-center-caption,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-caption{
+  text-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-orbit,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-orbit::after,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-projector,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-projector *,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-platform,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-platform *,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-metric,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-ai-metric,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-ai-metric::before,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-side{
+  box-shadow:none!important;text-shadow:none!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-beam,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .alvis-globe-shimmer,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .alvis-core-light,
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .alvis-projection-scan{
+  display:none!important;animation:none!important;mix-blend-mode:normal!important;
+}
+html.alvis-zooming #chatPage[data-display-mode="jarvis"] .display-dock .hud-globe-map{
+  filter:none!important;mix-blend-mode:normal!important;
+}
+
+
+
+
+/* v154: premium precision-machined holographic pedestal.
+   Keep the pedestal static; remove the toy-like hot-pink core and oversized glow. */
+.display-dock .hud-platform{
+  width:84%!important;height:15%!important;bottom:2%!important;
+  border:1px solid #8daec455!important;border-bottom-color:#c5d8e477!important;
+  border-radius:50%!important;
+  background:
+    radial-gradient(ellipse at 50% 22%,#d8f5ff14 0%,transparent 34%),
+    linear-gradient(180deg,#8fb6cb18 0%,#16334b55 42%,#020b19dd 78%,#071a2b88 100%)!important;
+  box-shadow:0 8px 16px -13px #7dd3fc88,inset 0 1px 2px #e5f8ff22,inset 0 -5px 10px #010713aa!important;
+}
+.display-dock .hud-platform:before,
+.display-dock .hud-platform:after,
+.display-dock .hud-platform i{
+  border-radius:50%!important;
+  box-shadow:inset 0 1px 1px #e7f8ff22,0 1px 2px #020b1888!important;
+}
+.display-dock .hud-platform:before{
+  top:9%!important;width:88%!important;height:68%!important;
+  border:1px solid #9bb9c977!important;
+  background:linear-gradient(180deg,#d8f5ff0c,#07172922)!important;
+}
+.display-dock .hud-platform:after{
+  top:23%!important;width:67%!important;height:51%!important;
+  border:1px solid #8fc8df66!important;
+  background:linear-gradient(180deg,#a9eaff0b,#020b1a66)!important;
+}
+.display-dock .hud-platform i{
+  top:34%!important;width:43%!important;height:34%!important;
+  border:1px solid #b9dce955!important;
+  background:radial-gradient(ellipse,#9deaff12 0%,#06162955 72%)!important;
+}
+.display-dock .hud-platform b{
+  left:50%!important;top:49%!important;width:7%!important;height:8%!important;
+  transform:translate(-50%,-50%)!important;border-radius:50%!important;
+  background:radial-gradient(circle,#c8f5ffbb 0%,#4e9fbd77 48%,#071a2b00 75%)!important;
+  box-shadow:0 0 7px 2px #55b7d933!important;
+}
+.display-dock .hud-platform span{
+  left:50%!important;top:8%!important;width:3px!important;height:3px!important;
+  border-radius:50%!important;background:#b9dce9aa!important;
+  box-shadow:0 0 4px 1px #75c9e944!important;
+}
+@media(max-width:760px){
+  .display-dock .hud-platform{width:88%!important;height:14%!important}
+}
+@media(max-width:430px){
+  .display-dock .hud-platform{width:90%!important;height:13%!important}
+}
+/* end v154 */
+
+
+/* v155: clear active state for direct hologram menu navigation */
+.display-dock .hud-nav .hud-shortcut.is-active{
+  color:#e2f8ff!important;
+  background:linear-gradient(90deg,#0b568455,#0b568400)!important;
+  box-shadow:inset 2px 0 0 #7deaff,0 0 12px #168bff22!important;
+  text-shadow:0 0 8px #48cfff88!important;
+}
+.display-dock .hud-nav .hud-shortcut.is-active span{
+  color:#b9f2ff!important;
+  text-shadow:0 0 12px #4bdcff!important;
+}
+/* end v155 */
+ 
+/* v156: restore touch/click hit-testing for the hologram side panels.
+   Legacy reference-scene rules disabled pointer events on .hud-side;
+   making the panels visible again did not restore interaction for children. */
+.display-dock .mode-stage.jarvis-stage>.hud-side{
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-side .hud-nav,
+.display-dock .mode-stage.jarvis-stage .hud-side .hud-shortcut{
+  visibility:visible!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+.display-dock .mode-stage.jarvis-stage .hud-nav .hud-shortcut{
+  position:relative!important;
+  z-index:6!important;
+  cursor:pointer!important;
+}
+
+
+
+ 
+/* v157: clear distinction between the offline-first design principle and live network state. */
+.display-dock .hud-status-line #hudNetworkState{letter-spacing:.12em;color:#b9edff}
+ 
+/* v157: calm, seamless page hand-off inspired by the login awakening. */
+@keyframes alvisPageEnter{
+  0%{opacity:0;transform:translateY(9px) scale(.992)}
+  42%{opacity:.78;transform:translateY(2px) scale(.997)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes alvisPageAmbient{
+  0%{opacity:0}
+  24%{opacity:.52}
+  100%{opacity:0}
+}
+@keyframes alvisPageWave{
+  0%{opacity:0;transform:scale(.78)}
+  28%{opacity:.48}
+  100%{opacity:0;transform:scale(1.55)}
+}
+main section.alvis-page-enter{
+  animation:alvisPageEnter 680ms cubic-bezier(.2,.72,.2,1) both;
+  transform-origin:50% 42%;
+}
+body.alvis-page-transitioning{overflow-x:hidden}
+body.alvis-page-transitioning:before,
+body.alvis-page-transitioning:after{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;
+}
+body.alvis-page-transitioning:before{
+  background:radial-gradient(ellipse at 50% 44%,#b9f5ff1c 0%,#67e8f912 18%,transparent 58%);
+  animation:alvisPageAmbient 680ms ease-out both;
+}
+body.alvis-page-transitioning:after{
+  background:radial-gradient(circle at 50% 44%,transparent 0%,transparent 22%,#a5f3fc16 22.2%,#67e8f910 22.5%,transparent 23%,transparent 100%);
+  animation:alvisPageWave 680ms cubic-bezier(.16,.68,.22,1) both;
+}
+@media(prefers-reduced-motion:reduce){
+  main section.alvis-page-enter{animation:none!important}
+  body.alvis-page-transitioning:before,
+  body.alvis-page-transitioning:after{animation:none!important}
+}
+
+
+/* v161: slightly tighten the three animated hologram orbits.
+   Preserve the globe, center alignment, ring stroke, pedestal and motion timing. */
+.display-dock .hud-center .hud-orbit-a{width:108%!important;height:40%!important;}
+.display-dock .hud-center .hud-orbit-b{width:100%!important;height:54%!important;}
+.display-dock .hud-center .hud-orbit-c{width:108%!important;height:108%!important;}
+/* end v161 */
+
+
+/* v162: full-width holographic chat composer attached to the ALVIS display dock.
+   Keep the input outside the artwork itself so the globe, orbit rings and pedestal
+   remain fully visible; the composer is part of the same glass control surface. */
+.display-dock .alvis-chat-composer{
+  display:flex;align-items:stretch;gap:10px;width:100%;max-width:100%;
+  margin:10px 0 2px;padding:9px;
+  border:1px solid #38bdf866;border-radius:13px;
+  background:linear-gradient(135deg,#071a2ceF,#0b2940eF 55%,#061426f2);
+  box-shadow:inset 0 1px 0 #c5f5ff18,0 0 18px #0284c722,0 8px 18px #02061766;
+}
+.display-dock .alvis-chat-composer textarea#chatInput{
+  display:block;flex:1 1 auto;min-width:0;width:100%;height:66px;min-height:66px;max-height:150px;
+  margin:0;padding:12px 14px;border:1px solid #287da5;border-radius:9px;
+  background:linear-gradient(145deg,#061426,#0a2035);color:#e8faff;
+  font:inherit;font-size:16px;line-height:1.45;resize:vertical;
+  box-shadow:inset 0 0 14px #02081788;
+}
+.display-dock .alvis-chat-composer textarea#chatInput::placeholder{color:#8ebbd0}
+.display-dock .alvis-chat-composer textarea#chatInput:focus{
+  outline:2px solid #38bdf8aa;outline-offset:1px;border-color:#67e8f9;
+  box-shadow:inset 0 0 14px #02081788,0 0 13px #0ea5e955;
+}
+.display-dock .alvis-chat-composer button#sendChat{
+  flex:0 0 92px;min-width:92px;min-height:66px;margin:0;padding:10px 12px;
+  border:1px solid #67e8f9;border-radius:9px;
+  background:linear-gradient(145deg,#087eae,#075985 58%,#06365a);
+  color:#f0fdff;font-weight:700;letter-spacing:.06em;
+  box-shadow:inset 0 1px 0 #d9fbff44,0 0 14px #0284c744;
+}
+.display-dock .alvis-chat-composer button#sendChat:disabled{opacity:.48;filter:saturate(.55)}
+@media(max-width:600px){
+  .display-dock .alvis-chat-composer{gap:7px;margin:8px 0 1px;padding:7px;border-radius:11px}
+  .display-dock .alvis-chat-composer textarea#chatInput{height:62px;min-height:62px;padding:10px 11px;font-size:16px}
+  .display-dock .alvis-chat-composer button#sendChat{flex-basis:72px;min-width:72px;min-height:62px;padding:8px 7px;font-size:13px}
+}
+@media(max-width:360px){
+  .display-dock .alvis-chat-composer{gap:6px;padding:6px}
+  .display-dock .alvis-chat-composer button#sendChat{flex-basis:64px;min-width:64px}
+}
+/* end v162 */
+
+/* v163: enable Send when text is entered; keep it disabled only while empty/busy. */
+.display-dock .alvis-chat-composer button#sendChat:not(:disabled){cursor:pointer;opacity:1}
+/* end v163 */
+
+/* v164: integrate the composer into the hologram frame and keep chat history unobstructed. */
+.display-dock .jarvis-stage{padding-bottom:112px}
+.display-dock .avatar-stage{min-height:270px;padding-bottom:104px}
+.display-dock .alvis-chat-composer{
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:8;
+  width:calc(100% - 32px);max-width:920px;margin:0;
+}
+.display-dock .alvis-chat-composer textarea#chatInput{height:72px;min-height:72px}
+.display-dock .alvis-chat-composer button#sendChat{min-height:72px}
+.hud-shortcuts{margin:12px 0 16px}
+@media(max-width:600px){
+  .display-dock .jarvis-stage{padding-bottom:98px}
+  .display-dock .avatar-stage{min-height:260px;padding-bottom:92px}
+  .display-dock .alvis-chat-composer{bottom:12px;width:calc(100% - 20px);gap:7px;padding:7px}
+  .display-dock .alvis-chat-composer textarea#chatInput{height:66px;min-height:66px;padding:10px 11px}
+  .display-dock .alvis-chat-composer button#sendChat{min-height:66px}
+}
+/* end v164 */
+
+
+
+/* v165: clearer speaker identity and message separation. */
+.message{position:relative;padding:13px 16px;margin:16px 0;max-width:min(88%,760px);border-radius:16px;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.message-speaker{font-size:11px;font-weight:800;letter-spacing:.12em;margin-bottom:7px;opacity:.95}
+.message-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;font-size:15px}
+.message.alvis{margin-right:auto;background:linear-gradient(145deg,rgba(8,43,78,.96),rgba(13,29,55,.98));border:1px solid rgba(71,190,255,.62);border-left:3px solid #52d8ff;border-radius:5px 17px 17px 17px;color:#e8f8ff;box-shadow:0 0 18px rgba(35,164,255,.12),inset 0 0 22px rgba(45,160,255,.06)}
+.message.alvis .message-speaker{color:#70dcff}
+.message.user{margin-left:auto;background:linear-gradient(145deg,#1855a9,#244b91);border:1px solid rgba(115,174,255,.65);border-right:3px solid #a5caff;border-radius:17px 5px 17px 17px;color:#fff}
+.message.user .message-speaker{text-align:right;color:#d5e8ff}
+#voicePage .panel{max-width:900px;margin:18px auto}
+@media(max-width:600px){.message{max-width:94%;padding:12px 13px;margin:14px 0}.message-body{font-size:15px;line-height:1.7}}
+/* end v165 */
+
+
+/* v166: conversation flow - history above the message composer. */
+.display-dock .jarvis-stage{padding-bottom:16px}
+.display-dock .avatar-stage{min-height:210px;padding-bottom:12px}
+.alvis-chat-composer{
+  position:relative;left:auto;bottom:auto;transform:none;z-index:1;
+  display:flex;align-items:stretch;gap:10px;width:100%;max-width:100%;
+  margin:12px 0 16px;padding:10px;
+  border:1px solid #38bdf866;border-radius:13px;
+  background:linear-gradient(135deg,#071a2cef,#0b2940ef 55%,#061426f2);
+  box-shadow:inset 0 1px 0 #c5f5ff18,0 0 18px #0284c722,0 8px 18px #02061766;
+}
+.alvis-chat-composer textarea#chatInput{display:block;flex:1 1 auto;min-width:0;width:100%;height:72px;min-height:72px;max-height:150px;margin:0;padding:12px 14px;border:1px solid #287da5;border-radius:9px;background:linear-gradient(145deg,#061426,#0a2035);color:#e8faff;font:inherit;font-size:16px;line-height:1.45;resize:vertical}
+.alvis-chat-composer textarea#chatInput::placeholder{color:#8ebbd0}
+.alvis-chat-composer textarea#chatInput:focus{outline:2px solid #38bdf8aa;outline-offset:1px;border-color:#67e8f9;box-shadow:inset 0 0 14px #02081788,0 0 13px #0ea5e955}
+.alvis-chat-composer button#sendChat{flex:0 0 92px;min-width:92px;min-height:72px;margin:0;padding:10px 12px;border:1px solid #67e8f9;border-radius:9px;background:linear-gradient(145deg,#087eae,#075985 58%,#06365a);color:#f0fdff;font-weight:700;letter-spacing:.06em;box-shadow:inset 0 1px 0 #d9fbff44,0 0 14px #0284c744}
+.alvis-chat-composer button#sendChat:disabled{opacity:.48;filter:saturate(.55)}
+#chatLog{min-height:120px;max-height:42vh;overflow-y:auto;padding:8px 12px;border:1px solid #164e78;border-radius:14px;background:linear-gradient(180deg,rgba(3,15,30,.92),rgba(7,25,44,.82));scroll-behavior:smooth}
+@media(max-width:600px){
+ .display-dock .jarvis-stage{padding-bottom:10px}
+ .display-dock .avatar-stage{min-height:174px;padding-bottom:10px}
+ .alvis-chat-composer{gap:7px;margin:10px 0 14px;padding:7px;border-radius:11px}
+ .alvis-chat-composer textarea#chatInput{height:66px;min-height:66px;padding:10px 11px;font-size:16px}
+ .alvis-chat-composer button#sendChat{flex-basis:72px;min-width:72px;min-height:66px;padding:8px 7px;font-size:13px}
+ #chatLog{max-height:45vh;padding:6px 9px}
+}
+@media(max-width:360px){.alvis-chat-composer{gap:6px;padding:6px}}
+/* end v166 */
+
+
+/* v167: compact vertical layout so the hologram, recent replies and composer
+   occupy less screen space without changing the approved hologram artwork. */
+.display-dock .hud-center{min-height:clamp(220px,26vh,260px)}
+#chatLog{
+  min-height:96px;
+  max-height:30vh;
+  padding:6px 10px;
+}
+#chatLog .message{margin:8px 0;padding:10px 13px}
+#chatLog .message-speaker{margin-bottom:4px;font-size:10px}
+#chatLog .message-body{font-size:14px;line-height:1.55}
+.alvis-chat-composer{margin:8px 0 10px;padding:8px}
+.alvis-chat-composer textarea#chatInput{height:58px;min-height:58px;padding:9px 12px}
+.alvis-chat-composer button#sendChat{min-height:58px}
+.hud-shortcuts{margin:8px 0 10px}
+@media(max-width:600px){
+  .display-dock .hud-center{min-height:190px}
+  .display-dock .mode-switch{gap:6px;margin-bottom:7px}
+  .display-dock .jarvis-stage{padding-top:6px;padding-bottom:6px}
+  #chatLog{min-height:82px;max-height:28vh;padding:5px 8px}
+  #chatLog .message{margin:6px 0;padding:9px 11px}
+  #chatLog .message-body{font-size:13px;line-height:1.5}
+  .alvis-chat-composer{gap:6px;margin:7px 0 8px;padding:6px}
+  .alvis-chat-composer textarea#chatInput{height:54px;min-height:54px;padding:8px 10px}
+  .alvis-chat-composer button#sendChat{flex-basis:66px;min-width:66px;min-height:54px;padding:7px 6px}
+  .hud-shortcuts{margin:6px 0 8px}
+}
+@media(max-height:720px) and (min-width:601px){
+  .display-dock .hud-center{min-height:205px}
+  #chatLog{max-height:25vh}
+}
+@media(max-height:700px) and (max-width:600px){
+  .display-dock .hud-center{min-height:168px}
+  #chatLog{max-height:24vh;min-height:72px}
+  .alvis-chat-composer textarea#chatInput{height:48px;min-height:48px}
+  .alvis-chat-composer button#sendChat{min-height:48px}
+}
+/* end v167 */
+
+
+/* v168: pull the chat experience and top navigation closer to the viewport.
+   Keep the approved hologram artwork, controls and interaction logic intact. */
+header{padding:7px 12px}
+header .status{margin-top:2px}
+#appPanel>nav{gap:6px;padding:4px 8px}
+#appPanel>nav button{padding:8px 11px;font-size:13px}
+#appPanel>main{padding:5px 9px 10px}
+#chatPage>.panel{margin:4px 0;padding:8px}
+#chatPage>.panel>h2{margin:0 0 5px;font-size:16px}
+#chatPage .display-dock{padding:4px 0 2px;box-shadow:0 5px 10px #0f172a55}
+#chatPage .mode-switch{gap:6px;margin:0 0 4px}
+#chatPage .mode-switch button{padding:8px 10px;font-size:13px}
+#chatPage .display-dock .jarvis-stage{padding-top:4px;padding-bottom:4px}
+#chatPage #chatLog{margin-top:3px}
+#chatPage .alvis-chat-composer{margin-top:5px;margin-bottom:6px}
+@media(max-width:600px){
+  header{padding:5px 9px}
+  header h1{font-size:20px;letter-spacing:2px}
+  #appPanel>nav{gap:5px;padding:3px 6px}
+  #appPanel>nav button{padding:7px 9px;font-size:12px}
+  #appPanel>main{padding:3px 6px 8px}
+  #chatPage>.panel{margin:3px 0;padding:6px}
+  #chatPage>.panel>h2{margin-bottom:4px;font-size:15px}
+  #chatPage .display-dock{padding:3px 0 1px}
+  #chatPage .mode-switch{gap:5px;margin-bottom:3px}
+  #chatPage .mode-switch button{padding:7px 8px;font-size:12px}
+  #chatPage .display-dock .jarvis-stage{padding-top:2px;padding-bottom:2px}
+  #chatPage #chatLog{margin-top:2px}
+  #chatPage .alvis-chat-composer{margin-top:4px;margin-bottom:5px}
+}
+/* end v168 */
+
+
+/* v169: keep conversation history and composer inside the unified hologram frame. */
+.display-dock{padding:8px 10px 10px}
+.display-dock #chatLog{
+  margin:8px 0 0;
+  border:1px solid #287da566;
+  border-top:1px solid #38bdf888;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(3,18,34,.96),rgba(5,25,43,.92));
+  box-shadow:inset 0 1px 0 #c5f5ff12,0 0 14px #0284c71a;
+}
+.display-dock .alvis-chat-composer{margin:8px 0 0}
+@media(max-width:600px){
+  .display-dock{padding:6px 7px 8px}
+  .display-dock #chatLog{margin-top:6px}
+  .display-dock .alvis-chat-composer{margin-top:6px}
+}
+/* end v169 */
+
+/* v170: place conversation in the unused lower area of the hologram canvas. */
+.display-dock .jarvis-stage{
+  grid-template-columns:minmax(76px,.82fr) minmax(0,1.5fr) minmax(76px,.82fr);
+  grid-template-rows:auto auto;
+  align-content:stretch;
+  row-gap:4px;
+  padding-bottom:12px;
+}
+.display-dock .jarvis-stage #chatLog{
+  grid-column:1 / -1;
+  grid-row:2;
+  align-self:stretch;
+  min-height:68px;
+  max-height:17vh;
+  margin:0;
+  padding:6px 10px;
+  border:1px solid #38bdf866;
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(2,16,31,.94),rgba(4,26,45,.9));
+  box-shadow:inset 0 1px 0 #dff8ff12,0 0 12px #0284c722;
+  overflow-y:auto;
+}
+.display-dock .jarvis-stage .alvis-chat-composer{
+  grid-column:1 / -1;
+  grid-row:3;
+  margin:0;
+}
+#chatPage[data-display-mode="avatar"] .jarvis-stage{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto auto;
+  min-height:0;
+  padding:8px;
+  background:linear-gradient(145deg,#071a2c,#061426);
+}
+#chatPage[data-display-mode="avatar"] .jarvis-stage>.hud-side,
+#chatPage[data-display-mode="avatar"] .jarvis-stage>.hud-center,
+#chatPage[data-display-mode="avatar"] .jarvis-stage>.hud-caption{display:none!important}
+#chatPage[data-display-mode="avatar"] .jarvis-stage #chatLog{grid-column:1;grid-row:1;max-height:22vh}
+#chatPage[data-display-mode="avatar"] .jarvis-stage .alvis-chat-composer{grid-column:1;grid-row:2}
+@media(max-width:760px){
+  .display-dock .jarvis-stage{grid-template-columns:64px minmax(0,1fr) 64px;row-gap:5px}
+  .display-dock .jarvis-stage #chatLog{min-height:58px;max-height:15vh;padding:5px 7px}
+  .display-dock .jarvis-stage .alvis-chat-composer{gap:6px;padding:6px}
+  .display-dock .jarvis-stage .alvis-chat-composer textarea#chatInput{height:48px;min-height:48px}
+  .display-dock .jarvis-stage .alvis-chat-composer button#sendChat{min-height:48px;flex-basis:66px;min-width:66px}
+}
+@media(max-width:430px){
+  .display-dock .jarvis-stage{grid-template-columns:58px minmax(0,1fr) 58px}
+}
+
+ 
+ /* v171: raise the projector pedestal clear of chat and feature the latest ALVIS reply above history. */
+ .display-dock .hud-center .hud-platform{bottom:12%!important}
+ .display-dock .jarvis-stage{grid-template-rows:auto auto auto auto;row-gap:5px}
+ .display-dock .jarvis-stage #alvisLatestReply{
+   grid-column:1 / -1;grid-row:2;min-width:0;margin:0;padding:7px 11px 9px;
+   border:1px solid rgba(56,189,248,.72);border-left:3px solid #67e8f9;border-radius:9px;
+   background:linear-gradient(110deg,rgba(5,35,58,.97),rgba(7,24,43,.96));
+   box-shadow:inset 0 1px 0 #dff8ff18,0 0 15px #0284c72b;color:#e5f8ff;
+ }
+ .alvis-latest-heading{display:flex;align-items:center;gap:7px;margin-bottom:4px;color:#7dd3fc;font-size:9px;font-weight:800;letter-spacing:.16em}
+ .alvis-latest-indicator{width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#67e8f9;box-shadow:0 0 8px #38bdf8}
+ #alvisLatestReplyText{max-height:4.8em;overflow-y:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55;color:#effaff}
+ .display-dock .jarvis-stage #chatLog{grid-row:3}
+ .display-dock .jarvis-stage .alvis-chat-composer{grid-row:4}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage{grid-template-rows:auto auto auto}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage #alvisLatestReply{grid-column:1;grid-row:1}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage #chatLog{grid-column:1;grid-row:2}
+ #chatPage[data-display-mode="avatar"] .jarvis-stage .alvis-chat-composer{grid-column:1;grid-row:3}
+ @media(max-width:760px){
+   .display-dock .jarvis-stage{row-gap:4px}
+   .display-dock .jarvis-stage #alvisLatestReply{padding:6px 8px 7px}
+   .alvis-latest-heading{font-size:8px;margin-bottom:3px}
+   #alvisLatestReplyText{font-size:12px;line-height:1.45;max-height:4.35em}
+ }
+
+ 
+ /* v172: remove only the outer frames around the left/right HUD columns. */
+ .display-dock .mode-stage.jarvis-stage>.hud-side{
+   border-color:transparent!important;
+   background:transparent!important;
+   box-shadow:none!important;
+   border-radius:0!important;
+   clip-path:none!important;
+ }
+ /* end v172 */
+
+ /* v173: keep the hologram as a separate upper display; put all chat UI below it. */
+ .display-dock .alvis-chat-area{
+   display:flex!important;flex-direction:column!important;gap:6px!important;
+   width:100%!important;max-width:1200px!important;margin:0 auto!important;
+   min-width:0!important;position:relative!important;z-index:2!important;
+ }
+ .display-dock .alvis-chat-area #chatLog{
+   grid-column:auto!important;grid-row:auto!important;
+   width:100%!important;margin:0!important;
+ }
+ .display-dock .alvis-chat-area #alvisLatestReply{
+   display:block!important;position:relative!important;
+   grid-column:auto!important;grid-row:auto!important;
+   width:100%!important;min-width:0!important;margin:0!important;
+   padding:7px 11px 9px;border:1px solid rgba(56,189,248,.72);
+   border-left:3px solid #67e8f9;border-radius:9px;
+   background:linear-gradient(110deg,rgba(5,35,58,.97),rgba(7,24,43,.96));
+   box-shadow:inset 0 1px 0 #dff8ff18,0 0 15px #0284c72b;color:#e5f8ff;
+ }
+ .display-dock .alvis-chat-area .alvis-chat-composer{
+   position:relative!important;left:auto!important;bottom:auto!important;
+   transform:none!important;grid-column:auto!important;grid-row:auto!important;
+   width:100%!important;max-width:100%!important;margin:0!important;
+ }
+ @media(max-width:760px){
+   .display-dock .alvis-chat-area{gap:4px!important}
+   .display-dock .alvis-chat-area #alvisLatestReply{padding:6px 8px 7px}
+ }
+ /* end v173 */
+
+ /* v174: hide only the visible conversation-history panel.
+    Keep #chatLog in the DOM so existing conversation/history logic remains intact. */
+ .display-dock .alvis-chat-area>#chatLog{display:none!important}
+ .display-dock .alvis-chat-area{gap:6px!important}
+ @media(max-width:760px){.display-dock .alvis-chat-area{gap:4px!important}}
+ /* end v174 */
+
+ /* v175: unify the hologram and the response/composer inside one outer frame. */
+ .display-dock .alvis-hologram-frame{
+   display:flex!important;flex-direction:column!important;align-items:stretch!important;
+   width:min(100%,420px)!important;max-width:420px!important;min-width:0!important;
+   margin:0 auto 10px!important;padding:8px 8px 10px!important;box-sizing:border-box!important;
+   border:1px solid rgba(56,189,248,.62)!important;border-radius:13px!important;
+   background:linear-gradient(155deg,rgba(7,28,49,.98),rgba(2,10,22,.99))!important;
+   box-shadow:inset 0 0 20px rgba(14,165,233,.10),0 0 18px rgba(2,132,199,.16)!important;
+   overflow:hidden!important;
+ }
+ .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+   width:100%!important;max-width:none!important;margin:0 auto 8px!important;
+   flex:0 0 auto!important;
+ }
+ .display-dock .alvis-hologram-frame>.alvis-chat-area{
+   width:100%!important;max-width:none!important;margin:0!important;padding:0 1px!important;
+   box-sizing:border-box!important;gap:6px!important;
+ }
+ .display-dock .alvis-hologram-frame .alvis-chat-area #alvisLatestReply,
+ .display-dock .alvis-hologram-frame .alvis-chat-area .alvis-chat-composer{width:100%!important;box-sizing:border-box!important}
+ @media(max-width:760px){
+   .display-dock .alvis-hologram-frame{width:100%!important;padding:6px 6px 8px!important;border-radius:11px!important}
+   .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{margin-bottom:6px!important}
+   .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
+ }
+
+
+ /* v177: restore full available viewport width in both orientations.
+    Do not cap portrait mode at 420px; let the frame and hologram use the available width. */
+ .display-dock .alvis-hologram-frame{
+   width:100%!important;max-width:none!important;box-sizing:border-box!important;
+   transition:width .24s ease,padding .24s ease;
+ }
+ .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+   width:100%!important;max-width:none!important;height:auto!important;
+   aspect-ratio:1397/1126!important;transition:width .24s ease;
+ }
+ @media(orientation:portrait){
+   .display-dock .alvis-hologram-frame{
+     width:100%!important;max-width:none!important;padding:6px 6px 8px!important;
+   }
+   .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+     width:100%!important;max-width:none!important;margin:0 auto 6px!important;
+   }
+ }
+ @media(orientation:landscape){
+   .display-dock .alvis-hologram-frame{
+     width:100%!important;max-width:none!important;padding:8px 10px 10px!important;
+   }
+   .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+     width:min(100%,clamp(520px,85svh,900px))!important;
+     max-width:900px!important;margin:0 auto 8px!important;
+   }
+   .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:6px!important}
+ }
+ @media(orientation:landscape) and (max-height:600px){
+   .display-dock .alvis-hologram-frame{padding:5px 8px 7px!important}
+   .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+     width:min(100%,clamp(360px,75svh,700px))!important;
+     max-width:700px!important;margin-bottom:5px!important;
+   }
+   .display-dock .alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
+   .display-dock .alvis-hologram-frame .alvis-chat-area #alvisLatestReply{padding:5px 8px 6px}
+ }
+ /* end v177 */
+
+ /* v178: the left hologram menu already identifies the current chat page.
+    Hide only the duplicate top navigation item while chat is active; keep it
+    available on every other page so users can return to chat. */
+ #appPanel:has(> main > #chatPage:not(.hidden)) > nav > button[data-page="chatPage"]{
+   display:none!important;
+ }
+ /* end v178 */
+ /* end v175 */
+
+ /* end v171 */
+ /* end v170 */
+
+/* v181: lazy-loaded browser-side 3D avatar preview. */
+#chatPage[data-display-mode="avatar"] .avatar-stage{
+  min-height:360px;padding:0;display:block;position:relative;isolation:isolate;
+  overflow:hidden;background:radial-gradient(ellipse at 50% 34%,#254b70 0%,#142b45 48%,#060d19 100%);
+}
+.alvis-avatar-canvas{position:absolute;inset:0;width:100%;height:100%;min-height:320px;overflow:hidden}
+.alvis-avatar-canvas canvas{display:block;width:100%!important;height:100%!important;outline:none}
+.alvis-avatar-status{
+  position:absolute;z-index:4;top:10px;left:12px;padding:5px 9px;border:1px solid #7dd3fc55;
+  border-radius:999px;background:#061426bb;color:#bae6fd;font-size:10px;letter-spacing:.12em;
+  box-shadow:0 0 12px #0284c722;pointer-events:none
+}
+@media(max-width:600px){
+  #chatPage[data-display-mode="avatar"] .display-dock .avatar-stage{min-height:340px;padding:0}
+  #chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:300px}
+}
+@media(prefers-reduced-motion:reduce){
+  .alvis-avatar-status{box-shadow:none}
+}
+
+/* v190: stage-one faithful 18号 reference portrait shown in ALVIS avatar mode. */
+.alvis-avatar-preview{display:block;width:100%;height:100%;min-height:260px;object-fit:contain;object-position:center center;background:radial-gradient(ellipse at 50% 35%,#203b56 0%,#081321 72%);}
+/* end v190 */
+
+/* v193: keep the avatar preview visible across page navigation. */
+#chatPage .avatar-stage{position:relative}
+#chatPage .alvis-avatar-canvas{display:block;visibility:visible;opacity:1}
+#chatPage .alvis-avatar-preview{display:block!important;visibility:visible!important;opacity:1!important;width:100%;height:100%;min-height:260px;object-fit:contain;object-position:center;background:#081321}
+
+
+/* v213: remove the rejected 2D eyelid overlay; keep the approved portrait as a still reference. */
+
+
+/* v210: keep the approved 18号 portrait still.
+   Do not simulate avatar movement by translating/scaling the whole photograph.
+   Real blinking requires dedicated eyelid/closed-eye artwork or a rigged model. */
+/* end v210 */
+
+/* v192: persistent GLB import and interactive 3D viewer slot. */
+.alvis-avatar-tools{position:absolute;z-index:5;right:12px;top:10px;display:flex;gap:8px}
+.alvis-avatar-tools button{border:1px solid #67baf0aa;border-radius:999px;padding:7px 11px;background:#07182bdc;color:#d8f1ff;font:inherit;font-size:11px;cursor:pointer}
+.alvis-avatar-tools button:focus-visible{outline:2px solid #7dd3fc;outline-offset:2px}
+.alvis-avatar-diagnostics{position:absolute;z-index:6;right:12px;top:48px;max-width:min(280px,78%);padding:10px 12px;border:1px solid #67baf088;border-radius:12px;background:#07182bf2;color:#d8f1ff;font-size:11px;line-height:1.65;white-space:pre-line;box-shadow:0 8px 24px #0008;pointer-events:none}
+.alvis-avatar-diagnostics[hidden]{display:none}
+@media(max-width:600px){.alvis-avatar-diagnostics{right:8px;top:43px;font-size:10px;max-width:82%}}
+.alvis-avatar-model{display:block;width:100%;height:100%;min-height:260px;--poster-color:transparent;background:transparent}
+@media(max-width:600px){.alvis-avatar-tools{right:8px;top:8px}.alvis-avatar-tools button{font-size:10px;padding:6px 9px}}
+
+\n/* end v181 */
+/* v182: remove the redundant heading and top gap in Avatar mode only. */
+#chatPage[data-display-mode="avatar"] > .panel > h2{display:none!important}
+#chatPage[data-display-mode="avatar"] .display-dock{padding-top:0}
+#chatPage[data-display-mode="avatar"] .mode-switch{margin-top:0}
+/* end v182 */
+
+/* v183: reduce the oversized empty avatar stage above the chat area.
+   Keep the avatar visible while reclaiming vertical space for conversation. */
+#chatPage[data-display-mode="avatar"] .avatar-stage{min-height:260px}
+#chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:260px}
+@media(max-width:600px){
+  #chatPage[data-display-mode="avatar"] .display-dock .avatar-stage{min-height:240px}
+  #chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:240px}
+}
+/* end v183 */
+
+/* v184: make the avatar occupy the previously empty display area.
+   Talking Avatar renders a close-up face, so give its container a real responsive height. */
+#chatPage[data-display-mode="avatar"] .avatar-stage{
+  height:clamp(340px,52svh,460px);
+  min-height:340px;
+}
+#chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{
+  inset:0;width:100%;height:100%;min-height:0;
+}
+#chatPage[data-display-mode="avatar"] .alvis-avatar-canvas canvas{
+  display:block;width:100%!important;height:100%!important;
+}
+@media(max-width:600px){
+  #chatPage[data-display-mode="avatar"] .display-dock .avatar-stage{
+    height:clamp(300px,46svh,390px);min-height:300px;
+  }
+  #chatPage[data-display-mode="avatar"] .alvis-avatar-canvas{min-height:0}
+}
+/* end v184 */
+
+/* v185: place the avatar stage at the top of the display dock, before chat. */
+#chatPage[data-display-mode="avatar"] .display-dock>.avatar-stage{
+  order:0;
+}
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame{
+  order:1;
+}
+/* end v185 */
+
+/* v187: remove both nested hologram shell and the hidden hologram stage in Avatar mode.
+   The chat area remains visible as a normal-flow sibling immediately after the avatar. */
+#chatPage[data-display-mode="avatar"] .display-dock{
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame{
+  display:block!important;width:100%!important;max-width:none!important;
+  min-height:0!important;height:auto!important;margin:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;overflow:visible!important;
+}
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.mode-stage.jarvis-stage{
+  display:none!important;min-height:0!important;height:0!important;
+  margin:0!important;padding:0!important;border:0!important;
+}
+#chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.alvis-chat-area{
+  display:flex!important;flex-direction:column!important;
+  width:100%!important;max-width:none!important;min-height:0!important;
+  margin:0!important;padding:0!important;gap:6px!important;
+}
+@media(max-width:760px){
+  #chatPage[data-display-mode="avatar"] .display-dock>.alvis-hologram-frame>.alvis-chat-area{gap:4px!important}
+}
+/* end v187 */
+
+/* v188: keep ALVIS hologram orbital rings moving independently of the OS
+   reduced-motion preference. The orbit uses Web Animations on the rotate
+   property; other interface transitions continue to honor that preference. */
+/* end v188 */
+
+
+
+
+
+
+
+
+/* v249: iPhone portrait layout — slightly widen the live ALVIS hologram
+   and move the external-AI / local-model notes lower, without touching Avatar mode. */
+@media(max-width:600px) and (orientation:portrait){
+  #chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{
+    width:calc(100% + 12px)!important;
+    max-width:none!important;
+    margin-left:-6px!important;
+    margin-right:-6px!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame>.mode-stage.jarvis-stage{
+    width:100%!important;
+    max-width:none!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{
+    display:flex!important;
+    margin:24px 0 10px!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option+p.small,
+  #chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option+p.small+p.small{
+    margin:8px 0 10px!important;
+  }
+}
+/* end v249 */
+
+/* v250: extend the live ALVIS hologram downward on iPhone portrait.
+   Keep the globe, rings, side panels and Avatar mode styling unchanged. */
+@media(max-width:600px) and (orientation:portrait){
+  #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{
+    min-height:450px!important;
+  }
+  #chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-center{
+    min-height:390px!important;
+  }
+}
+/* end v250 */
+
+
+
+
+/* v262: restore the v188 live HUD and keep exactly two smaller orbital rings.
+   The globe, side panels, projector, pedestal, colors and layout stay unchanged. */
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage{
+  position:relative!important;display:grid!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-side{
+  display:block!important;visibility:visible!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.hud-center{
+  display:grid!important;visibility:visible!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage>.alvis-reference-image{
+  display:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-a{
+  width:60.75%!important;height:22.5%!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-b{
+  width:56.25%!important;height:30.375%!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit-c{
+  display:block!important;width:125%!important;height:31%!important;
+  transform:translate(-50%,-50%) rotate(9deg)!important;
+}
+
+/* v267: shrink the two actively rotating inner orbital ellipses only.
+   Set their geometry directly instead of stacking a CSS scale transform.
+   Preserve the centered translate and independent WAAPI rotation. The outer C ring is untouched. */
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a{
+  width:60.75%!important;height:22.5%!important;
+  border-color:#b8f5ffdd!important;border-width:1.2px!important;
+  box-shadow:0 0 8px #67e8f977,0 0 22px #0ea5e933!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-a::after{
+  left:12%!important;top:8%!important;width:4px!important;height:4px!important;
+  background:#e6fcff!important;box-shadow:0 0 8px 3px #67e8f9!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b{
+  width:56.25%!important;height:30.375%!important;
+  border-color:#38bdf8bb!important;border-width:1px!important;
+  box-shadow:0 0 9px #0ea5e966,0 0 24px #0284c733!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .mode-stage.jarvis-stage .hud-center>.hud-orbit-b::after{
+  left:84%!important;top:82%!important;width:4px!important;height:4px!important;
+  background:#b8eaff!important;box-shadow:0 0 8px 3px #38bdf8!important;
+}
+/* end v267 inner-orbit refinement */
+
+/* v292: restore the live ALVIS hologram stage. The approved reference artwork remains
+   in the DOM for reference only; v262's display:none rule keeps it from replacing the live globe.
+   Avatar mode is intentionally unaffected. */
+
+/* v296: restore ring C center and rotate only its independent CSS rotate component.
+   The old important transform included a second translate and blocked transform keyframe animation.
+   The individual translate property already centers the ring; do not translate it again. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center .hud-orbit{
+  top:48%!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  transform:none!important;
+  animation:none!important;
+}
+/* end v296 */
+
+/* v297: animate only the independent rotate component; preserve the centered translate. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  rotate:9deg;
+  animation:alvisHudOuterRotate299 42s linear infinite!important;
+}
+@keyframes alvisHudOuterRotate299{
+  from{rotate:9deg}
+  to{rotate:369deg}
+}
+/* end v297 */
+ 
+/* v300: align the circular outer gear exactly with the globe and make each tooth legible.
+   Keep the 1:1 geometry and independent 42-second rotation; only ALVIS mode is affected. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  left:50%!important;top:50%!important;
+  width:min(100%,280px)!important;height:auto!important;aspect-ratio:1/1!important;
+  border:1.5px solid #b8f5ffcc!important;border-radius:50%!important;
+  box-shadow:0 0 10px #38bdf8aa,0 0 24px #0ea5e966!important;
+  translate:-50% -50%!important;
+  transform:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  content:""!important;position:absolute!important;inset:-10px!important;
+  display:block!important;border:0!important;border-radius:50%!important;
+  background:repeating-conic-gradient(from 0deg,#e4fcff 0deg 3.5deg,#54dfff 3.5deg 3.9deg,transparent 3.9deg 7.5deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 84%,#000 85% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 84%,#000 85% 100%)!important;
+  opacity:1!important;filter:drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 9px #0ea5e9)!important;
+  pointer-events:none!important;
+}
+/* end v300 */
+
+
+
+/* v301: center the outer gear by auto margins inside the exact globe container.
+   This avoids percentage/translate positioning drift across responsive layouts. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;
+  width:min(100%,280px)!important;height:min(100%,280px)!important;aspect-ratio:1/1!important;
+  margin:auto!important;translate:none!important;transform:none!important;
+}
+/* end v301 */
+
+
+/* v302: align the outer gear to the globe's actual center, not the HUD container center.
+   The live globe core is positioned at left:50% / top:42% inside .hud-center.
+   Keep the circular gear size, teeth, and independent 42-second rotation unchanged. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  inset:auto!important;left:50%!important;top:42%!important;right:auto!important;bottom:auto!important;
+  margin:0!important;translate:-50% -50%!important;transform:none!important;
+}
+/* end v302 */
+
+
+/* v303: make the existing ALVIS outer gear teeth unmistakable.
+   Keep the confirmed globe-center anchor, circular geometry, and 42-second rotation.
+   The 48 teeth now project farther beyond the rim with wider luminous faces and deeper gaps. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  inset:-12px!important;
+  background:repeating-conic-gradient(from 0deg,#f1fdff 0deg 4.6deg,#39c9f4 4.6deg 5deg,#0b5d8b 5deg 5.4deg,transparent 5.4deg 7.5deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 82%,#000 83% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 82%,#000 83% 100%)!important;
+  opacity:1!important;
+  filter:drop-shadow(0 0 5px #7cecff) drop-shadow(0 0 11px #0ea5e9)!important;
+}
+/* end v303 */
+
+
+/* v304: replace the soft outer ring with distinct clock-like radial index teeth.
+   The 48 short marks and 8 longer cardinal markers rotate with the existing gear. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  animation:alvisHudOuterRotate299 18s linear infinite!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  inset:-14px!important;
+  background:
+    repeating-conic-gradient(from 0deg,#f7feff 0deg 1.35deg,#35d5ff 1.35deg 1.9deg,transparent 1.9deg 7.5deg),
+    repeating-conic-gradient(from 0deg,#e8fbff 0deg 2.4deg,transparent 2.4deg 45deg)!important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 77%,#000 78% 100%)!important;
+  mask:radial-gradient(circle at center,transparent 0 77%,#000 78% 100%)!important;
+  opacity:1!important;
+  filter:drop-shadow(0 0 6px #a5f3fc) drop-shadow(0 0 13px #0ea5e9)!important;
+}
+/* end v304 */
+
+
+/* v305: draw the outer gear as real SVG clock teeth, not a masked gradient.
+   SVG tick geometry stays crisp at every screen size; only the outer ring rotates. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  width:min(100%,280px)!important;height:auto!important;aspect-ratio:1/1!important;
+  animation:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c::before{
+  content:none!important;display:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth{
+  position:absolute!important;inset:-14px!important;
+  display:block!important;width:calc(100% + 28px)!important;height:calc(100% + 28px)!important;
+  overflow:visible!important;pointer-events:none!important;
+  filter:drop-shadow(0 0 5px #9af2ff) drop-shadow(0 0 12px #0ea5e9)!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .hud-gear-tick{
+  stroke:#65dcff;stroke-width:2.4;vector-effect:non-scaling-stroke;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .hud-gear-major{
+  stroke:#f4feff;stroke-width:3.8;
+}
+/* end v305 */
+
+
+/* v306: premium precision-metal sci-fi treatment for the ALVIS outer gear only.
+   Keep the confirmed circular anchor, globe, inner rings, and Avatar mode untouched. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c{
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth{
+  position:absolute!important;inset:-28px!important;
+  display:block!important;width:calc(100% + 56px)!important;height:calc(100% + 56px)!important;
+  overflow:visible!important;pointer-events:none!important;
+  filter:drop-shadow(0 0 2px #8ddfff88) drop-shadow(0 0 7px #168fc855)!important;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-tooth{
+  fill:url(#gearMetal);stroke:#bdeeff;stroke-opacity:.72;stroke-width:1.15;
+  stroke-linejoin:bevel;vector-effect:non-scaling-stroke;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-engrave{
+  fill:none;stroke:#d9f5ff;stroke-opacity:.58;stroke-width:1.1;
+  stroke-linecap:round;vector-effect:non-scaling-stroke;
+}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-body{
+  filter:drop-shadow(0 1px 1px #020b14);
+}
+/* end v306 */
+
+
+/* v308: restrained precision index on the ALVIS outer ring; no gear teeth. */
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth{filter:drop-shadow(0 0 1px #8ddfff55)!important;}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-tick{fill:none;stroke:#82c8df;stroke-opacity:.52;stroke-width:1.05;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+#chatPage[data-display-mode="jarvis"] .display-dock .hud-center>.hud-orbit-c>.hud-gear-teeth .gear-tick-major{stroke:#d8f4ff;stroke-opacity:.72;stroke-width:1.45;}
+/* end v308 */
