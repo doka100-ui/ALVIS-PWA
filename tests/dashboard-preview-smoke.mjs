@@ -123,7 +123,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
     assert.ok(refreshHtml.includes("alvis-cache-v315-integrated"), browserName + ": refresh page must verify the v315 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=313"), browserName + ": refresh page must return to the integrated app only after v315 activation");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=315"), browserName + ": refresh page must return to the integrated app only after v315 activation");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
