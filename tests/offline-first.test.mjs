@@ -1285,8 +1285,8 @@ assert.match(app,/stage\.slice\(0,64\)/);
  
 // v326: if engine.unload fails during initialization loss/logout, captured GPU devices are individually destroyed before references are cleared.
 assert.match(app,/function releaseCapturedAlvisModelDevices\(\{destroy=false,reason=""\}=\{\}\)[\s\S]*?modelDevices\.splice\(0\)[\s\S]*?if\(destroy\)[\s\S]*?device\?\.destroy\?\.\(\)/,"captured GPU devices must have a targeted fallback destroy path");
-assert.match(app,/if\(alvisGpuLossDuringLoad\)[\s\S]*?catch\(error\)\{cleanupError=error;\}[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"GPU loss during initialization must destroy captured devices if engine unload fails");
-assert.match(app,/if\(!unlocked\)\{[\s\S]*?catch\(error\)\{cleanupError=error;\}[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"logout during initialization must destroy captured devices if engine unload fails");
+assert.match(app,/if\(alvisGpuLossDuringLoad\)[\s\S]*?catch\(error\)\{[\s\S]*?cleanupError=error;[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"GPU loss during initialization must destroy captured devices if engine unload fails");
+assert.match(app,/if\(!unlocked\)\{[\s\S]*?catch\(error\)\{[\s\S]*?cleanupError=error;[\s\S]*?releaseCapturedAlvisModelDevices\(\{destroy:!!cleanupError/,"logout during initialization must destroy captured devices if engine unload fails");
 assert.match(app,/failedModelDeviceCount=releaseCapturedAlvisModelDevices\(\{destroy:true,reason:"モデル初期化失敗"\}\)/,"rejected model initialization must use the same targeted GPU cleanup helper");
 
 
