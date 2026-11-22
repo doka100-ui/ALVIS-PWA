@@ -1,3 +1,8 @@
+## Latest update — v325 GPU停止通知とモデル所有権引き渡しの競合を修正
+- WebLLMのCreateMLCEngineがresolveした直後、ALVISがGPUDeviceの所有権を受け取る直前にdevice.lost通知が届くと、captureModelDevices解除後の通知を初期化中の停止として記録できない競合を修正。
+- 一時追跡中のmodelDevicesに対象GPUDeviceが残っている間は、captureModelDevices解除後もlost通知（通常resolve/reject両経路）をalvisGpuLossDuringLoadへ記録。エンジン引き渡し後は従来の通常GPU停止処理へ移行。
+- Qwen3モデルID/量子化/context window、WebLLM 0.2.87、Cache API/既存モデル重み、GPU確保/解放方針、記憶/履歴/AES-GCM/同期/バックアップ、Kokoro、ALVIS v308表示は変更なし。キャッシュ削除・再取得強制なし。Service Worker cache alvis-cache-v325-integrated、更新ページ refresh-v325.html。
+
 ## v324 公開ブラウザ検証の修正
 - 初回のv324 preview smokeは、更新中継ページが正しく `?refresh=324` へ遷移した後、Playwright側の遷移待機だけが `refresh=323` を期待して60秒タイムアウトしていた。
 - ブラウザテストの期待値を324へ修正。アプリ本体・Worker・ユーザーデータには変更なし。

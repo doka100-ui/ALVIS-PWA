@@ -1,3 +1,7 @@
+## v325 — WebGPU停止通知の所有権引き渡し競合を修正
+- CreateMLCEngine完了後からALVIS engine公開までの短い区間も、追跡中GPUDeviceのlost通知を初期化失敗として捕捉する。Promise resolve/reject両経路に対応。
+- GPUDeviceがALVIS engineへ引き渡された後は既存の稼働中GPU停止処理を使用。モデル設定、モデルキャッシュ、ユーザーデータ形式、UIは変更しない。Service Worker app shell cache v325。
+
 ## v324 — 再読込後のモデル診断メタデータ保持
 - モデル重みキャッシュの起動前/初期化後判定と保存領域永続化要求の状態を、技術ログと同じSafari sessionStorageへ保持し、同一タブ再読込後の診断に復元する。
 - 「要求中」のまま再読込された場合は結果不明として扱い、許可/拒否を推測しない。タブを閉じると消去。会話・記憶・履歴・個人情報は対象外。

@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v324";
+const ALVIS_APP_BUILD_ID="v325";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -680,7 +680,7 @@ function installAlvisWebGpuDiagnostics(){
             if(info?.reason!=="destroyed")recordAlvisModelLoadTrace("WebGPU device lost："+alvisGpuDiagnostics.deviceLostReasonCode+" / "+alvisGpuDiagnostics.deviceLostReason);
             // Explicit engine unload also destroys its GPUDevice; do not treat that as a crash.
             if(info?.reason!=="destroyed"){
-              if(alvisGpuDiagnostics.captureModelDevices)alvisGpuLossDuringLoad=info;
+              if(alvisGpuDiagnostics.captureModelDevices||alvisGpuDiagnostics.modelDevices.includes(device))alvisGpuLossDuringLoad=info;
               void handleAlvisUnexpectedGpuLoss(info);
             }
           },error=>{
@@ -690,7 +690,7 @@ function installAlvisWebGpuDiagnostics(){
             alvisGpuDiagnostics.deviceLostAt=new Date().toISOString();
             recordAlvisModelLoadTrace("WebGPU device lost promise rejected："+alvisGpuDiagnostics.deviceLostReason);
             const lossInfo={reason:"promise-rejected",message:error?.message||String(error)};
-            if(alvisGpuDiagnostics.captureModelDevices)alvisGpuLossDuringLoad=lossInfo;
+            if(alvisGpuDiagnostics.captureModelDevices||alvisGpuDiagnostics.modelDevices.includes(device))alvisGpuLossDuringLoad=lossInfo;
             void handleAlvisUnexpectedGpuLoss(lossInfo);
           });
         }
