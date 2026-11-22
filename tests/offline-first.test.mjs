@@ -864,6 +864,12 @@ const modelLoadHandler=app.slice(app.indexOf('$("loadAiModel").addEventListener(
 assert.match(modelLoadHandler,/if\(aiLoading\)return;[\s\S]*?aiLoading=true;[\s\S]*?await /,"a second model-start tap must be rejected before any asynchronous yield");
 assert.match(modelLoadHandler,/\$\("loadAiModel"\)\.disabled=true;[\s\S]*?\$\("unloadAiModel"\)\.disabled=true/,"model controls must be locked while initialization is active");
 assert.match(modelLoadHandler,/if\(kokoroTts\|\|kokoroLoading\)/,"Kokoro and Qwen must not initialize concurrently on memory-constrained devices");
+const inferenceSerializer=app.slice(app.indexOf("function serializeAlvisInference"),app.indexOf("// Unexpected GPU loss recovery"));
+assert.match(inferenceSerializer,/if\(unloadRequested\)return Promise\.reject/,"new inference requests must be rejected after unload begins");
+assert.match(inferenceSerializer,/const request=inferenceQueue\.then\(\(\)=>\{[\s\S]*?return originalCreate\(\.\.\.args\)/,"inference calls must execute serially through one queue");
+assert.match(inferenceSerializer,/if\(unloadRequested\)throw new Error/,"queued inference must not start after unload has been requested");
+assert.match(inferenceSerializer,/if\(unloadPromise\)return unloadPromise;[\s\S]*?unloadRequested=true;[\s\S]*?await inferenceQueue\.catch/,"repeated unload requests must share one cleanup promise and wait for active inference");
+
 assert.match(sw,/key\.startsWith\("alvis-cache-"\)[\s\S]*?key\.startsWith\("alvis-deps-"\)/,"activation cleanup must be restricted to ALVIS-owned caches");
 assert.match(sw,/for\s*\(const cacheName of \["webllm\/model",\s*"webllm\/config",\s*"webllm\/wasm"\]\)/,"offline model cache lookups must retain WebLLM's own cache namespaces");
 assert.doesNotMatch(sw,/caches\.delete\(["']webllm\//,"Service Worker must never delete WebLLM model artifacts");
