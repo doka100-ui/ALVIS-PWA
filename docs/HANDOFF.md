@@ -1,0 +1,2480 @@
+## Latest update — v321 Qwen起動時のキャッシュ/GPU診断記録
+- Safariでのモデル再取得疑いを安全に切り分けるため、Qwen起動時の段階、WebLLM進捗コールバック文、モデル重みキャッシュの起動前/初期化後判定、永続化要求の結果、失敗内容を最大32件だけメモリ内に記録し、端末診断へ表示する。
+- 記録はこのページのJavaScriptメモリ内だけに保持し、localStorage、IndexedDB、Cache Storage、クラウド同期へ保存しない。ログアウト/ページ再読み込みで消える。記憶、会話履歴、暗号化、同期、バックアップ、既存モデルキャッシュには触れない。
+- 診断に選択モデル、context window、WebLLM v0.2.87公式定義の必要VRAM目安を追加。これは端末の実空きGPUメモリを示す値ではない。
+- iPad Safari実機での再起動・通信量・GPU OOM再現はユーザー端末での確認が必要。診断ログから「キャッシュ確認後に重み取得進捗が再度進む」「GPU初期化中にdevice lost」などを区別する。Service Worker cache alvis-cache-v321-integrated、更新ページ refresh-v321.html。
+
+## Latest update — v311 追加質問から承認済み記憶・学びを検索
+- v310で短い追加質問が保存済み会話を参照できるようになったため、次にその直前のユーザー発言を使って関連する承認済み記憶・学びも検索するよう改善。
+- 「妻は？」のような短い追加質問では、直前のユーザー発言を検索対象として補助し、関連する記憶・学びを候補へ含める。通常質問では従来どおり現在の質問を優先し、文脈は直近のユーザー発言1件だけを使用。
+- 学びはstatus:"approved"のみを検索対象とし、承認待ち候補は引き続き回答に使わない。履歴、記憶、暗号化、承認フロー、モデル設定・キャッシュ、同期・バックアップ、Avatarモード、ALVIS完成形v308の表示は変更しない。
+- 回帰テストに短い追加質問での記憶・承認済み学びの検索、および未承認学びを除外する確認を追加。Service Worker cache alvis-cache-v311-integrated、更新ページ refresh-v311.html。
+
+- プレビューの更新フロー検証もrefresh-v310.html／refresh=310／alvis-cache-v310-integratedへ同期し、実際のWorker有効化と遷移先を確認する。
+## Latest update — v310 短い追加質問と保存済み会話文脈の接続
+- 会話履歴はassistant発言をrole:"alvis"として保存するが、短い名詞句の追加質問判定はrole:"assistant"だけを見ていたため、実際の保存履歴では文脈検索が働かない経路があった。
+- 追加質問判定でrole:"alvis"もassistant相当として認識し、buildContextualQueryが「妻は？」「料金は？」などの短い追加質問でも直前の保存済み会話を参照するよう修正。これにより承認済み記憶・学びの関連検索も同じ文脈を利用できる。
+- 完全な独立質問は従来どおり無関係な履歴を引き継がない。会話履歴そのもの、暗号化、保存形式、承認フロー、モデル設定、モデルキャッシュ、同期・バックアップ、Avatarモード、ALVIS完成形v308の表示は変更しない。
+- 実際の保存ロールrole:"alvis"を使う回帰テストを追加。Service Worker cache alvis-cache-v310-integrated、更新ページ refresh-v310.html。
+
+## Latest update — v309 WebGPUモデル初期化失敗時の部分GPU確保を解放
+- WebLLMのCreateMLCEngineがGPUDeviceを確保した後、エンジンを返す前に失敗する場合、従来はGPUDeviceの参照を保持・解放できない経路があった。
+- モデル初期化中にALVISが監視下で捕捉したGPUDeviceだけを一時追跡し、初期化失敗時にdestroy()を呼び出して部分確保を解放する。正常にエンジンが返った場合は参照を直ちに破棄し、通常のエンジン所有権・unload処理を維持。
+- 自動で別モデルを重ねて起動する処理は追加しない。初期化失敗時に古いGPU確保が残ったまま軽量モデルを起動すると、二重確保でOOMを悪化させる可能性があるため。モデルID/量子化/context window、保存済みモデルキャッシュ、記憶/履歴/暗号化/同期/バックアップ、Avatarモード、ALVIS完成形v308の表示は変更しない。キャッシュ削除・モデル再取得強制なし。
+- 回帰テストで失敗時のGPUDevice解放経路を検査。Service Worker cache alvis-cache-v309-integrated、更新ページ refresh-v309.html。
+## Latest update — v302 align the outer gear to the actual globe center
+- v301 positioned ring C at the center of the full `.hud-center` container. Inspection of the effective live CSS showed the globe core itself is intentionally positioned at `left:50% / top:42%`, so centering the ring at the container's 50%/50% left it visibly below the globe center.
+- v302 changes only ring C's anchor to `left:50% / top:42%` and centers the ring's own bounds with `translate:-50% -50%`. Its circular 1:1 shape, diameter rules, gear teeth, border/glow, and independent 42-second rotation remain unchanged.
+- Avatar mode, globe/core, inner rings, projector/platform, chat, AI/model loading, encrypted memories, history, sync, backup, WebLLM/Kokoro caches are not changed. No caches or user data are cleared.
+- Refresh bridge: `refresh-v302.html`; Service Worker shell cache: `alvis-cache-v302-integrated`. Browser smoke now measures ring C against the globe core's actual center (50%/42%) in Chromium/WebKit/iPhone-width WebKit.
+
+## Latest update — v301 true auto-margin centering for outer ALVIS gear
+- User confirmed v300 ring was still visually off-center after top:50%.
+- Root issue: percentage top + individual translate is not robust enough across responsive stage sizing. v301 anchors the square ring to all four edges of its actual .hud-center containing block (inset:0) and uses auto margins to center it; percentage translate is removed. Since .hud-core is grid-centered in the same .hud-center, this aligns the gear's geometric center directly with the globe core.
+- Preserve 1:1 geometry, visible 48-tooth rim, and independent 42-second rotate animation. Only ALVIS mode outer ring C changes.
+- Avatar mode, globe artwork, inner rings, projector/platform, chat, memory/history/encryption/sync/backup, WebLLM/Kokoro model storage untouched. No user data/cache clearing.
+- Refresh bridge: refresh-v301.html; Service Worker shell cache: alvis-cache-v301-integrated. Browser smoke test checks inset 0, auto margins, circular geometry, and measured ring/core center offsets. Await CI/deployment and user confirmation.
+
+## Latest update — v300 outer ALVIS gear centered and made more visible
+- User confirmed v299 finally rendered a true circle, but reported that it was off-center and the fine gear teeth were hard to distinguish.
+- v300 moves only the ALVIS-mode outer ring C from top:48% to top:50%, aligning its center with the globe core. The 1:1 circular geometry and independent 42-second rotation remain.
+- The gear rim now uses 48 more visible radial teeth (7.5-degree pitch), a thicker radial band (85–100%), brighter cyan/white contrast and stronger restrained glow.
+- Avatar mode, globe artwork, inner rings, projector/platform, chat, memory/history/encryption/sync/backup, WebLLM/Kokoro models and caches are untouched. No user data or model caches are cleared.
+- Safe update page: refresh-v300.html; Service Worker app shell cache: alvis-cache-v300-integrated. Browser smoke tests now verify top:50%, circular geometry, shared globe/ring centers and the clearer tooth spacing. Wait for CI/deployment and user visual confirmation before treating as complete.
+
+## Latest update — v299 ALVIS outer ring corrected to a true circle
+- User reported v298 looked unchanged and the ring was not round. Root cause: ring C remained a flattened 125% x 31% ellipse; v298 only added teeth around that ellipse.
+- v299 replaces ring C geometry in ALVIS mode only with a square aspect-ratio 1:1 box (max 280px), preserving left/top centering and 42-second independent rotation; fine radial gear teeth are masked to a circular rim.
+- Avatar mode, globe, inner rings, memory/history/encryption/sync/backup, model caches and voice are untouched. Safe refresh page refresh-v299.html; app shell cache alvis-cache-v299-integrated. Wait for CI and user visual confirmation before treating as final.
+
+
+## Latest update — v298 ALVIS outer ring gear rim
+- v297 rotation and centered placement were confirmed by the user. v298 adds 64 evenly spaced fine radial teeth to the existing outer ring using a masked conic-gradient pseudo-element; the ellipse geometry, center, tilt, 42-second rotation and existing marker remain unchanged.
+- Change is scoped to ALVIS/Jarvis mode. Avatar mode, globe, inner rings, memory/history/encryption/sync/backup, model caches and voice are untouched. New safe refresh page: refresh-v298.html; app-shell cache: alvis-cache-v298-integrated.
+- Browser smoke tests also correct the stale refresh-v296 path/cache expectations and check the pseudo-element gear rim in Chromium/WebKit. Wait for CI and user visual confirmation before treating the shape as final.
+## Latest update — v297 outer ALVIS ring
+- v296 disabled the outer ring animation; v297 animates only its independent `rotate` component, preserving the existing `translate` centering and 48% vertical position.
+- Avatar mode remains untouched. Confirm the deployed preview browser test before asking the user to verify on iPhone/iPad.
+
+## v296 ALVISモード外側リングCの位置・回転修正（2026-11-20）
+- v295のCSS transformアニメーションは、v267の高詳細度!important transformに負けて動作しなかった。v294のtop:42%も中心位置をずらしていた。
+- v296はtop:48%へ戻し、ring Cのtransformをnone!importantにして二重translateを除去。既存のtranslate:-50% -50%で中央配置を維持し、startAlvisHudMotion()から独立rotateをWAAPIで42秒周期（9deg→369deg）に回す。
+- tests/dashboard-preview-smoke.mjs は実アニメーションのkeyframes/duration、top、translate、transformをChromium/WebKitで検証する。
+- Service Worker cache alvis-cache-v296-integrated。更新ページ refresh-v296.html。実機での位置・回転確認待ち。Avatarモードと個人データ領域は変更しない。
+
+## v295 ALVISモードの外側リングC回転を復旧（2026-11-20）
+- v294の中心位置修正時に、外側リングCの回転アニメーション指定が欠落していた問題を修正。
+- `.hud-orbit-c` にALVISモード限定の42秒周期CSSアニメーションを追加。transformは9度から369度へ回転し、既存の個別translateによる中心位置合わせを維持。
+- 内側リングA/B、球体、Avatarモード、会話/記憶/履歴/暗号化/同期/バックアップ、WebLLM/Kokoroモデル・キャッシュは変更なし。
+- Service Worker cache `alvis-cache-v295-integrated`。PlaywrightとCloudflare Pages配信、Safari実機確認待ち。
+
+## v294 ALVISホログラム3リングの中心位置を修正（2026-11-20）
+- ユーザー実機でリングが中心からずれていることを確認。原因：球体コアはdisplay stageのtop:42%、リング群はv153でtop:48%。外側ring Cはv262のtransform:translate(...) rotate(...)がv153の個別translate:-50% -50%と重なり、二重移動になる。
+- v294でALVISモードに限定して全リングのtopを42%へ揃え、ring Cのtransformをrotate(9deg)だけにする。サイズ・角度・色・速度は維持。
+- Playwrightで3リングのgetBoundingClientRect中心と球体コア中心の差が各軸3px未満であることを追加検査。
+- Service Worker cache alvis-cache-v294-integrated。記憶/履歴/暗号化/同期/バックアップ、Qwen/Kokoroモデル・キャッシュ、Avatarモードには変更なし。CIとiPhone実機確認待ち。
+
+## v293 ALVISモードの遅延CSS読込とHUD起動競合を修正（2026-11-20）
+- 原因候補を特定：ログイン画面を速く表示するため assets/alvis-app.css を遅延読込している。ログイン完了後の startAlvisHudMotion() がCSS適用前に呼ばれると、参照画像がまだ表示中と判定され、リング起動を中止する。その後CSSが適用されても自動再試行がなく、ライブHUDの動きが始まらない。
+- v293ではスタイルシートのloadを監視し、ALVISモードかつアプリ表示中の場合だけ、CSS適用後にリング起動を再試行する。Avatarモードには触れない。
+- PlaywrightテストにCSS読込を意図的に遅らせた状態での起動テストを追加。テスト結果はGitHub Actionsで確認する。
+- 変更対象：index-integrated.html、service-worker.js、refresh-v293.html、tests/dashboard-preview-smoke.mjs。Service Worker cache alvis-cache-v293-integrated。
+- 既存の記憶・履歴・候補、AES-GCM暗号化、同期/バックアップ、WebLLM/Kokoroモデル・キャッシュ、Avatar表示/音声は変更・削除しない。実機iPhoneでの表示確認はユーザー確認待ち。
+
+## v291 更新ページを旧Service Workerのキャッシュから分離（2026-11-18）
+- 旧Workerが更新ページ自身の旧版をキャッシュから返す可能性へ対応。旧キャッシュに存在しない固有URL `refresh-v291.html` を追加し、最新の更新中継ページをネットワークから取得できるようにする。
+- 新ページは登録済みWorkerへ更新確認を行い、実際のWorker応答が `alvis-cache-v291-integrated` と一致した場合だけALVISへ戻す。
+- 診断の画面コード版をv291へ更新。モデル/依存キャッシュ、暗号化記憶、会話履歴、同期/バックアップ、Avatar/ALVISの表示設定は変更しない。既存キャッシュの一括削除・登録解除・モデル再取得は行わない。
+
+- v288更新導線：`refresh.html` はService Workerの更新後、稼働中Workerへ `ALVIS_GET_BUILD_INFO` を送り、`alvis-cache-v288-integrated` の応答を確認してから `index-integrated.html?refresh=288` へ移動する。旧Worker/更新失敗時は誤って最新版と表示せず、エラーを画面に残す。
+## v288 画面コードと制御中Service Workerの実バージョン表示（2026-11-18）
+- 端末診断へHTML画面自身のコード版を追加し、Service WorkerへMessageChannelで問い合わせて、実際にページを制御しているWorkerのキャッシュ版を取得する。古い画面HTMLと古いWorkerキャッシュを区別して表示できる。
+- Service Worker app shell cache v288。バージョン文字列だけを表示するのではなく、稼働中Workerから応答を取得する。応答がない場合はその旨を表示し、古いWorkerまたは未制御の可能性を示す。
+- 記憶/履歴/暗号化/同期/バックアップ、WebLLM/Kokoroモデルキャッシュ、Avatar/ALVIS表示やAI設定は変更しない。既存データやキャッシュの削除なし。
+
+## v285 iPhone起動時にService Worker更新を先行開始（2026-11-18）
+- 端末診断でiPhoneがv258のALVISアプリキャッシュを使用し続けていた。従来の登録/更新処理は大きなアプリ本体スクリプトの末尾にあり、実行開始が遅れる構造だった。
+- Service Worker登録と明示的な更新確認をHTML headで先行開始し、巨大なアプリスクリプトの解析・実行を待たずに新Workerの取得を始める。更新確認は非同期で、ログイン画面の表示を待たせない。有効化待ちは12秒で打ち切り、通常起動を継続する。
+- 既存Workerを解除せず、Cache Storage/IndexedDB/localStorage、Qwen/Kokoroモデル・依存キャッシュ、暗号化記憶/履歴/同期/バックアップは削除・変更しない。ALVIS/Avatarの表示やAI設定も変更しない。
+- Service Worker app shell cache v285。iPhone実機で旧v258から更新されるか、起動時間が改善するかは未確認。CI後に既存 refresh.html を使って安全に切り替えを確認する。
+
+## v282 Qwen起動の停止段階を可視化（2026-11-18）
+- Qwen起動中にService Worker待機・WebLLM CDN import・モデルキャッシュ確認・WebGPU/モデル初期化の各段階を明示し、5秒ごとに経過秒数を更新する。WebLLMの進捗コールバックも併記する。
+- タイムアウトで初期化を中断しない。エラー時は停止段階と経過時間を表示し、実際に停止したawaitを特定するための診断修正。
+- モデルID/量子化/context window、GPU設定、モデルキャッシュ、記憶/履歴/暗号化/同期/バックアップ、Avatar/音声は変更しない。キャッシュ削除・モデル再取得強制なし。Service Worker app shell cache v282。CIと実機iPhone Safariで確認する。
+
+## v281 iPhone更新ページの待機を有限化（2026-11-18）
+- v280更新中継ページで、Service Worker登録取得・登録・更新確認・新Worker有効化の各待機に上限を設定。更新確認が長引いても画面が無期限に待ち続けず、段階別のエラーと再試行ボタンを表示する。
+- キャッシュ削除、Service Worker登録解除、モデル/依存キャッシュ、記憶・履歴・暗号化・同期・バックアップには触れない。更新処理の成否はiPhone Safari実機で確認する。
+ 
+## v280 iPhone Safariで旧Service Workerを安全に更新する中継ページ（2026-11-18）
+- 端末診断で `alvis-cache-v258-integrated` が残り、開発ブランチのCloudflare Pagesデプロイ成功後も旧Workerが継続していることを確認。
+- 旧アプリシェルのキャッシュに存在しない `refresh.html` を追加。ページ内で既存スコープのService Worker登録を取得し、`registration.update()` を明示実行、新Workerのinstall/activateを待ってから統合画面へ戻す。
+- 既存のWorker登録がない場合のみ同じスコープへ登録する。更新待ちは最大30秒。失敗時は状態と再試行ボタンを表示する。
+- このページはCache Storage、IndexedDB、localStorage、WebLLM/Kokoroキャッシュ、記憶/履歴/暗号化/同期/バックアップを削除しない。既存のALVIS画面、モデル設定、Avatar、音声機能も変更しない。
+- 追加した中継ページのHTTP配信と静的回帰検査をCIで確認する。実機iPhone Safariでv278への切替とQwen起動を確認するまでは完了扱いにしない。
+
+## v278 iOS SafariでService Worker準備待ちがページ全体を止めないよう修正（2026-11-17）
+- Service Worker登録後の更新確認・有効化待機は維持しつつ、無期限に解決しない場合がある `navigator.serviceWorker.ready` の追加待機を削除。12秒の有界な有効化待機後は、Service Workerが未準備でもページ本体の初期化を続行する。
+- Service Workerが利用できる場合のオフライン機能・キャッシュ更新は従来どおり維持。モデルキャッシュ、記憶/履歴、暗号化、同期/バックアップ、Avatar、音声機能は変更しない。既存キャッシュやユーザーデータの削除を要求しない。
+- Service Workerアプリシェルcache v278。CI回帰テストと実配信確認後、iPhone Safari実機で読み込み完了とQwen起動を確認する。
+
+## v276 — iPhone/iPadのパスキーPRFによるFace IDログイン（2026-11-17）
+- 既存のパスワードログインを維持したまま、この端末のWebAuthn platform passkeyとPRF拡張でログイン補助を追加。iOS/iPadOSのFace ID/Touch IDによるユーザー確認後、PRF出力をHKDF-SHA256で用途分離したAES-GCM鍵へ導出し、既存ALVISパスワードを端末内で暗号化保管する。
+- ログイン時はパスキー認証で暗号化パスワードを復号し、既存のunlock()/PBKDF2-SHA256/AES-GCM保管庫解除処理へ渡す。既存DB_KEYの保存形式、暗号化記憶/履歴/候補/バックアップ/同期形式は変更しない。Face ID未設定・非対応・キャンセル時は従来パスワードへフォールバック。
+- 登録は通常ログイン後、現在のパスワード検証→platform passkey登録（PRF有効化）→PRF取得/暗号化保存の段階式。未完了登録のパスワードはメモリ内だけで保持し、3分で破棄。ロック時にも破棄する。
+- 設定は端末ごとのlocalStorageに保存。iCloud Keychainのパスキーが同期されても、暗号化パスワード包みは各端末で個別に登録する。設定解除はALVIS側の包みを削除するが、OSのパスキー自体はiCloud Keychainに残る場合がある。
+- WebAuthn PRFが利用できるHTTPSのSafari/Apple platform authenticatorが必要。iOS/iPadOS実機でのFace ID表示・PRF出力・再ログインは未確認。CI/Cloudflare Pages配信も別途確認する。Service Worker app shell cache v276。
+
+## v275 — 完成見本を覆う旧サイド装飾の除去とプレビュー検査修正（2026-11-17）
+- 完成見本の左右透明操作レイヤーに残っていた旧 `::before` ガラス背景と `::after` チャート棒を、ALVIS静止画モード時だけ無効化。画像内の球体・リング・投影装置・台座・左右パネルはそのまま表示し、透明な操作領域は維持する。
+- Playwright Chromium/WebKitの実配信検査に、画像の全不透明度と左右4つの疑似要素が非表示であることの確認を追加。
+- Chromiumのオフライン検査は `navigator.onLine` に依存せず、キャッシュ済み画像のService Worker応答と未キャッシュURLへの503オフラインフォールバックで判定する。
+- Service Worker app shell cache v275。モデル重み/依存キャッシュ、暗号化記憶、履歴、同期/バックアップ、音声データは削除しない。iPad/iPhone実機Safariは別途確認する。
+
+## v274 — 開発版プレビューのブラウザ検証（2026-11-17）
+- Cloudflare Pagesの当該コミット用チェックが成功するまで待ち、チェックURLから一意のPreview URLを解決するGitHub Actions workflow `.github/workflows/dashboard-preview-smoke.yml` を追加。
+- Playwright Chromium/WebKitで実配信ページと `assets/alvis-dashboard-reference.avif` のHTTP応答・700×564実寸・非トリミング表示・5メニュー・右側の記憶/成長操作・AI起動タップ領域・チャット入力を確認する。
+- テスト用の使い捨てブラウザー内だけでロック画面/appPanelの表示クラスを切り替え、実パスワード入力、暗号化データの読出し/復号、ユーザーデータ変更は行わない。ローカルAIの起動や送信も実行しない。
+- ChromiumではService Workerの画像プリキャッシュと、HTTPキャッシュを無効化した状態でのオフライン再読込も検証し、画面キャプチャをActions artifactへ保存する。WebKitは表示・操作確認を行う。
+- アプリ本体、Service Worker、画像バイナリ、保存形式は変更しない。Playwright WebKitは実機iPad Safariそのものではないため、iPad/iPhone実機確認は別途扱う。
+
+## v272 Qwenモデル読み込み段階をHUDへ表示（2026-11-15）
+- これまでHUDはaiLoading中に常に「Qwen3-1.7B 準備中」と表示し、WebLLMのinitProgressCallbackが返す進捗率や段階説明を隠していた。
+- HUDの詳細欄へ読み込み率と段階説明を表示し、準備待ち・キャッシュ確認・モデル取得などを区別しやすくする。WebLLMの進捗コールバックが発火しない場合は準備中表示のままになるため、次の診断材料として扱う。
+- 推論処理、モデルID/量子化、モデルキャッシュ、GPU管理、Service Worker待機フォールバック、Avatar、ALVIS HUDの構造、記憶/履歴/暗号化/同期/バックアップは変更しない。アプリシェルcache v272。
+- GitHub Actions回帰テストで表示ロジックを確認後、iPhone Safari実機で進捗表示とダウンロード完了を確認する。
+
+## v271 Qwenモデル起動をService Worker待ちで停止させない（2026-11-15）
+- Service Workerのinstall/cache.addAllが失敗・長時間pendingになるとnavigator.serviceWorker.readyも解決せず、Qwenモデル取得開始前に「準備中」で止まる可能性へ対応。
+- 起動時のService Worker待機を最大3.5秒に制限し、タイムアウト/利用不可でもWebLLMのimportとモデル起動を続行する。Service Workerの準備完了時は従来どおり依存コードのキャッシュを利用。
+- 既存のWebLLMモデルキャッシュ、音声モデル、GPU制御、Avatar、ALVIS HUD、記憶/履歴/暗号化/同期/バックアップは変更しない。キャッシュ削除やモデル再ダウンロードを強制しない。
+- Service Workerアプリシェルcache v271。CIと実機でのダウンロード再開/完了は別途確認が必要。
+
+## v270 Avatarモード: Kokoro口パクの音量包絡を滑らかに調整（2026-11-15）
+- Kokoro音声のAudioBuffer/HTMLAudioElement両再生経路で共有する波形解析に、環境ノイズ床の緩やかな追従、ノイズゲート、速いアタック/遅いリリースの包絡平滑化を追加。小さな無音ノイズで口が震えるのを抑え、発話開始への反応と口の閉じ方を改善する。
+- 変更はAvatar専用のKokoro口開閉ブリッジのみ。音声モデル/音声キャッシュ/再生速度/標準音声5母音同期/VRM表情・視線・まばたき・頭部動作/ALVIS HUD/Qwen/記憶/履歴/暗号化/同期/バックアップは変更しない。
+- Service Workerアプリシェルcache v270。回帰テストで新しい包絡処理を検査する。iOS Safari実機と利用中VRMモデルでの口パク改善効果は未確認。音量ベースであり音素単位の完全なリップシンクではない。
+
+## v269 Avatarモード: 日本語5母音の口形切り替え（2026-11-15）
+- VRM標準の口形 aa/ih/ou/ee/oh を独立して滑らかに制御し、モデル側で未対応の口形は既存の口開閉へフォールバックする。診断表示に各口形の対応状況を追加。
+- 端末標準 speechSynthesis の onboundary/charIndex から読み上げ中のかなを取得し、対応する母音口形へ切り替える。ひらがな/カタカナ、拗音、濁音、半濁音、小書き母音を扱う。撥音「ん」と促音「っ」は口を閉じ、長音「ー」は直前の口形を保持する。
+- 漢字の読みを推測しない。speechSynthesis の boundary イベントが iOS Safari で発火しない場合、またはVRMに5口形のBlendShapeがない場合は精度が落ち、従来の口開閉へフォールバックする。pause時は閉口、resume時は小さく再開し、不正なcharIndexは無視する。これは音素強制アラインメントではなく、読み上げイベントに基づく近似。
+- Kokoro生成音声の再生経路はv268の音量ベース同期を維持し、今回の5母音タイミング連携対象外。ALVIS HUD、Avatarモデル保存/3D描画、Qwen、音声モデル、記憶/履歴/暗号化/同期/バックアップは変更しない。
+- Service Workerアプリシェルcache v269。回帰テストCIは成功を確認済み。Safari実機と利用中のVRMモデルでの口形対応は未確認。
+
+## v269 Avatarモード: 日本語5母音の口形制御（2026-11-15）
+- VRM標準expressionのaa/ih/ou/ee/ohを個別に滑らかに制御するsetMouthVisemeを追加。モデルに対象expressionがない場合は既存の汎用口開閉へフォールバック。診断に5母音の対応状況を追加。
+- 端末標準speechSynthesisのonboundary/charIndexから、ひらがな/カタカナの母音行を判定して対応する口形へ切り替える。漢字の読みは推測しないため、境界イベントが漢字・未知文字の場合は控えめなaaへフォールバック。発音境界イベントはOS/ブラウザの音声実装に依存し、実際の音素時刻と完全一致するものではない。
+- 読み上げ終了/エラー/停止/Avatar終了時に口を閉じる。セッション世代チェックを維持。
+- Kokoroは現行の音量ベース口パクを維持し、今回の文字境界マッピングは端末標準音声経路のみ。Kokoroの音素/viseme同期は次段階。ALVIS HUD、Avatarモデル保存、Qwen、音声生成、記憶/履歴/暗号化/同期/バックアップは変更しない。
+- Service Workerアプリシェルcache v269。GitHub Actions回帰テスト実行後に実機確認する。VRMモデルがaa/ih/ou/ee/ohを備えているかは診断画面で確認が必要。
+
+## v268 Avatarモード: Kokoro音声プレーヤー経由の口パク同期（2026-11-15）
+- 既存のAudioContext/AudioBuffer経路に加え、KokoroのHTMLAudioElementフォールバックでも音声波形をAnalyserNodeへ接続し、VRMの口開閉へ反映する。Safari等で自動再生できず、画面上の音声プレーヤーを手動再生した場合もplayイベントから同期を開始する。
+- MediaElementAudioSourceNodeは同じ音声要素に一度しか作れないため、WeakMapで要素ごとに再利用する。音声終了/エラー/ログアウト時は口パクを停止し、セッションガードを維持。
+- 変更対象は共有Kokoro音声の再生経路とAvatar専用の口パクブリッジのみ。ALVIS HUD、Avatarの3D描画/モデル保存、Qwen推論、音声モデル、記憶/履歴/暗号化/同期/バックアップは変更しない。
+- これは音量包絡ベースの口開閉であり、日本語の音素/visemeを認識する高精度な発音同期ではない。端末標準speechSynthesis経路はWeb Audioへ直接接続できないため今回の対象外。Safari実機での再生/同期は未確認。
+- Service Workerアプリシェルcache v268。CIで回帰テストを実行してから実機確認する。
+
+## v267 回転している内側2本の楕円軌道を実際に縮小（2026-11-15）
+- ユーザーが指定した「回っている2本」をA/Bとして再確認。v266で誤って拡大していた寸法を修正し、Aを60.75%×22.5%、Bを56.25%×30.375%へ変更。A/BのWAAPI回転（27.5秒/38.75秒）と中央位置合わせは維持する。
+- 外側リングC（125%×31%）は変更しない。中央球体、背景、左右HUD、投影装置、台座、Avatarモード、ズーム負荷対策、共有AI/音声、記憶/履歴/暗号化/同期/バックアップ、モデル/依存キャッシュは維持。
+- Service Workerアプリシェルをv267へ更新。Cloudflare Pages配信とSafari実機の表示確認は未確認。回転する2本が実際に小さく表示されることを実機で確認するまで完了扱いにしない。
+
+## v266 ALVISモードの内側2本の楕円軌道を直接寸法指定（2026-11-15）
+- v265の個別CSS scale指定を撤去し、中央球体周囲の内側リングA/Bへ幅・高さを直接指定。A:86%×32%、B:80%×44%。既存の中央位置合わせとWAAPI回転を維持する。
+- A/Bの発光色・軌道上の小さな光点を控えめに差別化し、ホログラムらしい立体感を強調。外側リングCの寸法125%×31%・角度・表示は変更しない。
+- 球体/SVG地図/背景/左右HUD/投影装置/台座/ズーム負荷対策/Avatarモード/共有チャット・AI・音声/記憶/履歴/暗号化/同期/バックアップは変更しない。
+- Service Workerアプリシェルをv266へ更新。WebLLM/Kokoroモデルキャッシュと依存キャッシュは保持。
+- developmentのコード変更commit: `b5b95bd493d8bce19bcc4c3aab3e8f36105702f1`。回帰テストの更新commit: dashboard `8a843a292f7ba2b44a3857552b201702cd7490ab`、offline-first `d2f71b1939495b8d059c622b1f364a05769500d0`。GitHub Actions run `43691111119` はdashboard-image/offline-first両job成功。Cloudflare Pages配信とSafari実機での見た目/回転/ズームは未確認。実機確認前に完了扱いにしない。
+
+## v265 球体を囲む内側2本の楕円軌道を明示的に縮小（2026-11-15）
+- ユーザーが指定した対象を、中央球体の周囲にある .hud-orbit-a と .hud-orbit-b の2つの楕円軌道として再確認。
+- 以前の幅/高さ指定だけでは実機表示に変化が確認できなかったため、ALVISモードの .hud-center 直下にあるA/Bへ個別CSS scale:.65 を適用。既存の位置合わせとWAAPIのrotateアニメーションを維持する。
+- 外側リングCはCSS/寸法/角度を変更しない。球体、地図、背景、左右HUD、投影装置、台座、Avatarモードは変更しない。
+- Service Workerアプリシェルをv265へ更新。v264のオンラインnetwork-first/オフラインfallbackを維持。WebLLM/Kokoroモデルキャッシュ、依存キャッシュ、記憶/履歴/暗号化/同期/バックアップには触れない。
+- GitHub Actions/Cloudflare Pages/Safari実機での反映確認はこれから。実機での視覚確認前に完了扱いにしない。
+
+## v264 開発版の古い画面キャッシュを避ける（2026-11-15）
+- iOS Safari/PWAのService Workerが、更新後も古い `index-integrated.html` をcache-firstで返して表示変更が反映されない可能性に対応。
+- `index-integrated.html` へのオンラインの画面遷移だけnetwork-firstへ変更し、成功した最新HTMLをALVISアプリシェルキャッシュへ保存。通信失敗/オフライン時は既存キャッシュへフォールバックする。
+- クエリ文字列付きURLでも同じ画面を更新できる。通常の静的資産/CDN依存キャッシュ、WebLLM/Kokoroモデルキャッシュ、記憶/履歴/暗号化/同期/バックアップは変更・削除しない。
+- Service Workerアプリシェルをv264へ更新。内側リングA/Bの寸法と外側Cの寸法はv263のまま維持。Avatarモード、共有AI/音声機能は変更しない。
+- GitHub Actions/Cloudflare Pages/Safari実機の反映確認はこれから。旧Service Workerから新Service Workerへの更新には、ブラウザ側の更新サイクルが必要な場合がある。
+
+## v263 内側2本のリングを縮小し、外側リングを維持（2026-11-15）
+- ユーザー指定に合わせ、ALVISモードをv188系ライブHUDの3本リング構成へ修正。外側リングCは元の寸法（125%×31%）・角度を維持して表示する。
+- 内側リングA/Bだけをv262寸法からさらに25%縮小（A:60.75%×22.5%、B:56.25%×30.375%）。球体、背景、左右HUD、投影装置、台座、配色、Avatarモードは変更しない。
+- A/Bの回転アニメーション、ズーム時描画軽減、非表示時pause/resumeを維持。共有AI/音声/記憶/履歴/暗号化/同期/バックアップ、WebLLM/Kokoroモデルキャッシュは変更しない。
+- Service Workerアプリシェルをv263へ更新。GitHub Actions/Cloudflare Pages/Safari実機での表示・回転・ズーム確認は別途必要。
+
+## v262 v188系ライブHUDを復元し、リングを2本に縮小（2026-11-15）
+- ALVISモードをv188系ライブHUDへ復元。v261の静止画表示CSSと画像要素を外し、既存SVG球体/左右HUD/投影装置/台座を再表示。元の描画要素を再作成・描き直ししない。
+- 軌道リングはA/Bの2本だけを表示し、従来寸法から幅/高さを各25%縮小（A:81%×30%、B:75%×40.5%）。CリングはDOMから外し、A/BのみWAAPIで回転（27.5秒/38.75秒）。
+- ズーム時の描画軽減、非表示時pause/resume、Avatarモード分離、共有AI/音声/記憶/履歴/暗号化/同期/バックアップは維持。モデル/依存キャッシュは削除しない。
+- Service Workerアプリシェルをv262へ更新し、静止画AVIFのプリキャッシュを解除。開発版配信とSafari実機での見た目/操作/ズーム/オフライン動作は未確認。
+## v261 指定完成見本をALVISモードへ復帰（2026-11-15）
+- 現行タスクで指定された「未来都市のホログラム地球ダッシュボード.png」をALVISモードの表示基準にする。既存バイナリ `assets/alvis-dashboard-reference.avif`（700×564、Git blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8`）を再利用し、画像を新たに描き直さない。
+- 元PNGの1397:1126構図を保ち、画像全体を `object-fit:fill` で表示。球体・軌道リング・上部投影装置・下部台座・左右パネル・色・文字に装飾や動的表示を重ねない。
+- 左5メニュー、AI起動、右側の端末診断/記憶/成長は透明な操作領域で既存ページ/処理へ接続。旧ライブHUD DOMは状態更新互換のため残すが非表示にし、静止画表示中は旧リングのWAAPIアニメーションを開始しない。
+- Service Workerをv261へ更新し、完成見本AVIFをアプリシェルへプリキャッシュ。WebLLM/Kokoroモデル・依存キャッシュ、記憶、履歴、暗号化、同期、バックアップ、音声処理は変更しない。
+- GitHub Actions run `43671639796`（コード/テストcommit `959eb974`）で `dashboard-image` と `offline-first` の両jobが成功。開発版 `development.alvis-pwa.pages.dev` はこの実行環境からDNS解決できず、Cloudflare Pagesの実配信/画像読み込み、Safari実機の操作・オフライン再読込は未確認。完了扱いにはしない。
+
+## v260 v188系ライブHUDへ復帰し、軌道リングを軽量化（2026-11-15）
+- ユーザー指定の基準デザインをv188と再確認。v259で追加された静止画ダッシュボード表示CSSと画像上の透明ホットスポットを撤去し、v248で復元済みのv188系ライブHUD（中央SVGホログラム球体、左右HUD、投影光/台座、3本の独立回転リング）を再表示する。
+- 元の球体・地図・左右パネル・投影装置・台座・配色・配置は描き直さず、既存DOM/CSSを再利用。リング3本だけCSS scale 0.75（約25%縮小）を適用し、WAAPI回転周期を22/31/42秒から27.5/38.75/52.5秒へ延長（約25%低速化）。
+- ALVISモードのズーム中アニメーション停止/低負荷表示、ページ非表示中のpause/resumeは維持。AvatarモードのDOM/CSS/runtime、AIモデル/キャッシュ、音声、記憶、履歴、暗号化、同期、バックアップは変更しない。
+- 静止画AVIFはリポジトリから削除せず、ALVIS画面DOMとService Workerのアプリシェルプリキャッシュからのみ外す。Service Workerアプリシェルキャッシュをv260へ更新。モデル/依存キャッシュは保持。
+- ライブHUD回帰テストとoffline-firstテストをv260仕様へ更新。CI、Cloudflare Pages配信、Safari実機でのデザイン/リング負荷/ズーム/タップ確認は未実施。
+
+## v259 指定完成見本をALVISモードへ再適用（2026-11-12）
+- ユーザー指定の完成見本を元にした既存バイナリ `assets/alvis-dashboard-reference.avif`（700×564、Git blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8`）を再利用。画像バイナリ自体は変更しない。
+- ALVISモードのステージへ画像全体を1397:1126比率で表示。球体・リング・投影装置・台座・左右パネル・色・文字を画像そのまま使用し、追加の装飾や動的文字を重ねない。
+- 既存の左5メニューとAI起動ボタン、右側の端末診断/記憶/成長は透明なタップ領域で既存ページへ接続。旧ライブHUDのDOMは状態連携互換のため残し、画面上は非表示。
+- Service Workerをv259へ更新し、完成見本AVIFをアプリシェルへプリキャッシュ。WebLLM/Kokoroモデル、依存キャッシュ、暗号化記憶、履歴、同期、バックアップは削除・変更しない。
+- 画像専用テストとoffline-first回帰テストを、静止画ダッシュボードの表示仕様へ更新。Cloudflare Pages配信、Safari実機の画像読み込み/タップ/オフライン再読込は別途確認が必要。
+
+## v258 非表示中の描画ループを停止（2026-11-12）
+- iOS Safari/ホーム画面アプリで画面が非表示になった間、VRM AvatarのrequestAnimationFrame描画を停止し、visible復帰時に再開する。非表示時間はアニメーション時計へ加算せず、復帰時の大きな時間ジャンプを防ぐ。
+- ALVIS HUDの3本のリングアニメーションは非表示中pauseし、復帰時にplayする。Avatar runtimeの終了時にvisibility/page lifecycle listenerを解除する。
+- AI推論、モデルキャッシュ、音声、記憶/履歴、暗号化、同期、バックアップ、通常表示デザインは変更しない。実機での消費電力/GPU負荷差は未測定。
+
+## v257 Safari最大ズーム時のALVIS HUD描画負荷を軽減（2026-11-12）
+- Safariでも最大ズーム時にALVISモードだけクラッシュする報告を受け、v256のアニメーション停止だけでは不足と判断。
+- ズーム中に限りALVISモードの装飾的な多重発光、影、走査線、ビーム、グローブのシマーを簡略化/非表示にする。球体・地図・HUD配置・軌道の形状は維持し、通常倍率に戻ると元のCSS表示へ戻る。
+- Avatarモードは対象外。ズーム自体は無効化しない。WebGPUモデル、モデルキャッシュ、音声、記憶/履歴、暗号化、同期、バックアップは変更しない。Service Workerアプリシェルキャッシュv257。iPhone実機のクラッシュ解消は未確認。
+
+## v256 ALVISモードのズーム中はHUD内すべてのアニメーションを停止（2026-11-12）
+- v255では3本の軌道リングだけを停止していたが、球体内部のCSS疑似要素アニメーションや状態表示など、HUD内の別アニメーションは動作し続けていた。
+- v256ではALVISモードのHUDステージ内にある全要素のAnimationを列挙し、ピンチズーム中に一時停止、通常倍率へ戻ると再開する。iOS Safariのgesturestart/change/endも監視し、visualViewportの更新前から停止を開始する。
+- Avatarモードは対象外。ズーム操作自体は無効化しない。WebGPUモデル、モデルキャッシュ、音声、記憶/履歴、暗号化、同期、バックアップは変更しない。アプリシェルキャッシュv256。iPhone実機でのクラッシュ解消は未確認。
+
+## v255 実際のHUDリングアニメーションをズーム中に停止（2026-11-11）
+- v254ではCSS animation-play-stateを変更していたが、実際のリング回転はWeb Animations API（Element.animate）で作られていたため停止対象外だった。
+- v255ではvisualViewportのscale監視に連動し、`alvisHudMotionAnimations`のAnimationオブジェクトを拡大中pause、通常倍率でplayする。pageshow/visibility復帰後に再生成されたリングも拡大中ならpauseする。
+- これによりv254の対策が実際のリング回転に適用される。iPhone実機でのクラッシュ解消は未確認。
+
+## v254 iOSホーム画面アプリのピンチズーム時にHUD描画負荷を抑制（2026-11-11）
+- Qwen3-4B読み込み完了後のピンチズームでSafariホーム画面アプリが再起動する可能性に対し、Visual Viewportのscaleを監視し、拡大中だけALVISモードの軌道リングCSSアニメーションと球体の強い発光影を一時停止/軽減する。
+- ズーム自体は無効化しない。拡大解除時に元の演出へ自動復帰。Avatarモード、ログイン、WebGPUモデル、記憶/履歴/暗号化/同期/バックアップ処理は変更しない。
+- アプリシェルキャッシュv254。既存モデル/依存キャッシュは保持。CIとiPhone実機での再現確認は未実施。
+
+## v253 iOS SafariのService Workerリダイレクト応答を正規化（2026-11-11）
+- iOS Safariで「Response served by service worker has redirections」が発生する可能性に対応するため、Service Workerがキャッシュ応答・ネットワーク応答・オフライン用アプリシェルを返す直前に、redirected応答のリダイレクトメタデータを除去し、最終レスポンスの本文/ステータス/ヘッダーを維持する。
+- アプリシェルキャッシュをv253へ更新。既存のモデルキャッシュ、依存コードキャッシュ、音声、記憶、履歴、暗号化、同期、バックアップは削除・変更しない。
+- 回帰テストを追加。iPhone Safari + 280blocker有効状態での実機起動、およびCloudflare Pages反映は未確認。
+## v252 Avatar用model-viewer依存CDNのオフラインキャッシュ（2026-11-11）
+- Avatarモードが初回ロードする `https://ajax.googleapis.com` のmodel-viewerモジュールも、既存の依存コードキャッシュ `alvis-deps-v2` へ保存する許可オリジンに追加。
+- Service Workerのアプリシェルキャッシュをv252へ更新。v251のPWAメタデータ、クエリ文字列を無視するアプリシェル照合、activate時のclients.claim待機を維持。
+- 既存のesm.run/jsdelivr依存キャッシュ方式、WebLLMモデルキャッシュ、Kokoroモデル/音声キャッシュ、暗号化記憶、履歴、同期、バックアップは削除・変更しない。
+- 回帰テストを追加。Google CDNを含む依存グラフ全体、3Dモデル/テクスチャ、Qwen/Kokoroの全資材がオフラインで利用できるかは実機未確認。
+
+## v251 オフライン起動用PWA設定とService Worker制御の強化（2026-11-11）
+- `index-integrated.html` に `manifest-integrated.json` の参照とiOS/iPadOS向けホーム画面起動メタデータを追加。manifestのstart_urlは統合版 `index-integrated.html`、scopeは既存の `./` を維持。
+- Service Workerのアプリシェルキャッシュ照合を `ignoreSearch:true` にし、`?refresh=...` 等のクエリ付きURLでも保存済み同一パスを再利用できるようにする。activate内で旧ALVISアプリ/依存キャッシュの整理後に `clients.claim()` をawait。
+- 旧ALVISアプリキャッシュだけをv251へ更新。WebLLMモデルキャッシュ、依存キャッシュ名/内容、Kokoro音声キャッシュ、暗号化記憶、会話履歴、同期、バックアップ、AIモデル設定は削除・変更しない。
+- 回帰テストにPWAメタデータ、manifestのstart_url/scope、クエリ付きキャッシュ照合、activate制御を追加。iOSホーム画面追加・完全オフライン再起動・Qwenモデル再ロード・Cloudflare Pages配信は実機未確認。完全オフライン対応完了とは扱わない。
+
+## v250 iPhone縦画面でホログラムを下方向へ拡張（2026-11-11）
+- 600px以下の縦向き画面に限定し、ALVISモードのライブHUDステージをmin-height 450px、中央HUD領域を390pxへ拡張。v249の横幅調整と説明文位置は維持。
+- 球体/リング/左右パネルのデザインやアニメーション自体は変更せず、表示領域を縦方向へ拡大。Avatarモードと共有チャット/AI/音声/記憶/履歴/暗号化/同期/バックアップ、モデル/依存キャッシュは変更しない。Service Worker cache v250。
+- 回帰テストを追加。Safari実機表示とCloudflare Pages配信は未確認。
+
+## v249 iPhone縦画面のALVISモード配置調整（2026-11-11）
+- iPhone相当の幅600px以下・縦向きに限定し、ALVISモードのホログラム枠を左右各6px（合計12px）拡張。既存のライブHUDの縦横比・球体・リング・パネル・タップ領域は変更しない。
+- 「この質問文だけをオンラインAIにも送る」チェック項目と、その下の2つの説明文を、クイック機能ボタン群から24px下げる。
+- CSSはALVISモード限定。アバターモード、共有チャット/AI/音声/記憶/履歴/暗号化/同期/バックアップ、モデルキャッシュは変更しない。Service Worker cache v249。
+- 回帰テストを追加。Safari実機での見た目・タップ動作、Cloudflare Pages配信は未確認。
+
+## v248 ALVISモードをライブHUDへ再復元（2026-11-11）
+- v245で再導入された静止画ダッシュボードの上書きCSS、画像要素、画像位置に依存する透明ホットスポットを撤去。ALVISモードをv235で復元したv188系ライブHUD（SVGホログラム球体、左右HUD、3本の独立回転リング、投影光/台座）へ戻す。
+- 既存の左メニュー、AI起動、右側の記憶/成長操作、端末診断ナビゲーションを維持。画像ファイル自体は削除せず、アプリ画面とService Workerのプリキャッシュからのみ外す。
+- AvatarモードのDOM/CSS/runtime、共有チャット/音声/記憶/履歴/暗号化/同期/バックアップ、AIモデルとモデルキャッシュは変更しない。Service Worker cache v248。
+- ライブHUD専用回帰テストへ更新。GitHub Actions、Cloudflare Pages配信、Safari実機表示/リング回転/タップ動作は未確認。
+
+## v247 アバターモードの首・頭の自然な動き（2026-11-10）
+- VRMの正規化humanoid骨からneck/headを任意取得。対応する骨がある場合だけ、元の姿勢を基準に小さなyaw/pitch/rollを滑らかに重ねる。首と頭へ分散し、対応骨がないモデルでは無効。
+- アイドル中は4〜8秒間隔でごく小さく頭部姿勢を変化。会話応答時は約0.78秒の小さなうなずきを一度行う。振幅を抑え、アニメーションフレームごとに元のQuaternionから適用して累積回転を防ぐ。
+- setHeadGesture("nod")をVRM runtimeから公開し、アバター専用UIブリッジ経由で会話応答に接続。診断にHEAD MOTIONを表示。ブリッジはVRM破棄/静止画復帰時に解除。
+- ALVISモードのHUD/球体/リング/タップ領域、チャット生成、音声/TTS、記憶、履歴、暗号化、同期、バックアップは変更しない。Service Worker cache v247。
+- GitHub ActionsでNode回帰テストを実行予定。実VRM骨格の見た目、Safari実機、Cloudflare配信は未確認。
+
+## v246 アバターモードの会話連動表情（2026-11-10）
+- v244のVRM表情APIを会話応答へ接続。ユーザーの明確な感情表現とALVISの返答内容を控えめなルールで照合し、happy / sad / relaxed / surprised を低めの強度で適用する。怒り表情は自動選択せず、手動API用に残す。通常の事実回答はneutral。
+- 表情は約5.2秒後にneutralへ戻す。新しい返答が来た場合は古い解除タイマーを無効化。アバターモードかつVRM表情ブリッジが利用可能な場合だけ実行し、GLB/静止画では何もしない。
+- ALVISモードへ戻るときは非表示アバターの表情だけneutralへ戻す。ALVIS HUD画像/球体/リング/タップ領域、AI推論、音声/TTS、記憶、履歴、暗号化、同期、バックアップは変更しない。
+- 回帰テストに日本語の感情分類例とアバターモード限定条件を追加。Service Worker cache v246。CI/Cloudflare/Safari実機/実VRMでの表情品質はまだ未確認。
+
+## v245 指定完成見本をALVISモードへ再統合（2026-11-10）
+- 現在のdevelopmentブランチにも残っている `assets/alvis-dashboard-reference.avif` を再利用。v234時点と現在のGit blob SHAが同一（`801f0dba167b770a4f8f3ae2fde871bbba3b6ea8`）であることを確認。ユーザー指定PNG「未来都市のホログラム地球ダッシュボード.png」を元にした700×564 AVIF。
+- ALVISモードのステージへ画像を表示し、1397:1126比率・画像全体・元の色/球体/リング/投影台/左右パネルを保持。CSS/SVGで描き直したり、追加リングや光を重ねたりしない。
+- 左の5メニューとAI起動、右の端末診断/記憶/成長は既存のページ遷移・AI起動ボタンへ接続する透明タップ領域のみ。画像自体の文字/状態は固定表示で、正確な見た目を保つため動的な文字重ねは行わない。
+- Service Worker cache v245へ更新し画像をプリキャッシュ。モデル/依存キャッシュ、暗号化記憶、会話履歴、バックアップ/復元、同期、ローカルAI、音声処理は変更しない。
+- GitHub Actions run `42750214051` は `dashboard-image` 15/15 PASS、`offline-first` PASS。開発版URL `https://development.alvis-pwa.pages.dev/index-integrated.html` はこの実行環境から取得できず、Cloudflare配信/画像の実ロード/タップ/オフライン再読込は未確認。Safari実機も未確認のため、完了扱いにせず保留。
+
+## v244 アバターモードの感情表現制御（2026-11-10）
+- VRM標準表情 happy / angry / sad / relaxed / surprised を許可リスト化し、setEmotion(name, intensity)で切り替える。neutralで中立へ戻す。
+- 表情はフレーム単位で滑らかに補間し、音声口パク（aa/oh）と瞬きの処理を独立して維持する。モデルに存在しない表情は適用せずfalseを返す。
+- アバター診断に対応表情一覧を追加。window.ALVISAvatarSetEmotionはVRMロード時のみ公開し、アバター終了/画像へ戻る際に解除する。
+- 変更対象はassets/alvis-vrm-runtime.js、index-integrated.htmlのアバター専用ブリッジ/診断表示、回帰テスト、Service Worker cache、開発資料。ALVISモードHUD、球体、リング、投影台、チャット/記憶/履歴/暗号化/同期/バックアップ/音声生成は変更しない。
+- GitHub Actionsの `offline-first` と `dashboard-image` はcommit `2a2d9cc2192bd23264195dba8441755fc9c66e1b` で成功。実VRMでの表情表示、iPad Safari負荷、Cloudflare Pages配信は未確認。
+
+## v243 アバターモードの自然な自動視線（2026-11-10）
+- VRM runtime内に、ユーザー正面を基本に数秒ごとに左右/上下へ小さく視線を移し、滑らかに戻す自動視線を追加。VRM lookAt targetが存在するモデルだけで有効。
+- 手動setLookAtを呼ぶと自動視線を停止し、setAutoLookAt(true/false)で再開/停止できる。視線対応のないVRMやGLB/静止画には無理に適用しない。
+- 変更対象はassets/alvis-vrm-runtime.js（アバターモード専用）、回帰テスト、Service Worker cache、開発資料のみ。ALVISモードのHUD、球体、リング、投影台、チャット/記憶/履歴/暗号化/同期/バックアップ/音声処理は変更しない。
+- 実際のVRMモデルでの視線品質、iPad Safariの負荷、実機表示、Nodeテスト/CI/Cloudflare配信は未確認。
+
+## v242 ログアウト後の遅延音声コールバックを隔離（2026-11-10）
+- v241で音声生成・再生開始前のセッション確認を追加した後も、WebAudio/HTMLAudioの再生終了・再生失敗イベントやplay()完了Promiseがログアウト後に遅れて返ると、音声ステータスや歓迎ボタンを更新する可能性があった。
+- 音声再生開始時のセッション世代を、再生終了/失敗イベント、play()完了後、再生エラー処理で確認し、ログアウト済みまたは別セッションならUI更新を行わない。
+- 音声データ、Kokoroモデル、音声キャッシュ、音声設定、記憶庫、会話履歴、AES-GCM、同期、バックアップ、v188ライブHUDは変更しない。音声モデルの解放APIも追加していない。
+- Service Workerのアプリシェルキャッシュをv242へ更新し、静的回帰検査を追加。Nodeテスト実行、GitHub Actions、Cloudflare Pages反映、Safari実機でのログアウト競合は未確認。
+
+
+## v241 ログアウト後の古いチャット・音声処理をセッションから隔離（2026-11-10）
+- チャット推論/オンラインAI照会/保存処理が非同期で進行中にログアウトすると、完了後の古い処理がログアウト後の空データや再ログイン後の別セッションへ回答・記憶候補・状態表示を書き込む可能性があった。
+- セッション世代番号を導入し、送信開始時の世代とログイン状態を検証。各await後、モデル生成後、履歴追加前、保存後に世代が変わっていれば古い処理を終了する。古いリクエストのfinallyが新セッションの送信ロックを解除しない。
+- 暗号化ローカル保存も世代番号・CryptoKey参照・data参照を保存開始時に固定し、暗号化完了時に同一セッションであることを再確認してからlocalStorageへ書き込む。ログアウト後に完了した古い暗号化処理が、新しいログインの保存データを上書きしない。
+- ログアウト時に音声読み上げ/再生とリップシンクを停止。遅延自動読み上げおよび遅れて完了したKokoro準備からの再生も、元のログインセッションが有効な場合だけ許可する。Kokoroモデル自体は安全な解放APIが確認できないためunloadしない。
+- 進行中のWebLLM推論そのものを中断する変更ではない。既存の推論キューによる安全なunload待機を維持し、古い推論結果の反映だけを防ぐ。記憶庫/履歴の保存形式、暗号化、同期、バックアップ、モデルキャッシュ、v188ライブHUDは変更しない。
+- Service Workerのアプリシェルキャッシュをv241へ更新し、回帰テストを追加。Nodeテスト、GitHub Actions、Cloudflare Pages反映、Safari実機でのログアウト競合は未確認。
+
+## v240 ログアウト直後のGPUモデル二重起動を防止（2026-11-10）
+- ログアウト時のモデルunloadは推論キュー完了後に非同期で進むため、直後に再ログインして新モデルを起動すると、旧GPUエンジンの解放前に新エンジンを確保する競合があった。
+- 旧エンジンの終了Promiseを共有し、新規モデル読み込み前に終了完了を待つ。unload失敗時は新規GPUモデルを起動せず、ページ再読み込みによる復旧を案内してGPUメモリの二重確保を避ける。
+- 既存の推論直列化、GPU loss復旧、モデル読み込み中loss検知、読み取り専用キャッシュ確認を維持。モデル重み/キャッシュ、記憶庫、履歴、AES-GCM、同期、バックアップ、音声、v188ライブHUDは変更なし。
+- Service Workerのアプリシェルキャッシュをv240へ更新し、回帰テストを追加。テスト実行、GitHub Actions、Cloudflare Pages反映、Safari実機の連続ログアウト/再ログイン動作は未確認。
+
+## v239 モデル読み込み中のWebGPU喪失を検知（2026-11-10）
+- CreateMLCEngineの初期化中はまだaiEngine参照が確定していないため、その間にGPUDeviceがlostになると、v238の実行中エンジン復旧処理が対象を見つけられない競合を修正。
+- モデル用GPUデバイスのlost/rejectedを読み込み中フラグへ記録し、CreateMLCEngineがエンジンを返した後にそのエンジンを直列化ラッパー経由でunloadしてから、読み込み失敗として案内する。破棄済みGPUエンジンを「準備完了」にしない。
+- 既存の実行中エンジン復旧、意図的unloadのdestroyed除外、モデルキャッシュの読み取り専用確認を維持。モデル重み/キャッシュ、モデル選択、context、記憶庫、履歴、AES-GCM、同期、バックアップ、v188ライブHUD、音声機能は変更なし。
+- Service Workerのアプリシェルキャッシュをv239へ更新。回帰テストを追加。Nodeテスト実行、GitHub Actions、Cloudflare Pages反映、Safari実機でのGPU喪失再現は未確認。
+
+## v238 WebGPU予期しない停止時の安全な復旧とモデルキャッシュ事前確認（2026-11-10）
+- WebGPUのmodel GPUDeviceが予期せずlostになった場合、診断情報を記録したうえで、推論直列化キューの完了を待って古いengineをunloadし、同じengine参照だけを切り離す。明示的unloadに伴うreason=destroyedはクラッシュ復旧扱いしない。
+- 復旧後はモデル再読み込み操作を再び有効化し、保存済みモデルキャッシュと記憶・会話履歴を変更せずに再起動できるようにする。GPUがロード中に失われた場合は既存のロード失敗処理を維持する。
+- モデル起動時にWebLLM hasModelInCacheを読み取り専用で確認し、重みキャッシュがある/未検出/確認できない状態をステータス表示する。CreateMLCEngineの標準キャッシュ利用を維持し、独自ダウンロード・キャッシュ削除・移動・再作成は行わない。補助資材が通信を必要とする可能性は残る。
+- Service Workerのアプリシェルキャッシュをv238へ更新。WebLLM/Kokoro依存キャッシュ、モデル重み、記憶庫、履歴、暗号化、同期、バックアップ、v188ライブHUDには変更なし。
+- 回帰テストを追加。実際のSafariでのGPU喪失再現、再起動後のモデルキャッシュ再利用、OOM改善効果は未確認。
+
+## v237 iPad向けQwen3-4BのKVキャッシュ負荷を軽減（2026-11-10）
+- iPadOS Safari（通常UA/デスクトップUA）の自動選択モデルは従来どおりQwen3-4Bのまま、WebLLMのcontext_window_sizeのみ2048から1024へ縮小。iPhone/Androidは既存のQwen3-1.7B・1024を維持。その他端末の4B・2048も維持。
+- WebLLMのcontext_window_sizeはKVキャッシュ設定としてモデル読み込み時に指定できる。モデル重み・量子化・保存キャッシュ・推論履歴の保存形式は変更しない。
+- Service Workerのアプリシェルキャッシュをv237へ更新。既存のWebLLMモデルキャッシュ、Kokoro、暗号化記憶、履歴、同期データは削除しない。
+- 回帰テストをv235ライブHUD構成へ更新し、旧v234画像表示を必須とする古い検査を撤去。iPad端末判定と1024コンテキストを検査する。実機でのOOM改善効果、読み込み速度、応答品質は11月22日以降にiPad Pro M1で確認する。
+
+## v236 offline-firstテストのブラウザ依存コード混入を修正（2026-11-10）
+- 推論直列化テストが `serializeAlvisInference()` だけでなく、その直後にあるブラウザ専用GPU診断初期化まで `new Function()` で評価していたため、Node.js環境に `document` がなく `document is not defined` で停止していた。
+- テストの抽出終端を `// WebGPU device lifecycle diagnostics` の直前へ変更し、推論直列化関数だけを分離して検証する。
+- アプリ本体、WebGPU診断の実行時動作、WebLLM/WebGPU設定、モデル/モデルキャッシュ、Service Worker、画面デザイン、記憶・履歴・暗号化・同期・バックアップには変更なし。
+- 変更はテストコードのみ。GitHub Actionsでの再実行結果は未確認。iPhone/iPad Safariの実機動作にも変更なし。
+
+## v235 ALVISモードをv188ライブHUDへ復元（2026-11-10）
+- v196以降の単一画像表示・HUD非表示CSS・画像上の透明ホットスポットを撤去し、v204で確認済みのv188ライブHUD構成へ復元。中央のSVGホログラム球体、左右の情報パネル、3本の軌道リング、投影光/台座、既存のAI起動ボタンとメニューを再表示。
+- 軌道リングは既存のWeb Animations APIによる独立回転（22秒/31秒/42秒）を利用。アバターモードは従来どおり独立。
+- チャット入力/送信、ローカルAI推論、VRM/GLB、記憶候補/長期記憶、会話履歴、AES-GCM、同期、バックアップ/復元、音声/TTSの処理ロジックは変更しない。
+- Service Worker cacheをv235へ更新。ALVISアプリシェルのみ更新し、WebLLM/Kokoro等の依存・モデルキャッシュやユーザーデータは削除しない。旧画像ファイルは未使用のまま残す。
+- 回帰テストをライブHUD仕様へ更新。GitHub Actionsの `dashboard-image` 相当テストは10/10成功。`offline-first` は既存の22/22ポリシー検査通過後、テスト側の `document is not defined`（`tests/offline-first.test.mjs:424`）で失敗しており、今回のHUD変更とは別のテスト環境問題。Cloudflare Pages配信とSafari実機表示/タップ/リング回転は未確認。実機での確認前に完了扱いにしない。
+
+## v234 指定完成見本をALVISモードの実画面へ統合（2026-11-09）
+- ユーザー提供の「未来都市のホログラム地球ダッシュボード.png」を700×564 AVIFへ最適化し、`assets/alvis-dashboard-reference.avif` として登録。元画像と同じ1397:1126の縦横比を維持し、球体・リング・投影台・左右パネル・文字・配色をCSS/SVGで再描画しない。
+- ALVISモードのステージは完成見本画像1枚を表示。旧ベクターHUDは既存の状態更新互換のためDOMに残して非表示。画像上に追加したのは、既存のページ遷移とAI起動ボタンへ接続する透明なタップ領域のみ。
+- チャット入力/送信、モード切替、アバターステージ、ローカルAI推論、記憶候補/長期記憶、会話履歴、AES-GCM、同期、バックアップ/復元、音声/TTSの処理コードは変更しない。
+- Service Worker cacheをv234へ更新し、画像をプリキャッシュへ追加。更新対象はALVISアプリキャッシュのみ。WebLLM/Kokoro等のモデル・依存キャッシュは保持。
+- 画像バイナリSHA-256: `0d511dbe92fe6132709a1c4edbe2fe919a1071edbe4b2a8a1f669f82eb9731ac`。`dashboard-image` GitHub Actionsは12/12成功。Cloudflare Pagesはcommit `c8be4d2` でデプロイ成功（Preview: `https://eb4b9152.alvis-pwa.pages.dev`、Branch Preview: `https://development.alvis-pwa.pages.dev`）。一方、既存 `offline-first` job は22/22ポリシー検査通過後、テスト側の `document is not defined`（`tests/offline-first.test.mjs:424`）で失敗。Cloudflare URLはこの実行環境から取得できず、Safariでの実画像表示・タップ・オフライン再読込は未確認。ここは完了扱いにせず、実機確認待ち。
+
+## v233 省略された短い追加質問の文脈判定（2026-11-09）
+- 「妻は？」「料金は？」のような短い名詞句の追加質問を、直前にユーザー発言とALVIS回答の両方がある場合に限り、フォローアップとして扱う。
+- 「富士山の高さは？」など疑問語を含む通常の質問は対象外。直前の質問・回答を推論文脈へ残し、対象が曖昧な場合は一つ確認するようシステム指示を追加。
+- 現在の質問と保存履歴は変更せず、過去文脈の上限（600文字）も維持。記憶候補/承認済み記憶、履歴、AES-GCM、同期、バックアップ、モデル設定は変更なし。
+- Service Worker cacheをv228へ更新。追加した判定関数と文脈保持の回帰テストを追加。実機応答品質、Nodeテストスイート全体、Cloudflare Pages反映は未確認。
+
+## v228 iPhone SafariのGPU診断変数スコープ修正（2026-11-09）
+- ユーザーのiPhone Safari実機診断で、標準GPUデバイス作成/WebLLM相当GPUデバイス作成がともに `Can't find variable: originalRequestDevice` で失敗。
+- 原因は、元の `GPUAdapter.requestDevice` を保持する変数が監視関数内のローカル変数であり、別の端末診断イベントから参照できなかったこと。GPU機能の故障を示す結果ではない。
+- 元のrequestDevice関数を診断状態オブジェクトに保持し、2つの診断テストから安全に呼び出すよう修正。GPUモデル監視のcapture windowは維持し、診断用デバイスをモデルGPU喪失へ混入させない。
+- モデルID/context/WebLLM版/モデルキャッシュ/記憶庫/履歴/AES-GCM/同期/バックアップは変更なし。モデルのダウンロード・キャッシュ削除も行わない。
+- Service Worker cacheをv223へ更新し、スコープ参照の回帰テストを追加。静的確認・テストスイート・Cloudflare Pages反映・Safari実機再確認は未確認。
+
+## v227 WebLLMモデル重みキャッシュの読み取り専用確認（2026-11-09）
+- WebLLM 0.2.87が公開する `hasModelInCache` を端末診断へ追加し、現在の端末プロファイルで選ばれたモデルIDのtensor/model重みキャッシュを直接確認する。
+- 表示は「保存あり（再利用候補）」「未検出（読み込み時に取得の可能性）」「確認不可」を区別。APIが確認するのはモデルtensorキャッシュであり、tokenizer/config/WASMを含む全資材の完全性までは保証しない。CDNモジュールを取得できないオフライン時などは「確認不可」となる。
+- 診断は読み取り専用。モデルのダウンロード開始、キャッシュ削除/移動、キャッシュ方式変更、モデルID/context変更は行わない。WebLLM標準Cache API、既存キャッシュ、記憶庫、履歴、暗号化、同期、バックアップは維持。
+- Service Worker cacheをv222へ更新し、回帰テストを追加。実ブラウザでの確認、テストスイート実行、Cloudflare Pages反映は未確認。
+ 
+## v226 GPU診断をWebLLMモデル用デバイスに限定（2026-11-09）
+- v225のiPhone Safari診断でGPU lost reason codeが `destroyed` と報告されたが、端末診断機能自身が標準GPUテスト/WebLLM相当テストのためにGPUDeviceを作成し、直後に `destroy()` していた。従来監視はこれらの診断用デバイスも同じGPU喪失として数えるため、モデル用GPU喪失と誤認する可能性があった。
+- GPUDevice監視をWebLLMの `CreateMLCEngine` 初期化中に要求されたデバイスだけに限定。端末診断の2つのGPUテストは監視ラッパーを迂回して元の `requestDevice` を呼び、診断用デバイスの意図的破棄をモデルGPU喪失へ混入させない。
+- 診断表示のデバイス件数を「model device」と明記。モデル生成・推論・モデルID・context・WebLLM 0.2.87・既存キャッシュ・記憶庫・履歴・暗号化・同期・バックアップは変更しない。
+- Service Worker cacheをv221へ更新。静的コード検査と回帰テストを追加。実テスト・Cloudflare Pages反映・Safari実機確認は未実施。
+
+## v225 WebGPU喪失理由コードを記録（2026-11-09）
+- v224のiPhone Safari診断でGPUデバイス喪失が1回観測されたが、既存診断はGPUDeviceLostInfo.messageのみを記録し、標準のreasonコードを表示していなかった。
+- GPUDeviceLostInfo.reason（destroyed / unknown等）を読み取り、lost promiseがrejectされた場合はpromise-rejectedとして診断に追加。既存のメッセージ・時刻・uncaptured errorも維持。
+- GPU喪失理由を区別するための読み取り専用診断のみ。モデル初期化・推論・キャッシュ・モデル設定・記憶・履歴・暗号化・同期・バックアップは変更しない。
+- Service Worker cacheをv220へ更新。静的コード検査と回帰テストを追加。実テスト・Cloudflare反映・Safari実機確認は未実施。
+
+## v224 WebGPU失効・Safariライフサイクル診断（2026-11-09）
+- v223適用後もiPhone Safariで `Object has already been disposed` が継続したため、推論コードの変更前にGPUデバイス状態とページ表示ライフサイクルを観測する診断を追加。
+- `GPUAdapter.requestDevice` を透過的に監視し、生成されたGPUDeviceの `lost` Promiseと `uncapturederror` を記録。Safariの `visibilitychange` / `pageshow` / `pagehide` も時刻・回数・状態のみ記録する。
+- エラー診断へGPU状態、デバイス生成回数、ページ可視状態、ページイベント、GPU失効理由/未捕捉エラーを追加。プロンプト本文、個人データ、記憶内容は記録しない。
+- これは原因切り分け用の読み取り専用診断であり、GPU失効の修復や推論成功を保証しない。GPUAdapter監視APIがSafariで利用できない場合は、その旨を診断表示する。
+- Service Worker cacheをv219へ更新。既存WebLLMモデルキャッシュ、記憶庫、会話履歴、AES-GCM、同期、バックアップは削除・変更しない。モデルID・context・WebLLM 0.2.87は維持。
+- 静的検査のみ。テスト実行・Cloudflare Pages反映・Safari実機での診断確認は未実施。
+
+## v223 WebLLMのTVMオブジェクト寿命修正を採用（2026-11-09）
+- ユーザーのiPhone Safari実機でWebLLM 0.2.82でも `Object has already been disposed` が再現。診断はQwen3-1.7B / context 1024 / system 472文字 / conversation 105文字 / external 0 / max_tokens 192。
+- 上流Issue mlc-ai/web-llm#844の根本修正PR apache/tvm#20501は2026-10-02にマージ。shape tupleの呼び出し元参照を独立させ、GPU device loss時の自動破棄を所有側で制御する修正。
+- WebLLM v0.2.87は `@mlc-ai/web-runtime@0.28.0-dev1` を同梱するため、ALVISの遅延importを0.2.87へ戻す。端末別モデルIDとcontext設定、推論キュー、診断機能は維持。
+- v0.2.87はモデルバイナリもv0_2_87へ更新している。過去のALVIS 0.2.87利用時のキャッシュが再利用される可能性はあるが、実機では未確認。キャッシュは消去しない。未キャッシュ資材があれば追加ダウンロードされるため、モデル再読込はWi-Fi接続時を推奨。
+- Service Worker cacheをv218へ更新。モデルキャッシュ、記憶庫、会話履歴、AES-GCM、同期、バックアップは削除・変更しない。
+- 静的検査のみ。Cloudflare反映・Safari実機での再推論は未確認。
+
+## v222 推論エラーの実行環境診断（2026-11-09）
+- v221でWebLLMを0.2.82へ固定した後もiPhone Safariで `Object has already been disposed` が継続したため、0.2.82への固定だけでは解決しないと判断。
+- WebLLM issue #844は2026-10-04に上流修正済み。v0.2.87はその後にWeb runtimeを0.28.0-dev1へ更新しているため、同issueだけを今回の原因と断定しない。
+- 次回のdisposedエラー時に、ALVISが指定したWebLLMバージョン、モデルID、context、system/会話入力文字数、メッセージ数、max_tokens、例外名と先頭スタックをチャット履歴へ表示する。質問文やプロンプト本文は診断に含めない。
+- 当時は0.2.82指定を維持したが、実機で同エラーが継続。後続のv223で、修正済みTVM runtimeを含む0.2.87へ更新。
+- Service Worker cacheをv217へ更新。モデルキャッシュ、記憶庫、履歴、AES-GCM、同期、バックアップは削除・変更しない。モデル選択とコンテキスト設定も維持。
+- 静的検査のみ。Cloudflare Pages反映とSafari実機再現は未確認。
+
+## v221 WebLLM破棄済みShapeTuple不具合の回避（2026-11-09）
+- iPhone SafariでQwen3-1.7Bの初回推論が `Object has already been disposed` になる問題を調査。
+- WebLLM issue #844に、0.2.83以降で同エラーが発生し、Qwen3-1.7Bを含む複数モデルで再現、0.2.82では同条件で再現しなかったという報告がある。
+- ALVISのCDN importを `@mlc-ai/web-llm@0.2.82` に固定し、既知の不具合を回避する暫定措置。モデル選択・端末別設定は変更しない。
+- 既存Cache Storageや記憶・履歴・暗号化・同期・バックアップは削除しない。0.2.82固有のランタイム資材は別URLのため、必要に応じて追加取得される可能性がある。
+- Service Worker cacheをv216へ更新。静的チェックと回帰テストを追加。Safari実機での推論成功は未確認。
+
+## v220 破棄済みWebLLMエンジンの復旧（2026-11-09）
+- iPhoneでQwen3-1.7B読み込み後、初回推論が `Object has already been disposed` で失敗した報告を受け、チャット送信時の異常エンジン判定を確認。
+- 既存判定はWebGPU device lost等のみを対象とし、disposedエラーを拾わず古い `aiEngine` 参照が残る可能性があった。
+- disposedエラーも実行状態喪失として扱い、古い参照を切り離してbest-effort unloadし、端末プロファイルに応じたモデル名で再読み込みを案内する。
+- 記憶・履歴・暗号化・同期・バックアップ・モデルキャッシュの削除/変更なし。Service Worker cacheをv215へ更新。
+- 静的検査と回帰テストを追加。Safari実機での再読み込み後の再推論確認はユーザー確認待ち。
+
+## v219 キャッシュ診断の可視化（2026-11-09）
+- 開発ブランチ: `development`。
+- 既存のWebLLM 0.2.87は既定のCache APIをモデル成果物の保存先に使用する。Service WorkerはALVIS自身の旧キャッシュだけを削除し、他ライブラリのキャッシュを保持する設計。
+- 端末診断にALVIS以外のCache Storage名と各キャッシュのエントリー数、ブラウザ保存領域の永続化許可状態を追加。モデルキャッシュを名称・件数だけで断定しない。
+- Service Workerのアプリキャッシュを `alvis-cache-v214-integrated` へ更新。
+- 既存の記憶庫、会話履歴、AES-GCM暗号化、バックアップ、同期、モデルID、モデルキャッシュの保存方式は変更しない。キャッシュ削除や永続化要求は行わない。
+- iPhone Safariで診断表示を確認し、モデル読み込み後・ページ再読み込み後のキャッシュ名/件数/保存容量を比較する。iPad実機確認は21日以降。Safariによる保存データ保持は保証されない。
+
+## v218 ローカル生成・ブラウザリギング候補の再検証（2026-11-08）
+- Presidium Shape Studio（PyPI presidium-shapestudio 0.1.6）を確認。無料/Apache-2.0のローカル画像→3DツールでGLB/OBJ出力、CPUでTripoSRを動かす構想。TRELLIS image-largeは16GB NVIDIA GPU必須で未統合。実TripoSR checkpointはユーザーのGTX 1660 Ti laptopでロード確認まで、完全な実生成結果はまだ報告されていない。アプリはWindows/macOS/Linuxデスクトップ向け。iPad Safariで動くものではなく、単一画像入力なので18号の多視点一致にも不十分。候補として参考に留める。
+- Modly（modly3d.app）を確認。無料・MIT・ローカル生成・GLB出力だが、公式仕様はWindows/LinuxのデスクトップアプリでNVIDIA GPU推論。iPad/iPhoneでは実行できない。個人画像をクラウドへ送らない点は良いが、端末条件不適合。
+- Ekza Studio v0.6を確認。ブラウザ内ローカル処理、GLB/VRM 0.x/1.0読み込みとVRM 1.0出力、Humanoid rig、基本アニメーションに対応。ただし現時点の正式サポートはChrome/Edgeで、Safariは対象外。iPad用タッチファーストUIは将来予定。基本シェーディングはlow-poly palette中心で、18号の写実的顔・顔モーフ/表情リグを生成するものではない。既存モデルに身体骨格を付ける後工程候補としてのみ扱う。
+- 3D AI（3dai.art）の規約を確認。アップロード画像/プロンプトにサービス提供・モデレーション・不正検知・サービス改善のライセンスを与える条項があり、ゲストコンテンツは安全/不正検知のため短期間保持。無料/有料混在。画像学習の明確な否定がないため、18号画像のアップロード候補から除外。
+- 結論: 新候補も単独で「iPad Safari・無料・複数画像・写実的な顔の同一性・表情付きVRM」を満たさない。既存EkzaはGLB/VRMの後工程検証に限る。外部画像送信・課金・アプリ本体変更は未実施。
+
+## v217 複数画像3D生成・無料GPU候補の実行条件を再評価（2026-11-08）
+- OpenNexus3DStudioの公開READMEと `docs/AVATAR_PIPELINE.md` を確認。公開VercelデモはVRMアップロード/表示UIで、AI生成には別途3DAIGC-APIバックエンド（DGX Spark等のGPUサーバー）が必要。iPad単体では生成不可。
+- 同プロジェクトのAvatar pipelineは Photo → TRELLIS API → GLB → template rig API → rigged GLB → VRM export。bones-only template rigでは顔のmesh morphがなく、表情プリセット名を埋め込むだけでは顔が動かない。顔表情にはtemplate_wrap等の追加処理が必要。
+- TencentARC/Pixal3D公式READMEを確認。2026-09にmulti-view推論コードを公開しており、複数ビューからGLBを作れる。ただし `transforms.json` に各カメラの4×4 camera-to-world行列とFOVが必要。標準の正面/90度間隔4ビューなら同梱transformを再利用できるが、18号の参考資料は正面・斜め・左右横顔・背面など任意角度の資料なので、そのままの投入はできず、カメラ姿勢の推定・整列が必要。実行はTRELLIS.2ベースのGPU推論で、iPad Safari内では動かせない。
+- AssetFurnace（image-to-3dlab）はApple Silicon対応だが、必要なのはMシリーズMac（32GB推奨）または対応NVIDIA/AMD Linux環境。ユーザーのiPad Pro M1 1TBは対象外。
+- Virmiiは写真→Tripo生成→Humanoid rig→VRMの一貫サービス候補。ただしAI生成は顔/服/体型の完全一致を保証せず、追加表情セットは20 credits、さらに表情はダウンロードVRMに埋め込まれないため、無料・高精度・ALVIS移植の条件を満たさない。
+- Google Colab無料GPUは利用可能性・上限が動的で保証されず、無料枠のウェブUI生成は終了されることがある。安定した生成環境としては扱わない。
+- 3dai.devは現時点のページに無料・複数ビュー・GLB・24時間後自動削除の表示がある一方、privacy/terms URLを確認できず、画像の学習利用・運営主体・生成物ライセンスを確認できない。18号画像は未送信のまま保留。
+- 結論: 現在確認できた範囲では「iPadのみ・無料・規約/画像取扱い明確・複数画像の顔一致・VRM表情付き」を同時に満たすサービスは見つかっていない。顔の一致を妥協して単一画像生成を完成扱いにしない。
+- 変更範囲: HANDOFFと18号制作仕様書のみ。ALVISアプリ本体、VRMランタイム、ユーザーデータ、画像アップロード、外部生成、課金は未実施。
+
+## v216 3DAI Studio候補の料金・プライバシー再確認（2026-11-08）
+- 先行候補の3dai.dev/enは「登録不要・無料」「単一画像/複数ビュー」「テクスチャ付きGLB」「画像とモデルは24時間後自動削除」とページ上で表示。
+- ただし、3dai.dev上では運営主体の詳細、完全なプライバシーポリシー、画像のAI学習利用条件、生成物ライセンスを確認できていない。24時間後の削除表示だけで機密性を保証しない。
+- 3daistudio.com / docs.3daistudio.com は別サービスとして確認。FAQではImage-to-3Dが20〜60 credits、無料クレジットは試用分、以降は$19/月からと案内。riggingにも15〜20 credits必要。3dai.devと混同しない。
+- よって3dai.devは技術候補としてのみ保持し、画像アップロードは保留。無料・プライバシー・ライセンス条件が十分確認できない限り18号資料を送信しない。
+- アシスタントから外部サイトを直接操作して生成する接続はない。実行したと誤認させない。
+- アプリ本体/ランタイム/データには変更なし。次工程はより透明な規約・運営情報のある無料ローカルまたはブラウザー生成手段の調査。
+## v215 18号3D生成経路の候補を比較（2026-11-08）
+- iPad Safariで利用できるブラウザー型の画像→3D生成候補を再調査。
+- 3DAI Studio（https://3dai.dev/en）は複数視点入力、テクスチャ付きGLB出力、登録不要・無料を案内し、画像/モデルは24時間後に自動削除と表示。ただし運営者・詳細なプライバシー条件・実際の無料出力条件は未検証のため、18号画像はまだ送信しない。
+- Hi3D（https://hi3d.pro/）も無料・登録不要・GLB/PBR出力を主張するが、単一画像からの形状生成であり、顔の一致やリグは保証されない。利用条件の独立確認が必要。
+- 3DAI Studioを第一候補の検証対象とするが、サービスの表示だけで安全性・永続無料・ライセンスを保証しない。
+- 生成ツールはメッシュ/テクスチャ出力まで。Humanoid骨格、顔ブレンドシェイプ、VRM化は別工程。
+- 参照画像の外部送信はユーザーが無償条件で許可済みだが、無料枠を超える課金・自動課金・有料出力は行わない。料金確認できない場合は送信しない。
+- ALVISアプリ本体、VRMランタイム、記憶/履歴/音声/同期/バックアップは変更なし。
+- 次工程: 3DAI Studioの規約・プライバシー・無料GLB取得条件を検証し、条件が明確な場合のみ生成を試す。アシスタントから外部サイトへ直接アップロードする機能は現在未接続であり、実行済みとは扱わない。
+
+## v214 18号3Dアバター制作仕様を確定（2026-11-08）
+- ユーザーから正面・左右斜め・左右横顔・背面・表情バリエーションを含む18号の参考資料を受領。
+- `docs/ALVIS_18_AVATAR_MODEL_BRIEF.md` を追加。顔の一致を最優先に、外観、VRM骨格/表情、モバイル最適化、受け入れテスト、無料条件を明文化。
+- 3Dメッシュ生成・顔リグ・VRM書き出しは未実施。制作仕様を確定した段階であり、完成モデルがあるとは扱わない。
+- 既存アプリコード、表示ランタイム、ユーザーデータは変更なし。
+- 次工程は無料条件を満たす実モデル生成手段の確保と、生成モデルの品質確認。
+
+## v213 18号の2Dまぶた試作を撤去・3Dモデル制作へ移行（2026-11-08）
+- ユーザー評価により、静止画上へまぶたを貼り付ける方式は不自然なため撤去。18号の承認済み画像は静止した参照画像として保持する。
+- 次工程は18号の外観を参照した独立3Dキャラクターモデル制作。VRMランタイム（v199以降）と既存のローカルVRM/GLB読み込み導線を利用する。
+- 18号固有の3Dモデルは未作成。3D生成サービスの接続または制作済みモデル素材が必要。生成前に顔の一致度・ライセンス・出力形式を確認する。
+- ALVISモード、会話、記憶、履歴、音声、暗号化、同期、バックアップは変更しない。
+- Service Worker cache: alvis-cache-v213-integrated。
+
+## v212 まばたきレイヤーの表示タイミング修正（2026-11-08）
+- v211のCSSキーフレームで、閉じたまぶたレイヤーが周期の大半で表示状態になる/開閉の位相が逆に見える問題を修正。
+- 通常時は透明、瞬きの短い区間だけまぶたレイヤーを表示し、閉じてから開く動きへ変更。
+- 元画像に対する目元の位置合わせと肌色の自然さは、実機ブラウザーでの確認が引き続き必要。完成扱いではない。
+- Service Worker cache: alvis-cache-v212-integrated。
+- キーフレームとキャッシュ名を再取得して静的確認。Safari実機未確認。
+
+## v211 18号まばたき2Dレイヤー試作（2026-11-08）
+- 承認済み静止画の上に、左右の目元だけを対象とするSVGまぶたレイヤーを追加。写真全体は移動・拡大縮小しない。
+- まぶたの開閉をCSSで試作。左右のタイミングをわずかにずらし、VRM/GLBキャンバスがある場合はSVGレイヤーを非表示にする。
+- これは位置合わせ・肌色・閉眼時の自然さをSafari実機で確認するための試作であり、完成扱いにしない。元画像に閉眼差分がないため、肌テクスチャとまつ毛の一致は未検証。
+- ALVISモード、VRM/GLBランタイム、会話、記憶、履歴、音声、暗号化、同期、バックアップ処理は変更なし。
+- Service Worker cache: alvis-cache-v211-integrated。
+- HTML/SVG/CSSの存在と旧画像揺れCSSがないことを静的確認。iPad/iPhone Safariでの目元位置・自然さは未確認。
+
+## v210 18号静止画の疑似揺れを撤去（2026-11-08）
+- アバターモードの静止画プレビューに適用していた上下移動・拡大縮小・微小回転を削除。承認済みの18号画像を静止表示し、画像全体の揺れをアバター動作と誤認させない。
+- これはまばたき実装ではない。現在の画像には閉じた目の差分・まぶたレイヤーがなく、自然な瞬きを成立させる素材はまだない。
+- ALVISモード、VRM/GLBランタイム、会話、記憶、履歴、音声、暗号化、同期、バックアップは変更なし。
+- Service Worker cache: alvis-cache-v210-integrated。
+- CSS差分とキャッシュ名を静的確認。Safari実機確認は未実施。
+
+## v209 VRMの左右独立まばたき表情に対応（2026-11-08）
+- VRM標準 `blink` に加え、`blinkLeft` と `blinkRight` の両方を持つモデルでも自動まばたきを有効化。
+- 左右独立プリセットを使う場合は同じ滑らかなまばたきカーブで両目を同期制御する。
+- モデル診断に左右プリセットの対応状況を追加。既存の単一 `blink` モデルとの互換性を維持。
+- 静止画の18号プレビュー、ALVISモード、GLB、会話、記憶、履歴、音声、同期、バックアップは変更なし。
+- Service Worker cache: alvis-cache-v209-integrated。
+- 静的コード確認のみ。実VRM各形式とSafari実機での確認は未実施。
+
+## v208 VRMのまばたき対応判定を修正（2026-11-08）
+- VRMのexpressionManagerが存在するだけでblink対応と誤判定する問題を修正。標準の `blink` 表情プリセットを実際に持つモデルだけ自動まばたきを実行し、診断表示も正しく一致させる。
+- まばたきの不規則周期・滑らかな閉じ/開き・まれな二度まばたきの動作は維持。
+- 静止画の18号プレビュー、ALVISモード、GLB、会話、記憶、履歴、音声、同期、バックアップは変更なし。
+- Service Worker cache: alvis-cache-v208-integrated。
+- コード静的確認のみ。blink対応/非対応の実VRMモデルおよびSafari実機での確認は未実施。
+
+## v207 VRMの自動まばたきを自然な不規則周期へ改善（2026-11-08）
+- VRMモデルに標準の blink 表情がある場合、一定周期ではなく約3〜6.5秒の揺らぎを持つ自然な待機まばたきへ変更。
+- まぶたの閉じ/開きは滑らかなサインカーブで約0.12〜0.18秒。まれに短い二度まばたきを加える。
+- 対象はVRMモデルのみ。静止画プレビューには適用されず、18号の画像・ALVISモード・GLB表示・チャット/記憶/履歴/音声/同期/バックアップは変更しない。
+- Service Worker cache: alvis-cache-v207-integrated。
+- 静的コード確認のみ。blink表情を持つVRMモデルでの実機確認は未実施。現行18号は静止画であり、実際の瞬きには18号のblink対応VRMモデルが必要。
+
+## v206 アバター画像の微細な頭部スウェイ（2026-11-08）
+- v205の呼吸感のある待機モーションに、ごく小さな左右の揺れ（最大±0.12度）を追加。周期は約6.5秒のまま。
+- アバターモードの静止画プレビューにのみ適用。18号画像そのものは変更しない。
+- VRM/GLBランタイムとALVISモードのHUDは変更なし。会話・記憶・履歴・音声・暗号化・同期・バックアップも変更なし。
+- prefers-reduced-motion が有効な端末では停止。
+- Service Worker cache: alvis-cache-v206-integrated。
+- CSSの既存v205キーフレームを更新し、アバターモード限定/reduced-motion/キャッシュ名を静的確認。Safari実機の見え方はユーザー確認待ち。
+
+## v205 アバターモードの静止画に微細な待機モーションを追加（2026-11-08）
+- 18号の高解像度参照画像を維持したまま、アバターモードでのみ約6.5秒周期のごく小さな上下移動と呼吸感のある拡大縮小を追加。
+- 画像表示時のみ適用し、VRM/GLBモデルの描画・待機動作・表情・口パク・視線処理は変更しない。
+- ALVISモードのHUD・球体・リング・投影光・台座には変更なし。チャット、記憶、履歴、音声、暗号化、同期、バックアップも変更なし。
+- prefers-reduced-motion が有効な端末では画像アニメーションを停止。
+- Service Worker cache: alvis-cache-v205-integrated。
+- CSSセレクター、キーフレーム、モード限定、reduced-motion、Service Workerキャッシュ名を静的確認。Safari実機の動き・見え方はユーザー確認待ち。
+
+## v204 ALVISモードをv188のライブHUD構成へ復元（2026-11-08）
+- v196で追加された静止画表示とHUD非表示CSSを撤去し、v188までのライブHUD（左右パネル・中央球体・3本のリング・投影光・台座・キャプション）を再表示する。
+- v203の画像上モーションレイヤーも撤去。リングのWAAPI対象を元の `.hud-center .hud-orbit` へ戻し、22秒/31秒/42秒の回転を維持。
+- AI起動ボタンをv188と同じ左側HUDパネル内へ戻す。既存IDとイベント接続を維持。
+- アバターモード、VRM/GLBランタイム、チャット、記憶、履歴、音声、AES-GCM、同期、バックアップ処理は変更しない。
+- Service Worker cache: alvis-cache-v204-integrated。不要になったALVIS参照画像のプリキャッシュを除去。
+- 静的検査で画像/オーバーレイ撤去、HUD復元、リング対象、AIボタン位置、キャッシュ名を確認。Safari実機の最終表示はユーザー確認待ち。
+
+## v203 表示中のALVISホログラムへ動きを接続（2026-11-08）
+- v196以降のALVISモードは完成見本を単一のimgとして表示し、旧HUD（.hud-center）はvisibility:hiddenのため、その子要素へWAAPIを適用しても画面上のリングは動かなかった。
+- 画像の構図・色・文字・台座は変更せず、画像の上に独立した透明モーションレイヤーを配置。3つの発光ノードをそれぞれ22秒/31秒/42秒で周回させ、球体中心の光をゆっくり脈動させる。
+- 表示モード切替時はALVIS側モーションレイヤーだけを開始/停止。アバター側VRM/GLBランタイムには触れない。既存のチャット・記憶・履歴・暗号化・同期・バックアップは変更しない。
+- 既存のalvis-reference.jpgは承認済み画像と同じ構図の400×323低解像度版。高解像度PNGへの置換は未完了。
+- Service Worker cache: alvis-cache-v203-integrated。
+- 静的検査で可視レイヤーのDOM、3つの周回対象、モード分離、キャッシュ名を確認。Safari実機での動作確認はユーザー待ち。
+
+## v202 ALVISモードとアバターモードのアニメーションを分離（2026-11-08）
+- 表示モード切替時にALVISホログラムのリングアニメーションを明示的に開始/停止する。
+- ALVISモードへ戻した際にリング回転を再開する。アバターモードへ切り替えた際はALVIS側のWAAPIアニメーションだけを停止する。
+- ALVIS側アニメーションの対象ステージが非表示/未準備の場合も、残存アニメーションを停止。ページ表示・復帰時の既存再開処理は維持。
+- アバターのVRM/GLBレンダリング、診断、会話、記憶、履歴、暗号化、同期、バックアップは変更しない。
+- Service Worker cache: alvis-cache-v202-integrated。
+ 
+## v201 VRMモデルの対応機能を画面内で診断（2026-11-08）
+- VRMランタイムにモデル診断APIを追加。メタ情報の名前、Humanoid頭部ボーン、lookAt、標準表情（blink / aa / oh / happy / sad）の有無を読み取り専用で検査する。
+- アバター画面に「モデル診断」ボタンを追加。VRM読み込み後に対応機能を✓で表示し、未対応項目は—で表示。モデルのデータを書き換えず、診断は端末内で完結。
+- VRMの読み込み完了ステータスに、まばたき・口パク・視線制御の対応状況を要約表示。GLBは従来どおり表示専用で、診断対象外。
+- Service Worker cache: alvis-cache-v201-integrated。
+- 既存のGLB/VRM保存キー、会話、記憶、履歴、暗号化、同期、バックアップ、音声再生処理は変更しない。実機Safariでの表示確認は未実施。
+ 
+## v200 VRMアバターの待機動作・表情・Kokoro口パク制御（2026-11-08）
+- VRMランタイムに待機中の微細な上下動・左右スウェイを追加。標準blink表情による自動まばたきは継続。
+- VRM標準表情プリセットを操作するAPI（setExpression）、口の開き量を滑らかに反映するAPI（setMouthOpen）、視線ターゲットAPI（setLookAt）、待機動作のON/OFF API（setIdleEnabled）を追加。
+- Kokoro音声がAudioContext経由で再生される場合、AnalyserNodeで音量包絡を取得し、VRMの「aa」「oh」表情へ口の開き量を反映する。HTMLAudioElementへのフォールバック再生および標準speechSynthesisでは口パク同期しない。
+- VRMモデルに対象の表情プリセットが含まれない場合、その表情は動作しない。口パクは音量ベースの簡易同期で、音素単位のリップシンクではない。
+- Service Worker cache: alvis-cache-v200-integrated。
+- 18号の3Dモデル自体は未作成。実機（特にiPad/iPhone Safari）での動作・GPU負荷・表情対応は未検証。既存の会話・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。
+
+## v199 VRM形式の3Dアバター表示エンジンを追加（2026-11-08）
+- 既存の静止画プレビューとGLB表示を維持したまま、VRM 0.x/1.0モデルをThree.js + @pixiv/three-vrmで表示するブラウザー内ランタイムを追加。
+- VRMファイルは既存のALVISAvatarAssets IndexedDB内の別キーへ保存し、従来のGLBデータを上書きしない。読み込みはユーザーが選択したローカルファイルから行う。
+- VRMに標準のblink表情が含まれる場合、待機中に自動まばたきを行う。VRMに表情データがない場合はモデル表示のみ。
+- Three.js / three-vrmはjsDelivrから初回取得し、Service Workerの依存キャッシュ対象で再利用。アプリ側ランタイムもプリキャッシュ対象へ追加。初回取得前の完全オフライン起動はできない。
+- Service Worker cache: alvis-cache-v199-integrated。
+- これは3D表示基盤の追加であり、18号の3Dモデルそのものはまだ作成されていない。顔の一致、リギング品質、表情切替、視線、口パク、音声同期は未実装。既存の会話・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。
+
+## v197 18号参照画像を正常なJPEGファイルとして配信（2026-11-08）
+- 破損したdata URI埋め込みを廃止し、検証済みJPEG（400×565）を独立した静的アセットとして配置。HTMLのimg srcは相対パス参照に変更。
+- Service Workerのプリキャッシュ対象に新画像を追加し、アプリキャッシュをv197へ更新。
+- 会話・記憶・履歴・音声・暗号化・同期・バックアップ・3Dモデル読み込み処理は変更しない。
+- JPEGはPillowでデコード検証済み。HTML参照先、SWキャッシュ対象、既存DOM IDを静的検証。Safari実機表示はユーザー確認待ち。
+
+## v196 指定完成見本をALVISモードの実画面へ配置（2026-11-08）
+- ユーザー指定の「未来都市のホログラム地球ダッシュボード.png」と同じ構図の登録済み画像 assets/alvis-reference.jpg を、ALVISモードのステージへ直接配置。画像の球体・リング・投影台・左右パネル・色・文字配置には追加描画や再設計を行わない。
+- リポジトリ内の画像アセットは既存の400×323 JPEGを再利用（画像バイナリ自体はこのコミットで変更していない）。元画像の高解像度版への置換は別途必要。
+- 旧HUD描画DOMは状態更新互換のため残し、表示のみ停止。ローカルAI起動ボタンはステージ直下の透明な球体タップ領域へ移し、既存IDとイベントを維持。
+- チャット入力・送信、記憶、履歴、暗号化、同期、バックアップ、音声、AI推論ロジックは変更なし。
+- Service Worker cache: alvis-cache-v196-integrated。既存の画像プリキャッシュ項目を維持。
+- 静的検査: 画像要素1件・既存アセット参照・ステージ比率1397:1126・旧HUDの非表示・AI起動ボタンID一意・チャット要素ID一意・インラインJavaScript無変更・Service Worker構文を確認。開発版の配信/画像HTTP取得とSafari実機の描画・タップ確認はデプロイ後の検証対象。
+
+## v195 18号プレビューをHTMLへ直接配置しキャッシュを更新（2026-11-08）
+- 18号のJPEG参照画像をJavaScriptの実行後に挿入する方式から、アバター表示領域内にHTMLのimg要素として最初から配置する方式へ変更。初期化スクリプトが失敗しても画像そのものは表示可能。
+- 3Dモデルを読み込んだ際は従来どおりモデル表示へ切り替え、読み込み失敗時はHTML内の参照画像要素を複製して復帰する。
+- 画像データはHTML内に1回だけ埋め込み。既存の会話・記憶・履歴・音声・暗号化・同期・バックアップ処理は変更しない。
+- Service Worker cache: alvis-cache-v195-integrated。v194以前のALVISアプリキャッシュを更新対象にする。
+- 画像の静的HTML配置、画像データの重複なし、GLB失敗時の復帰処理、キャッシュ名、既存要素IDを静的検証。Safari実機での表示はユーザー確認待ち。
+
+## v188 ALVISモードの軌道リング常時回転を復旧（2026-11-08）
+- startAlvisHudMotion()内でOSのprefers-reduced-motion設定を検出するとreturnしていたため、軌道リング3本のWeb Animations開始処理が丸ごと中止される問題を修正。
+- 球体周囲の軌道リングはALVIS表示の中核的な常時演出として、端末の視差効果を減らす設定にかかわらず低速・一定速度で回転するようにする。
+- ページ遷移やログイン演出など、その他の動きは引き続きOSの軽減設定を尊重。アバターモード・3Dアバター・チャット・記憶・履歴・音声・暗号化・同期・バックアップは変更なし。
+- Service Worker cache: alvis-cache-v188-integrated。
+- reduced-motionによる早期return削除、3本の回転設定、起動/復帰/ページ遷移からの開始経路、キャッシュ名を静的検証。Safari実機での回転確認はユーザー確認待ち。
+
+## v187 アバターモードの巨大な外枠と空のホログラム領域を除去（2026-11-08）
+- v186で対象を内側のホログラム枠だけに限定していたため、外側のdisplay-dockの背景・枠・影が残り、さらにv170の!important指定で非表示にできていなかった空のjarvis-stageが残る問題を修正。
+- アバターモードのみdisplay-dockの外観を透明化し、alvis-hologram-frameの装飾/余白を解除。空のjarvis-stageをdisplay:none!importantで完全に非表示にする。
+- チャット領域は既存DOMのまま表示し、アバターの直後に通常フローで配置。ALVISモードのホログラムと外枠、チャット機能・記憶・履歴・音声・暗号化・同期・バックアップは変更なし。
+- Service Worker cache: alvis-cache-v187-integrated。
+- CSS優先度（v170の!importantを上書き）、DOM順、ID維持、キャッシュ名を静的検証。Safari実機表示はユーザー確認待ち。
+
+## v186 アバター直下にチャットを配置（2026-11-08）
+- アバターモード時だけ、チャットを含むホログラム枠の余白・枠線・背景・影・下マージンを解除。アバター直下からチャット領域が始まるように調整。
+- チャット領域の内部余白も解除し、チャット表示と入力欄の間隔を小さく設定。
+- ALVISモードのホログラム枠と既存チャット処理は変更なし。
+- Service Worker cache: alvis-cache-v186-integrated。
+## v185 アバターを表示領域の最上部へ移動（2026-11-08）
+- DOM順を変更し、アバター表示ステージをホログラム枠／チャット領域より前に配置。アバターモードではモード切替の直下、チャットより上に表示。
+- アバター描画先ID（alvisAvatarCanvas）とステータス要素を維持。既存の表示高さ・モデル読み込み処理を維持。
+- ALVISホログラムモードの表示順や既存データ・機能は変更なし。
+- Service Worker cache: alvis-cache-v185-integrated。
+## v184 アバターを空白領域に明示表示（2026-11-07）
+- Talking Avatar SDKの組み込み女性モデルを `AVATARS.female` として明示指定。従来の暗黙デフォルト依存をなくした。
+- アバター表示領域に実寸のレスポンシブ高さを付与（通常 clamp(340px,52svh,460px)、スマートフォン clamp(300px,46svh,390px)）。3Dキャンバスを領域全体へ拡張し、空白だった領域に顔のクローズアップを表示する設計。
+- SDKの組み込みモデルは顔中心の女性アバター。Android 18風モデルへの置き換えは別工程。SDKの顔中心フレーミング仕様により全身表示ではない。
+- ALVISホログラムモード、会話・記憶・履歴・音声・暗号化・同期・バックアップ・AI処理は変更なし。
+- Service Worker cache: alvis-cache-v184-integrated。
+- HTML/CSS、AVATARS.female指定、キャッシュ名、ドキュメントを静的検証。Safari実機での描画確認はユーザー確認待ち。
+
+## v183 アバターモードのチャット上部の空白を縮小（2026-11-07）
+- アバターモードの3D表示ステージを最小高さ360px→260px、スマートフォン340px→240pxへ縮小。3Dキャンバスの最小高さも同じ値に合わせ、アバターを表示しながらチャットまでの縦空間を圧縮。
+- ALVISモード、ホログラムの造形/動き、チャット・記憶・履歴・音声・暗号化・同期・バックアップ・AI処理は変更なし。
+- Service Worker cache: alvis-cache-v183-integrated。
+- CSS対象とブレークポイント、旧設定の上書き、キャッシュ名を静的確認。Safari実機でのアバター見切れ/空白量はユーザー確認待ち。
+
+## v182 アバターモード上部の余白を整理（2026-11-07）
+- アバターモード時だけ「ALVISとの会話」見出しを非表示にし、display-dock上部の余白を0にする。ALVISモードや他ページの見出し・余白は変更しない。
+- 3Dモデルはv181の試験表示を暫定維持。次段階は18号の特徴を明確に備えたモデルへ置き換える。別のオリジナル顔デザインを新規採用しない。
+- Service Worker cache: alvis-cache-v182-integrated。
+- CSSセレクターとキャッシュ名を静的確認。Safari実機表示はユーザー確認待ち。
+
+## v181 アバターモードにブラウザー内3Dモデルを導入（2026-11-07）
+- 旧CSS製の簡易顔プレースホルダーを、Talking Avatar Open Source SDKによる女性3Dアバター表示領域へ置換。初期モデルは検証用で、ALVIS専用の髪型・顔立ちではない。今後カスタムGLBへ交換する前提。
+- SDKはMITライセンス、ブラウザー内で描画・音声解析を行い、APIキーや外部AIサービスを必要としない。モデル/ライブラリはjsDelivrから初回取得し、Service Workerの依存キャッシュで再利用する。
+- アバターモードを開いた時だけ遅延ロードし、JARVISモードまたはチャット画面を離れた時にWebGLリソースをdisposeしてGPU負荷を抑える。
+- 既存のチャット・音声読み上げ・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。音声との口パク連動は次段階。
+- Service Worker cache: alvis-cache-v181-integrated。
+- コード構造・遅延ロード・破棄処理・CDN依存キャッシュ設定を静的確認。iPad/iPhone Safari実機の表示、GPU負荷、モデル読み込みは未確認。
+
+## v180 送信ボタンが2回目以降も使えるようロック解除を保証（2026-11-07）
+- 送信処理の開始直後に行う状態更新・履歴描画もtry/finallyの保護範囲へ含め、途中で例外が発生しても送信中フラグを必ず解除する。
+- 送信後の再描画が失敗した場合も、finally内のfinallyで入力内容・処理状態に基づき送信ボタンを再計算する。
+- 入力イベントにchange/compositionendも追加し、日本語IME入力後もボタン状態を同期する。
+- 送信内容・会話履歴・記憶・暗号化・同期・バックアップ・AI推論・音声・ホログラム表示は変更しない。
+- Service Worker cache: alvis-cache-v180-integrated。
+- コード構造とイベント登録、finallyでのロック解除、キャッシュ名を静的検査。Safari実機での連続送信確認はユーザー確認待ち。
+
+## v179 球体横の重複チャットメニューを削除（2026-11-07）
+- ホログラム左側HUDメニューにあった「チャット」ショートカットのみを削除。
+- 左側の「記憶候補」「長期記憶」「履歴」「クラウド同期」は維持。別の下部HUDにある「記憶」ショートカットも変更なし。
+- 上部ナビゲーションの「チャット」はチャット画面以外で表示し、他ページから戻る導線を維持。チャット画面中はv178の重複表示抑制を維持。
+- 球体・リング・光・台座・HUDの他項目、画面遷移・記憶・履歴・同期・AI・音声・保存処理は変更なし。
+- Service Worker cache: alvis-cache-v179-integrated。
+- 左側の対象HUDメニューでチャット項目が0件、残す4項目が各1件、下部HUDの別ショートカットを保持、上部ナビのチャット項目が1件、v178の条件付き非表示CSSとキャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v178 チャット画面の重複ナビゲーションを整理（2026-11-07）
+- チャット画面を開いている間だけ、上部ナビゲーションの「チャット」を非表示にする。ホログラム左側メニューの「チャット」はそのまま残す。
+- チャット以外のページでは上部「チャット」を再表示し、他ページからチャットへ戻る導線を維持。
+- CSSの表示制御のみ。ページ遷移処理、左側メニュー、記憶候補・長期記憶・履歴・クラウド同期、AI推論・音声・保存処理は変更なし。
+- Service Worker cache: alvis-cache-v178-integrated。
+- CSS条件、既存ナビゲーションDOM、ページ切替処理、キャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v177 画面幅の縮小を修正（2026-11-07）
+- v176で縦向きフレームを最大420pxに制限したため、従来より小さくなっていた問題を修正。
+- 縦向き・横向きとも外枠を利用可能な幅100%へ戻し、ホログラムも枠内幅100%で表示する。
+- 横向きではホログラムの最大幅を画面高85svh基準（最大900px）に拡大し、短い横画面では75svh基準で調整。
+- 元画像、1397:1126の比率、球体・リング・光・台座の意匠と動き、チャット・記憶等の処理は変更なし。
+- Service Worker cache: alvis-cache-v177-integrated。
+- CSS、DOM要素の一意性、タグ対応、キャッシュ名を静的検査。実機Safari表示はユーザー確認待ち。
+
+## v176 画面の縦向き・横向きに合わせた自動サイズ調整（2026-11-07）
+- CSSのorientation判定で共通フレームを縦向き最大420px、横向き最大760pxへ自動調整。端末の向きを変えると再読み込みなしで切り替える。
+- 横向きではホログラム表示幅を画面高（svh）に連動させ、短い横画面ではさらに縮小。返答欄・入力欄は同じ外枠内で幅に追従。
+- ホログラムの元画像、縦横比、球体・リング・光・台座の意匠/アニメーション、チャット・記憶・履歴・音声・暗号化・同期・バックアップ処理は変更なし。
+- Service Worker cache: alvis-cache-v176-integrated。
+- CSS挿入位置、縦横メディアクエリ、v175マーカー、キャッシュ名を静的検査。Safari実機の縦横表示確認はユーザー確認待ち。
+
+## v175 ホログラムと返答・入力欄を共通の外枠内に配置（2026-11-07）
+- ホログラム表示とALVIS最新返答・入力欄を新しい共通フレームで囲み、返答欄と入力欄をホログラムの直下・同じ枠の内側に配置。
+- ホログラム画像・球体・リング・投影光・台座の描画やアニメーションは変更せず、既存のホログラム表示ステージをそのまま維持。
+- 会話履歴（#chatLog）は非表示のままDOMと内部処理を保持。返答抽出・送信・音声・保存・暗号化・同期・バックアップ処理は変更なし。
+- アバターモードの既存ステージと切替処理は維持。
+- Service Worker cache: alvis-cache-v175-integrated。
+- HTML構造、対象IDの一意性、ホログラム→チャット→アバターステージの順序、履歴非表示CSS、キャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v174 会話履歴欄のみ非表示（2026-11-07）
+- チャットエリア内の会話履歴表示（#chatLog）のみCSSで非表示。
+- DOMと既存の履歴処理は維持し、履歴データの保存・読み込み・会話処理への影響を避ける。
+- 表示順は「ALVIS最新返答→メッセージ入力欄」。ホログラム領域とは分離したまま。
+- v173のホログラム・球体・リング・台座・左右HUD外枠除去は維持。
+- Service Worker cache: alvis-cache-v174-integrated。
+- 静的検査で履歴欄の非表示CSS、返答欄・入力欄の存在、ID一意性、HTMLタグ対応を確認。Safari実機表示はユーザー確認待ち。
+
+## v173 ホログラムとチャット領域を分離し返答欄を入力欄直上へ配置（2026-11-07）
+- ホログラム表示ステージを閉じた後にチャット専用領域を配置。返答欄がホログラムの上・内部へ重ならない構造に変更。
+- チャット領域の順序を「会話履歴→ALVIS最新返答→メッセージ入力欄」に固定。返答欄は入力欄のすぐ上。
+- ホログラムの球体・リング・投影光・台座・HUD意匠は変更なし。左右HUDの外枠除去（v172）も維持。
+- 既存ID、返答抽出、履歴・送信・音声・保存・暗号化・同期・バックアップ処理は維持。
+- Service Worker cache: alvis-cache-v173-integrated。
+- DOM階層、ID一意性、HTMLタグ対応、CSS配置、キャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v172 ALVIS返答欄を入力欄直上へ移動・左右HUD外枠を除去（2026-11-07）
+- 最新ALVIS返答欄を会話履歴の後、メッセージ入力欄の直前へ移動。表示順を「ホログラム→会話履歴→ALVIS最新返答→入力欄」に統一。
+- 左右HUDパネルの最外周フレームのみ（外枠線、外側背景、外枠影、角形状）を除去。内部コンテンツ・各項目・操作ボタン・区切り線は保持。
+- アバターモードも返答欄を入力欄の直上に配置。
+- 球体・リング・投影台座、返答抽出、会話履歴・入力・音声・保存形式は変更なし。
+- Service Worker cache: alvis-cache-v172-integrated。
+- DOM順序、ID一意性、HTMLタグ対応、CSS対象、キャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v171 台座の見切れ防止とALVIS最新返答欄を追加（2026-11-07）
+- 投影台座を中央HUD内で少し上へ移動し、下部チャット領域に重ならず見えるよう調整。球体・リング・台座の造形や配色は変更しない。
+- ホログラム直下、会話履歴の上に「ALVIS RESPONSE」欄を追加。会話履歴から最新のALVIS返答を自動抽出して表示し、新しい返答が保存・描画されるたびに更新する。
+- 既存の会話履歴・入力欄・読み上げ・送信処理・保存形式は維持。アバターモードでも最新返答→履歴→入力欄の順で表示。
+- Service Worker cache: alvis-cache-v171-integrated。
+- DOM順序、最新返答の抽出、ID一意性、grid配置、HTMLタグ対応、キャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v170 ホログラム画面の下部空き領域へチャットを配置（2026-11-07）
+- #chatLogと.alvis-chat-composerを.display-dock直下ではなく、ALVISホログラム本体の.jarvis-stage内へ移動。
+- HUDの左右パネル・中央球体・リング・投影光・台座・下部キャプションの後に、会話履歴と入力欄を全幅で配置。球体や台座には重ねず、ホログラム青画面の下側空間を利用。
+- アバターモードでも会話できるよう、同モードではホログラム描画部分のみを隠し、共通の履歴・入力欄を表示する。
+- 既存ID・送信処理・会話/記憶データ・音声・暗号化・同期・バックアップ・AI推論は維持。
+- Service Worker cache: alvis-cache-v170-integrated。
+- DOM順序、ID一意性、divタグ数、モード別CSS、キャッシュ名を静的検査。Safari実機表示はユーザー確認待ち。
+
+## v169 ホログラム表示枠内へチャットを統合（2026-11-07）
+- 会話履歴（#chatLog）と入力欄（.alvis-chat-composer）を、ALVIS/アバター表示を囲む .display-dock の内側へ移動。
+- 表示順は「モード切替 → ホログラム/アバター → 会話履歴 → メッセージ入力」。ホログラムの球体・リング・台座・HUD描画やアニメーションには重ねず、同じガラス調フレーム内に一体化。
+- chatLog/chatInput/sendChatのIDと既存イベント、会話データ、記憶、音声、暗号化、同期、バックアップ、AI推論は変更しない。
+- 表示枠と履歴の境界を青いガラス調に統一。スマートフォン向け余白も調整。
+- Service Worker cache: alvis-cache-v169-integrated。
+- HTMLのタグ対応、DOM順序、ID一意性、CSS追加、キャッシュ名を静的検査。Safari実機の見た目・操作はユーザー確認待ち。
+
+## v168 画面上部とチャット周辺の余白を圧縮（2026-11-07）
+- 上部ヘッダーとメインナビゲーションの上下余白・ボタン寸法を縮小し、メニューを画面上端へ寄せる。
+- チャットページに限定してメイン領域・パネル・モード切替・ホログラム枠・履歴・入力欄の間隔を詰め、画面内に会話操作を収めやすくする。
+- ホログラムの球体・リング・台座・HUD内容、色、アニメーション、既存ID/イベント、記憶・履歴・音声・暗号化・同期・バックアップ・推論ロジックは変更しない。
+- Service Worker cache: alvis-cache-v168-integrated。
+- CSS追加位置・対象セレクター・キャッシュ版を静的検査。端末Safariでの実表示とスクロール量はユーザー確認待ち。
+
+## v167 チャット画面の縦スペースを最適化（2026-11-07）
+- 承認済みホログラムの構図・色・球体・リング・台座は変更せず、中央HUDの高さを画面高に応じて抑制。短い画面ではさらにコンパクトにする。
+- ホログラム直下の会話履歴と入力欄を維持し、履歴カードの余白・文字行間・入力欄の高さ・周辺マージンを縮小。履歴領域は画面高に応じた上限を設け、長い履歴だけを内部スクロール可能にする。
+- 入力ID、送信イベント、履歴データ、音声、記憶、暗号化、同期、バックアップ、AI推論は変更しない。
+- Service Worker cache: alvis-cache-v167-integrated。
+- ソース上のCSS/DOM構造を検査。各端末Safariでの実際の表示高さ・スクロール量はユーザー確認待ち。
+
+## v166 会話欄の順序を直感的に整理（2026-11-07）
+- チャット画面を「ホログラム表示 → 会話履歴/ALVISの返答 → メッセージ入力欄」の順に変更。ALVISの返答が入力欄の直上に表示され、確認後すぐ次のメッセージを送れる構成。
+- 入力欄をホログラム内から独立させ、会話履歴の下に通常フローで配置。履歴は独立スクロール領域とし、画面全体を長くしすぎない。
+- v164で入力欄用に確保していたホログラム下部の余白を解除。球体・リング・台座、メッセージ表示・送信処理・音声会話ページは維持。
+- Service Worker cache: alvis-cache-v166-integrated。
+- DOM順序、ID一意性、チャット履歴と入力欄の順番を静的検査。実機Safariでの操作・スクロール確認は未実施。
+
+## v165 音声会話ページ分離・返信の視認性改善（2026-11-07）
+- 上部ナビゲーションに「音声会話」タブを追加し、読み上げON/OFF、音声エンジン、標準音声、Kokoro音声/速度、試聴・準備・停止の設定一式を独立ページへ移動。
+- 設定要素のIDとイベント接続は維持し、保存形式・選択値・音声合成ロジックは変更しない。チャット画面から音声設定パネルを取り除き、重複配置を防止。
+- ホログラムのVOICE操作も音声会話ページへ遷移するよう接続。チャット下部の音声ショートカットは上部タブと重複するため削除。
+- チャット履歴に話者ラベル（ALVIS/あなた）を追加。ALVISは左側の青い発光パネル、ユーザーは右側の別色パネルとして、余白・輪郭・文字間隔を調整。読み上げボタンと情報源リンクは維持。
+- メッセージデータ形式、送信処理、記憶、暗号化、同期、バックアップ、モデル推論は変更なし。
+- Service Worker cache: alvis-cache-v165-integrated。
+- DOM/ID/ナビゲーション/描画処理の静的検査のみ。Safari実機の見た目・ページ遷移・音声設定保存はユーザー確認待ち。
+
+## v163 送信ボタンの入力連動を修正（2026-11-07）
+- 入力欄が空のときだけ送信ボタンを無効化し、文字入力で有効化するよう変更。
+- AIモデル読み込み中・応答処理中は無効化を維持し、処理完了後は入力内容に応じて状態を再計算。
+- モデル未起動時もボタン自体は押せるようにし、既存の送信処理が「先にQwen3モデルを読み込む」案内を表示する。挨拶・日付/時刻など既存の即答経路も維持。
+- 既存の送信イベント、Enter送信/Shift+Enter改行、チャットデータ形式、記憶・暗号化・同期・バックアップ・音声機能は変更なし。
+- Service Worker cache: alvis-cache-v163-integrated。
+- 静的検査のみ。Safari実機での送信はユーザー確認待ち。
+
+## v162 チャット入力欄をホログラム操作面へ統合（2026-11-07）
+- 独立して狭く見えやすかったチャット入力欄と送信ボタンを、ホログラム表示ドック直下の横長ガラス調コンポーザーへ移動。
+- 入力欄を横方向に広く確保し、送信ボタンを右側に一体配置。iPad/デスクトップでは余裕ある幅、スマートフォンでは入力欄を優先し送信ボタンをコンパクト化。
+- ホログラム画像そのものには重ねず、球体・回転リング・台座・文字を隠さない配置。チャット履歴は表示ドック直後へ移動し、会話の流れを保つ。
+- `chatInput` / `sendChat` のIDと既存送信・Enter/Shift+Enter処理を維持。記憶、履歴データ形式、暗号化、同期、バックアップ、AI推論、音声処理は変更なし。
+- Service Worker cache: alvis-cache-v162-integrated。
+- GitHubソース構造・ID重複・既存イベント参照の静的検査を実施。Safari実機での入力操作・見た目はユーザー確認待ち。
+
+## v161 軌道リングを少し縮小（2026-11-07）
+- ユーザー確認済みのv160回転方式は維持し、3本のリングの寸法のみ約7%縮小。
+- 楕円A: 116%×43% → 108%×40%。楕円B: 108%×58% → 100%×54%。円C: 116%×116% → 108%×108%。
+- 中心位置（left/top/translate）、回転周期22秒/31秒/42秒、回転方向、線幅・色、球体SVG、投影台は変更なし。
+- 記憶、履歴、暗号化、同期、バックアップ、AI推論、音声処理は変更なし。
+- Service Worker cache: alvis-cache-v161-integrated。
+- 静的CSS/DOM検査のみ。実機でのサイズ感はユーザー確認待ち。
+
+## v160 リング回転と位置固定の競合を解消（2026-11-07）
+- v159の実装を再点検し、v153で中央位置維持のために `transform:none!important` を指定しているのに、v159が同じ `transform` をWeb Animations APIで動かそうとしていた競合を確認。
+- 3本の軌道は `transform` ではなく独立したCSS `rotate` プロパティをWAAPIでアニメーション。既存の `translate:-50% -50%` による中心固定を維持しながら回転する。
+- 回転周期は22秒/31秒/42秒。ログイン後、チャット復帰時、pageshow/visibilitychange時の開始経路は維持。
+- prefers-reduced-motion: reduce の場合は動きを強制しない。
+- 記憶、履歴、AES-GCM、同期、バックアップ、AI推論、音声、球体SVG、投影台の見た目は変更なし。
+- Service Worker cache: alvis-cache-v160-integrated。
+- 静的なソース検査のみ。Safari実機での動作確認はユーザー確認待ち。
+
+## v159 ホログラム軌道をWeb Animations APIで駆動（2026-11-07）
+- v158のCSSアニメーション再起動だけではSafariの初回表示時に動かない問題が残ったため、中央HUDの3軌道をElement.animate()で直接駆動する方式へ変更。
+- 22秒/31秒/42秒の線形無限回転。既存の回転角度、中心位置、楕円/円形形状、色、投影台は維持。
+- ログイン後、チャット復帰時、pageshow/visibilitychange時に開始。再実行時は前のAnimationをcancelして重複を防止。
+- 記憶、履歴、暗号化、同期、バックアップ、AI推論、音声処理は変更なし。
+- Service Worker cache: alvis-cache-v159-integrated。
+- 静的コード検査は実施。Safari実機での再現解消はユーザー確認待ち。
+
+## v158 初回表示時のホログラム回転開始を修正（2026-11-07）
+- Safariでログイン直後の初期表示時にHUDの軌道アニメーションが開始しない場合に備え、アプリ表示完了後に3本の軌道アニメーションを明示的に再起動する処理を追加。
+- チャット画面へ戻った時、ページ復帰（pageshow）、タブ/アプリが再び可視になった時（visibilitychange）にも再起動する。
+- CSSアニメーションを一度停止→レイアウト確定→次の描画フレームでCSS定義へ戻す。デザイン、回転周期、位置、台座、SVG球体は変更しない。
+- prefers-reduced-motion: reduce の利用者には従来どおり動きを強制しない。アバターモードや非表示のチャット画面でも再起動しない。
+- Service Worker cache: alvis-cache-v158-integrated。
+- 静的コード検査は実施。Safari実機での再現解消はユーザー確認待ち。
+ 
+## v153 リング回転と左AI起動ボタンの修正（2026-11-07）
+- v152のリング回転が見えにくい原因は、旧translateとrotateを同じtransformで扱い位置が回転中心からずれる可能性があったこと。CSS個別translateとrotate専用animationに分離し、中心を固定。
+- 2本の楕円リングはそれぞれ22秒/31秒で逆方向回転。3本目は球体を囲む円形リング（◎）として42秒で回転。
+- 左AIボタンが反応/表示しない原因は、v128の旧CSSが#hudAiActionを中央の透明オーバーレイとして配置・透明化していたこと。実際のDOM位置（左HUD内）に限定した高優先度CSSで表示・操作を復元。
+- ボタンの既存click handlerとhidden loadAiModelの処理経路は維持。推論、記憶、暗号化、同期、バックアップ、音声ロジックは変更なし。
+- Service Worker cache: alvis-cache-v153-integrated。
+- 静的なDOM/CSS/JavaScript文字列検査のみ。Safari実機での動作は未確認。
+
+## v152 ホログラム微調整・操作フィードバック（2026-11-07）
+- 3本の球体周回リングを異なる周期・方向で回転。各キーフレームで中央位置合わせのtranslateを維持し、回転時に軌道が中心から外れる問題を回避。下部投影台は静止。
+- 球体SVGのみを約82%の不透明度にし、ALVISロゴ文字は鮮明なまま残す。球体背面の塗りと外周光も弱め、透過感を追加。
+- 右上時計を幅100%の右揃え固定列にし、日付/時刻の数字幅を揃えて折り返しを防止。日本時間表示は既存処理を維持。
+- 左のAI起動ボタンに実進捗をCSSカスタムプロパティで反映し、LOADING/ONLINE/ERRORを色で識別。読み込みボタンが存在しない場合は状態欄へ案内を出す。既存のloadAiModelクリック経路を維持。
+- 記憶、履歴、AES-GCM、同期、バックアップ、WebLLM推論、音声処理は変更なし。
+- Service Worker cache: alvis-cache-v152-integrated。
+- developmentブランチへ反映。構造・文字列検査は実施。iPad/iPhone Safariでの描画、回転、AI起動タップの実機確認は未実施。
+
+## v150 HTML構造の最終検証修正（2026-11-07）
+- v149配置修正時の文字列挿入位置を再検証し、AI起動ボタンをHTML文書の先頭ではなくhud-center内へ正しく配置し直した。
+- DOCTYPEが文書先頭にあること、AI起動ボタンが中央HUD内に1つだけ存在することを検査。
+- Service Worker cache: `alvis-cache-v150-integrated`。
+
+## v149 ホログラム内AI操作の配置調整（2026-11-07）
+- AI起動ボタンをステージ直下から中央HUDコンテナ内へ移動し、3カラムのレイアウト計算に干渉しないよう修正。
+- 球体上の透明な操作領域として維持し、キーボードフォーカス時は視認できる。
+- Service Worker cache: `alvis-cache-v149-integrated`。
+
+## v148 ラスター画像撤去・ライブホログラム復帰（2026-11-07）
+- 原因を特定：v138で400px幅のJPEG画像をメイン表示に貼り、左右のHUDと中央のSVG球体をdisplay:noneにしていた。v145ではそのJPEGを最大560pxまで拡大していたため、拡大時にぼやけていた。
+- JPEGの埋め込みimgをHTMLから撤去。画像を拡大表示する方式を廃止。
+- 左右の操作パネル、中央のインラインSVG球体、投影機、光線、軌道リング、台座、AI起動ボタンをライブUIとして復帰。
+- デスクトップ/iPad/スマートフォン向けに3カラムを再設定。SVGはベクターのまま表示し、画像補間やぼかしフィルターを使わない。
+- v147の状態連動・ボタン機能と既存の記憶/暗号化/同期/バックアップ処理は維持。
+- Service Worker cache: `alvis-cache-v148-integrated`。
+- developmentブランチに反映。Safari実機での表示・タップ確認は未実施。
+
+## v147 ホログラム高精細化とSYSTEM STATUS実連動（2026-11-07）
+- 画像の貼り付け・拡大には頼らず、中央グローブをインラインSVGのまま精細化。球面グリッド、緯度ライン、外周の大気光をベクターで追加し、幾何学描画を指定。
+- 左側SYSTEM STATUSのINFERENCEをWebGPU/モデル状態、PROCESSを会話状態、RESPONSE TIMEを実測応答時間、DATA VAULTを保管庫ロック状態（AES-GCM）へ連動。
+- ネットワーク状態をonline/offlineイベントで更新。OFFLINE FIRSTは設計ラベルを保ちつつ、現在の接続状態を併記。
+- INFERENCE / PROCESS / DATA VAULT / OFFLINE FIRSTを実際の操作ボタンにし、AIモデル管理・チャット入力・長期記憶・端末診断へ移動可能にした。
+- 既存の記憶データ形式、暗号化処理、同期、バックアップ、AI推論、音声処理は変更しない。
+- Service Worker cache: `alvis-cache-v147-integrated`。
+- コードはdevelopmentブランチ。ブラウザ実機での描画品質・タップ操作・online/offline切替は未確認。
+
+## v146 ホログラム右側パネルを実操作へ接続（2026-11-07）
+- 参考デザイン右側のVOICE / SEARCH / MEMORY / GROWTHを、見た目だけの情報行から実際に押せる操作ボタンへ変更。
+- VOICEは既存の音声設定へスクロール、SEARCHはチャット画面を開いて入力欄へフォーカス、MEMORYは長期記憶画面、GROWTHは成長計画画面へ遷移する。
+- 既存のナビゲーション、音声設定、チャット入力、記憶庫、成長計画の処理を再利用。保存形式・暗号化・同期・AIモデル処理は変更しない。
+- キーボードフォーカス表示と押下/ホバー状態を追加。画像自体は背景のままで、操作はHTMLボタンで実行する。
+- Service Worker cache: `alvis-cache-v146-integrated`。
+- コード反映先はdevelopmentブランチ。実機Safariでのタップ・表示・画面遷移はユーザー確認待ち。高解像度原画像への差し替え、左側パネルの追加操作化、3D/WebGL化は未完了。
+
+## v145 端末幅に合わせたホログラム表示サイズ
+- ホログラム表示領域を親幅に追従させ、最大520px（広い画面では最大560px）に調整。iPhoneでは画面幅内に収め、画像比率1397:1126を維持する。
+- 元画像は現在HTML内の400×323 JPEGのため、表示サイズの最適化のみでは文字の細部は復元できない。文字の高精細化は元の1397×1126画像をアプリ資産として差し替えるか、文字部分をHTML/SVGで再構成する工程が必要。今回の変更では文字の鮮明化を完了扱いにしない。
+- 既存の記憶庫、履歴、暗号化、同期、バックアップ、音声、モデル処理は変更しない。
+- Service Worker cache: `alvis-cache-v145-integrated`。実機確認前は完成扱いにしない。
+
+## v144 軌道光点・球体走査
+- 軌道2本にシアン/マゼンタの発光点を追加し、回転の視認性を上げる。
+- 球体領域内を横切る淡い光走査を追加。参考画像・左右UI・投影台の構図は維持する。
+- 現在の埋め込み画像は400×323のまま。高解像度化は別作業。実機確認前は完成扱いにしない。
+- Service Worker cache: `alvis-cache-v144-integrated`。
+
+## v143 ホログラム動作復帰
+- v142で静止画像へ切り替えた際に、CSS末尾の非表示指定がモーション要素を隠し、さらにDOM要素自体が未配置だった。
+- v143では参考画像の上に2本の楕円軌道、中央光の脈動、中央投影ビームの明滅を独立レイヤーとして追加。背景画像・左右パネル・下部台座の構図は変えない。
+- 400×323画像を400 CSS px以下で表示し、アップスケーリングによるぼけを抑える。高解像度原本への置換は別工程。
+- Service Worker cache: `alvis-cache-v143-integrated`。実機確認前は完成扱いにしない。
+
+## v142 画像をHTMLへ内包してiPhoneの画像欠落を回避（2026-11-07）
+- iPhoneでホログラム画像が「？」表示になる問題に対し、選択済みJPEGをdata URIとして `index-integrated.html` 内へ内包。画像ファイルへの相対パス解決・別リクエスト・画像キャッシュ取得に依存しない。
+- 画像の内容・構図・400×323表示比率は維持。中央のAI起動タップ領域と既存の操作DOMは維持。
+- Service Worker cacheをv142へ更新し、旧HTMLキャッシュを更新対象にする。
+- 記憶庫、候補承認、会話履歴、暗号化、クラウド同期、バックアップ、音声、AIモデル処理は変更しない。
+- GitHub開発ブランチへの反映後、iPhone Safari実機での表示はユーザー確認待ち。
+
+## v138 参考画像そのものをホログラム土台に採用（2026-11-07）
+- ユーザーが提供した406×326の参考画像を `assets/alvis-reference.jpg` として追加し、ホログラム表示の背景にそのまま使用。
+- 以前の近似SVG描画を表示経路から外し、画像比率を固定して全体をそのまま表示。
+- 既存の `hudAiAction` は球体中央の透明タップ領域へ移動。既存の状態更新IDは保持し、周辺の旧HUD描画だけを非表示化。
+- 球体周囲に控えめな2本の回転リングと中心光の脈動を重ねる。下部投影台にはアニメーションを適用しない。
+- Service Workerをv138へ更新し、参考画像をアプリシェルと一緒にキャッシュ。
+- 自動テスト/実機確認は別途実施。Safariの初回画像取得はオンライン接続が必要。
+
+## v131 参考画像の実寸比率へ修正（2026-11-07）
+- 添付の実画像は406×326。v128以降のSVG viewBoxとステージが406×406だったため縦横比が一致せず、表示が圧縮/余白過多になっていた。
+- SVG viewBoxとステージを406:326へ変更し、文字の過剰なグローを除去して輪郭を明瞭化。
+- 下部プラットフォームは静止を維持。球体周囲の軌道リングのみ回転。
+- 実機表示は未確認。
+
+## v130 球体の大陸表現と下部固定（2026-11-07）
+- ユーザー指摘を受け、下部投影台のリング回転と中心光の脈動を停止。下部リングは静止状態にする。
+- 地球の大陸形状を直線主体の多角形からベジェ曲線主体の滑らかな輪郭に変更し、モザイク状に見える印象を軽減。
+- 球体周囲の軌道リングのみ回転を継続。チャット/AI/記憶/履歴/音声処理は変更なし。
+- 実機表示は未確認。
+
+## v129 リングアニメーションと微細HUD（2026-11-07）
+- 中央球体を囲む軌道リング2グループを逆方向・異なる周期（42秒/29秒）で連続回転。
+- 下部投影台の外周リングと内周リングも逆方向（18秒/12秒）で回転。中央の赤いエネルギー光を脈動。
+- 周辺に小型ラベル、キャリブレーション目盛り、追加発光点を追加。
+- CSS prefers-reduced-motion が有効な場合はアニメーション停止。既存チャット/AI/記憶/履歴/音声処理は変更なし。
+- 実機表示・動作確認は未実施。
+
+## v128 参考画像の構図を単一シーンとして再構築（2026-11-07）
+- v127までのCSS装飾方式をやめ、ユーザー提供画像の406×406構図を基準にしたインラインSVGシーンへ置換。
+- 上部投影器、左右角形フレーム、左レーダー、左右データパネル/棒グラフ、中央の地球・大陸・経緯線・軌道、ALVIS文字、中央光柱、下部の青赤投影リングを固定座標で再配置。
+- 既存HUD/モデル制御DOMは残し、AI起動ボタンだけを中央球体の透明なタップ領域として維持。チャット/記憶/履歴/音声/暗号化/同期の処理は変更なし。
+- SVGはインラインで外部画像取得なし。実機表示は未確認。
+
+## v127 参考画像への構図寄せ（2026-11-07）
+- v126で中央グローブは追加できたが、参考画像の周辺HUD表現が不足。v127では左右パネルを薄い投影パネルに変更し、左側に円形レーダー、左右下部に青い棒グラフ装飾を追加。
+- 中央球体、複数の楕円軌道、上部投影器/光柱、下部の青い投影台と赤いコア光を強化。
+- 既存DOMと機能IDは維持し、CSS中心の調整。外部通信/画像取得なし。
+- 実機表示は未確認。
+
+## v126 ホログラム構図の再設計（2026-11-07）
+- v125は既存構図の色・光量調整に留まり、参考画像への再現度が不足していたため再設計。
+- モバイル時に `.display-dock .mode-stage` 等の既存高詳細度ルールが新規CSSを上書きしていた点を修正。専用セレクタでステージ高・3列比率・中央球体サイズを明示。
+- 中央コア内にインラインSVGの簡易大陸シルエットと経緯線を追加。外部画像/通信不要。
+- 左右パネルを細くし、中央投影を主役に。チャット機能DOM/モデル/保存形式は維持。
+- CSS/JS静的検証後、実機表示は未確認。
+
+## v125 ホログラムHUD参照画像への調整（2026-11-07）
+- ユーザー提供の参考画像に合わせ、中央コアを青い地球型投影に近づける。球面状の緯度経度グリッド、複数軌道、上部プロジェクター、下部の青/赤アクセント付き投影台を強化。
+- 左右の情報パネルは暗い半透明ガラス調にし、背景の青い奥行きと控えめな走査線を追加。
+- iPhone幅を含む760px以下/430px以下の専用レイアウトを追加し、中央コアと投影台の存在感を維持。
+- チャットDOM、ボタンID、モデル制御、記憶/履歴/暗号化/同期処理は変更なし。CSSのみ。
+- 構文とDOMフック保持を静的検査予定。Safari実機の見た目・アニメーションは未確認。
+
+## v124 モデル表示の端末適応（2026-11-07）
+- ホログラムHUD、AI管理画面、音声・成長機能のステータス表示で、選択中のモデル名を端末プロファイルに合わせる。
+- AIステータス共通表示処理でQwen3-4B表記を選択モデル名へ統一し、iPhoneで4Bと誤表示しない。
+- 暗号化データ・記憶・履歴・同期形式に変更なし。実機動作は未検証。
+
+## v123 端末別AIプロファイル整理（2026-11-07）
+- 端末判定を `resolveAlvisDeviceProfile()` に集約。iPhone / iPod / Androidスマートフォンは Qwen3-1.7B・context 1024、iPadとその他は Qwen3-4B・context 2048。
+- iPadOS SafariのデスクトップUAを考慮し、`navigator.platform === "MacIntel"` かつ `maxTouchPoints > 1` の場合はiPadとして扱う。
+- AIモデル管理画面の説明・読み込み/終了ステータスを選択モデルに合わせて表示。端末診断にも端末プロファイルとモデル選択を表示。
+- 既存の暗号化保管庫、記憶候補、会話履歴、バックアップ、同期形式は変更していない。モデル選択は端末内のみで決定し、個人データを外部送信しない。
+- テストにiPhone/iPad/デスクトップUA/Android/タッチ対応MacIntelのプロファイル判定を追加。実機Safariでのモデル読込・GPU安定性は未検証。
+- 次の確認: iPhoneで1.7B、iPadで4Bの選択が画面に表示されることを確認し、それぞれ短い会話を試す。iPhoneが引き続きクラッシュする場合、0.6Bへの縮小またはクラッシュ位置の診断を検討。
+
+## 2026-11-07 — v123 端末プロファイルの共通化
+
+- 端末判定とローカルAIモデル設定を `resolveAlvisDeviceProfile()` に集約。iPhone/iPodとAndroidスマートフォンはQwen3-1.7B・コンテキスト1024、iPadはQwen3-4B・2048を選択する。
+- iPadOS SafariがデスクトップUAを返す場合も、MacIntelと複数タッチポイントからiPadとして識別する。iPadの既存4B設定は維持。
+- 端末診断にALVISの判定端末種別・選択モデル・コンテキスト長を表示。読み込み/終了/音声競合の案内を端末共通表現に統一。
+- 記憶庫、会話履歴、暗号化、同期、バックアップ、モデルID自体は変更なし。Service Worker cache: `alvis-cache-v123-integrated`。
+- 検証: アプリmodule script構文、Service Worker構文、端末プロファイル5パターン（iPhone/iPad/iPadデスクトップUA/Androidスマートフォン/デスクトップ）をV8で確認。iPhone/iPad Safari実機、WebLLMモデル起動・会話は未確認。
+
+## 2026-11-07 — v122 iPhone向けQwen3軽量モデル選択
+
+- iPhone Safariでは `Qwen3-1.7B-q4f16_1-MLC` を選択し、KVコンテキストを1024に制限。iPad/その他端末では従来の `Qwen3-4B-q4f16_1-MLC` と2048を維持。
+- WebLLM v0.2.87公式モデル定義のVRAM要求値はQwen3-1.7B約2036.66MB、Qwen3-4B約3431.59MB。iPhoneの40〜50%付近でのタブ終了はGPU/メモリ圧迫の可能性があるが、実機原因は未確定。
+- モデルIDとHUD/読み込みボタン表示を端末選択に連動。既存の4Bキャッシュ、記憶庫、会話履歴、暗号化、同期、バックアップは削除・変更しない。
+- Service Worker cache: `alvis-cache-v122-integrated`。回帰テストにiPhone/iPadモデル選択を追加。
+- 静的構文・V8互換回帰検証後、iPhone Safariで1.7Bの初回取得/起動/会話を実機確認する。モデル初回取得は通信が必要な場合がある。
+
+## 2026-11-07 — v121 Kokoro/Qwenメモリ競合の回避
+
+- ログイン時のKokoro歓迎音声は、既に端末内キャッシュにある固定フレーズ音声だけを再生する。ログインのたびにKokoro推論モデルを起動しない。キャッシュがない場合は端末標準音声へフォールバック。
+- Qwen3-4B起動中/読み込み中はKokoroモデルを起動しない。Kokoroモデルが既に起動している場合、公開された安全な解放APIを確認できないため、Qwen起動を止めてページ再読み込みを案内する。
+- Qwen使用中にKokoroが選択されている場合は、同時起動せず端末標準音声へフォールバック。Qwen終了後はKokoroを準備して利用できる。
+- Kokoro公式READMEにランタイム解放APIの記載がないため、非公開内部オブジェクトを操作したり、参照だけをnullにして解放を偽装したりしない。
+- 記憶庫・暗号化・会話履歴・同期・バックアップ形式、保存済み音声キャッシュは変更しない。Service Worker cache: `alvis-cache-v121-integrated`。
+- 検証: アプリ内JavaScript構文、Service Worker構文、offline-first回帰アサーション全体をV8互換ハーネスで実行しPASS。Node.js標準ランナー、GitHub Actions、iPhone/iPad Safari実機でのQwen安定性は未確認。
+
+## 2026-11-07 — v120 Kokoro歓迎音声の安定化と端末内キャッシュ
+
+- ログイン時の歓迎音声を端末標準音声への強制フォールバックから、保管庫に保存された音声エンジン/選択済みKokoro女性音声へ統一。
+- Kokoroを選択中なら、通常の返信自動読み上げ設定がOFFでもログイン時の歓迎音声は再生する（歓迎音声と会話返信の読み上げ設定を分離）。
+- ログインボタン/Enter操作中にWeb Audio出力を解放し、認証・画面遷移・Kokoro合成の非同期処理後もAudioContext経由で再生できる経路を追加。AudioContextが使えない場合は音声プレーヤーを表示する。
+- 「おかえりなさい」のKokoro生成音声は声ID別にCache Storage `alvis-voice-cache-v1` へ保存し、2回目以降は端末内の音声データを再利用。ユーザーの会話文や個人情報はキャッシュしない。キャッシュはSWのアプリ更新対象から除外。
+- Kokoro話速の未設定時の初期値を0.98倍へ変更し、少し落ち着いた話し方に調整。既に保存済みのユーザー設定は維持。
+- Kokoroモデルは各ページセッションでメモリへ再初期化する必要があるが、ライブラリ/CDNのキャッシュを利用する設計。モデルファイルが毎回ネットワーク再取得されないことは実機で未確認。
+- 暗号化保管庫、記憶、履歴、同期、バックアップ形式は変更なし。Service Worker cache: `alvis-cache-v120-integrated`。
+- 静的回帰アサーションを追加。Safari/iPad/iPhoneでの自動再生、AudioContextの継続、モデルキャッシュ再利用は実機確認待ち。
+- 検証: アプリ内JavaScript構文、Service Worker構文、offline-first回帰テスト全体をV8互換ハーネスで実行しPASS。Node.js標準ランナー、GitHub Actions、Safari/iPad/iPhone実機での音声再生は未確認。
+## 2026-11-07 — v119 ログイン歓迎音声の再生経路修正
+
+- v118で「何も言わない」問題を受けて、歓迎音声の再生経路を修正。
+- 「おかえりなさいを聞く」ボタンはログイン成功後に常時表示し、自動読み上げ設定がONの場合のみ自動再生も試行する。
+- `fallbackToStandard:true` がKokoro選択・ロード済み状態より優先されるよう分岐順を修正。手動ボタンはユーザー操作から端末標準音声を直接呼び出す。
+- SpeechSynthesisのエラー時だけ手動ボタンを再表示するようイベントハンドラーを修正。
+- 既存の音声設定、Kokoroモデル、暗号化保管庫、記憶、履歴、同期、バックアップ形式は変更しない。Service Worker cache: `alvis-cache-v119-integrated`。
+- ソース静的確認と回帰アサーションを追加。実際のSafari/iPad/iPhoneで音声が出るかは未確認。
+## 2026-11-07 — v118 音声ウェルカムの手動再生フォールバック
+
+- v117のログイン後自動読み上げを維持しつつ、Safari等で自動再生が拒否された場合に備え「🔊 おかえりなさいを聞く」ボタンを追加。
+- ボタンはログイン成功後、自動読み上げ設定がONの場合だけ自動再生試行と同時に表示。ユーザー操作から端末標準音声を直接呼び出す。
+- 音声開始/完了でボタンを隠し、再生失敗時は再表示。認証失敗・ロック状態では発話しない。
+- Kokoroモデルの追加ロードは行わない。既存のKokoro設定や保存データは変更しない。Service Worker cache: `alvis-cache-v118-integrated`。
+- 静的回帰チェックを追加。実機Safariの自動再生/タップ再生は未確認。
+
+## 2026-11-07 — v117 ログイン時の音声ウェルカム
+
+- 保管庫の認証成功後、ログイン演出が終わったタイミングで「おかえりなさい」と音声案内する。
+- 既存の「ALVISの返事を自動で読み上げる」設定を尊重し、OFFなら読み上げない。
+- 選択済みのKokoroがメモリ上で準備済みならKokoroを使用。未準備ならモデルの追加ロードを避けて端末標準音声へフォールバック。標準音声の選択・話し方設定も維持。
+- 認証失敗時は再生しない。ログイン遷移後にロックされた場合も再生しない。暗号化・記憶・履歴・同期・バックアップ形式に変更なし。Service Worker cache: `alvis-cache-v117-integrated`。
+- 静的回帰チェックを追加。Safari/iPad/iPhoneでの自動再生許可・実際の音声は実機未確認。
+
+## 2026-11-07 — v116 控えめなシネマティック起動演出
+
+- v115の星芒・放射光線・円形クリップによる派手な起動演出を廃止。ログイン画面は静かにぼかして退場し、ALVIS画面は中心付近の柔らかな環境光と短いフォーカス復帰で自然に現れる。
+- 中央から広がる光は細く淡い一重の波紋のみ。コニカルグラデーション、爆発・花火風の光線、ゲーム風ワイプは使用しない。約0.9秒。
+- 認証、暗号化、記憶・履歴、音声、同期、モデル、バックアップ処理は変更なし。Service Worker cache: `alvis-cache-v116-integrated`。
+- 回帰アサーションを新演出に更新。構文・静的検査はこれから実施。Safari/iPad/iPhone実機での印象・描画は未確認。
+
+## 2026-11-07 — v115 中心から広がる神秘的ログイン遷移
+
+- v114の下方向移動/スキャンライン演出を廃止。認証成功後、ALVISワークスペースを画面中央（50%/46%）から円形クリップで放射状に展開する。
+- 中央の青白いコア発光、シアンの星芒（conic-gradient）、ログインパネルの中心縮小・発光フェードを組み合わせた約1.1秒の演出。
+- 認証失敗時は遷移しない。OSの「動きを減らす」設定ではアニメーションを省略。
+- 認証、暗号化、音声設定保存、同期トークン復元、記憶・履歴、モデル、バックアップ処理は変更なし。Service Worker cache: `alvis-cache-v115-integrated`。
+- 静的回帰チェックとJavaScript構文検査を実施。Safari/iPad/iPhone実機の描画・性能・視認性は未確認。
+
+## 2026-11-07 — v114 ログインからALVIS画面へのシームレス遷移
+
+- 保管庫の認証成功後、ログインパネルを青い光の余韻とともにフェード/縮小させ、ALVISワークスペースを下から自然に表示する遷移を追加。全画面に短いシアンのスキャン光を通す。
+- 認証失敗時は遷移しない。OSの「動きを減らす」設定ではアニメーションを省略する。
+- 認証、暗号化、音声設定保存、同期トークン復元、記憶・履歴、モデル、バックアップ処理は変更なし。Service Worker cache: `alvis-cache-v114-integrated`。
+- 静的回帰チェックを追加。Safari/iPad/iPhone実機での見た目、遷移時間、タップ操作は未確認。
+
+## 2026-11-06 — v113 応答状態・応答時間HUDとセキュアログイン画面
+
+- SYSTEM STATUSへPROCESS（THINKING/READY/STANDBY）とRESPONSE TIMEを追加。会話ターン開始時に考え中へ切り替え、finallyで送信開始から完了までの経過秒を表示する。端末内即答も同じ計測対象。
+- ログイン画面をALVISの青/シアン系ホログラム意匠へ刷新。ロゴコア、SECURE ACCESS、AES-256/LOCAL FIRST表示を追加。既存のパスワード認証・暗号化処理・入力IDは維持。
+- 既存データ、暗号化、同期、バックアップ、モデル処理は変更なし。Service Worker cache: `alvis-cache-v113-integrated`。
+- HUDの状態遷移、計測処理、ログインUIの静的回帰チェックを追加。Safari実機の見た目・秒数表示・認証動作は未確認。
+
+## 2026-11-06 — v112 自律タスクの提案根拠を正しく紐付け
+
+- ALVISの自律目標案に付随する理由・完了条件・優先度・提案元を、生成時の目標と最初の行動に紐付けて保存する。
+- ユーザーが登録前に目標または行動を書き換えた場合、元のAI提案の根拠や優先度を誤って引き継がず、通常のユーザー作成タスクとして登録する。
+- 既存のタスクや保存済みデータは変更しない。暗号化、記憶、履歴、同期、バックアップ形式に変更なし。
+- Service Worker cache: `alvis-cache-v112-integrated`。
+- メタデータの一致/不一致を確認する回帰アサーションを追加。実機のタスク登録操作とNode.js標準テストランナーは未確認。
+
+## 2026-11-06 — v111 自律タスクの重複登録防止強化
+
+- 自律タスクの重複判定を完全一致から正規化比較へ改善。Unicode NFKCで全角/半角を統一し、英字の大小・空白・句読点・記号の差を吸収して、目標と行動の組み合わせを比較する。
+- 課題候補からのタスク化と、目標案からのタスク登録の両方に同じ判定を適用。目標または行動が実質的に異なる場合は登録できる。
+- 既存タスクの自動統合・削除・書き換えは行わない。暗号化データ形式、記憶、会話履歴、同期、バックアップには変更なし。
+- Service Worker cache: `alvis-cache-v111-integrated`。
+- 正規化関数の回帰アサーションを追加。実機での登録操作とNode.js標準テストランナーは未確認。
+
+## 2026-11-06 — v110 会話ターンの重複実行防止
+
+- `sendToAlvis()` にターンロックを追加。Enter連打/複数クリックで履歴更新・オンライン参照・推論・保存処理が重複して走らないようにし、`finally` で解除。
+- 目的は会話文脈の混線とGPU推論待ち行列の抑制。Qwen推論キューや保存データ形式は変更なし。
+- 記憶、履歴、暗号化、同期、バックアップ、モデルキャッシュ内容は維持。Service Worker cache: `alvis-cache-v110-integrated`。
+- 回帰テストを追加。実機での連続入力確認は未実施。
+
+## 2026-11-06 — v109 空間投影型ホログラムHUD
+
+- ALVISモードをユーザー提示の近未来型ホログラム指示書に沿って強化。中央球体コア、精密な軌道リング、上部投影装置、下部エネルギー投影台、左右のガラス調情報パネルを追加。
+- 青/シアン基調、赤/ピンクは限定アクセント。iPad幅・スマートフォン幅に応じたレイアウト縮小と、動きを減らす設定への配慮を追加。
+- 既存Qwen3-4B起動操作と実進捗％を左パネルへ維持。右側のVOICE/SEARCH/MEMORY/GROWTHは機能領域の表示で、ライブ状態表示ではない。
+- 実装はHTML/CSSのホログラム演出。3DモデルやThree.js/WebGLによる実空間描画ではない。
+- 記憶、履歴、暗号化、同期、バックアップ、AI推論ロジックは変更なし。Service Worker cache: `alvis-cache-v109-integrated`。
+- 回帰テスト記述を更新。実機の視認性、画面回転、描画性能は未確認。
+
+## 2026-11-06 — v108 HUD進捗表示・クイック機能
+
+- Qwen3-4Bの読み込み進捗を既存WebLLM `initProgressCallback` から取得し、ALVISモード左側の円の中央へ0〜100%で表示。読み込み完了は100%、未起動/終了後は0%。
+- チャット画面からローカルAIモデル管理パネルを外し、端末診断ページ内の「AIモデル管理」へ移動。起動処理は上部HUD円から呼び出し、停止操作と状態表示は端末ページに残す。
+- HUD下部に「記憶」「成長」「音声」「端末」のクイック操作を追加。既存ページ/音声設定への移動のみで、新しいデータ処理は追加しない。
+- 記憶、履歴、暗号化、同期、バックアップ、モデルID、推論設定は変更なし。
+- Service Worker cache: `alvis-cache-v108-integrated`。
+- コード構造と回帰テストを更新。iPad/iPhone Safariでの進捗表示、レイアウト、タップ操作は未確認。
+
+## 2026-11-06 — v107 Qwen読み込み円形コントロール
+
+- ALVIS HUDのOFFLINE/ONLINE表示を円形ボタン化。タップで既存Qwen3-4Bロード処理を呼び出す。
+- 読み込み中はボタン周囲の円形リングが回転し、状態を視覚化。起動後は緑色の固定リング、エラー時は赤色リング。
+- 二重ロードを防ぎ、モデル稼働中・読み込み中・終了中はボタンを無効化。エラー時は再試行可能。
+- HUD下部の重複した起動ボタンを削除。モデル停止は従来のモデル操作欄を利用。
+- 記憶・履歴・暗号化・同期・バックアップ・推論エンジンには変更なし。
+- Service Worker cache: `alvis-cache-v107-integrated`。
+- コード上の回帰チェックを追加。実機でのタップ・回転表示は未確認。
+
+## 2026-11-06 — v106 ALVISモード名称・Qwen状態統合
+
+- 表示名を「JARVISモード」から「ALVISモード」へ変更。内部の保存値 `jarvis` と既存のモード保存キーは互換性維持のため変更しない。
+- HUDの「AI ONLINE」をQwen3-4Bの実状態表示へ統合。未起動・読み込み中・稼働中・終了中・エラーを状態に応じて表示し、モデルの稼働状態を明示する。
+- HUDからQwen3-4Bの起動・終了を直接操作できるようにし、従来のモデル設定ボタンも維持。
+- iPhone幅でHUDの3列表示と操作ボタンを調整。AIモデル、推論設定、記憶・履歴・暗号化・同期・バックアップ形式は変更なし。
+- Service Worker cache: `alvis-cache-v106-integrated`。
+- 静的回帰検査を追加。iPad/iPhone Safariでの見た目、ボタン操作、Qwen状態同期は実機未確認。
+
+## 2026-11-06 — v105 JARVIS HUD／アバター表示のビジュアル強化
+
+- `index-integrated.html` の表示CSSを改善。JARVIS HUDにグリッド／スキャンライン風背景、発光リング、ガラス調の切替UIを追加。アバター仮表示は照明・奥行き・カード表現と顔／衣装の陰影を改善。
+- CSSプレビューであり、実際の3Dモデルや顔アニメーションはまだ未実装。モード切替・sticky表示・狭幅レイアウトは維持。
+- Service Worker cache v105。テストに主要装飾スタイルの静的検査を追加。記憶・履歴・暗号化・同期・バックアップ形式は変更なし。
+- 実ブラウザのスクリーン表示、iPad/iPhoneの描画負荷、画面回転時の見た目は未確認。
+
+## 2026-11-06 — v104 アバター／JARVIS表示のスクロール固定
+
+- チャット画面のモード切替と選択中の表示ステージを `display-dock` にまとめ、`position: sticky` で上部に固定。チャット本文や設定欄をスクロールしても表示を維持する構成。
+- 600px以下ではステージの高さを156pxに縮小し、アバター仮表示も調整。
+- 変更対象: `index-integrated.html`、`service-worker.js`（cache v104）、`tests/offline-first.test.mjs`、本書、CHANGELOG。
+- 記憶庫、会話履歴、暗号化、同期、バックアップ、Qwenモデルキャッシュは変更しない。
+- 静的回帰アサーションを追加。iPad/iPhone Safariの実スクロール・画面回転・ナビゲーション復帰は未確認。ユーザー実機で最後に一度確認する。
+
+## 2026-11-06 — v103 JARVIS/アバター2モードの土台
+
+- 開発版 `development` の `index-integrated.html` にJARVISモードとアバターモードの切り替えUIを追加。
+- JARVISモードは青い円形HUD表示。アバターモードは将来の3D表示領域と暫定プレビューを表示する。現時点では本物の3Dモデル、表情制御、視線追従、リップシンクは未実装。
+- 選択モードは `ALVIS_DISPLAY_MODE` へ保存。暗号化保管庫 `ALVIS_ENCRYPTED_V1`、会話履歴、長期記憶、同期・バックアップ形式には触れない。
+- Service Worker cache: `alvis-cache-v103-integrated`。
+- 回帰テストにモードUI、保存キー、表示切替、既存暗号化データとの分離を確認するアサーションを追加。
+- iPad/iPhone Safariでの表示・切り替え・再読み込み後の設定保持は未確認。3D描画性能も未検証。
+
+### v102 検証結果（2026-11-06）
+
+- offline-firstテスト本文をV8互換ハーネスで実行: 298 assertions PASS。
+- index-integrated.html内のJavaScript構文 PASS。service-worker.js構文 PASS。
+- 注意: Node.js標準ランナーでの実行ではない。GitHub Actionsのpush run状態は利用可能なGitHub接続から取得できず未確認。iPad Safari実機のprefill時間・GPU mapAsync安定性は未確認。
+- v102の目的は入力prefillとKV cache負荷を抑えること。実機確認前にmap async障害が解消したと断定しない。
+
+## 2026-11-06 v102 — iPad WebGPU prefill負荷軽減
+
+- Qwen3-4Bロード時に CreateMLCEngine(..., config, {context_window_size:2048}) を指定。WebLLM 0.2.87の公式API例にある第3引数 chatOpts を使用し、KV cacheの最大コンテキストを縮小。
+- 通常会話は巨大なシステムプロンプトを使わず、短い基本指示＋compact日本語ガイダンス＋短い会話変化ガイダンスへ変更。
+- 推論時のみ会話履歴を直近1発言（フォローアップは2発言）・各100文字へ制限。現在の質問は省略せず保持。関連記憶180文字、関連学び・出典付き資料420文字、ユーザーが明示許可した外部AI参考文500文字。
+- 保存済みの会話履歴・記憶データは変更・削除しない。暗号化、同期、バックアップのデータ形式は変更なし。短い疲労共有などの端末内即答は維持。
+- Service Worker cache: alvis-cache-v102-integrated。
+- 目的はiPad Safariのprefill一括処理とKV cache負荷を軽減すること。WebLLM内部のGPU mapAsync障害を完全に解決した保証はない。
+- 次: テストのNode.js標準実行とGitHub Actionsを確認。成功後、ユーザーには通常の質問を一度だけ試してもらい、応答時間・回答の自然さ・GPUエラーの有無をまとめて確認する。短い疲労共有の再テストは不要。
+
+### v100（2026-11-06）— 内部独白の遮断・応答負荷の削減
+
+- 「SYNCしています」「ユーザーがどんなことを話そうとしているのか」など、回答ではない内部向けの独白が出た場合は異常出力として検出し、追加生成を待たず短い安全メッセージへ置き換える。
+- iPad WebGPUの負荷と待ち時間を抑えるため、最大生成量を短い会話64 tokens／通常回答192 tokensへ削減。通常会話の推論用履歴は直近6発言・各700文字、短い会話は直近4発言・各160文字に制限。暗号化記憶・会話履歴の保存データは変更しない。
+- Service Worker cache: `alvis-cache-v100-integrated`。
+- 検証: アプリとService Workerの構文確認、テスト本体283アサーションを互換実行環境で確認。Node標準テストランナー・GitHub Actions・iPad実機は未確認。
+
+## 2026-11-06 v89 — GPU再生成制御と未完了回答検出
+- 再生成の連鎖を防止し、1回の質問につき初回＋追加1回までに制限。GPU負荷を抑える。
+- 「また、富士山」のような読点後の短い断片を未完了回答として検出し、品質修復へ回す。
+- 通常回答トークン上限は384へ戻す。512はiPad GPU負荷を考慮して採用しない。
+- Service Worker cache v89。記憶・履歴・暗号化・同期・バックアップ形式は変更なし。
+- 回帰テストとGitHub Actionsを確認し、iPad実機確認はユーザーに一操作ずつ依頼する。
+
+## 2026-11-06 v88 — 公開情報リンクのフォールバックと回答上限
+- v87で学習選択時の出典メタデータ保持は修正済み。今回、モデルが `[出典N]` を出力しないケースでも、回答に関連してプロンプトへ渡した承認済み公開資料リンクを表示するようにした。
+- 明示的な引用番号がある場合は「参考にした情報源」、ない場合は「関連する承認済み資料」と表示し、誤った引用表現を避ける。
+- 通常回答の上限を384→512 tokensへ拡大。短い会話96 tokensは維持。
+- Service Worker cache v88。既存データ形式・暗号化・同期・バックアップは変更なし。
+- 回帰テストとGitHub Actionsを確認後、開発URLでiPad Safari実機確認を依頼する。実機確認前に完成と断言しない。
+
+# ALVIS 開発引き継ぎ
+
+最終更新: 2026-11-06  
+リポジトリ: `doka100-ui/ALVIS-PWA`  
+作業ブランチ: `development`
+
+## 最初に読む資料
+1. このファイル
+2. `docs/DEVELOPMENT.md`（開発ルール）
+3. 必要に応じて `docs/ALVIS_SPEC.md`（仕様）、`docs/ARCHITECTURE.md`（構成）、`docs/CHANGELOG.md`（変更履歴）
+
+## 現在の開発対象
+- 統合アプリ: `index-integrated.html`
+- 開発URL: https://development.alvis-pwa.pages.dev/index-integrated.html
+- 本番URL: https://alvis-pwa.pages.dev/ （変更禁止。明示許可が必要）
+- AI: WebLLM `@mlc-ai/web-llm@0.2.87`
+- モデル: `Qwen3-4B-q4f16_1-MLC`
+- 実行: iPad Safari / WebGPU
+- 同期Worker: `https://alvis-sync.dokodemodoa100.workers.dev`
+
+## 最新の開発更新（2026-11-06）
+
+- v87: `selectRelevantLearnings()` が関連度順に学びを選ぶ際、元レコードの出典メタデータを落としていた問題を修正。`sourceType` / `sourceUrl` / `sourceProvider` / `sourceQuestion` を回答生成まで保持する。v86の引用表示が外部調査の承認済み学びと接続される。Service Worker cache: `alvis-cache-v87-integrated`。
+- 関連学習の選択後も出典情報が保持される回帰テストを追加。iPad実機・GitHub Actionsは未確認。
+
+- v86: 承認済み公開情報を回答に利用した場合、ALVISが `[出典1]` 等で示した実在する出典だけを回答下へリンク表示する。引用のない回答には出典を付けない。履歴には任意の `sources` を保存し、既存履歴との互換性を維持。Service Worker cache: `alvis-cache-v86-integrated`。
+- 回帰テストを追加。コード構文・引用抽出の単体確認はこれから実施。iPad Safari/GitHub Actionsは未確認。
+
+## 最新の開発更新（2026-11-05）
+
+- 最新追加（v78）: 会話のバリエーション層を追加。直近3件のALVIS返答を参照し、同じ相づち・慰め文句の反復を避ける。疲労/大変さ・不満/悔しさ・不安・悲しさ・喜びを軽量分類し、発言の種類に合わせた返答方針をプロンプトへ追加。AI自身の人間らしい経験の捏造も抑止。Service Worker cache: alvis-cache-v78-integrated。実機Qwenの品質・速度は未確認。
+- 自然な会話の文脈理解を強化。短文会話は最大180文字の会話表現マーカーで判定し、直近4メッセージ（各200文字）を参照する。
+- 短文会話プロンプトに、直前の返答とのつながり、引用・確認・冗談・反語、肯定・否定、発話者の区別、ユーザーが言っていない経験や感情を補わない指示を追加。
+- 日本語言語パックは短文会話用のコンパクト指針を使用。短文会話の最大生成量は96 tokens。通常質問の384 tokensは維持。
+- 最新追加（v77）: 「そんなに頑張ってない」「頑張ってないんですか」等の努力否定・疑問表現を日本語品質検査で検出し、再生成後も残れば端末内の自然な共感文へフォールバック。Service Worker cache: alvis-cache-v77-integrated。
+- 追加した回帰アサーション159件は取得した現行ソースを使った実行で全件成功。GitHub Actions/Node本番ランナーでの実行結果は未確認。Qwen3-4Bの実際の出力とiPad Safari実機の速度・連続会話品質も未確認。
+- 次の実機テスト: 「今日は疲れた」→「ほんとですね。そんなに頑張ってないんですか？私も今日も大変でしたけど、そんなくらいでいいかなって思ってました。しっかり休んでくださいね。」のような、直前の返答を受けた少し長めの発言→「そういう意味じゃないよ」などの訂正→話題を続ける、の順で意味のつながりと訂正反映を確認する。
+
+## 動作確認済みとして引き継ぐ項目
+- 保管庫ログイン・ロック
+- Qwen3-4Bでの会話（例: 1+1 → 2）
+- 会話から記憶候補を自動抽出
+- 候補の承認と長期記憶への保存
+- 再ログイン後の好みの想起についてユーザー確認あり
+- 暗号化ローカル保存
+- 暗号化バックアップ/復元の実装
+- クラウド同期の実装（すべての同期条件を毎回実機確認済みという意味ではない）
+
+## 直近のアップデート
+- 2026-11-05: ログイン画面にJavaScriptソースが大量表示される原因を特定。`</html>` の後ろに約35.8KBの `sendToAlvis()` 以降のコードが重複して残っていたため、HTML文書末尾で切り詰めて除去。Service Worker v64へ更新。iPad Safari実機確認は未実施。
+- 2026-11-05: 名前質問の即答判定を「名前は？」などの自然な短縮表現・言い換えに拡張。ログイン画面は説明文を減らし、パスワード欄・ログイン/記憶庫作成ボタン・エラー表示に簡素化。開発版の実機確認は未実施。
+- 2026-11-04: `selectRelevantMemories()` を追加（コミット `ea1321f283b5ca9b3ed86553eb954a40987e517c`）。今回の質問と関連する承認済み記憶を最大5件選び、プロンプトへ渡す。
+- 2026-11-04: 長期記憶の検索欄・分類フィルター、成長計画（改善案の生成・承認・進行・振り返り）を追加（アプリコミット `93865b1903d51824b0bc2750f31b319bfd66fb71`、互換修正 `af427b865289c2b9f1e7f3bf6303e0bf33a6b6fa`）。
+- 2026-11-04: 長期記憶の自動分類ラベル・件数表示を追加（コミット `f96279ccc3349b1a0d498703d2474994126819fc`）。表示時に分類し、保存形式は変更しない。実機テストは未確認。
+- 2026-11-04: PWAキャッシュ名を `alvis-cache-v5-integrated` に更新（コミット `5151ff2ae4e743e675ff7237b160c74cee2daf41`）。分類機能の新しいHTMLが古いキャッシュに残るのを避ける。
+- 2026-11-04: 長期記憶の編集UIと重複登録防止を追加（アプリコミット `b3f76bc0b92a6a9f7fa1973b841d6e681d7339e9`）。編集は既存項目のtitle/bodyのみ更新。完全一致ベースで候補・記憶の重複登録を防ぐ。
+- 2026-11-04: PWAキャッシュ名を `alvis-cache-v6-integrated` に更新（コミット `15986858ab95b4996e56b146d294b013e0ff00bd`）。
+- 2026-11-04: 成長計画UIの配信に合わせ、PWAキャッシュ名を `alvis-cache-v7-integrated` に更新（コミット `371ed22cd1f5b7accaa503f2267a11988289074a`）。
+- 2026-11-04: 同期トークンの任意保存を追加。ユーザーがチェックした場合のみ、保管庫ログインパスワード由来のAES-GCM鍵でトークンを暗号化して端末内保存し、次回ロック解除後に復号して入力欄へ戻す。平文トークンはlocalStorageへ保存しない。実機テスト待ち。PWAキャッシュv8。
+- 検索はキーワード/文字2-gram/簡易カテゴリ語彙による初期版。意味検索ではない。
+- データ保存形式、暗号化、バックアップ、同期処理は変更していない。
+- 実機テストはこれから。テスト完了前に完成扱いしない。
+
+## 未完成・次の開発候補
+1. 関連記憶検索・分類フィルターの実機テストと検索語彙・閾値の調整。
+2. 記憶の編集・キャンセル・重複防止・再読み込み後の保持はユーザー実機確認済み。クラウド復元そのものは未確認。重複判定は文字列完全一致ベースで、意味的な重複統合は未実装。
+3. 成長計画の実機テスト（Qwen3-4Bでの提案生成、登録、開始、完了、AI振り返り、同期）。
+4. 応答品質と速度の継続改善。
+5. オフラインでのモデル再起動・キャッシュ動作の確認。
+6. 自動テストと回帰テストの拡充。
+7. 将来のコード分割（現時点では実施しない）。
+8. AIモデル自体の追加学習は未実装。会話記憶の保存とモデル再訓練を混同しない。
+
+## 絶対ルール
+- 開発は `development` のみ。main/本番へ変更を入れない。
+- 変更前にGitHubから最新ファイルを取得して確認する。
+- 既存機能、保存データ、暗号化、同期、バックアップを無断変更・削除しない。
+- 1回の変更は小さく限定し、コミットSHAを記録する。
+- 実機テスト前に成功・完成と断言しない。
+- 操作案内は日本語で一つずつ。ユーザーはプログラミング未経験。
+- パスワードや同期トークンを資料やコードへ記載しない。
+
+## 次に行うこと
+開発URLを開き、今回追加した長期記憶検索・分類フィルターと成長計画を実機テストする。特にQwen3-4Bで改善案生成、提案の編集・登録、開始、完了メモ、AI振り返りを順番に確認する。成長計画のローカル保存・再読み込み・クラウド同期を確認する。旧データ互換性は静的コード確認済みだが、旧バックアップの復元試験は安全なテスト用バックアップで別途行う。実機テスト前に完成扱いしない。
+
+## 現行コードで重要な設定
+- LocalStorage key: `ALVIS_ENCRYPTED_V1`
+- PBKDF2-HMAC-SHA256: 310,000 iterations
+- AES-GCM: 256-bit、salt 16 bytes、IV 12 bytes
+- AIへ渡す会話履歴: 直近12メッセージ
+- 承認済み長期記憶: system promptへ最大5,000文字
+- 同期自動保存: 約3秒後、クラウド確認: 約30秒間隔（同期を有効化した場合）
+
+## 2026-11-04 — 文脈理解・監督付き自律タスク/学習を追加
+
+- ブランチ: `development`
+- アプリ変更コミット: `3936052e2b8c782e845adadfb36322c5c503c808`、描画反映修正: `838caa284d2b7580f30694075fe0603a7b10c202`
+- Service Worker更新コミット: `74fd40cc773a6573fd27ef1acbdedd6cf8241ced`（cache v9）
+- 会話理解: 短い返答・指示語を含むフォローアップでは最大16メッセージ/7,200文字、通常は最大12メッセージ/6,000文字を文脈に応じて送る。プロンプトに話題転換、直前文脈、ユーザー発言とAI発言の根拠区別、訂正優先の指示を追加。
+- 自律タスク: 目標を入力し、Qwen3-4Bが次の小さな行動を1件提案。ユーザーが編集・登録後、手動で開始・完了する。
+- 学習: 完了タスクの実行メモからAIが学びを生成し、`pending` で保存。ユーザー承認後のみ `approved` となり、以降の会話プロンプトへ最大5件を渡す。
+- データ互換: `autonomyTasks` と `learnings` を追加。旧データ/旧バックアップ/旧クラウドデータにない場合は空配列を補完。既存暗号化方式・キー・同期APIは変更しない。
+- 安全: バックグラウンド自動実行、コードの自動変更、外部送信、記憶の自動承認は行わない。タスク登録・開始・完了・学びの承認はユーザー操作。
+- テスト: GitHubソースの静的確認のみ。ブラウザ実機テストは未実施。文脈の応答品質、タスク生成/保存/同期、学びの承認と次回プロンプト反映を確認する。
+
+## 注意
+この資料は2026-11-04時点の調査結果。新しいチャットでは資料だけを信じ切らず、作業開始時に必ずGitHubの現行コードとブランチを再確認する。
+
+
+## 2026-11-04 — 自律サイクル1〜6を追加
+
+- アプリコミット: `eca8aa5403189f528a71030edc1d08774a05de24`
+- Service Worker: `8c12ca3c84adf1a704d4fd1de96548720160fb6b`（cache v10）
+- 課題発見: 直近18件の会話、直近12件のタスク、承認済み学習から最大3件の課題候補をローカルQwen3-4Bが抽出。
+- 優先順位: high / medium / low を提案し、優先度順に表示。
+- 計画: 課題の採用操作で自律タスクへ変換。採用前に根拠と最初の一歩を確認できる。
+- 実行: 既存のタスク開始・完了・実行メモ機能を使用。開始・完了はユーザー操作。
+- 評価: 既存のAI振り返りで学びを生成し、ユーザー承認後のみ会話プロンプトへ反映。
+- 次の改善: 完了タスク・承認済み学習・未完了タスクを材料に、次の改善目標を提案して目標欄へ設定。
+- データ: `autonomyIssues` を追加。旧データ・旧バックアップ・旧クラウドデータには空配列を補完。暗号化方式・同期API・既存データの意味は変更しない。
+- 安全: 課題候補の採用、タスク開始/完了、学習承認は手動。バックグラウンド実行、コード自動変更、データ削除、外部送信はしない。
+- 検証: JavaScript構文チェック済み。ブラウザ実機テストと実際のモデル出力品質は未確認。
+
+## 次に行うこと
+開発URLで新しい「自律サイクル1〜6」が表示されるか確認する。Qwen3-4Bを読み込み、課題発見、優先度表示、課題採用によるタスク化、次の改善目標の生成を順番にテストする。既存のタスク開始/完了/学習承認の動作と、再読み込み後の保持も確認する。
+
+
+## 2026-11-04 — 文脈に応じた記憶・学習検索を改善
+
+- アプリコミット: `123b90d644a38f037af88e0dbe14b8c31629c985`
+
+- Service Worker更新コミット: `6e5b122d0c44f21a07a629749d21fd8cd6b78591`（cache v11）。新しいHTML/JSが旧キャッシュに残らないよう更新。
+- 短い返答・指示語を含むフォローアップでは、直近6件の会話を補助文脈として関連記憶検索に利用する。通常の質問は現在の質問を優先し、過去文脈の影響を受けにくくする。
+- 承認済み学習は全件を新しい順に渡す方式から、現在の質問と必要な場合の直前文脈に関連する項目を最大5件選ぶ方式へ変更。短いフォローアップで一致がない場合のみ直近2件を補助として使う。
+- 未承認学習は引き続き会話プロンプトへ渡さない。
+- 保存形式、暗号化キー、PBKDF2/AES-GCM、同期API、バックアップ形式は変更していない。
+- 検証: GitHubソースの置換内容確認。ブラウザ実機での応答品質テストはユーザー確認待ち。
+
+
+## 2026-11-04 — 日本時間の日付回答を安定化
+
+- チャット送信時に `Intl.DateTimeFormat` の `Asia/Tokyo` から現在日時を取得。
+- 「今日は何年何月何日？」などの日付質問は、ローカルAIの生成処理を通さず、取得した日本時間の日付から決定的に回答する。
+- 通常のAI会話にも現在日時をシステムプロンプトへ渡し、日付・時刻の質問でモデルの学習知識による推測を避けるよう指示。
+- 保存データ形式、暗号化、記憶、クラウド同期には変更なし。
+- Service Worker cache を v12 に更新。
+- 検証: ソース上の変更とキャッシュ版を確認。Safari実機での動作はユーザー確認待ち。
+
+
+## 2026-11-04 — 日本時間の時刻質問に直接回答
+
+- `isTimeQuestion()` を追加し、「今は何時ですか？」「今何時？」「現在の時刻を教えて」などを判定。
+- 時刻質問はQwen3の文章生成を通さず、`Intl.DateTimeFormat` で取得した `Asia/Tokyo` の現在時刻（HH:mm）を使って「現在の日本時間はHH:mmです。」と回答。
+- 日付質問の既存処理は維持。通常会話、記憶、暗号化、クラウド同期、バックアップ形式に変更なし。
+- Service Worker cache を v13 に更新。
+- 検証: GitHubソース上で判定関数・直接回答分岐・cache v13を確認。Safari実機での時刻回答はユーザー確認待ち。
+
+
+## 2026-11-04 — WebLLMモデルキャッシュの保持を修正
+
+- Service Worker変更コミット: `40d846df477c78389f6dee937679b87d18c5b89c`
+- 変更: 有効化時にCache Storage全体を削除していた処理を修正。ALVIS自身の `alvis-cache-*` の旧キャッシュだけを削除し、WebLLMのモデルキャッシュを保持する。
+- WebLLM 0.2.87は既定でCache APIをモデル成果物の保存先に使用する。従来のService Workerがそのキャッシュまで削除していたことが、毎回の再ダウンロードの原因と判断。
+- 新しいALVISアプリキャッシュ: `alvis-cache-v14-integrated`
+- 保管庫データ、暗号化、バックアップ、同期APIは変更していない。
+- 実機テスト: 未確認。次回モデル読み込み完了後、Safariでページ再読み込みまたはSafari再起動を行い、モデル読み込み時に大容量ダウンロードが再発しないか確認する。キャッシュがすでに削除されている場合、最初の一度だけ再ダウンロードが必要。
+
+
+## 2026-11-04 — 時刻の文脈追従と異常出力ガード
+
+- 「今は何時？」の直後の「アメリカは？」を時刻の追加質問として認識し、米国4時間帯の時刻を端末から直接取得して回答する。
+- 日付・時刻・挨拶の決定的な回答はQwen3未読み込みでも利用可能。
+- Qwen3の返答に `ViewGroup` が複数回含まれる場合は異常出力として検出し、安全な案内文に置き換える。
+- 保存形式、暗号化、記憶、クラウド同期、バックアップには変更なし。
+- Service Worker cache: `alvis-cache-v15-integrated`
+- 実機テスト: 未確認。開発URLで「今は何時ですか？」→「アメリカは？」を試し、時刻回答とViewGroupの非表示を確認する。
+
+
+## 2026-11-04 — 国別の時刻追加質問に対応
+
+- 「今は何時？」の直後の国名質問を認識し、登録済みの国別タイムゾーンから現地時刻を取得する。
+- 主要国を登録。複数時間帯の国は複数都市の時刻を表示する。国リストは追加拡張可能。
+- Service Worker cache: `alvis-cache-v16-integrated`
+- 実機テスト: 未確認。日本時間の質問後に「アメリカは？」「韓国は？」「ラオスは？」などを試す。
+
+
+## 2026-11-04 — 日本語音声読み上げ（初期版）
+
+- ブランチ: `development` のみ。
+- チャットに端末ブラウザ標準の Speech Synthesis を利用した音声読み上げを追加。
+- ALVISの返答を自動読み上げするON/OFF、読み上げ停止、返答ごとの「聞く」ボタン、日本語音声の選択に対応。
+- 自動読み上げ設定と選択した音声名はLocalStorageへ保存。会話履歴・暗号化保管庫・同期データには追加しない。
+- 音声合成は端末/ブラウザ提供機能を利用し、外部音声APIへ会話内容を送信しない。
+- 初期状態は自動読み上げON。iPad Safariの音声利用可否・音声一覧・自動再生制限は実機確認が必要。
+- 音声入力、割り込み、双方向のリアルタイム会話は未実装。次段階で音声入力を追加する。
+- Service Worker cache: `alvis-cache-v17-integrated`。
+- 実機テスト: 未確認。開発URLで保管庫解除後、日本語音声の選択、返答の自動読み上げ、聞くボタン、停止、ON/OFF保持を確認する。
+
+
+## 2026-11-04 — 音声選択・試聴の初期拡張（v18）
+- 端末/ブラウザが提供する日本語音声を一覧から選択できる既存機能を維持。
+- 「自然・やさしい・明るい・落ち着いた・元気」の5つの話し方プリセットを追加。話速と声の高さを調整し、設定はLocalStorageへ保存。
+- 試聴ボタンを追加し、選択した音声と話し方でサンプルを再生できる。
+- これは音声合成エンジン自体を変更するものではない。声の種類・自然さは端末の音声エンジンに依存し、ピッチ/速度調整で別人の声になるわけではない。動画のような高品質AI音声は別途TTSサービス導入が必要。
+- 外部API、音声送信、保管庫/同期データ形式の変更なし。
+- Service Worker cache: `alvis-cache-v18-integrated`。
+- 検証: ソース変更と設定保存・試聴イベントの静的確認。iPad Safari実機での音質・音声数・試聴はユーザー確認待ち。
+
+
+## 2026-11-04 — オフラインファースト・マルチデバイス計画を開始
+
+- 設計資料 `docs/OFFLINE_FIRST_ROADMAP.md` を追加（コミット `ee6442de738a553f8dff8b91f5888f2f3c9e8fe0`）。
+- 目標端末: iPhone、iPad、PC。将来的にAndroidも対象。端末ごとの性能に合わせてAIモデル/実行方式を切り替え、記憶・人格・設定を共通化する。
+- 原則: 会話・推論・記憶・音声を可能な限り端末内で実行。初回モデル取得・更新・任意の暗号化同期のみオンラインを許容。
+- 現状の未達成事項: WebLLMをesm.runから読み込むため依存コード取得がネットワークに依存する可能性がある。モデル初回取得もオンライン必須。Service Workerはアプリ基本ファイルのみで全依存/モデルのオフライン保証はない。端末標準TTSも同じ声・オフライン利用を保証しない。
+- 次の作業: Phase 0として外部依存、Service Worker、モデルキャッシュ、PWA、端末互換性を調査し、既存データ・暗号化・同期を守りながらPhase 1の最小変更を設計する。
+- 今回は設計資料のみ。アプリコード、暗号化保管庫、バックアップ、同期Worker/APIは変更していない。実機オフライン試験は未実施。
+
+
+## 2026-11-04 — オフライン起動基盤 Phase 1 の初期変更
+
+- アプリコミット: `d313a585075d9c17a5bf397543276cebe0e66fd3`
+- Service Workerコミット: `49add232a84a449de2cebbe465a04388b4fe7677`（cache v19）
+- `index-integrated.html`: WebLLMの静的importを遅延importへ変更し、Service Worker準備後に読み込む。
+- `service-worker.js`: esm.run / cdn.jsdelivr.netのscriptリクエストを `alvis-deps-v1` にキャッシュ。オフライン時のHTMLフォールバックはnavigationのみに限定し、取得不能なサブリソースは503を返す。
+- WebLLMモデルキャッシュ、既存の暗号化保管庫、バックアップ、同期APIは変更しない。
+- 未確認: Service Worker制御下での依存コードキャッシュ、モデル初回取得後の機内モード起動、iOS Safariでの永続性。オンラインで一度モデルを読み込んだだけでオフライン対応完了とは扱わない。
+- 次の実機テスト: 開発URLをオンラインで開き、ページ読み込み後にQwen3-4Bをロード。完了後にページを再読み込みしてから機内モードで再起動し、アプリ表示・AIモデル読み込みを確認する。失敗時はエラー文を確認し、キャッシュ方式を見直す。
+
+## 2026-11-05 — Kokoro日本語TTSの試験導入
+
+- ブランチ: `development` のみ。
+- `index-integrated.html`: 端末標準Speech Synthesisを維持したまま、Kokoro音声エンジンを選択できるUIを追加。日本語女性ボイス `jf_alpha` / `jf_gongitsune` / `jf_nezumi` / `jf_tebukuro` を選択可能。
+- Kokoroは `kokoro-js-jp@0.2.0` のブラウザ向けCDNビルドを遅延import。初回準備ボタンからモデル・日本語辞書を取得する。音声合成はブラウザ内で実行し、会話テキストをTTSサーバーへ送らない。
+- Service Worker: `alvis-cache-v20-integrated` / `alvis-deps-v2`。jsDelivr/esm.runの許可済みCDN資材をdestination判定に依存せずキャッシュする。モデル重みはTransformers.js側のCache API管理を利用する想定。
+- iOS Safariの再生制限に備え、生成後のHTML audio controlsを表示。標準音声への切り替えも維持。
+- 変更コミット: アプリ `f9b83192d42425604f2d7abe51d5ff11ade825ea`、iOS再生UI `330fa78b152e4207e3f7f51f47508beaab7575bc`、Service Worker `7700e94aafb80d36538aa75e5cc331c9077d2637`。
+- 未確認: iPad Safariでのモデル初回取得・実音声・メモリ負荷・オフライン再起動。モデルの保存容量/キャッシュ永続性は端末とブラウザに依存。Kokoroを選択しただけでは準備完了とみなさず、準備ボタンで初回ロードを行う。
+- 次の実機試験: 開発版をオンラインで開き、Qwen3-4Bを一度終了してメモリを空けることを検討しつつ、Kokoro準備→女性音声を試聴→再読み込み→オフラインで再準備・再生を確認する。失敗時はエラー表示を記録し、標準音声へ戻せることを確認する。
+
+- 追加修正コミット: `61f10eb8db38473b645926fd5cb92cb8141b9d3e`。Kokoro再生から標準音声へ切り替える際にaudio elementとObject URLを後片付けする。
+
+## 2026-11-05 — Kokoro日本語女性音声の個別試聴UI
+
+- 開発ブランチ `development` の統合アプリに、Kokoro日本語女性音声4種（jf_alpha / jf_gongitsune / jf_nezumi / jf_tebukuro）の個別試聴ボタンを追加。
+- 4種類とも同じ試聴文を使用し、押した音声IDを選択欄とLocalStorageへ保存する。音声エンジンもKokoroへ切り替えて保存。
+- iPadのメモリ競合を避けるため、Qwen3-4Bが起動中または読み込み中は試聴を開始せず、先にモデル終了を案内する。既存のKokoro音声・標準音声切替・停止操作は維持。
+- Service Workerアプリキャッシュを `alvis-cache-v21-integrated` へ更新。依存キャッシュv2とWebLLMのモデルキャッシュ保持方針は維持。
+- 既存の保管庫、暗号化、会話履歴、バックアップ、クラウド同期形式は変更なし。
+- 検証: GitHub上のコード挿入位置・音声ID・メモリガード・キャッシュ更新を静的確認。iPad Safariで4音声の実再生・好みの比較・オフライン再起動はユーザー確認待ち。
+
+## 2026-11-05 — Kokoro音声の高さ・速さ微調整
+
+- `index-integrated.html`: Kokoro再生に0.94〜1.08倍の微調整を追加。再生速度に伴って声の高さも変化するため、独立したピッチ変更ではないことをUIに明記。設定は端末内LocalStorageへ保存。
+- 選択中の声・調整値で同じ試聴文を再生するボタンを追加。既存4音声・標準音声・オフライン方針・会話データ形式は変更なし。
+- `service-worker.js`: アプリキャッシュをv22へ更新。依存キャッシュv2とモデルキャッシュ保持方針は維持。
+- 検証: コードの挿入位置と設定保存/再生経路を静的確認。iPad Safariでの操作・音質・オフライン実再生は未確認。
+
+
+## 2026-11-05 — 音声設定の暗号化引き継ぎ
+
+- 音声設定を保管庫データの `voiceSettings` として保存し、既存のAES-GCM暗号化バックアップ/復元・クラウド同期の対象に含めた。
+- 対象: TTSエンジン、Kokoro voice ID、Kokoro速度、端末標準音声名、標準音声スタイル、自動読み上げ。
+- 設定変更時に暗号化保管庫を更新。既存保管庫は次回ログイン時に現在の設定を取り込む。復元時は保存された設定を画面にも反映する。
+- 旧バックアップに設定項目がなくても復元可能。モデルファイルは含めず、各端末でKokoroを初回取得する必要がある。
+- Service Worker cache: `alvis-cache-v23-integrated`。
+- 実機テスト待ち: iPadで設定変更→バックアップ書き出し→別ブラウザ/端末で復元し、声/速度/自動読み上げが反映されること。クラウド同期経由でも確認する。
+
+
+## 2026-11-05 — 端末・オフライン診断を追加
+
+- ブランチ: `development`
+- アプリコミット: `dae34e36e2da97d30d92200ca65efb920cc69625`
+- Service Workerコミット: `e69e41df40b932ad3aa9867ffd94cf9228a6b0e5`（アプリキャッシュv24）
+- `index-integrated.html` に「端末診断」ページを追加。オンライン状態の目安、User-Agent、WebGPU、標準音声、Service Worker登録/制御状態、ALVISアプリキャッシュ名、依存コードキャッシュ名、ブラウザ保存領域の推定使用量/上限を表示する。
+- 診断は読み取り専用。保管庫、記憶、暗号化、バックアップ、同期データを変更しない。
+- AI/Kokoroモデルの保存状況はライブラリ内部管理のため、診断画面から存在を断定しない。実際の機内モードでのモデル再読み込み・会話・音声再生を別々に試す必要がある。
+- 静的確認: UI挿入位置、診断イベント、Service Worker cache v24への更新を確認。iPhone/iPad Safariでの表示・診断実行は未確認。
+
+## 次に行うこと（2026-11-05）
+1. iPhoneで開発URLを再読み込みし、保管庫へログイン。「端末診断」→「この端末を診断する」を実行する。
+2. iPhoneでQwen3-4BがWebGPU対応/メモリ面で動作するかを、Kokoroとは別に確認する。失敗してもiPad側のデータに影響させない。
+3. iPhoneでKokoroをオンライン準備し、音声を再生する。Qwenを同時に保持せず、必要に応じてモデルを終了する。
+4. iPhoneでアプリシェル、AI、Kokoroをそれぞれ機内モードで再確認する。
+5. その後iPadで同じ診断とオフライン再起動を行う。
+6. 成長計画・自律サイクルの実機テストを再開する。
+
+注意: iPhoneへの音声設定復元はユーザーが全項目一致を確認済み。ただしこれは音声モデル資材の転送やAI推論の動作確認ではない。
+
+
+## 2026-11-05 — iPad向けAI起動エラー案内の改善
+
+- Qwen3-4Bの初期化失敗時に、WebGPUデバイス喪失/メモリ不足、通信/資材取得、WebGPU初期化の可能性を分類し、iPadで取れる次の対応を画面に表示する。
+- 失敗時にAIエンジン参照をnullへ戻す既存動作を維持し、再試行前にKokoroや他タブを閉じるなど、メモリ競合を避ける案内を追加。
+- 会話履歴・記憶・暗号化・バックアップ・同期形式は変更しない。Service Workerのアプリシェルcacheをv25へ更新し、モデル用キャッシュは消去しない。
+- 静的確認のみ。iPad Safariで意図的に各エラーを再現した実機検証は未実施。
+
+## 次の作業方針（iPad優先）
+1. iPad Safariで開発版を再読み込みし、端末診断でWebGPU/Service Worker/保存領域を確認する。
+2. Qwen3-4Bを単独で起動し、会話・記憶参照・モデル終了・再起動を確認する。Kokoroは同時起動しない。
+3. Qwenが安定した後、記憶検索の精度と会話文脈のテストを行う。
+4. 次にKokoro音声、最後に機内モードでの再起動を検証する。
+5. iPhoneの検証はiPad側の安定化後に再開する。
+
+
+## 2026-11-05 — iPad優先：長期記憶検索の関連度改善
+
+- `selectRelevantMemories()` を改善。現在の質問と記憶タイトル/本文を分けて評価し、タイトル一致を少し重視する。
+- 短いフォローアップでは直近のユーザー発言を個別に照合し、会話履歴全体の混在を抑える。文脈一致の寄与は現在の質問より低くする。
+- 完全一致に近いフレーズを加点し、同点時は更新日時の新しい記憶を優先。AIへ渡す記憶件数上限5件・本文上限5000文字は維持。
+- 記憶データ形式、暗号化、バックアップ、同期、承認フローは変更なし。Service Workerのアプリキャッシュをv26へ更新。
+- 未確認: iPad Safariでの実会話検索品質、既存記憶との関連性、Qwen起動安定性。これは検索ロジックの改善であり、ベクトル検索/意味検索の実装ではない。
+
+
+## 2026-11-05 — iPad向けモデルライフサイクル保護
+
+- Qwen3-4Bのロード開始時にアンロード操作を無効化し、ロード中の二重操作を防止。
+- ログアウト中/ログアウト後にモデル初期化が完了した場合、生成されたエンジンを直ちにunloadして保持しない。
+- unload中は再ロードを無効化。unload失敗時はエンジン参照を保持して状態を偽らず、再読み込みによる復旧を案内。
+- Service Worker app shell cache v27。モデル本体キャッシュは削除しない。
+- 静的コード確認のみ。iPad Safari実機でのWebGPUメモリ解放・再ロード成功は未検証。
+
+## 2026-11-05 — Qwen異常反復出力への対策
+- iPadでQwen3-4Bのロード・終了・再ロードは成功したが、通常質問に対して「以下几个」を繰り返す異常回答が2回発生。
+- 原因候補として、異常なassistant回答が直近会話履歴に残り、次回生成の入力へ再投入されていた点を確認。
+- `buildConversationMessages()` は異常回答と判定されたassistant履歴をモデル入力から除外する。保存済み履歴自体は削除しない。
+- `isCorruptedModelReply()` はViewGroup反復に加えて、同一の漢字フレーズが3回以上続く出力も検出する。
+- 日本語指定に「求められない限り中国語など他言語へ切り替えない」を追加。
+- Service Worker app shell cache v28。モデルキャッシュ・保管庫・会話履歴データ形式は変更なし。
+- 静的確認のみ。修正版でのiPad実機再テスト待ち。
+
+## 次のiPadテスト
+1. 開発版を再読み込みしてログイン。
+2. Qwen3-4Bを読み込み、「日本で一番高い山は何ですか？」を1回送信。
+3. 返答が正常か確認。異常なら表示された回答とAIステータス文をそのまま共有する。
+- 補足: 漢字反復検出のUnicode正規表現を修正し、Service Worker app shell cacheをv29へ更新。
+
+## 2026-11-05 — Qwen空回答への再試行
+- iPadで「レイリー散乱とは何ですか？」への回答が2回連続で空になり、UIが「回答を生成できませんでした」と表示。
+- 原因候補として、Qwen3のmessage.contentが思考タグ除去後に空文字となる経路を確認。根本原因の確定ではない。
+- 回答本文の抽出を文字列/配列の両形式に対応。最初の生成で本文が空の場合、会話履歴を含めない短い日本語プロンプトで1回だけ再試行する。
+- 再試行後も空なら、空回答だったことが分かる状態表示とメッセージを出す。
+- Service Worker app shell cache v30。会話履歴・長期記憶・暗号化保管庫・バックアップ・同期・モデルキャッシュは変更しない。
+- 静的コード更新のみ。iPad Safariでの再試行成功は未確認。
+
+### 2026-11-05 ログイン操作の初期化順序
+- 保管庫の解除ボタンとEnterキーのイベント登録を、アプリ内の他の初期化処理より前へ移動。
+- 後続の初期化処理で例外が発生しても、ログイン操作のイベント登録まで巻き込まれにくくする。
+- 暗号化データ、パスワード、バックアップ形式、同期処理は変更していない。
+- iPad実機での再確認は未実施。開発版を再読み込みしてログイン操作を確認する。
+
+### 2026-11-05 ログイン無反応の根本原因修正
+- 調査で回答抽出関数内の正規表現リテラルにエスケープ誤りを発見。JavaScriptモジュール全体が構文エラーとなり、ログインイベントを含むスクリプトが一切実行されない状態だった。
+- 正規表現を修正し、モジュール本文の構文チェックが成功することを確認。
+- Service Workerのアプリシェルキャッシュを v32 に更新。
+- 暗号化データ、パスワード、バックアップ、同期データは変更していない。
+- iPad実機でのログイン再確認は未実施。
+
+
+## 2026-11-05 — WebLLM実行状態喪失後の復旧
+- `sendToAlvis()` が `map async was not successful` または `Model not loaded before trying to complete` 等を受けた場合、失敗したWebLLMエンジン参照を無効化し、可能な範囲でunloadを試みる。
+- 次の送信で壊れたエンジンを再利用せず、ユーザーが「Qwen3-4Bを読み込む」で再起動できる状態へ戻す。
+- 会話履歴にはエラーと復旧手順を残す。暗号化保管庫、記憶、バックアップ、同期形式は変更しない。
+- Service Worker app shell cacheをv33へ更新。モデル重みキャッシュは削除しない。
+- 静的コード確認のみ。iPad Safariでの実機確認はユーザー待ち。
+
+
+## 2026-11-05 — Qwen反復トークン出力の検出
+- `isCorruptedModelReply()` を拡張し、同一の短い英単語/日本語断片が大量に繰り返される出力を検出してユーザーへそのまま表示しない。
+- 通常生成のtemperatureを0.35へ調整し、frequency_penalty 0.5 / presence_penalty 0.2を追加して反復を抑制する。
+- 異常出力の検出は品質保護であり、モデル自体の根本原因修正を保証しない。iPad実機テスト待ち。
+- Service Worker cache v34。記憶庫・会話履歴・暗号化形式は変更しない。
+
+## 2026-11-05: 会話履歴の汚染防止
+- チャット履歴から、句読点だけのユーザー/ALVIS発言、空回答、既知の生成失敗メッセージ、異常出力を除外してモデルへ渡す。
+- 目的は、過去の「。」だけの返答や失敗文が次の生成プロンプトを汚染するのを防ぐこと。保存済み履歴そのものは削除しない。
+- 開発ブランチへ反映。iPad Safariでの実機再テストは未実施。
+
+## 2026-11-05: 日本語回答の再生成
+- 日本語の質問に対し、英字主体かつ日本語文字がほぼない回答を検出した場合に限り、履歴を外して日本語のみを要求するプロンプトで1回再生成する。
+- 通常の日本語回答は再生成しない。Qwen3-4Bは変更せず、設定も保存データも変更しない。
+- Service Worker app shell cache v35。iPad Safariでの実機確認待ち。
+
+## 2026-11-05: WebGPU実アダプター診断
+- 端末診断に `navigator.gpu.requestAdapter()` と `adapter.requestDevice()` の確認を追加。取得結果、公開されるGPU情報、最大バッファ、デバイス作成エラーを表示し、診断用デバイスは直後に破棄する。
+- `navigator.gpu` の存在確認だけでは実際のGPUアダプター取得を判定できないため、Qwen起動失敗の切り分けに使用する。アプリシェルキャッシュv36。iPad実機確認待ち。
+
+## 2026-11-05: 短い内部トークン反復の検出・再生成
+- `forKey`等の短い英字トークンが回答の大半を占める異常出力を検出するよう閾値を改善（8回以上、トークン全体の70%以上）。
+- 異常出力を検出した場合、会話履歴を外した短い日本語プロンプトで1回だけ再生成する。再生成も異常なら異常文字列を会話に保存せず、モデル再起動を案内する。
+- Service Worker app shell cache v37。iPad実機確認待ち。
+
+
+## 2026-11-05 — Qwen日本語判定と生成設定の修正
+- 日本語回答の再生成条件に使う文字範囲の正規表現を修正。以前はエスケープが過剰で、日本語質問の判定が正しく働かない可能性があった。
+- Qwen3-4Bの配布元 `mlc-chat-config.json` の標準値（temperature 0.6 / top_p 0.95 / frequency_penalty 0 / presence_penalty 0 / repetition_penalty 1.0）を確認し、過剰なfrequency/presence penaltyを外した。通常生成temperature 0.6、top_p 0.95、軽いrepetition_penalty 1.05を指定。
+- 異常トークン検出の日本語文字範囲とforKey反復判定、複数テキスト片の結合処理のエスケープも修正。
+- Service Worker app shell cacheの更新は未完了。次回iPadテストは `?v=38` を付けた開発URLで新しいHTMLを取得する。
+- 静的コード確認のみ。iPad実機テスト待ち。記憶庫・会話データ・暗号化形式は変更なし。
+
+
+## 2026-11-05 WebGPU adapter preference diagnostic
+- Qwen3-4B load failure persisted despite default `navigator.gpu.requestAdapter()` and `requestDevice()` succeeding.
+- WebLLM's TVM GPU initialization requests `navigator.gpu.requestAdapter({powerPreference: "high-performance"})`; the generic error is thrown when that request returns null.
+- Updated ALVIS device diagnostics to test default, high-performance, and low-power adapter requests separately, while retaining the default adapter device-creation check. This is diagnostic only; it does not change model initialization behavior.
+- Service Worker app cache bumped to v39. No model data, encrypted vault, backups, or conversation history changed.
+
+
+## 2026-11-05 WebLLM GPU limit compatibility diagnostic
+- All three adapter preference checks (default/high-performance/low-power) succeeded on the user's iPad Safari; generic device creation succeeded.
+- Added a separate high-performance GPU device test using the required limits/features requested by TVM WebGPU runtime: maxBufferSize, maxStorageBufferBindingSize, maxComputeWorkgroupStorageSize, maxStorageBuffersPerShaderStage, optional maxComputeInvocationsPerWorkgroup, and optional shader-f16/subgroups.
+- This is a diagnostic-only test. It does not change model loading or allocate model weights; the temporary GPU device is destroyed immediately.
+- App shell cache bumped to v40. Encrypted memory, conversations, model cache and backup format are unchanged.
+
+
+## 2026-11-05 — Qwen生成不安定の切り分け（iPad優先）
+- GPU診断ではWebLLM相当のGPUデバイス作成が成功し、ユーザー実機でQwen3-4Bの読み込みも成功した。GPUアダプター取得だけを原因とする仮説は弱くなった。
+- 本体の `sendToAlvis()` は空回答・英語主体・異常反復に対して同一エンジンへ複数回再生成を行う一方、各試行の `finish_reason` と `usage` を記録していない。このため、これまでの試験では停止理由・出力トークン数を比較できていなかった。
+- `ai-test.html` に独立生成の診断表示を追加。モデルID、生成時間、finish_reason、入力/出力/合計token数、回答文字数を表示する。会話履歴・長期記憶・本体の再試行ロジックを使わない。
+- 次の切り分けは、同じQwen3-4Bの単体テスト結果と本体の結果を比較すること。単体も異常ならモデル資材/WebLLM/モデル実行側、本体だけ異常なら本体のプロンプト・履歴構築側を優先調査する。
+- 開発版URL: https://development.alvis-pwa.pages.dev/ai-test.html
+- 未確認: iPad Safariでの単体生成と診断値。これは原因切り分け用であり、Qwenの品質修正そのものではない。
+
+
+## 2026-11-05 — Qwen本体生成設定の基準統一
+- ユーザーの単体生成結果：Qwen3-4B-q4f16_1-MLC、22.42秒、finish_reason=stop、入力49 / 出力233 / 合計282 tokens、回答875文字。単体画面では正常な日本語回答を確認。
+- `ai-test.html`の初回生成設定はtemperature 0.7 / max_tokens 512のみ。一方、本体`sendToAlvis()`はtemperature 0.6、top_p 0.95、repetition_penalty 1.05、max_tokens 384、extra_body.enable_thinking:falseを指定していた。
+- 本体初回生成を単体テストと同じtemperature/max_tokensへ合わせ、追加指定を除去。再試行側もenable_thinking:falseを除去。履歴・長期記憶・暗号化データの構造は変更していない。
+- Service Worker cache: `alvis-cache-v41-integrated`。
+- 次の実機確認は一度だけでよい。開発版を再読み込みして、通常の質問を一つ送る。生成が正常ならこの差分を維持し、異常なら本体プロンプト/履歴の次の差分をコード側で調査する。繰り返しの単体テストは不要。
+- 未確認：iPad Safariでの本体生成結果。コード更新・キャッシュ更新は開発ブランチへ反映済み。
+
+
+## 2026-11-05 — Qwen異常出力（キリル文字・数字反復）
+- 本体設定を単体テスト基準へ統一した後も、ユーザー実機で「元気ですか？」に対しキリル文字断片と`v7777...`の反復が発生。初回生成設定の差だけでは解決しなかった。
+- `isCorruptedModelReply()`にキリル文字のみの異常断片と英数字1文字12回以上の連続検出を追加。既存の1回再生成・異常出力時の安全な案内へ接続。
+- Service Worker cacheは`alvis-cache-v42-integrated`。
+- 重要：この変更は異常文字列を検出して表示を防ぐ保護策。Qwen生成崩壊の根本原因は未特定。現時点でモデルを正常化したとは扱わない。次の段階はモデルのロード条件・GPU/メモリ状態・KV cache/生成ランタイムの問題を調べること。ユーザーに同じ質問の反復テストを求めない。
+
+- 検出正規表現の静的再確認でエスケープの誤りを発見したため修正済み。Unicodeキリル文字範囲と同一英数字12連続の検出が正しく機能する形を確認。Service Worker cacheは最終的に `alvis-cache-v43-integrated`。
+
+
+## 2026-11-05 — ALVIS生成不安定の追加調査・コンテキスト修正
+- ユーザーが「元気ですか？」と送った際、短文判定により通常の質問までフォローアップ扱いされ、最大16メッセージ/7,200文字の履歴と、直近の承認済み学びが不要に追加される実装を確認。単体テストとの大きな差の一つ。
+- `isFollowUpMessage()`を追加し、明示的な応答（できた、続き、数字のみ等）だけを文脈継続扱いに修正。一般の短い質問や「なぜ〜？」は独立質問として扱う。
+- 推論に渡す履歴を通常6メッセージ/2,400文字、フォローアップ10メッセージ/4,200文字へ制限。各発言は最大1,400文字。長期記憶2,200文字、承認済み学び1,200文字まで。保存データは削除・書換えしていない。
+- 初回生成と空/英語/異常出力時の再試行でtemperature 0.7 / max_tokens 512へ統一。再試行カウンタの位置もソース確認済み。
+- 異常出力検出にキリル文字、英数字同一文字12連続、句読点12連続、同一トークン反復を追加。ユーザーの過去例（`v777...`、`woo woo...`、`ith with...`、ドット反復）を含むロジックテストを実施。
+- 最終ステータスへ生成時間、試行回数、prompt文字数、finish_reason、入力/出力token数を表示し、保存後に診断が消えないようにした。
+- Service Worker cache: `alvis-cache-v44-integrated`。
+- 静的ロジックテスト12項目すべて合格。これはソース内の判定・上限・設定を対象にしたテストで、WebGPU/Qwen実機推論の成功を意味しない。iPadでの最終確認は一度だけ依頼する。
+
+
+## 2026-11-05 追記：異常貼り付け文のコンテキスト除外
+- `isLikelyPastedCorruption()` を追加。160文字以上で、単一文字の占有率が55%以上かつ文字種が12以下の長文を異常貼り付けと判定。
+- `isUsableConversationTurn()` でユーザー側の異常貼り付けだけを推論用履歴から除外。`data.history` の保存内容は削除しない。
+- 目的：診断時に貼り付けられた `7777...` 等の異常文字列が、次の通常質問のプロンプトに混入するのを防ぐ。
+- 未実施：iPad Safariでの実機確認。今回の変更はコード静的確認のみ。
+
+
+## 2026-11-05 追記：複数質問・自然な会話
+- 本体システムプロンプトに複数意図の処理指示を追加。1発言内の雑談＋質問などを最大3件程度に分け、回答漏れを避けて自然な一つの返答にまとめる。
+- 最新情報が必要で取得できない場合は推測・捏造しない。天気の例を明示。
+- `buildConversationMessages()` の通常履歴上限を8メッセージ/約3,200文字へ拡張。フォローアップは10メッセージ/約4,200文字。
+- Service Worker `alvis-cache-v45-integrated`。
+- 実機未確認。次回まとめてiPadで複数質問・文脈維持を確認する。
+
+
+## 2026-11-05 追記：文脈を引き継ぐ追加質問
+- `isFollowUpMessage()` に「じゃあ」「それなら」「ちなみに」「あと」「では」「なら」を追加。
+- システムプロンプトで追加質問時の場所・日時・対象の引き継ぎと、明確な話題転換の優先を明記。
+- Service Worker "alvis-cache-v46-integrated"。iPad実機テストは複数質問機能とまとめて実施。
+
+
+## 2026-11-05 追記：会話判定の修正とロジック検証
+- `index-integrated.html` の正規表現を点検し、空白・全角空白を扱う箇所の二重エスケープを修正。`isLikelyPastedCorruption`、`isUsableConversationTurn`、日付・時刻・国名正規化を対象。
+- 日付・時刻の即時応答を単独質問だけに限定し、複数意図の発言が固定応答に吸収されるのを防止。
+- 国名時刻フォローアップも短い国名発言等に限定。
+- ロジック単体テスト20ケース（日時11、履歴/貼り付け/フォローアップ9）全件合格。これは関数ロジックの検証であり、WebLLM実生成やSafari実機テストではない。
+- Service Worker `alvis-cache-v${next}-integrated`。次回iPad確認は複数質問、日付/時刻＋別質問、じゃあ/それならの文脈継続、貼り付け事故後の会話。
+
+- 追加で国名時刻フォローアップ5ケースを検証し全件合格。ロジック単体テストは合計25ケース（日時11、履歴/貼り付け/フォローアップ9、国名時刻5）。
+
+
+## 2026-11-05 追加改善（会話品質・情報の正確性）
+
+- 開発版キャッシュ: `alvis-cache-v51-integrated`。
+- 会話履歴の選択で、文字数超過した古い発言1件のために、それ以前の全ての文脈が捨てられる問題を修正。超過発言を飛ばして他の有用な履歴を探す。現在のユーザー発言は予算内で優先する。
+- 天気質問のプロンプトに「最新データが渡されていない」制約を追加。モデルが晴雨・気温等を推測して返した場合、表示前に該当する予報文を除外し、確認できない旨を表示する。
+- 日本語の質問に対して再試行後も英語主体の回答が残る場合の最終表示ガードを追加。
+- 保存データ、暗号化、バックアップ、同期APIは変更しない。
+- 検証: 変更箇所の静的確認とロジック単体テストを実施予定。Qwen実生成とiPad Safariの実機確認は未実施。
+
+
+### 2026-11-05 追加分の静的検証結果
+
+- module script構文解析: PASS。
+- 天気情報ガード: 10/10ケース PASS。
+- 会話履歴選択: 古い発言のスキップと最新質問の保持を確認。
+- これはコード上のロジック検証。Qwen実生成・iPad Safari実機確認・オフライン再起動は未実施。
+- 最終キャッシュ名: `alvis-cache-v49-integrated`。
+
+
+### 2026-11-05 — 記憶検索の無関係な学び混入を抑制
+
+- 短いフォローアップで関連度の高い学びがない場合、最新というだけで承認済み学びを2件追加していたフォールバックを削除。
+- 関連度閾値を満たした学びのみ最大3件を使用。会話履歴による文脈解決は維持。
+- 保存済み学び・記憶・暗号化データ・バックアップは変更しない。
+- PWA cache: `alvis-cache-v50-integrated`。
+- 検証: ロジック単体テストを実施。Qwen実生成・iPad Safariは未確認。
+
+
+### 2026-11-05 — 記憶検索で現在質問を優先
+
+- 長期記憶と承認済み学びの関連度を見直し、現在質問に直接関連する候補だけを選択するよう変更。
+- 直近会話の文脈は、現在質問に直接一致した候補の順位補助に限定。古い会話の単語が偶然重なっただけで無関係な記憶を採用しない。
+- 承認済み学びの「直近2件」フォールバックも削除済み。
+- PWA cache: `alvis-cache-v51-integrated`。
+- データ保存形式、暗号化、バックアップ、同期は変更なし。
+
+
+### 記憶検索の回帰テスト結果（2026-11-05）
+
+- 関連する具体的フォローアップ: 正しい記憶を取得。
+- 曖昧な「それなら？」: 無関係な記憶・学びを取得しない。
+- オフライン開発の追加質問: 開発関連の記憶・学びを取得。
+- 天気の独立質問: 無関係な記憶を取得しない。
+- 4/4ケース PASS。関数単体テストのみ。実機のQwen生成は未確認。
+- 現在のService Worker cache: `alvis-cache-v51-integrated`。
+
+
+## 2026-11-05 — オンラインAI連携の実装記録
+
+- 開発版に「AI連携」ページを追加。ゲートウェイURL・共有トークンを既存AES-GCM暗号化保管庫に保存する。
+- チャットの「この質問文だけをオンラインAIにも送る」チェックは初期OFFで、送信後に自動解除。
+- 送信対象は現在の質問文のみ。過去の会話・長期記憶・保管庫全体は送信しない。
+- WorkerはOpenAIとGeminiへ並列依頼し、取得できた回答を返す。ローカルQwen3-4Bが参考意見として比較・統合する。
+- 外部AI回答はシステムプロンプトに埋め込まず、独立した未検証資料メッセージとして渡す。資料内の命令に従わないよう指示。
+- Workerファイル: `workers/online-ai-gateway.js`。設定手順: `docs/ONLINE_AI_GATEWAY.md`。
+- 構文解析: アプリmodule script PASS、Worker source PASS。実際のCloudflareデプロイ・API接続・iPad Safariは未実施。
+- Cache: `alvis-cache-v53-integrated`。
+
+
+### オンラインAI連携UIの追加仕上げ（2026-11-05）
+
+- ゲートウェイトークン生成後にコピーできるボタンを追加。
+- 外部AI参考資料は独立したユーザーメッセージとして、実改行付きでローカルAIに渡す。
+- Service Worker cache: `alvis-cache-v53-integrated`。
+
+
+### オンラインAIゲートウェイ検証結果（2026-11-05）
+
+- アプリmodule script / Worker source 構文解析: PASS。
+- Workerモックテスト: 8/8 PASS（health、認証、CORS、JSON、リクエストサイズ、質問長、2社並列、片方失敗時の部分成功）。
+- 実際のCloudflare WorkerデプロイとOpenAI/Gemini API接続はまだ行っていない。現段階ではコードとモック動作の検証まで。
+- 開発版Service Worker cache: `alvis-cache-v53-integrated`。
+
+
+### 2026-11-05 — オンラインAI API方式の更新
+
+- OpenAIはResponses API、GeminiはInteractions APIを使用するようWorkerを更新。
+- 両方のリクエストに `store:false` を設定。GeminiキーをURLからHTTPヘッダーへ移動。
+- 公式仕様確認: OpenAIは新規プロジェクトにResponses APIを推奨。GoogleはInteractions APIを2026年6月以降の新規開発向け標準として案内。
+- 実API接続は未実施。模擬レスポンスを使ったWorkerテストを再実行する。
+
+
+### 現行API移行後の検証（2026-11-05）
+
+- Workerモックテスト10/10 PASS。
+- 検証項目: health、認証、Origin制限、不正JSON、本文サイズ制限、質問長制限、OpenAI Responses + Gemini Interactionsの両応答、store:false、Geminiキーのヘッダー送信、片側プロバイダー失敗時の部分成功。
+- アプリmodule scriptとWorkerソースの構文解析もPASS。
+- 実Cloudflare Workerデプロイ・実API接続・iPad Safariでの動作は未確認。
+
+
+## ChatGPT無料連携の次工程（2026-11-05）
+- OpenAI公式Sign in with ChatGPTのオープンソース/ローカル実行向け方式を調査。ChatGPT Plus/Proの利用枠を、ユーザーの明示許可のもとAPIキーなしで使える方式がある。
+- Freeプランの利用資格は公式開発例で確認できず、Plus/Proが要件として記載されているため、Freeで使えるとは案内しない。
+- 現行ALVISはCloudflare Pages配信のSafari PWA。ChatGPTプラン用トークンをCloudflare Workerへ送る実装は行わない。OpenAIのローカル実行・トークン端末保護要件に合うランタイムが必要。
+- 次はiPad SafariだけでOAuthコールバック/トークンを端末内に安全保持できるか、公式SDKの対応環境を調べる。難しい場合はローカルアプリ/サービス方式の選択肢を比較する。実装前にユーザーへ追加料金・プラン条件を明確に説明する。
+- 現行Qwen3-4Bのオフライン経路は維持。ネットワーク断・ChatGPT利用不可時のローカルフォールバックを維持する。
+- 既存のOpenAI/Gemini APIゲートウェイは従量課金の別経路。ユーザーが明示承認するまで実デプロイ・APIキー設定は行わない。
+
+
+## SDK・iPad対応の追加確認
+
+- OpenAI公式DevKitのREADMEでは、Sign in with ChatGPTの開発SDKはローカルNode.jsプロセス向け（@siwc/local）とされ、掲載されている実アプリ例はmacOS/Electron。ブラウザ単体で動くPWA向けSDKではない。
+- iPad Safari上のALVIS PWAへNode.jsローカルランタイムをそのまま組み込むことはできないため、現行iPad構成に直接追加できるとは判断しない。
+- iPadでの実現にはiOSネイティブ/ローカルブリッジ等の別アプリ層が必要になる可能性が高い。現時点でiOS対応は未確認であり、iPadで使えると約束しない。
+- DevKitのコードはNoncommercial License v1.0。利用・配布する場合はライセンス条件を確認する。
+- 公式DevKit: https://github.com/openai/sign-in-with-chatgpt-devkit
+
+
+## 2026-11-05 — Offline-first原則の回帰保護
+- ALVISの主AIは端末内Qwen3-4B、オンラインAIは明示許可時だけの任意拡張とする方針をコード検査で固定。
+- `tests/offline-first.test.mjs` と `docs/OFFLINE_FIRST_TESTS.md` を追加。
+- 静的構造チェック10項目を実施し10/10 PASS：オンライン初期OFF、Qwen主系統、明示チェックによる呼び出し、一回限りの許可、質問文だけの転送、外部回答の未信頼扱い、オンライン失敗後のローカル継続、フロントエンドにAPIキーなし、アプリシェルキャッシュ、非GET要求のキャッシュ回避。
+- これはソース構造の検査であり、Node.jsテストコマンド実行やSafari実機での機内モード再起動・モデル推論成功を意味しない。
+- アプリ本体・Service Worker・暗号化データ形式は変更なし。キャッシュ更新不要。
+- ChatGPT公式DevKitはローカルNode.jsランタイム向けであり、Safari PWAにそのまま導入できない。iPad対応は別ランタイム方式を調査し、Qwenオフライン基盤を崩さない。
+
+
+
+## 2026-11-05 — ChatGPT連携の公式条件を再確認
+- 本人確認ログインとプラン利用は別許可。プラン利用は既存ChatGPT Work/Codex枠を消費し、Usageでアプリごとの週間上限を設定可能。ChatGPT会話/メモリは共有されない。
+- Help Centerの商用アプリ対象はGo/Plus/Proだが、公式オープンソースDevKitの利用例はPlus/Pro。ALVISのOSS連携ではGo/Freeを保証しない。
+- 公式DevKitはローカルNode.js SDK。サンプルはmacOS 14+ / Node.js 22.12+ / Xcode CLTのmacOS/Electron。Noncommercial License v1.0。Safari PWA/iPadの直接対応は未確認。
+- 今すぐユーザーのログイン・パスワード・トークンは求めない。次の技術調査はiPad単独のローカル実行可否と、必要ならMacコンパニオン方式。どちらもQwenオフラインを維持する。
+
+
+## 2026-11-05 — オフライン回帰チェックと実機受け入れ試験
+- `tests/offline-first.test.mjs` を追加し、GitHub Actions `.github/workflows/offline-first.yml` でdevelopmentブランチへの関連変更時にNode.js 22で自動実行する設定を追加。
+- ソース構造を確認する10項目は10/10 PASS（この会話内の検査）。GitHub Actionsの実行結果はまだ未確認。
+- `docs/OFFLINE_ACCEPTANCE.md` にiPad Safariでの完全オフライン再起動・Qwen再ロード・記憶復号・音声・保存・オンライン失敗時のローカル継続の実機試験手順を追加。
+- 機内モードでの再起動・推論は未確認。完全オフライン対応済みとはまだ扱わない。
+
+
+## 2026-11-05 追加 — Qwen3通常チャットの生成設定
+
+- 通常チャットの初回生成・空回答再試行・日本語再生成・異常出力再生成の4経路に `extra_body: { enable_thinking: false }` を統一して追加。
+- 回帰テスト `tests/offline-first.test.mjs` に4経路の設定確認を追加。
+- Service Worker cache は v54。
+- 次の確認: GitHub Actionsでテスト実行結果を確認し、その後iPad Safariで通常質問・短いフォローアップ・複数質問・異常出力時の安全な置換をまとめて確認する。
+- まだNode.jsテスト実行および実機テストは未確認。Qwen3回答品質が改善したと断定しない。
+
+
+## 2026-11-05 — Qwen3の異常断片対策
+- 孤立した`</think>`と`Queryable`の表示・保存を防ぐガードを追加。
+- GPU `map async was not successful`時は既存の安全停止を維持。自動再ロードは未実装・未検証で、iPadのGPUメモリ不足時に再試行を重ねない。
+- 実機テストは未完了。ユーザーへ同じ質問の反復を求めず、次の修正をまとめてから確認する。
+
+## 2026-11-05 — 外部AIからALVISへの監督付き学習を追加
+
+- 方針: ALVISが主AI、Qwen3-4Bがオフライン主系統。ChatGPT/Gemini等はALVISが必要な場合に使う補助役。
+- アプリ変更: a83834188558c8a3d1eac61947c3e62bdd321964
+- 回帰テスト: 43e0b3dd9a283e5f67259fdeeed792b2dfa5a7a0
+- Service Worker: 8d1aa82e76e5668edefc33df0d68e3b53494a0af（cache v56）
+- ドキュメント: CHANGELOG f6646777db68f6138a4f923702040d86a8a238d2 / ARCHITECTURE 7e1db9cbf6140e91a2e11491d2afd196440a9e4b / ALVIS_SPEC 398513d528d57565ef6dee7a28226b84bb9014fc
+- オンラインAIをその質問で明示的にONにし、回答が返った場合のみ、外部AI回答を data.learnings へ pending 候補として保存する。最大2件/質問、本文最大2,200文字、未承認候補は最大30件。provider/model/元質問/日時を保存し、重複候補を抑止。未承認候補は学習メモ画面から却下・削除可能。承認後も通常会話・課題分析・次の改善目標の各プロンプトで出典と未検証ラベルを保持する。
+- 未承認候補は会話プロンプトへ渡さない。学習メモ画面に出典と元質問を表示し、外部AI由来の候補は「事実の正しさが保証されない」旨を確認してから承認する。
+- 承認後も外部AI由来情報は参考資料として扱い、内部命令・システム指示として扱わない。出典と元質問をプロンプトに保持する。
+- 既存の data.learnings を利用。暗号化方式、バックアップ形式、同期APIは変更していない。Qwenのモデル重み更新・追加学習ではなく、承認付きの知識蓄積/検索利用の初期段階。
+- 次の作業: (1) 最新コミットの回帰テスト内容を再確認し、GitHub Actionsの結果を確認。(2) オンラインAIが実際に設定済みの場合のみ、テスト用の質問で候補生成→承認待ち→承認→関連質問で参照をiPad Safari上で確認。(3) オフラインでは候補の新規作成なしで、Qwenと既存記憶だけが動くことを確認。
+- 未確認: Node.jsテストの実行結果、GitHub Actions、実API通信、iPad Safariでの保存/承認/再利用。APIデプロイ・APIキー設定・有料利用は行っていない。
+
+### 2026-11-05 追加 — 外部AI学習候補の安全性・出典保持
+
+- 追加アプリコミット: b7e9344751a572e17b984c36e4a123491bca4837（未承認候補30件上限、却下操作、通常会話/課題分析/次の目標で出典・未検証ラベルを保持）。
+- 回帰テスト最終コミット: bd0dd008f5e7781ccae22c39032b2d0027674401。
+- 静的ソース検査は22/22 PASS。テストファイルにも22件のassertionが存在することを確認。これはNode.jsでテストファイルを実行した結果ではない。
+- 現在の開発版Service Worker cache: alvis-cache-v56-integrated。
+- 次はGitHub Actionsの実行結果確認と、オンラインAI接続が設定済みの場合に限ったiPad Safari実機テスト。APIデプロイ・APIキー設定・有料利用は行わない。
+
+
+
+## 2026-11-05 — 外部AI回答の専用表示ページ
+- チャットで取得した外部AIの回答・学習候補を、ナビゲーションの「外部AIの回答」から個別に確認できる専用ページを追加。
+- 回答ごとに提供元・モデル・元質問・取得日時・本文・承認状態を表示し、未承認の回答は個別に承認または却下できる。
+- 成長計画の通常の学習メモには外部AI由来の候補を重複表示せず、専用ページへ分離。
+- 外部AI接続そのもの（Cloudflare Workerデプロイ/APIキー登録）は未実施。接続完了までは専用ページに案内文が表示される。
+- Service Worker cache: v57。開発ブランチのみ。iPad Safari実機確認は未実施。
+
+- 最終調整: 外部AIの承認確認文の改行を修正し、専用画面の回帰テスト参照変数を修正。最終HTML反映に合わせService Worker cacheをv58へ更新。
+
+
+## 2026-11-05 — 混在文字列の反復崩壊対策
+- 実機報告: 「あなたの名前は？」への回答で中国語・英字の短い断片が空白なしで大量反復。
+- 既存の単語単位の検査は連結された混在文字列を十分に検出できなかったため、短い部分文字列の連続反復を検出するガードを追加。異常時は履歴を外して一度再生成し、再発時は安全な日本語メッセージへ置換。
+- 回帰チェックを追加。Service Worker cache v59。実機再確認は未実施。
+
+
+## 2026-11-05 — Qwen3の単文字・記号反復出力の検出修正
+- 実機で「黻」1文字やアポストロフィだけの反復が回答として出た報告を受け、異常出力検出を拡張。
+- 直前の混在文字列対策に正規表現のエスケープ誤りがあり、後方参照・空白クラスが意図どおり動かないことをコード監査で発見。正しい正規表現へ修正。
+- 単文字だけの回答、文字・数字を含まない記号列、記号比率が極端に高い回答を異常扱いし、再生成後も異常なら安全な日本語メッセージへ置換。
+- 回帰テストは検出関数をNode.js上で直接実行し、今回の異常例3種を拒否、正常な短文3種を許可する動的テストを追加。
+- Service Worker cache v60。Node.jsテストの実行結果とiPad Safari実機確認は、変更反映後に別途確認する。
+
+
+## 2026-11-05 — ALVISの名前を即答する固定基本情報
+- ALVIS自身の名前を「ALVIS（アルヴィス）」としてシステム基本情報に明記。
+- 「あなたの名前は？」「名前は？」等の定型質問はQwen3推論を呼ばず、端末内で「私はALVISです。」と即答する。モデル未ロード・オフラインでも動く経路とし、通常の会話履歴には質問と回答を保存。
+- Service Worker cache v61。静的検査とNode.js動的テストは追加したが、iPad Safari実機での応答時間は未確認。
+
+- 追加修正: 名前質問をQwen未ロード時にも通すため、モデル必須チェックより前に名前質問フラグを判定し、モデル不要条件へ追加。Service Worker cache v62。
+
+
+## 2026-11-05 — ALVISの読み上げ発音を修正
+
+- 標準音声とKokoroの読み上げ直前だけ、英字表記 `ALVIS` を「アルビス」に正規化。
+- 画面表示、会話履歴、保存データの表記は変更しない。
+- Service Workerキャッシュをv65へ更新。
+- 回帰テストに標準音声・Kokoro両方の読み上げ正規化を追加。
+- iPad実機での読み上げ確認は未実施。ユーザー確認待ち。
+
+
+## 2026-11-05 — ジャービス型の自然な対話方針を強化
+- `index-integrated.html` の通常チャット用システムプロンプトに、発言意図（質問・報告・感想・相談・冗談・作業指示）に応じた返答方針を追加。
+- 指示語の参照先、気持ちの受け止め、助言の押しつけ防止、親しみやすい口調、一人称「私」、過剰な同意・称賛の抑制、能力を誇張しないことを明文化。
+- 会話履歴の長さ、Qwen設定、外部送信範囲、保存データ形式は変更なし。オフラインQwenのまま動作する。
+- Service Worker cacheをv66へ更新。
+- 回帰テストに自然な対話ルールの存在確認を追加。Qwen実生成・iPad Safari実機での会話品質は未確認。
+
+### 自然な対話方針の回帰テスト結果（2026-11-05）
+- GitHub Actions `Offline-first regression checks` run #52: SUCCESS。
+- Node.js 22で `tests/offline-first.test.mjs` を実行し、オフライン優先・Qwen推論設定・異常出力検出・名前即答・HTML構造・標準/Kokoroの読み上げ正規化・今回追加した自然な対話ルールのアサーションを通過。
+- テスト実行中に既存テストの正規表現構文と変数名の不整合を発見・修正してから再実行し、最終成功を確認。
+- Qwen3-4Bの実際の会話品質、iPad Safariでのキャッシュ更新・実機動作は未確認。
+
+## 2026-11-05 — Qwen応答時間の短縮
+- 実機で75.5秒・2回試行の報告。通常チャットの最大生成量を512から384 tokensへ、短い日常会話は128 tokensへ制限。
+- 長い異常出力が再試行につながる場合の待ち時間を抑える狙い。回答内容が途中で切れる場合はfinish reasonと実機時間を確認して再調整する。
+- Service Worker cache v67。Node回帰テストは次のCIで確認。iPad実機の短縮効果は未確認。
+
+- 追加調整: 「ALVISで質問にお答えしました」のような第三者・業務報告調を避け、自己言及は一人称「私」に統一。AI自身の日常を聞かれた際も人間のような生活を装わない。
+- Service Worker cache v68。CIおよびiPad実機での再確認はこれから。
+
+- 追加: 短い雑談では短縮システムプロンプト＋直近4発言（各最大500文字）に絞り、入力処理の負荷を抑える。Service Worker cache v69。CI結果・iPad実機の時間比較は未確認。
+
+- 再試行側も512から128 tokensへ制限し、異常出力・空回答などでの長い再生成を抑える。通常雑談128、通常質問384、再試行128。Service Worker cache v70。実機での短縮効果は未確認。
+
+- 不具合対応: 「こんにちはアルビス」のようにALVIS名を添えた挨拶が既存の完全一致判定から漏れ、Qwen推論に進んでいた。名前付き挨拶を即答経路に追加し、不要なGPU推論を回避。Service Worker cache v71。CI/実機テスト結果は未確認。
+
+
+## 2026-11-05 — 短い会話の速度・自然さ改善
+- 短い雑談の対象を拡張し、会話的な短文でも軽量な専用プロンプトを使用。
+- 短い雑談の会話履歴を直近2ターン・各240文字に縮小し、最大生成トークンを128から64へ削減。空回答/日本語再生成/異常出力の各回復生成も64トークンに制限。
+- 専用プロンプトは「AIであることを毎回説明しない」「人間のふりをしない」「自然な日本語のみ」「短く直接返す」を明確化。
+- 長い質問の生成上限384、ローカルQwen、オフライン動作、暗号化記憶庫・バックアップ・同期データ形式は変更なし。
+- Service Worker cache を v72 に更新。
+- 期待効果は短い会話の入力負荷と出力時間の低減。iPad実機の生成秒数・会話品質は変更反映後に測定が必要で、改善を保証するものではない。
+
+- 2026-11-05: オフライン日本語言語パック第1段階を追加。`ALVIS_JAPANESE_LANGUAGE_PACK` に意図別の応答方針・自然な表現例・助詞と接続表現の小辞書・日本語文法の注意を保持し、現在の発言に関係する短いガイダンスだけをQwen3-4Bへ渡す。英語混入・同じ文の反復を診断する関数も追加したが、誤修正防止のため自動修正は未実装。Service Worker cache v74。Node.js/GitHub Actions・iPad実機の検証結果は未確認。
+
+
+- 2026-11-05: 日本語品質診断を実際の回答経路へ接続。英語混入・反復・限定した不自然表現を検出した場合のみ、日本語専用で一度再生成し、感情応答では再生成失敗時に端末内の共感表現へ切替える。Service Worker cache v75。iPad実機の結果は未確認。
+
+
+## 2026-11-06 — 会話重複検出 v79
+- 直近6件のALVIS返答と照合し、完全重複・長文の高類似度を検出する品質ゲートを追加。
+- 重複時のみ一度再生成し、感情応答の修復にも失敗した場合は直近回答と被らないローカル候補文へ切り替える。
+- 次の実機確認: Qwen3-4Bで「今日は本当に大変だった」を送り、直近の返答と異なる自然な返答になるか確認する。続けて「今日は疲れた」でも不自然な否定や同じ慰め文句が再発しないか確認。
+
+
+## 2026-11-06 — 自律目標設定 v80 引き継ぎ
+- 「自分で次の目標を立てる」は、直近24件の会話・タスク・発見済み課題・改善計画・承認済み学習をQwen3-4Bで評価し、goal/reason/firstAction/successCriteria/priorityをJSONで提案する。
+- JSONパーサーは必須項目と優先度を検証。理由・完了条件・優先度・originを既存autonomyTasksの任意フィールドに保存し、タスク一覧にも表示する。
+- ユーザーが内容を確認して登録し、開始ボタンを押すまでタスクは実行されない。自動コード変更・外部送信・課金・バックグラウンド処理なし。
+- 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / CHANGELOG / ARCHITECTURE。
+- 次: Node.jsテストとGitHub Actionsの成功を確認。その後iPad Safariで成長計画を開き、Qwen3-4Bをロードして「自分で次の目標を立てる」を一度実行。提案が画面に表示されることだけを確認し、登録は内容を見てから。
+- 調査機能は別工程。現時点の自律目標提案はローカルの記録とモデル知識を使うもので、最新のWeb情報を自動検索するものではない。
+
+
+## 2026-11-06 — 自律学習振り返り v81
+- 完了タスクの「AIで学習を振り返る」は構造化JSONを生成。結果（成功/一部達成/阻害/判断不能）、根拠、学び、次の検証、確信度を表示。
+- 根拠はタスク実行メモ内に限定。根拠不在時はその旨を表示。学びはpending候補として保存し、ユーザー承認前は承認済み学習として使わない。
+- 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / docs。
+- 次: Node.js回帰テスト・GitHub Actions確認。iPad Safariで既存の完了済みタスクを1件選び「AIで学習を振り返る」を実行、根拠と確信度が表示されることを確認する。
+- これは経験と承認済み記憶を用いたシステム層の継続改善であり、Qwen3-4Bのモデル重み自体を学習・更新する機能ではない。
+
+- v81追加調整: 構造化振り返りを課題スキャンと次の目標設定の双方に引き継ぐ。blocked/unclearの結果を成功扱いせず次の検証へ反映。SW cache v82。
+
+
+## 2026-11-06 — 公開情報リサーチ v83
+- 成長計画に「ALVISが調べるテーマ」検索を追加。日本語Wikipedia Action APIへ検索語のみ匿名送信、最大5記事の短い本文と出典URLを表示。
+- 選択した記事だけ外部調査の学習候補に保存。承認前は知識利用しない。承認後も未検証・出典付きで利用する。会話履歴/長期記憶/認証情報は送信しない。
+- 変更対象: index-integrated.html / tests/offline-first.test.mjs / service-worker.js / docs。
+- 次: Node.js/GitHub Actionsの結果を確認。iPad Safariで成長計画→Qwen3-4Bは未ロードでもよい→調査欄へ短い日本語テーマを入力→検索→出典が表示されるか確認。結果の学習候補化・承認は内容確認後に実施。
+
+- v83修正: 外部調査候補の承認確認分岐を構文修正。外部調査候補も却下可能。Service Worker cache v84。
+
+
+## 最新更新 v91（2026-11-06）
+- v89のiPad実機確認：ユーザーが開発版を開きQwen3-4B読み込み成功。富士山回答の関連資料リンク表示も成功したが、回答末尾が「また」で途切れる問題を確認。
+- v90で「また」「さらに」等の接続語終端も未完了として検出し、修復後にも残れば末尾の未完了断片のみを除去。追加生成は行わずGPU負荷を増やさない。
+- 回帰テストを追加。Service Worker cache: alvis-cache-v90-integrated。
+- v91のCIとiPad実機再確認は未完了。追加で「また、標高は」のように接続語後へ断片が続くケースも末尾処理できることをローカル動的検査で確認。
+
+## 最新更新 v92（2026-11-06）
+- ユーザーの富士山回答で「日本の最高の山」「富士山登り」「神社があり。」という不自然な表現・文末を確認。
+- 承認済み公開資料を使う回答は資料抜粋に明記された事実だけに限定し、一般知識で補完しない指示を追加。回答修復にも資料抜粋を渡す。
+- 既知の不自然表現と「あり／おり」で終わる連用形を検出し、未完了の末尾節を除去する回帰テストを追加。
+- Service Worker cache: `alvis-cache-v92-integrated`。
+- 次: テストソースの構文・ローカル実行・GitHub Actionsを確認。その後iPad Safariで開発版を再読み込みし、同じ富士山質問で文の自然さ・出典リンク・末尾の完結を確認。実機検証前に成功と断定しない。
+
+## 最新更新 v93（2026-11-06）
+- v92で検出だけされ、Qwenの修復失敗時に残り得た不自然表現を表示直前に補正する処理を追加。
+- 「日本の最高の山」→「日本最高峰」、「富士山登り」→「富士登山」を端末内で補正。
+- 「あり／おり」で終わる未完了節は最後の文境界から除去。未完了節しか残らない場合は再質問案内に切り替える。
+- 既知の不自然表現が残る場合も安全な案内に切り替える。回帰テスト追加。
+- Service Worker cache: alvis-cache-v93-integrated。
+- 次: ローカル回帰テスト全体を実行できる環境で確認し、Actionsの実行状態を確認。実機テストは最後にまとめて依頼する。
+
+## v94追記（2026-11-06）
+- 「富士山登り」を含む文は語句だけ置換せず、文全体を除外する方式へ変更。出典にない代替主張を作らない。
+- 回帰テスト更新。Service Worker cache: alvis-cache-v94-integrated。
+
+## v95追記（2026-11-06）
+- 文末に出典番号がある場合も「あり／おり」の未完了節を検出できるよう正規表現を修正。引用記号を含む回帰テストを追加。
+- Service Worker cache: alvis-cache-v95-integrated。
+
+## v95検証結果
+- 現在のdevelopmentブランチから取得したアプリ・Service Worker・テストファイルを使い、端末内JavaScript実行環境でoffline-first.test.mjs全体を実行。全261アサーション成功。
+- 追加の個別ケース8件成功。ユーザー提示の富士山回答は「富士山は日本最高峰で、噴火の歴史を持つ活火山です。」までに整理され、根拠のない不自然な文と未完了節を除去。
+- アプリのインラインJavaScript構文、テストモジュール構文を確認。
+- GitHub Actionsの実行記録/ステータスは取得できず、iPad Safari実機は未確認。実機確認前に完全成功とは扱わない。
+
+## v96追記（2026-11-06）
+- ユーザーが確認した安全フォールバックの原因を調査。既知の不自然な一節が回答中に残ると最終品質判定が回答全体を拒否する構造だった。
+- 回答全体を拒否せず、該当する既知の不自然な文だけを除去し、残りの完結文を維持するよう変更。
+- 部分修復の回帰テスト追加。Service Worker cache: alvis-cache-v96-integrated。
+
+### v96検証結果
+- developmentから取得した現行ファイルを使い、offline-first.test.mjs全263アサーションが成功。
+- 提示された富士山回答を模したケースで、不自然な文だけを除去し、残った回答が最終品質判定を通過することを確認。出典マーカーも維持される。
+- アプリのインラインJavaScript構文、Service Worker cache v96を確認。
+- iPad Safari実機・GitHub Actionsは未確認。次は開発版の実機で最終確認。
+
+## v97追記（2026-11-06）
+- Qwenの `finish_reason` が `length` の場合、最後の完結した句点までを残し、生成上限で途切れた末尾断片を表示しない処理を追加。
+- 完結文に付いた出典番号は保持。完結文がない場合は断片を出さず、再質問案内を表示。
+- 回帰テスト追加。Service Worker cache: `alvis-cache-v97-integrated`。
+- ローカル検証: アプリ構文PASS、トークン上限の4ケースPASS、テスト内ガード存在確認PASS。Node.js全テスト・GitHub Actions・iPad Safari実機は未確認。
+- 次: v97を開発版で読み込み、前回の富士山質問で回答が文末まで完結し、出典リンクが維持されるか最後に一度だけ確認。
+
+### v97追加検証
+- `tests/offline-first.test.mjs` 全体の267アサーションをV8環境で実行し成功（Node.js標準ランナーではなく、`readFile`/`assert` の互換実装を使用）。
+- 生成上限で途切れた文の除外、完結文に付く出典番号の保持、完結文がない場合の再質問案内、通常の完結文の保持を確認。
+- Node.js標準ランナー・GitHub Actions・iPad Safari実機の結果は未確認。
+
+## v98追記（2026-11-06）
+- v97の生成上限処理で `finalChoice` を宣言前に参照していた問題を修正。生成結果から `finalChoice` を取得してから `finish_reason` を確認する順序に変更。
+- 同じ初期化順エラーを防ぐ回帰テストを追加。
+- Service Worker cache: `alvis-cache-v98-integrated`。
+- 検証: インラインJavaScript構文PASS、初期化順PASS、offline-firstテスト本文268アサーションPASS（V8互換実行）。Node.js標準ランナー・GitHub Actions・iPad Safari実機は未確認。
+- 次: 開発版を再読み込みしてモデルを読み込み、富士山の回答と出典表示を最終確認。
+\n\n## v99追記（2026-11-06）\n- 同一WebLLMエンジンに対するすべての `chat.completions.create` を直列化するラッパー `serializeAlvisInference` を追加。チャット・成長計画・課題分析・自律タスクの同時生成を防ぐ。\n- `engine.unload()` は実行中/待機中の生成キューが完了するまで待機する。エラー後の解放や画面ロック時の終了処理にも適用。\n- Service Worker cache: `alvis-cache-v99-integrated`。データ形式・暗号化・同期・バックアップは変更なし。\n- 回帰テスト: 4件の同時要求が最大同時実行数1で処理されること、推論後にunloadできることを確認するテストを追加。\n- iPad Safari実機で `map async was not successful` が再発しないかは未確認。WebGPUデバイス損失そのものを完全に防ぐ保証ではない。\n
+
+## v132 — ホログラム球体のぼけ・モザイク感を軽減（2026-11-07）
+- 球体本体に適用していたGaussian blurを除去し、輪郭は独立した細いベクターリングで表現。球体内部の輪郭・経緯線を高精度描画に統一。
+- 大陸シルエットをより細かな連続曲線へ置換し、単純な塊・モザイク状に見える印象を軽減。
+- ホログラムの軌道線に適用されていたぼかしフィルターも除去し、細い線を明瞭化。発光色と球体のグラデーションは維持。
+- 下部投影台の静止状態、既存AI操作・記憶・履歴・暗号化・同期・バックアップは変更なし。
+- Service Worker cache: alvis-cache-v132-integrated。ソース構文・CSS/SVG対象・回帰ガードを確認。Safari実機の見え方は未確認。
+
+
+## v133 — 地球表面の詳細化（2026-11-07）
+- 実際に表示されている .alvis-reference-scene 内の地球を修正。旧版の簡略化した少数の大陸パスを削除し、Natural Earth 1:110m のパブリックドメイン陸地ベクターデータから前面半球へ投影した輪郭へ置換。
+- 球面クリップ内に細かな海岸線を描画し、低解像度のブロック状シルエットを避ける。外部通信なしでSVGとして表示。
+- 地球周囲の軌道アニメーションを維持。下部投影台は静止のまま。既存のAI・記憶・履歴・暗号化・同期・バックアップ処理は変更なし。
+- Service Worker cache: alvis-cache-v133-integrated。コード上のSVG構造とキャッシュ版を確認。Safari実機での画質確認は未実施。
+- 地理データ出典: Natural Earth 1:110m land, public domain. <https://www.naturalearthdata.com/>.
+
+
+## v134 — ホログラムのぼかしフィルターを除去（2026-11-07）
+- 表示中のSVGホログラムに含まれていたGaussian blurフィルター（glow/soft）と参照属性を除去。SafariのSVGフィルター合成による広範囲のぼけを切り分けるため、シーン全体と子要素をfilter:noneで描画。
+- 地球のベクター輪郭、経緯線、軌道リング、中央操作領域は維持。下部投影台は静止のまま。
+- Service Worker cache: alvis-cache-v134-integrated。ソース上のフィルター除去とテストガードを追加。Safari実機でぼけが解消したかは未確認。
+
+
+## v135 — Safariの上半分ぼけ対策（2026-11-07）
+- スクリーンショットで確認されたシーン上部の矩形ぼけについて、SVG内部だけでなく祖先レイヤーを調査。stickyなdisplay-dockのbackdrop-filterと、appPanel入場アニメーションのfilter:blurを候補原因として除去。
+- ワークスペース入場演出はopacityのみとし、appPanel/display-dock/mode-stage/SVGにfilter・backdrop-filterを適用しない。
+- 地球・リング・下部静止台の構造は維持。Safari実機確認は未実施。
+
+
+## v136 — 初期表示の鮮明さを回復するぼかし除去（2026-11-07）
+- Git履歴でv105のdisplay-dock backdrop blur(14px)、v125のhud-side blur(12px)など後付けのガラスぼかしを確認。CSS全体からbackdrop-filterのblur指定とfilter:blur指定を除去。
+- 半透明背景・枠線・色は維持。SVGの地球形状・経緯線・軌道・中央操作領域・下部静止台は維持。
+- display-dockと子要素へぼかし禁止ガードを追加。実機描画は未確認。
+
+
+## v137 — 参考画像に合わせた球体・軌道の配置調整（2026-11-07）
+- 参考画像の構図に合わせ、地球・大気圏・経緯線・周回リングのまとまりを上方向へ25 SVG単位移動。球体中心は(204,166)から(204,141)、周回軌道中心もy=155へ合わせた。
+- ALVIS文字は球体中央に見えるよう元の基準位置を維持。上部プロジェクター、左右のHUD、下部投影台の位置は維持。
+- 中央の縦ビームを上部投影装置から投影台まで連続して見えるよう強調。下部投影台は静止。リング回転は継続。
+- 既存SVGベクター地球を使用し、外部画像通信なし。ぼかしは再導入しない。実機表示確認待ち。
+
+
+## 2026-11-07 — 参考デザイン再構成 v151
+- ユーザーが選択した「未来都市のホログラム地球ダッシュボード.png」を基準に、低解像度画像の貼り付けではなくHTML/CSS/SVGのライブUIとして再構成。
+- 画面比率を参考画像の1397:1126に合わせ、中央のホログラム球体、上部の大型投影リング、縦方向の光柱、周回リング、下部の同心円投影台、左右のパネル配置を再構築。
+- 左パネルにALVISロゴ風エンブレムと、チャット・記憶候補・長期記憶・履歴・クラウド同期への実操作メニューを配置。ローカルAI起動ボタンは左下へ移動し、既存の状態更新IDを維持。
+- 右パネルにシステム状態、記憶/成長への操作、ALVISメッセージ領域を配置。ネットワーク表示は既存のオンライン/オフライン状態更新に接続。
+- 球体SVGを420×420の高精細ベクター構成へ更新。埋め込みJPEGや外部画像への依存は追加していない。
+- 変更対象: index-integrated.html / service-worker.js / docs。
+- Service Worker cache: alvis-cache-v151-integrated。
+- 静的確認: DOCTYPE先頭、AI起動ボタンIDの重複なし、SVG球体・左右パネル・5つのページ遷移ボタンの存在、旧240px球体SVGの除去、埋め込みJPEG不使用を確認。
+- 未確認: Safari/iPad実機の表示・タッチ操作・アニメーション。実機確認前に完成表示とは扱わない。
+- 既存の暗号化、記憶候補承認、会話履歴、同期、バックアップ、推論、音声合成の処理ロジックおよび保存形式は変更していない。
+
+
+## v154 下部ホログラム投影台の高級感調整（2026-11-07）
+- 球体下の投影台を、強い青/ピンクの発光リングから、精密機器を思わせる薄いチタン調・ガラス調の同心リングへ変更。
+- ピンク色の内周リングと大きすぎる中心発光を抑え、淡いアイスブルーの反射、細い金属縁、控えめな陰影で上品さを強化。
+- 投影台は静止のまま。球体・上部リング・左右HUD・AI起動処理・記憶/履歴/暗号化/同期/バックアップ/音声処理は変更なし。
+- iPhone幅では投影台の高さと幅のみを微調整。Service Worker cache: `alvis-cache-v154-integrated`。
+- CSSの構造確認のみ。Safari実機での見た目確認はユーザー確認待ち。
+
+
+## v155 左側ホログラムメニューの画面遷移修正（2026-11-07）
+- メインメニューとホログラム内ショートカットの画面遷移を、疑似クリックを介さない共通 `navigateAlvisPage()` に統一。
+- 対象ページIDの存在を検証してから切替え、対象以外のmain内ページを非表示化。メインナビの選択状態とホログラムショートカットの選択状態/aria-currentも同期。
+- 既存の `data-page` を使うボタンを同じ直接ルーターへ接続。成長・記憶・診断等の既存ページIDと機能処理は変更しない。
+- 左メニューで選択中の項目に控えめなアイスブルーのアクティブ表示を追加。
+- Service Worker cache: `alvis-cache-v155-integrated`。
+- ソース構造の確認のみ。iPad/iPhone Safariでのタップ実機確認はユーザー確認待ち。
+
+
+## v156 — 左側ホログラムメニューのタップ操作を復旧（2026-11-07）
+- v155の画面遷移処理だけでは解決しなかった原因を特定。過去の参考画像レイヤー調整で .hud-side に pointer-events:none!important が残り、表示されていても左側メニューのタップが親要素で遮断されていた。
+- 左右HUDパネルと左側ナビ・各ボタンの pointer-events:auto を明示し、タッチ操作を有効化。メニューの既存 data-page と共通ルーターは維持。
+- Service Worker cache: alvis-cache-v156-integrated。
+- ソース上のCSS優先順位・対象要素・遷移先IDを静的確認。iPad/iPhone Safari実機のタップ確認はユーザー確認待ち。
+
+
+## v157 — 状態表示の整理と画面遷移演出（2026-11-07）
+- 「OFFLINE FIRST」はALVISの設計方針を表す表示として扱い、右側のライブ通信状態は ONLINE / OFFLINE のみ表示するよう分離。通信状態を設計方針と混同しない。
+- ページ切替時に、ログイン解除後の演出に合わせた控えめなフェード・微小スケール・中心から広がる淡い光の演出を追加。チャット、記憶候補、長期記憶、履歴、成長、外部AI、AI連携、同期、端末診断の共通ルーターを維持。
+- prefers-reduced-motion を尊重し、動きを抑える設定ではページ遷移アニメーションを無効化。
+- Service Worker cache: alvis-cache-v157-integrated。
+- ソース構造・表示文言・遷移先IDの静的確認のみ。Safari実機の演出とタップ操作は未確認。
+
+
+## v164 — ホログラム内チャット入力・履歴の見通し改善（2026-11-07）
+- チャット入力欄をホログラム表示枠の下部へ重ねて内蔵。入力欄と送信ボタンを少し拡張し、JARVIS表示/アバター表示の両方で利用できる配置にした。
+- 記憶・成長・音声・端末のクイック機能をホログラム枠の外、チャット履歴の下へ移動。
+- 大きなホログラム枠のsticky固定を解除。スクロール時にホログラムが履歴を覆い続けないようにした。
+- 既存ID（chatInput/sendChat/chatLog）と送信・AI・音声・記憶・履歴の処理は変更なし。データ形式、暗号化、同期、バックアップも変更なし。
+- Service Worker cache: alvis-cache-v164-integrated。
+- ソース構造・ID重複・CSS配置・キャッシュ版を静的確認。iPad/iPhone Safari実機の見た目と入力操作はユーザー確認待ち。
+
+
+## v189 18号アバターの正式ビジュアル基準を固定（2026-11-08）
+- ユーザーが2026-11-08に提示した「ALVIS / 18号 3Dアバター」参照画像を、アバターモードの唯一の正式ビジュアル基準とする。新しいチャットでも本項を引き継ぎ、画像の再提出やデザインの再確認を要求しない。
+- 顔・髪型・目・肌・表情・耳飾り・ネックレス・首元のバーコード状マークを参照画像に忠実に合わせる。特に金髪のボブ、サイドパートの前髪、青灰色の瞳、明るい肌、柔らかなピンク系の唇、金色のフープピアスと細いチェーンを維持する。
+- 服装は参照画像の白いノースリーブトップスを初期基準とする。ユーザーが明示的に許可した範囲以外で独自アレンジ・別の顔・別の髪型・新規アクセサリーを追加しない。
+- 参照シートにある正面/斜め/側面/背面、通常・微笑み・発話・怒り・閉眼・驚き・悲しみ等の表情を、3Dモデル制作時の形状・表情ターゲットの参照とする。画像内のモデル仕様表記（ポリゴン数等）は参考イメージであり、実際の納品仕様として保証しない。
+- 完成条件は静止画ではなく、ALVISのTalking Avatar SDKで読み込めるカスタムGLB。顔・髪・首・上半身の形状、リグ、自然な瞬き、表情、発話時の口形（viseme/morph targets）を確認してから正式採用する。
+- 現状のSDK内蔵AVATARS.femaleは汎用Rocketbox女性モデルであり、正式モデルではない。カスタムGLB完成までは置換しない。静止画を3D完成品と偽らず、簡易プレースホルダーや別デザインを正式採用しない。
+- 既存のアバター表示領域 #alvisAvatarCanvas、遅延ロード/破棄、チャット・音声・記憶・履歴・暗号化・同期・バックアップを維持し、カスタムGLB完成後にavatarUrlをローカル配信アセットへ差し替える。初回取得後はオフライン再利用できるようService Workerキャッシュ対象にする。
+- 次工程は参照画像から実際の3Dメッシュを生成し、リグ/表情を付与してGLB化すること。現在の実行環境では3D生成・リギング工程が未完了のため、まだモデル差し替えは行っていない。
+
+## v190 第1段階：18号参照画像をALVISに表示
+- ユーザーが2026-11-08に提示した正式参照画像から、左側メイン肖像パネルを切り出したプレビュー画像を assets/alvis-18-preview.jpg として追加。顔/髪型/衣装のデザイン変更はしていない。元の参照シートは会話添付として保持し、仕様は本HANDOFFとALVIS_SPECに固定済み。
+- アバターモードでは汎用Rocketboxモデルを起動せず、まず参照画像プレビューを表示する段階に変更。ステータスは「ALVIS / 18号 IMAGE PREVIEW — 3D MODEL IN PROGRESS」。これは静止画プレビューであり、3D/口パク対応は未完成。
+- Service Workerキャッシュをv190へ更新し、プレビュー画像を事前キャッシュ対象に追加。チャット、記憶、履歴、暗号化、同期、バックアップ処理は変更しない。
+- 次工程：参照画像から実際の3Dメッシュを生成し、リグ/表情/visemeを付与したカスタムGLBへ置換する。
+
+
+## v191 第2段階：18号の顔詳細プレビュー
+- ユーザーが再提示した正式参照シートの左側メイン肖像から、顔・髪・首元を含む詳細クロップを作成し、既存の assets/alvis-18-preview.jpg を差し替えた。元画像のピクセルを切り出したもので、顔の再生成・補正・デザイン変更はしていない。
+- アバターモードは既存の画像プレビュー表示を維持し、alt/statusを顔詳細プレビューと明示。静止画であり3Dモデルではない。
+- Service Workerキャッシュをv191へ更新。会話・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。
+- 3Dメッシュ生成、リギング、表情/visemeは引き続き未完了。実GLBが得られるまで正式モデルとして扱わない。
+
+
+## v192 3Dモデル取り込み・表示基盤
+- アバターモードにGLB専用の読み込み操作を追加。読み込んだGLBはIndexedDBへ保存し、次回以降も端末内から復元する。
+- GLBがある場合はmodel-viewerで回転・拡大縮小可能な3D表示へ切替。ライブラリは必要時に読み込むためオンライン接続が必要。モデル本体は端末内保存。
+- GLB未導入時は既存の18号参照画像を表示し、未完成状態を明示。3Dモデルを生成したとは扱わない。
+- 会話・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。Service Workerキャッシュv192。
+
+
+## v193 アバター「？」表示の修正
+- アバター画像がページ遷移時に消され、復帰時の表示判定に依存していた問題を修正。18号の参照画像をアバター欄に保持し、チャット画面への復帰後も再表示する。
+- GLB未導入時の画像プレビューを常時表示対象とし、アバター欄の表示CSSを明示。GLBがある場合の3D表示切替は維持。
+- 会話/記憶/履歴/暗号化/同期/バックアップは変更しない。キャッシュv193。
+
+
+## v194 3Dモデル読込失敗時の画像フォールバック
+- 保存済みGLBの読込エラーまたは3Dビューア初期化失敗時に、18号の参照画像プレビューへ自動で切り替える。
+- 失敗したGLBは端末内データを勝手に削除せず、現在の表示セッションでは再試行ループを避ける。
+- Service Workerキャッシュv194。会話/記憶/履歴/暗号化/同期/バックアップは変更しない。
+
+
+## v198 18号プレビュー高解像度化
+- ユーザーがGitHubへ登録した assets/alvis-18-preview-clean-hq.jpg（1800×2220）をALVISアバタープレビューに採用。従来の400px画像はロールバック用に残す。
+- index-integrated.htmlのプレビュー参照先を高解像度画像へ変更。Service Workerキャッシュをv198へ更新し、新画像を事前キャッシュ対象に追加。
+- 変更範囲は静止画プレビューとキャッシュのみ。3Dモデル化、表情/口パク、会話・音声・記憶・履歴・暗号化・同期・バックアップ処理は変更しない。
+
+
+## 2026-11-08 — KeenFace多視点顔再構成の調査（v207）
+- 新候補 KeenFace（https://keenface.ai/）を公式Pricing / API Docs / Terms / Privacy Policyで確認。
+- 新規登録時に450 credits、頭部生成1回150 credits。公式表示上は初期無料枠だけで最大3回分。クレジット購入は任意の別操作であり、購入・課金・API従量利用は行わない。
+- 同一人物の1〜15枚の通常参照画像を受け付け、GLB/OBJ等の3D頭部メッシュを生成。GLBではオプションでARKit 51 blendshapeを出力可能。顔の表情を動かす中間成果物として、現候補の中で有力。
+- ただし全身モデル・Humanoid骨格・VRMを完成させるサービスではない。髪・首・胴体・全身リグとの接合とVRM化は別工程。出力品質・18号の一致度は未検証。
+- Privacy/Termsでは、アップロード写真・生成モデルはユーザーが削除するまでクラウドに保存。機械学習モデルの訓練には使わないと明記。Customerは生成Outputの権利を保持するが、元画像の肖像/著作権等の権利と必要な同意はCustomer側で確保する必要がある。
+- Scan Reconstruction ONは写真を第三者AI事業者へ送らず原画像から再構成するが、同一撮影条件・同一セッションで撮影された2〜15枚の一貫した多視点画像が必要。今回の18号参照資料が別々に作成されたビューである場合は条件不適合の可能性がある。
+- Scan Reconstruction OFFは異なる撮影条件の通常参照資料を扱える一方、画像は処理・スクリーニングのためfal.ai経由でOpenAI等の第三者AI事業者へ送信される。アップロード画像/モデルは学習利用しないと規約に明記されているが、第三者処理が発生する点は必ず事前に説明する。
+- 判定: 無料枠と出力形式の面で有力候補。18号画像はまだ送信していない。ユーザーの「費用が発生しなければ送信可」という条件は維持し、無料枠を超える場合は中止。画像と生成物は取得後にサービス側から削除する方針。
+- 次: iPad SafariでKeenFace Studioが操作可能か、アカウント登録時に支払い情報が要求されないかを確認する必要がある。登録・規約同意・画像送信は未実施。APIキーや認証情報をチャットで共有しない。
+- 参考: https://keenface.ai/pricing ; https://keenface.ai/docs/reference ; https://keenface.ai/legal/terms-of-service ; https://keenface.ai/legal/privacy-policy
+
+
+## 2026-11-09 — KeenFaceの入力条件・無料枠を再確認（v208）
+- 公式API Docsを再確認。Defaultモードは同一人物の1〜15枚で、撮影日・カメラ・背景・照明が異なる通常写真やWeb参照画像を許容。Scan Reconstructionのみ同一撮影セッションの2〜15枚が必要。したがって18号の既存参照シートはDefaultモードの対象になり得る。前回の「通常モードが必要そう」という判断を公式仕様で確定。
+- Defaultは正面・左右斜め・プロフィール等の異なる角度を推奨。鮮明で顔が大きく、目が開き、同じ年齢・中立表情・過度な補正なしの画像が望ましい。参照シートから各方向の高解像度パネルを個別に用意する方針。
+- 公式Pricingは新規登録450 credits、頭部生成150 credits、Studio/APIとも同料金、GLB/OBJとテクスチャ・Expression/ARKit blendshapesが含まれ、ダウンロード追加料金なし。クレジット購入は別操作。無料枠内だけを使い、残高不足/購入画面では停止する。
+- Defaultの写真は第三者AI事業者に送られ、前処理・スクリーニングされる。Scan Reconstruction ONなら第三者AI事業者へ送信されないが、同一撮影セッション要件を満たさないため今回の資料には適さない。学習利用はしないと規約に明記。
+- アップロード画像と生成モデルは自動24時間削除ではなく、ユーザーが削除するまでクラウド保存。完成データ取得後にStudioから元画像/Headを削除する必要がある。
+- Studioのログイン先はcloud.keentools.ioへリダイレクトされ、閲覧調査ではログイン後UIを取得できなかった。公式にiPad Safari対応の明記も見つからず、iPadでの操作性は未確認。API経由はAPIキー発行・秘密情報管理・ファイル送受信が必要なため、現状のiPad Safariのみの作業フローには不向き。
+- 判定: 技術的な顔頭部候補としては引き続き有力。ただし登録時の支払い情報要否とiPad SafariでのStudio操作性は未確認。ユーザーの無償条件を守り、画像アップロード・登録・規約同意・課金は未実施。実際のアップロード前にユーザーへ第三者AI処理を再度明示し、無料残高を確認する。
+- 参考: https://keenface.ai/docs/reference ; https://keenface.ai/pricing ; https://keenface.ai/guidelines ; https://keenface.ai/legal/privacy-policy ; https://keenface.ai/legal/terms-of-service
+
+
+## v229 — モデル起動時の保存領域永続化要求（2026-11-09）
+- Qwenモデル起動ボタンの直接操作時、最初のawaitより前に `navigator.storage.persist()` を呼び出し、Safariへオリジン保存領域の永続化を要求する。
+- ブラウザが許可・拒否・非対応・例外のいずれでもモデル読み込みは継続し、要求失敗で推論を止めない。
+- 端末診断に要求結果を追加。`persisted()` の現在状態と、モデル起動時に要求した結果を区別して表示する。
+- キャッシュの削除/移動/再取得、モデル設定、記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
+- Service Worker cache: `alvis-cache-v224-integrated`。
+- 静的検査を追加。Safari実機で許可されたか、ストレージ保持が実際に継続するかは未確認。
+
+
+## v230 — 永続化要求の同期例外対策（2026-11-09）
+- v229で追加した `navigator.storage.persist()` は通常Promiseを返すが、API呼び出し自体が同期例外を投げる環境も想定し、呼び出し前後をtry/catchで保護。
+- 同期例外・Promise rejectionのどちらでも診断へ失敗状態を記録し、モデル起動処理は継続できるようにした。
+- 保存領域、WebLLMキャッシュ、モデル設定、記憶・履歴・暗号化・同期・バックアップは変更しない。
+- Service Worker cache: `alvis-cache-v225-integrated`。静的回帰ガード追加。実機検証待ち。
+
+
+## v231 — WebLLM終了処理の重複防止（2026-11-09）
+- `serializeAlvisInference()` の終了処理を冪等化。ロック処理と推論エラー処理等から同じengineへ複数回unloadが要求されても、元のWebLLM unloadは一度だけ実行し、同じPromiseを返す。
+- 終了要求が始まった後の新規/待機中推論を拒否し、実行中の推論キューがsettleしてからGPUリソースを解放する。
+- モデルキャッシュ、モデルID、context、記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
+- Service Worker cache: `alvis-cache-v226-integrated`。静的回帰ガード追加。実機でのGPU安定性は未確認。
+
+
+## v232 — フォローアップ文脈の保持と入力予算（2026-11-09）
+- 推論用の会話文脈を専用関数 `buildBoundedGenerationMessages()` で構築する。
+- 「それは？」「その意味は？」等のフォローアップでは、直前のユーザー質問とALVIS回答をセットで最大600文字保持し、現在の質問は文字数制限で切らない。
+- 通常質問は直前の発言1件のみ最大240文字とし、古い話題の混入とprefill負荷を抑える。
+- 永続会話履歴・記憶・学び・暗号化・同期・バックアップのデータは変更しない。Service Worker cache: `alvis-cache-v227-integrated`。
+- 回帰テストにフォローアップの役割順、現在質問の完全保持、過去文脈600文字上限を追加。実機の推論品質・速度は未確認。
+
+## v273 — 指定完成見本をALVISモードへ復帰（2026-11-16）
+- developmentブランチで、ユーザー指定の「未来都市のホログラム地球ダッシュボード.png」を元に登録済みの `assets/alvis-dashboard-reference.avif`（700×564、27,940 bytes、blob SHA `801f0dba167b770a4f8f3ae2fde871bbba3b6ea8`）をALVISモードの表示面へ戻す。
+- リポジトリ内のAVIFは元PNG（1397×1126）の最適化派生版であり、元PNGそのもの・画素単位の同一データではない。球体、軌道リング、上部投影装置、下部投影台、左右パネルは一枚の画像として表示し、CSS/SVGで描き直さない。
+- 画像内の左5メニューは既存の `data-page` ボタン、左下のAI状態領域は既存の `#hudAiAction`、右側の記憶/成長行は既存の `data-hud-action` ボタンへ透明なタップ領域として接続。右側ボタンに既存の `hud-interface-action` イベント委譲を追加して、記憶/成長ページへ遷移できるようにする。
+- 旧 `.hud-center` と装飾レイヤーはALVIS画像表示中に隠し、画像表示中は旧リングのWeb Animationsも開始しない。アバターモードと既存チャット入力/送信は別領域のまま維持。
+- Service Worker app-shell cacheをv273へ更新し、AVIFをプリキャッシュ対象へ追加。独立した依存キャッシュ、WebLLM/Kokoroモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ形式、推論処理は変更しない。
+- 回帰検査は `tests/alvis-dashboard.test.mjs` と `tests/offline-first.test.mjs` で画像表示、透明操作領域、既存機能、オフラインキャッシュを確認する。Safari実機での実タップ/オフライン再読込は別途確認が必要。
+
+
+## v277 — Service Worker更新の失敗耐性と明示的更新確認（2026-11-17）
+- Service Workerのinstall時に全アプリ資産を一括cache.addAll()していたため、任意の1ファイル取得失敗で新しいWorker全体のinstallが失敗し、旧バージョンが残り続ける可能性を修正。
+- 各プリキャッシュ資産を個別に取得・保存し、任意資産の失敗ではinstallを中断しない。必須のindex-integrated.htmlが保存できた場合だけ新Workerを有効化する。旧キャッシュ削除対象はALVIS app/dependency cacheに限定し、WebLLM/Kokoro/ユーザーデータは保持。
+- アプリ起動時のService Worker登録にupdateViaCache:noneを指定し、registration.update()を明示実行。新Workerのactivateを最大12秒待ち、失敗時は既存Service Worker/オンライン起動へフォールバック。
+- QwenモデルID・量子化・GPU処理・モデルキャッシュ・記憶・履歴・暗号化・同期・バックアップ形式は変更しない。
+- app shell cache: alvis-cache-v277-integrated。iPhone Safariでv258から更新されるか、実機確認が必要。
+
+## v278 — Service Worker待機の無期限化を回避（2026-11-17）
+- 起動時のService Worker登録後に `navigator.serviceWorker.ready` を無期限で待たないよう修正。Worker activateの待機は最大12秒とし、未完了でも通常のページ初期化へ進む。
+- Service Workerのapp shell cache: alvis-cache-v278-integrated。
+- WebLLM/Kokoroモデルキャッシュ、依存コードキャッシュ、暗号化記憶、履歴、同期、バックアップ、アバターモードは変更しない。
+- iPhone Safari実機での起動確認は未完了。
+
+## v279 — iPhone幅WebKitの初期表示スモークテスト（2026-11-17）
+- デプロイ済みページに対し、390×844・タッチ対応・iPhone Safari User-AgentのWebKitテストを追加。
+- 初期パスワード画面の表示、ALVIS画像の読み込み、アプリロック状態、未捕捉JavaScriptエラーを検証。診断用スクリーンショットも保存。
+- これはiPhone幅のWebKitエミュレーションであり、実機Safariの完全な代替ではない。
+
+
+## v283 — ログイン画面の初期表示を高速化（2026-11-18）
+- 128KB超のインラインCSSを分割し、ログイン画面に必要な基本スタイルとロック画面スタイル（約7.7KB）だけをHTML内へ残す。
+- ALVIS HUD・チャット・音声・記憶・履歴・同期・Avatarなどの非クリティカルCSSは `assets/alvis-app.css` へ移し、preload後に非同期適用。ログイン画面の初回描画を外部CSSの完了待ちから切り離す。
+- 新CSSはService Workerのアプリシェルへプリキャッシュし、オフライン時も既存UIスタイルを維持。
+- 認証処理、暗号化データ、記憶・履歴、同期・バックアップ、WebLLM/Kokoroモデルキャッシュ、ALVIS/Avatarの表示仕様は変更しない。
+- app shell cache: alvis-cache-v283-integrated。iPhone Safari実機の体感速度はデプロイ後に確認する。
+
+
+## v284 — 2回目以降の起動を高速化（2026-11-18）
+- 統合アプリ画面のService Workerナビゲーションをネットワーク優先からアプリシェルキャッシュ優先へ変更し、再訪時に毎回ネットワーク応答を待たない。
+- 通常リソースのキャッシュ検索をALVISアプリキャッシュと依存コードキャッシュに限定。CacheStorage全体を検索してWebLLMモデルキャッシュの全エントリを毎回走査する動作を廃止。
+- WebLLMの `webllm/model`・`webllm/config`・`webllm/wasm` は対象リクエスト時だけ個別参照し、既存モデルデータを保持。
+- アプリシェルの新バージョンはService Worker更新・インストール時にプリキャッシュしてから有効化。通常起動は即時キャッシュ、更新時は新Workerのキャッシュへ切替。
+- 記憶・履歴・暗号化・同期・バックアップ・モデルデータの削除や再取得は行わない。2・3回目の連続起動をブラウザテストで確認する。
+
+
+## 2026-11-18 — iPhone幅WebKitのログイン初回表示時間を計測
+- v284の起動改善後もユーザー実機で初回から遅いとの報告を受け、既存のモバイルWebKitスモークテストへNavigation Timing / Paint Timingを追加。
+- ログイン画面がDOM上で可視になるまでの時間、responseStart、DOM interactive、DOMContentLoaded、load、first-paint、first-contentful-paintを記録する。画面の表示条件や認証動作は変更しない。
+- この値はPlaywright WebKitの参考計測であり、iPhone実機の所要時間とは区別する。モデルキャッシュ、暗号化記憶、履歴、同期、バックアップ、Avatar/ALVIS表示は変更しない。
+
+
+## 2026-11-18 — 実機起動診断ページを追加
+- `startup-check.html` を追加。ページ内iframeで統合アプリを実際に起動し、ログイン画面がDOM上で見えるまでの実測時間、Navigation Timing、Service Workerの制御/状態、ALVISアプリキャッシュ名、配信中Service Workerのcache versionを表示・コピーできる。
+- 診断はキャッシュ名と状態のみを読み取り、IndexedDB/localStorage、暗号化記憶、会話履歴、パスワード、Qwen/Kokoroモデルの内容を読まない。更新・削除・登録解除・再取得も実行しない。
+- 以前の端末診断では `alvis-cache-v258-integrated` が表示されていた一方、開発版コードはv284であるため、端末側の旧Service Worker残存を切り分ける。現時点で実機v284適用は未確認。
+- `tests/alvis-dashboard.test.mjs` で診断ページの計測対象と非破壊性を検査。Cloudflare Pages配信後にiPhone実機で診断結果を確認する。
+
+
+## v286 — ログイン初期表示とService Worker更新の競合を回避（2026-11-18）
+- v285でhead内へ移動したService Worker登録・更新処理を、メイン画面のHTML/スクリプト読込後へ戻す。新Workerのプリキャッシュ通信がログイン初期表示と競合する可能性を減らす。
+- app shell cacheをv286へ更新。updateViaCache:none、registration.update()、activate待機12秒上限、既存Workerへのフォールバックは維持する。navigator.serviceWorker.readyの無期限待機は行わない。
+- Service Worker本体のキャッシュ優先動作、既存のオフライン対応、WebLLM/Kokoroモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップ、ALVIS/AvatarのUI・AI設定は変更しない。
+- iPhone実機での速度改善はユーザー確認待ち。自動テストは登録処理がheadより後で開始されることを検証する。
+
+
+## v287 — ログイン中の画像通信を後回し（2026-11-18）
+- ログイン前は非表示のALVISダッシュボード画像とアバター画像を loading=lazy / fetchpriority=low に変更し、初期パスワード画面の表示と画像取得が競合しにくいようにする。
+- 認証後に各表示領域が現れた時点で画像を読み込む。Service Workerの画像プリキャッシュは維持し、初回オンライン利用後のオフライン表示を保つ。
+- app shell cache: alvis-cache-v287-integrated。既存の画像・アバター表示、モデルキャッシュ、記憶、履歴、暗号化、同期、バックアップは変更しない。
+- 自動テストはログイン前に画像が遅延指定されていること、アプリ表示後に画像が読み込めることを確認する。iPhone実機での体感速度は別途確認が必要。
+
+
+## 2026-11-18 — v289 Service Workerの更新待ちをログイン必須資産だけに限定
+- v288ではService Worker installがダッシュボード画像・Avatar画像・VRMランタイムを含む全資産の取得完了まで待ってからskipWaitingしていた。任意資産の失敗は許容していたが、取得の遅延までは許容していなかった。
+- v289ではinstall時に統合ログインHTMLと必須CSSのみを取得して有効化する。画像・Avatar専用ランタイムなどの同一オリジン資産は、実際に要求された時点でALVISアプリキャッシュへ保存し、次回以降のオフライン利用に備える。
+- WebLLM/Kokoroのモデルキャッシュ、暗号化記憶、会話履歴、同期、バックアップには触れない。ALVIS/Avatarの画面デザイン・機能は変更しない。
+- CIで必須シェルの先行キャッシュ、任意資産のinstall待ち排除、同一オリジン資産のオンデマンド保存、更新ブリッジv289を検証する。iPhone実機の速度改善はユーザー確認待ち。
+
+
+## v290 — 端末診断で実際のWorker版と旧キャッシュを区別（2026-11-18）
+- 診断に「この画面のコード版」「現在この画面を制御するWorker版」「登録済みactive Worker版」を分けて表示する。更新直後に旧Workerが現在のページを制御している状態と、新Workerが登録済みの状態を区別できる。
+- ALVISアプリキャッシュは全一覧に加え、制御中Worker/登録済みactive Workerが報告したキャッシュと、それ以外のALVISキャッシュを分けて表示する。キャッシュ名の存在だけで稼働中バージョンと誤認しない。
+- 診断は読み取り専用。Cache Storage、WebLLM/Kokoroモデル、IndexedDB、暗号化記憶、会話履歴、同期、バックアップを削除・変更しない。
+- Service Worker app-shell cache: alvis-cache-v290-integrated。端末診断での実機バージョン判定は更新ページ適用後に確認する。
+
+
+## v291.1 Service Worker refresh follow-up
+- `refresh-v291.html` now re-registers the existing Service Worker with `updateViaCache: "none"` before calling `registration.update()`. Existing registrations may retain an older update policy, so the refresh page explicitly reapplies the no-cache policy rather than only doing so when no registration exists.
+- The refresh page still waits for the active worker to report `alvis-cache-v291-integrated` before redirecting. It does not clear caches or touch WebLLM/Kokoro model storage, encrypted memories, history, or backups.
+- Preview smoke assertions now target `refresh-v291.html` and verify the registration policy and v291 build check.
+
+
+## v291.2 — 実際の更新ページ遷移をブラウザで検証
+- Preview smoke test now opens `refresh-v291.html` in fresh Chromium and WebKit contexts, waits for its redirect, and queries the active Service Worker for its actual cache version.
+- This supplements source-string checks: the refresh bridge must complete its register/update/activate/version-check/redirect sequence in both browser engines before the dashboard smoke tests run.
+- Fresh-context coverage does not replace an iPhone user's existing-registration test; it validates the deployed update flow without touching personal storage.
+
+
+## v292 ALVISモードのライブホログラム復元（2026-11-20）
+- v273の静止画ダッシュボード上書きCSSを除去し、v262/v267で復元済みのライブHUD（球体SVG・左右パネル・投影台・リング）を再表示。アバターモードのCSS/DOM/描画処理は変更しない。
+- `startAlvisHudMotion()` の停止条件を修正。HTML内に参照画像要素が存在するだけでは停止せず、参照画像が実際に表示されている場合だけ停止する。非表示画像が残っていても2本のリングのWAAPI回転を開始できる。
+- Playwright Chromium/WebKit/iPhone WebKitの検査を静止画表示前提からライブ球体・リング表示/アニメーション検査へ変更。オフライン検査は必須CSSのキャッシュとアプリシェル再読込を検証する。
+- Service Worker cache `alvis-cache-v292-integrated`。Qwen/Kokoroモデル、依存キャッシュ、暗号化記憶、会話履歴、同期/バックアップ、Avatarモードは変更・削除しない。iPhone実機での表示確認は配信後に一度だけ行う。
+
+
+## v303 — ALVISモード外周ギアの歯を明瞭化（2026-11-22）
+- ユーザー確認済みのv302外周リング中心位置（球体コアの50%/42%アンカー）と真円形状を維持したまま、3つ目の外周リングの歯だけを明瞭化。
+- 48歯のピッチは7.5度のまま、歯の発光面を広げ、外周への突出量を12pxに拡大。歯間に濃い青の陰影と明確な抜きを設け、細かな歯車形状を視認しやすくする。
+- ALVISモードの外周リング::beforeのみ変更。球体、内側2リング、回転（42秒）、Avatarモード、投影台、チャット、Qwen/Kokoro、暗号化記憶、履歴、同期、バックアップ、既存キャッシュ/モデルデータは変更・削除しない。
+- Service Worker cache: alvis-cache-v303-integrated。Chromium/WebKitで外周歯の幅・突出・マスクと球体中心一致を検査する。
+
+
+## v304 — 時計目盛り型の外周ギア（2026-11-22）
+- ユーザーのフィードバックを受け、外周リングを薄い連続円に見せる表現から、一本ずつ明確に見える放射状の目盛りへ変更。48本の短い目盛りに加えて45度ごとの長い目盛りを重ね、時計の文字盤のように歯の区切りを強調。
+- 歯の発光コントラストを上げ、外側への突出を14px、内側マスク開始を77%へ調整。外周リングの独立回転を42秒から18秒へ短縮し、回転が視認しやすい速度にする。
+- 確認済みの中心位置（50%/42%）と真円形状を維持。球体、内側リング、Avatarモード、投影台、チャット、AIモデル、記憶・履歴・暗号化・同期・バックアップ、既存のモデルキャッシュは変更・削除しない。
+- Service Worker cache: `alvis-cache-v304-integrated`。更新ページ `refresh-v304.html` は実際のWorker版を確認してからアプリへ戻す。Chromium/WebKitで時計目盛り・中心・円形・回転・更新遷移を検査する。
+
+
+## v305 — SVGによる明確な外周ギア歯（2026-11-22）
+- v304のCSSグラデーション目盛りは実機で視認できなかったため廃止し、48本の独立したSVG線として描画。45度ごとに8本を長く太くし、時計の文字盤の目盛りとして明確に見える形にする。
+- 外周リングは真円（幅・高さ1:1）を維持。回転はCSSアニメーションではなく既存WAAPI制御に合わせ、実際の回転時間も18秒へ変更（以前はJS側の42秒指定が優先されていた）。
+- 球体、内側リング、Avatarモード、投影台、チャット、AIモデル、記憶・履歴・暗号化・同期・バックアップ、モデルキャッシュは変更・削除しない。
+- Service Worker cache: `alvis-cache-v305-integrated`。更新ページ `refresh-v305.html`。Chromium/WebKit検査でSVG歯48本・長歯8本・18秒回転・円形を確認する。
+
+
+## v306 — ALVISモード外周リングを高級SFメカニカル調へ試作（2026-11-22）
+- ユーザーの要望に合わせ、修正対象をALVISモードの3つ目の外周リングだけに限定。既存の外周SVG目盛りを、金属グラデーションの歯車歯・二重の面取りリム・細かな刻みを持つ精密メカニカルリングへ置換。
+- 外周リングの既存中心アンカー・円形寸法・18秒回転を維持。球体、内側2リング、左右パネル、投影装置、投影台、チャット、AI、Avatarモード、記憶・履歴・同期・バックアップ、モデルキャッシュは変更しない。
+- CSSはALVISモードの外周リング要素とその子SVGだけに適用。Service Worker cache: alvis-cache-v306-integrated。更新ページ: refresh-v306.html。
+- これはユーザー確認用の試作。実機Safari/iPadでの見た目・回転はユーザー確認待ち。
+
+
+## v307 — ALVIS外周リングの歯を控えめにし回転を少し減速（2026-11-22）
+- ユーザーのフィードバックに合わせ、修正対象はALVISモードの最外周リングのみ。外周ギア歯を48個から24個に減らし、歯の突出量を短くしてギザギザ感を抑えた。
+- リング内部の金属リム・円周ライン等のデザインは維持。回転時間は18秒から22秒へ変更。
+- 球体、内側リング、左右パネル、投影装置、投影台、チャット、AI、Avatarモード、記憶・履歴・同期・バックアップ、モデルキャッシュは変更しない。
+- Service Worker cache: alvis-cache-v307-integrated。更新ページ: refresh-v307.html。回帰テストおよびブラウザ確認待ち。
+
+
+## v308 — ALVIS外周ギアを廃止し精密インデックスリングへ変更（2026-11-22）
+- ユーザーから外周が玩具のように見えるとの指摘。ALVISモードの最外周SVGにあった24個の立体ギア歯を撤去し、連続した滑らかな外周ヘアラインと48本の浅い目盛りへ変更。45度ごとの8本のみ少し長くし、控えめなコントラストにする。
+- 内側の金属リム（r155/r145）、縁取り、点線（r139）、球体、内側2リング、外周の位置・22秒回転は維持。
+- Avatarモード、投影装置、投影台、左右パネル、チャット、AI、記憶・履歴・暗号化・同期・バックアップ、WebLLM/Kokoroモデルキャッシュは変更しない。
+- Service Worker cache: alvis-cache-v308-integrated。更新ページ: refresh-v308.html。ブラウザ回帰テスト後、実機表示はユーザー確認待ち。
+
+
+## ALVISモード完成形の基準バージョン（2026-11-22更新）
+- 従来の完成形基準 v188 は廃止し、**v308 をALVISモードの新しい完成形・復帰基準**とする。
+- ユーザーが「完成形に戻して」と指示した場合、ALVISモードの対象箇所をv308の状態へ戻す。v188へは戻さない。
+- この復帰基準はALVISモードに限定する。Avatarモード、投影装置、投影台、チャット、AI、記憶・履歴・暗号化・同期・バックアップ、モデルキャッシュ等をv308への復帰を理由に巻き戻したり削除したりしない。
+- v308以降の改善は、ユーザーが完成形として明示的に更新しない限り、v308の基準を保持する。
+
+
+## v312 — 自律目標の同一タスク再提案を事前防止（2026-11-22）
+- 自律サイクルでAIが次の目標を提案した直後、既存タスクと目標・最初の行動が正規化後に完全一致するかを登録前に検査する。
+- 同じ組み合わせが完了済み/未完了タスクにある場合は、入力欄へ重複案を流し込まず、過去の結果を確認して別の検証方法を選ぶよう案内する。失敗・停滞した目標でも最初の行動が異なる新しい実験は引き続き提案できる。
+- ユーザーが内容を確認してから登録する既存フロー、学習候補の承認制、暗号化記憶、履歴、同期、バックアップ、WebLLM/Kokoroモデルキャッシュ、ALVIS/Avatar表示は変更しない。
+- Service Worker cache: `alvis-cache-v312-integrated`。更新ページ: `refresh-v312.html`。CIで重複ガード、オフライン回帰、配信後ブラウザ確認を行う。
+
+
+## v313 — 自律課題候補の重複判定を改善（2026-11-22）
+- 課題スキャン結果を保存する前に、課題名と次の行動を正規化して既存候補および同一スキャン内で重複判定する。
+- 全角/半角・大小文字・空白・句読点だけが異なる同一案は重複登録しない。一方、同じ課題名でも次の検証方法が異なる案は残し、失敗後の別アプローチを妨げない。
+- 既存の課題・タスク・記憶・履歴・同期・バックアップ・モデルキャッシュは変更しない。学習承認フローも維持。
+- Service Worker cache: `alvis-cache-v313-integrated`。更新ページ: `refresh-v313.html`。
+
+
+## v314 — 自律振り返りの重複学習メモを防止（2026-11-22）
+- 完了タスクのAI振り返りで学習メモを追加する前に、学びの本文と次の検証方法を正規化して既存メモと照合する。
+- 同じ学び・同じ検証方法が既にある場合は新規追加しない。既存メモの承認/未承認状態や出典は変更せず、今回のタスクの振り返り自体は保存する。
+- 同じ学びでも次の検証方法が異なる場合は別メモとして残せる。自動承認は行わず、従来どおりユーザー確認を必須とする。
+- 記憶、会話履歴、同期、バックアップ、WebLLM/Kokoroモデル保存データ、ALVIS完成形v308、Avatarモードには変更を加えない。
+- Service Worker cache: `alvis-cache-v314-integrated`。更新ページ: `refresh-v314.html`。
+
+
+## v315 — 重複した自律目標の1回限定再提案（2026-11-22）
+- 自律目標の生成結果が既存タスクと重複した場合、そこで終了せず、重複したタスクの目標・行動・状態・実行メモ・振り返りをモデルに渡して別案を1回だけ再生成する。
+- 完了済みタスクは振り返りの根拠と次の検証方法を踏まえ、未完了タスクは既存タスクを再利用せず別の確認方法を選ぶよう指示する。
+- 再提案も重複した場合は安全に停止し、既存タスクの確認を案内する。無制限の再生成や自動タスク登録は行わない。
+- ユーザーが内容を確認してからタスク登録する既存フローを維持。記憶の自動承認、データ削除、同期・バックアップ・モデル保存データ・ALVIS完成形v308・Avatarモードには変更なし。
+- Service Worker cache: `alvis-cache-v315-integrated`。更新ページ: `refresh-v315.html`。
+
+
+## v316 — 過去の実験結果を使った自律目標の判断強化（2026-11-22）
+- 自律目標を生成する前に、完了タスクの振り返りから成功/一部達成/阻害/判断不能/未振り返りの件数と、直近8件の根拠・次の検証方法・確信度を構造化する。
+- この判断材料を目標生成プロンプトへ渡し、成功を過大評価せず、partialは未達部分へ分解、blockedは阻害要因の確認、unclear/未振り返りは証拠収集を優先する。
+- 承認済み学習だけを既存どおり参照し、未承認候補は判断材料へ混ぜない。自動実行・自動承認・データ削除・外部送信は行わない。
+- 保存形式・暗号化記憶・会話履歴・同期・バックアップ・モデルキャッシュ・ALVIS完成形v308・Avatarモードは変更しない。
+- Service Worker cache: alvis-cache-v316-integrated。更新ページ: refresh-v316.html。
+
+
+## v317 — 課題候補の根拠付き優先スコア（2026-11-22）
+- 課題分析の各候補に、影響・緊急度・改善効果・実現性・再発リスク・根拠強度の6軸（各1〜5）を付与する。
+- クライアント側で重み付きスコアを0〜100相当に換算し、75以上=高、50以上=中、それ未満=低へ決定的に分類する。モデルのpriority申告だけに依存しない。
+- 課題カードにスコアと各軸の内訳を表示し、採用前にユーザーが根拠を確認できる。既存の承認/タスク化フローは維持。
+- スコア未指定・不正値は中立値3に制限し、1〜5の範囲外を採用しない。自動実行・自動承認は行わない。
+- 保存形式の破壊的変更なし。暗号化記憶、会話履歴、同期、バックアップ、モデルキャッシュ、ALVIS完成形v308、Avatarモードは変更しない。
+- Service Worker cache: alvis-cache-v317-integrated。更新ページ: refresh-v317.html。
+
+
+## v318 — 優先順位に基づく改善計画提案（2026-11-22）
+- buildAutonomyPriorityPlanで未解決課題をスコア順に整列し、上位5件と最優先候補を生成する。
+- 却下済み・採用済み・既存タスクと重複する課題は候補から除外。スコア同点は登録順を維持。
+- 自律目標生成へ優先順位表を渡し、原則1位を選択。実現不能・根拠不足・安全性・重複がある場合は次点または確認作業を選ぶ。
+- 課題一覧も優先スコア順に表示。自動実行・自動承認・自動記憶更新は行わず、ユーザー確認フローを維持。
+- 既存保存データの破壊的変更なし。ALVIS完成形v308、Avatar、暗号化記憶、履歴、同期、バックアップ、モデルキャッシュは変更しない。
+- Service Worker cache: alvis-cache-v318-integrated。更新ページ: refresh-v318.html。
+
+
+## v319 — 改善課題と実行タスクの成果追跡（2026-11-22）
+- 課題をタスク化する際、課題の作成日時とタイトルを組み合わせた参照キーをタスクへ保存し、どの改善課題から派生したタスクかを明確に関連付ける。既存タスクは従来のsourceIssueタイトルでも表示・集計できる。
+- 課題カードに関連タスクの件数（未着手・実行中・完了）を表示。完了タスクにAI振り返りがある場合は、最新の評価・実行メモに基づく根拠・次の検証方法を表示する。
+- 自律目標提案が優先課題のタイトルまたは最初の行動と完全一致した場合のみ、提案タスクに課題参照キーを引き継ぐ。曖昧な関連付けは行わない。
+- 課題の状態や優先スコアを成果に応じて自動変更しない。AI振り返りと学習候補の承認制を維持し、自動実行・自動承認・自動記憶更新は行わない。
+- 既存データは追加フィールドのみで後方互換。暗号化記憶、会話履歴、同期、バックアップ、WebLLM/Kokoroモデルキャッシュ、ALVIS完成形v308、Avatarモードは変更しない。
+- Service Worker cache: `alvis-cache-v319-integrated`。更新ページ: `refresh-v319.html`。
+
+
+## v320 — 自律タスクの開始前・実行後比較（2026-11-22）
+- 自律タスク開始時に、開始前の状態・数値・困りごとを任意で記録できるようにする。未記入でも開始可能で、キャンセルした場合はタスク状態を変更しない。
+- 実行完了時は実行後の状態・変化・確認できた事実を記録する。既存の実行メモフィールドを使用し、追加の永続データ形式を増やさない。
+- AI振り返りへ開始前・実行後の両方を渡し、比較欄を保存・表示する。開始前の記録がない場合は比較不能と明示し、数値や成果を推測しない。ユーザーの自己申告を外部検証済みと表現しない。
+- 過去タスクのbaselineNote未設定はそのまま扱い、既存タスク・学習候補・承認状態は変更しない。暗号化保管庫、会話履歴、同期、バックアップ、WebLLM/Kokoroモデルキャッシュ、ALVIS完成形v308、Avatarモードは変更しない。
+- Service Worker cache: `alvis-cache-v320-integrated`。更新ページ: `refresh-v320.html`。
+- CIで開始前入力の任意性、キャンセル時の非変更、開始前後比較のプロンプト/表示、オフライン回帰、Chromium/WebKit配信後検査を確認する。
