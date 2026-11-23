@@ -1,3 +1,8 @@
+## Latest Avatar Studio real-browser and GLB export smoke test (2026-11-23)
+- Added a Chromium/SwiftShader preview smoke test that opens the deployed standalone Avatar Studio, verifies a live WebGL context, drives expression/viseme/blink sliders, downloads the GLB, parses its binary header and JSON chunk, and checks exported morph target names.
+- The dashboard preview workflow now runs this check for commits touching Avatar Studio. This validates the actual browser/export path in CI but does not replace iPad Safari GPU testing or an independent VRM import test.
+- No production main or user data was changed.
+
 ## Latest Avatar Studio reference accessory details (2026-11-23)
 - Added a small gold necklace pendant and subtle five-bar neck marking to reflect the visual details recorded in the approved 18号 model brief. Existing gold hoop earrings and white upper-body bust remain.
 - These are procedural placeholder meshes, not texture-baked details or a final likeness match.

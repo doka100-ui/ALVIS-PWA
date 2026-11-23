@@ -1,3 +1,8 @@
+## Avatar Studio — 実ブラウザGLB受け入れテスト
+- Cloudflare Pages preview上でChromium/SwiftShaderのWebGL描画を確認し、表情・母音・まばたきスライダーを操作する。
+- GLBを実際にダウンロードし、GLB v2ヘッダー、JSONチャンク、blink/happy/sad/angry/surprised/aa/ih/ou/ee/ohのtargetNamesを検査する。
+- CI成功はChromium上の検証であり、iPad Safari実機やVRM変換の成功を意味しない。
+
 ## Avatar Studio — 参考外观配饰细节
 - 上半身原型补充小型金色吊坠与颈侧条码状标记；耳饰和白色上衣维持。
 - 配饰为程序化几何占位，最终仍需参考多视角图像核对位置、尺寸与材质。

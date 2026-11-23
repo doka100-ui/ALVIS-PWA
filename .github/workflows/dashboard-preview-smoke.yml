@@ -26,6 +26,9 @@ on:
       - "assets/alvis-dashboard-reference.avif"
       - "tests/alvis-dashboard.test.mjs"
       - "tests/dashboard-preview-smoke.mjs"
+      - "tools/avatar-studio.html"
+      - "tests/avatar-studio.test.mjs"
+      - "tests/avatar-studio-browser-smoke.mjs"
       - "docs/HANDOFF.md"
       - "docs/ARCHITECTURE.md"
       - "docs/CHANGELOG.md"
@@ -90,6 +93,10 @@ jobs:
         env:
           ALVIS_PREVIEW_URL: ${{ steps.preview.outputs.url }}
         run: node tests/dashboard-preview-smoke.mjs
+      - name: Verify 3D avatar studio rendering and GLB morph export
+        env:
+          ALVIS_PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: node tests/avatar-studio-browser-smoke.mjs
       - name: Upload deployed dashboard screenshot
         if: always()
         uses: actions/upload-artifact@v4
