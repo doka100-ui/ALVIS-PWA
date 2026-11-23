@@ -79,19 +79,19 @@ try {
   assert.equal(jsonType, 0x4e4f534a, "GLB first chunk must be JSON");
   const gltf = JSON.parse(buffer.toString("utf8", 20, 20 + jsonLength).trim());
   const targetNames = (gltf.meshes || []).flatMap(mesh => mesh.extras?.targetNames || []);
-  for (const name of ["blink","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh"]) {
+  for (const name of ["blink","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
     assert.ok(targetNames.includes(name), "VRM must retain named morph target: "+name+"; found "+targetNames.join(", "));
   }
   const vrmExtension = gltf.extensions?.VRMC_vrm;
   assert.ok(vrmExtension, "export must include VRMC_vrm extension");
   assert.equal(vrmExtension.specVersion, "1.0", "export must declare VRM 1.0");
   assert.ok(gltf.extensionsRequired?.includes("VRMC_vrm"), "VRMC_vrm must be required");
-  const humanBones = vrmExtension.humanoid?.humanBones || {};
+  assert.equal(vrmExtension.lookAt?.type, "expression", "VRM lookAt must use expression mode");\n  for (const key of ["rangeMapHorizontalInner","rangeMapHorizontalOuter","rangeMapVerticalDown","rangeMapVerticalUp"]) assert.equal(vrmExtension.lookAt[key]?.outputScale, 1, "lookAt range map must use normalized expression weights: "+key);\n  const humanBones = vrmExtension.humanoid?.humanBones || {};
   for (const bone of ["hips","spine","head","leftUpperLeg","leftLowerLeg","leftFoot","rightUpperLeg","rightLowerLeg","rightFoot","leftUpperArm","leftLowerArm","leftHand","rightUpperArm","rightLowerArm","rightHand"]) {
     assert.ok(Number.isInteger(humanBones[bone]?.node), "VRM required humanoid bone must map to a node: "+bone);
     assert.ok(gltf.nodes[humanBones[bone].node], "VRM bone node must exist: "+bone);
   }
-  for (const expression of ["blink","happy","sad","angry","surprised","aa","ih","ou","ee","oh"]) {
+  for (const expression of ["blink","happy","sad","angry","surprised","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
     const binds = vrmExtension.expressions?.preset?.[expression]?.morphTargetBinds || [];
     assert.ok(binds.length > 0, "VRM preset must have morph target binds: "+expression);
     for (const bind of binds) {
@@ -120,7 +120,7 @@ try {
   console.log("PASS real WebGL renderer: "+JSON.stringify(renderInfo));
   console.log("PASS expression and five Japanese vowel viseme controls");
   console.log("PASS VRM 1.0 binary download: "+fileInfo.size+" bytes");
-  console.log("PASS VRMC_vrm extension, required humanoid bones, and expression morph binds");
+  console.log("PASS VRMC_vrm extension, humanoid bones, lookAt range maps, and expression morph binds");
 } finally {
   await context.close();
   await browser.close();

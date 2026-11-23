@@ -51,3 +51,6 @@ check("VRM required humanoid bones are created", ["hips","spine","head","leftUpp
 check("visible face and torso geometry are rigidly attached to head and chest bones", html.includes("torsoNames.has(part.name)?chest:headBone"));
 check("VRM extension is declared as used and required", html.includes('gltf.extensionsRequired=[...new Set') && html.includes('"VRMC_vrm"'));
 check("VRM expression presets are generated from actual mesh target names", html.includes("expressions.preset[preset]={morphTargetBinds}") && html.includes("names.forEach((name,index)"));
+
+check("both eyes export named VRM look-at morph targets", html.includes("addEyeGazeMorphTargets(irisMesh)") && html.includes("addEyeGazeMorphTargets(pupilMesh)") && html.includes('mesh.morphTargetDictionary={lookUp:0,lookDown:1,lookLeft:2,lookRight:3}'));
+check("VRM look-at expression presets and range maps are included", html.includes('lookAt:{type:"expression"') && ["lookUp","lookDown","lookLeft","lookRight"].every(name=>html.includes('"'+name+'"')));

@@ -1,3 +1,8 @@
+## VRM lookAt expression rig (2026-11-23)
+- Added named lookUp/lookDown/lookLeft/lookRight morph targets to both irises, pupils, and eye glints.
+- VRMC_vrm.lookAt now declares expression-based gaze with all four horizontal/vertical range maps; corresponding preset morphTargetBinds are generated from the exported mesh targets.
+- Chromium browser smoke checks the lookAt mode/range maps and all four expression binds. Visual gaze quality and real ALVIS runtime interaction still require a VRM loader and iPad Safari test.
+
 ## VRM 1.0 export prototype (2026-11-23)
 - Avatar Studio now builds a named humanoid node hierarchy (hips/spine/chest/neck/head, both shoulder/arm/hand chains, and both leg/foot chains). Visible head meshes are rigidly parented to the head bone and neck/upper-body meshes to the chest bone; the cropped bust intentionally has no visible arm/leg geometry.
 - Export packages the GLB binary as a .vrm with VRMC_vrm 1.0 metadata, humanoid node mappings, and preset morphTargetBinds for blink, happy/sad/angry/surprised/relaxed and aa/ih/ou/ee/oh.

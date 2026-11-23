@@ -1,3 +1,8 @@
+## Avatar Studio — VRM lookAt expression support
+- Both eyes include named lookUp/lookDown/lookLeft/lookRight morph targets for iris, pupil, and glint geometry.
+- VRMC_vrm.lookAt is emitted in expression mode with horizontal/vertical range maps and matching preset morphTargetBinds.
+- Export smoke verifies extension fields and bind indices. Natural gaze quality and integration with ALVIS runtime are not yet independently verified.
+
 ## Avatar Studio — first VRM 1.0 package export
 - Avatar Studio creates a VRMC_vrm 1.0 extension over the locally generated GLB binary, with VRM meta, required humanoid node mappings, and preset expression morphTargetBinds.
 - The cropped bust includes a head-to-chest rigid bone hierarchy. Required arm/leg bones are present as hierarchy-only nodes; no visible limb geometry or weighted skinning is claimed.
