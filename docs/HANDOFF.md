@@ -1,3 +1,9 @@
+## Latest update — v330 キャッシュ診断と公開ブラウザテスト修正（2026-11-23）
+- v330の端末診断にWebLLM Cache APIのモデル重み/設定/WASM件数を読み取り専用で追加。既存キャッシュの削除・移行・保存方式変更は行わない。キャッシュ件数だけで完全オフライン再利用を保証しない。
+- 公開ブラウザテストでv330更新ページのリダイレクト期待値だけがv329のまま残っていたため、`tests/dashboard-preview-smoke.mjs`の期待値をv330へ修正。アプリ本体・Service Worker・モデル/音声キャッシュ・ユーザーデータは変更しない。
+- 修正コミット: `844bde5e9ee30c650651876f7a84d7d0be415bad`。Cloudflare Pages preview deploy成功。Playwright Chromium/WebKitでv330 Worker更新、統合画面、HUD/メニュー、Chromiumオフライン再読み込み、iPhone幅WebKitのログイン/HUD表示テストが成功。
+- 実機iPad SafariでのQwen起動、GPU安定性、完全オフライン動作は引き続き未確認。実機試験前にモデルキャッシュやユーザーデータを消去しない。
+
 ## Latest update — v326 初期化中のGPU解放失敗に対する個別破棄フォールバック
 - CreateMLCEngine完了後、GPU停止またはログアウトを検出してengine.unload()を呼び出した際、unload自体が失敗すると追跡中GPUDeviceの参照だけを消してしまう経路を修正。
 - unload成功時はエンジンに解放を任せて参照のみを破棄。unload失敗時は当該初期化試行で捕捉したGPUDeviceだけを個別destroyし、技術ログへ結果を記録。モデル初期化reject時の既存後始末も共通ヘルパーへ統一。
