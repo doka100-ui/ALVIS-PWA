@@ -14,7 +14,7 @@ check("upper lip contains four named expression morph targets", html.includes('l
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));
 check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0}") && html.includes("upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}"));
 check("four named mouth expression targets are exported", html.includes('upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}') && html.includes('id="smile"') && ["sad","angry","surprised"].every(name=>html.includes('id="'+name+'"')));
-check("eyebrows have named angry sad and surprised morph targets", html.includes("addBrowMorphTargets(brow,side)") && html.includes('mesh.morphTargetDictionary={angry:0,sad:1,surprised:2}'));
+check("eyebrows have named angry sad and surprised morph targets", html.includes("addBrowMorphTargets(brow,side)") && html.includes("mesh.updateMorphTargets()") && html.includes('mesh.morphTargetDictionary={angry:0,sad:1,surprised:2}'));
 check("mouth interior exports all five VRM vowel visemes", html.includes('mouthInterior.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4}') && ["aa","ih","ou","ee","oh"].every(name=>html.includes('id="'+name+'"')));
 check("lip and mouth-interior morph target name counts match their geometry targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised"]') && html.includes("mouthInteriorGeometry.userData.targetNames=Object.keys(visemeScales)"));
 check("all five vowel sliders are included in rebuild state", html.includes('"surprised","aa","ih","ou","ee","oh"];') && html.includes("mouthInterior.morphTargetInfluences[index]=values[name]"));

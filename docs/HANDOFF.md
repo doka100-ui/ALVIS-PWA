@@ -1,3 +1,7 @@
+## Latest brow morph influence initialization correction (2026-11-23)
+- After attaching brow morph attributes to already-created TubeGeometry meshes, explicitly call `updateMorphTargets()` before assigning semantic names. This initializes the Mesh.morphTargetInfluences array; setting geometry morph attributes after Mesh construction does not initialize it automatically.
+- Added a regression assertion for this initialization. The browser smoke test previously exposed repeated runtime errors during interactive expression updates; this change addresses the identified initialization gap. Awaiting the next deployed browser run to confirm.
+
 ## Latest local Three.js dependency vendoring and offline browser verification (2026-11-23)
 - Replaced the Avatar Studio's jsDelivr import map with same-origin vendored Three.js r180 modules: core, module entry, OrbitControls, and GLTFExporter, plus the upstream MIT license. This removes the prototype's third-party CDN dependency.
 - The Avatar Studio browser smoke now first activates the existing ALVIS Service Worker, opens the standalone page, verifies WebGL and GLB morph names, then switches the browser offline and reloads the page from the Service Worker cache. It also asserts no external-origin requests occur while the Avatar Studio loads.

@@ -86,6 +86,7 @@ function addBrowMorphTargets(mesh,side){
  });
  mesh.geometry.morphAttributes.position=targets;
  mesh.geometry.userData.targetNames=["angry","sad","surprised"];
+ mesh.updateMorphTargets();
  mesh.morphTargetDictionary={angry:0,sad:1,surprised:2};
 }
 function makeFace(){
