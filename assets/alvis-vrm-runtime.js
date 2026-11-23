@@ -39,11 +39,18 @@ export async function mountVrmAvatar(host, blob) {
   camera.position.set(0, 1.35, 3.2);
   camera.lookAt(0, 1.05, 0);
 
-  const renderer = new THREE.WebGLRenderer({
-    alpha: true,
-    antialias: true,
-    powerPreference: "low-power"
-  });
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      powerPreference: "low-power"
+    });
+  } catch (error) {
+    // A failed WebGL context allocation must not leave the parsed avatar's GPU assets retained.
+    try { VRMUtils.deepDispose(vrm.scene); } catch (_) {}
+    throw error;
+  }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
