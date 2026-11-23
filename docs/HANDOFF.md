@@ -1,3 +1,7 @@
+## VRM左右まぶたのbind先を実書き出しで検証 (2026-11-23)
+- Browser smokeでVRMのblink presetが左右両方のeyelid nodeにbindされ、blinkLeftはeyelid-leftだけ、blinkRightはeyelid-rightだけにbindされることをGLB JSONから検査する。
+- 左右別の名前が存在するだけでなく、誤った側へ結び付いていないことを受け入れ条件にする。
+
 ## まぶたのblink変形を上まぶたの下降式メッシュへ変更 (2026-11-23)
 - 旧方式の「細い線から球体へ膨らむ」まぶたモーフを廃止し、目の上縁からまぶた面が下へ移動して閉じる格子メッシュへ変更。通常時は上まぶたの縁を覆い、blink時は左右別のまぶた面がアーモンド形の白目を覆う。
 - blink / blinkLeft / blinkRightのVRM morph preset名とALVIS runtime APIは維持。Chromium/WebKit実描画で閉眼時の貫通・自然さを別途目視確認する必要あり。

@@ -105,6 +105,10 @@ try {
       assert.equal(bind.weight, 1, "expression bind must use full normalized weight: "+expression);
     }
   }
+  const blinkBindNodeNames = expression => (vrmExtension.expressions?.preset?.[expression]?.morphTargetBinds||[]).map(bind=>gltf.nodes[bind.node]?.name).filter(Boolean).sort();
+  assert.deepEqual(blinkBindNodeNames("blink"),["eyelid-left","eyelid-right"],"full blink must affect both eyelids");
+  assert.deepEqual(blinkBindNodeNames("blinkLeft"),["eyelid-left"],"left wink must affect only the left eyelid");
+  assert.deepEqual(blinkBindNodeNames("blinkRight"),["eyelid-right"],"right wink must affect only the right eyelid");
   assert.deepEqual(pageErrors, [], "Avatar Studio must not throw browser runtime errors");
   assert.deepEqual(externalRequests, [], "Avatar Studio must load Three.js and all modules from the same origin only");
 
