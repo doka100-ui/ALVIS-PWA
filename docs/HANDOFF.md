@@ -1,3 +1,8 @@
+## Latest v347 preview smoke test correction (2026-11-23 / test-only)
+- The latest v347 preview run `45151766352` failed because `tests/dashboard-preview-smoke.mjs` waited for `?refresh=346`, while `refresh-v347.html` correctly redirects to `?refresh=347`.
+- Corrected only the Playwright expected query value to 347. The observed failure was a 60-second redirect-wait timeout, not evidence of a VRM rendering/runtime failure.
+- App/runtime/Service Worker, Avatar and ALVIS features, IndexedDB/user data, Qwen/Kokoro caches, and production `main` remain unchanged. Re-run preview CI after this test-only commit; real iPad Safari validation remains pending.
+
 ## Latest VRM auto-framing for cropped avatars (2026-11-23 / v347)
 - VRM runtime now prefers normalized head-to-chest humanoid anchors to frame an upper-body crop. If those anchors are unavailable (for example, a head-only rig), it falls back to imported scene bounds. Camera fit recalculates when the host resizes.
 - Default gaze focus follows the normalized head bone when available, otherwise the measured avatar center. Existing expressions, blink, Japanese visemes, idle motion, and VRM storage format remain unchanged.
