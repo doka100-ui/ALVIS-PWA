@@ -1,3 +1,6 @@
+## VRM診断パネルの表示（v341）
+- 診断項目は `Array.join("\\n")` で実改行へ連結し、Safariを含むブラウザの `textContent` で読みやすく表示する。診断データやモデル状態は変更しない。
+
 ## VRMアバターのGPUリソース解放（v340）
 - VRM runtimeのdispose()は描画ループ/イベント/ResizeObserverを停止・解除した後、three-vrm 3.5.5の `VRMUtils.deepDispose(vrm.scene)` でモデル配下のgeometry・material・textureを解放し、その後WebGLRendererをdispose/forceContextLossする。
 - モデル差し替え時は毎回新しいBlobからGLTFを解析するため、破棄対象のVRM sceneは他のアバターと共有しない。保存済みBlob/IndexedDBはそのまま保持する。
