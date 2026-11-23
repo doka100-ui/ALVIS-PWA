@@ -57,7 +57,7 @@ try {
   assert.ok(renderInfo.width > 0 && renderInfo.height > 0, "WebGL canvas must have a real drawing buffer");
   assert.ok(renderInfo.version.includes("WebGL"), "WebGL context must be active");
   assert.equal(await page.locator("#smile").count(), 1, "happy expression slider must exist");
-  for (const [id, value] of [["smile","0.65"],["sad","0.2"],["angry","0.15"],["surprised","0.1"],["aa","0.7"],["ih","0.2"],["ou","0.3"],["ee","0.4"],["oh","0.5"],["blink","0.35"]]) {
+  for (const [id, value] of [["smile","0.65"],["sad","0.2"],["angry","0.15"],["surprised","0.1"],["relaxed","0.25"],["aa","0.7"],["ih","0.2"],["ou","0.3"],["ee","0.4"],["oh","0.5"],["blink","0.35"]]) {
     await page.locator("#"+id).evaluate((element, next) => {
       element.value = next;
       element.dispatchEvent(new Event("input", { bubbles: true }));
@@ -79,7 +79,7 @@ try {
   assert.equal(jsonType, 0x4e4f534a, "GLB first chunk must be JSON");
   const gltf = JSON.parse(buffer.toString("utf8", 20, 20 + jsonLength).trim());
   const targetNames = (gltf.meshes || []).flatMap(mesh => mesh.extras?.targetNames || []);
-  for (const name of ["blink","happy","sad","angry","surprised","aa","ih","ou","ee","oh"]) {
+  for (const name of ["blink","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh"]) {
     assert.ok(targetNames.includes(name), "GLB must retain named morph target: "+name+"; found "+targetNames.join(", "));
   }
   assert.deepEqual(pageErrors, [], "Avatar Studio must not throw browser runtime errors");

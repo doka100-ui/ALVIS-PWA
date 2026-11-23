@@ -1,3 +1,6 @@
+## Avatar Studio — relaxed表情互換
+- 口元の名前付き表情セットに relaxed を追加し、ALVIS VRM runtimeの感情プリセット名と揃える。
+
 ## Avatar Studio — Three.jsローカル同梱とオフライン再読込
 - Three.js r180本体・OrbitControls・GLTFExporterを `tools/vendor/` に同梱し、MITライセンスを保存する。Avatar Studioは同一オリジンから読み込み、CDN依存を持たない。
 - 既存Service Workerの同一オリジン資産オンデマンドキャッシュを利用し、オンラインで一度開いた後にオフライン再読込できるかChromiumで検証する。新たなモデルキャッシュ領域や保存形式は作らない。

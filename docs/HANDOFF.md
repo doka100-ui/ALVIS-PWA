@@ -1,3 +1,7 @@
+## Latest Avatar Studio relaxed-expression compatibility (2026-11-23)
+- Added a named relaxed mouth morph target and preview slider so the expression set matches the existing ALVIS VRM runtime emotion presets: happy, sad, angry, surprised, and relaxed.
+- Static and deployed GLB browser checks now expect the relaxed target as well.
+
 ## Latest brow morph influence initialization correction (2026-11-23)
 - After attaching brow morph attributes to already-created TubeGeometry meshes, explicitly call `updateMorphTargets()` before assigning semantic names. This initializes the Mesh.morphTargetInfluences array; setting geometry morph attributes after Mesh construction does not initialize it automatically.
 - Added a regression assertion for this initialization. The browser smoke test previously exposed repeated runtime errors during interactive expression updates; this change addresses the identified initialization gap. Awaiting the next deployed browser run to confirm.

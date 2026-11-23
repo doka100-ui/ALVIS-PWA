@@ -10,10 +10,10 @@ check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize"
 check("blink and smile preview controls are present", ["blink","smile"].every(id => html.includes('id="'+id+'"')));
 check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("lid.morphTargetInfluences[0]=values.blink"));
 check("eyelids contain an exported blink morph target", html.includes('lidGeometry.userData.targetNames=["blink"]') && html.includes("lidGeometry.morphAttributes.position=[lidClosed]"));
-check("upper lip contains four named expression morph targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised"]') && html.includes("lipGeometry.morphAttributes.position=lipTargets"));
+check("upper lip contains five named expression morph targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised","relaxed"]') && html.includes("lipGeometry.morphAttributes.position=lipTargets"));
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));
-check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0}") && html.includes("upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}"));
-check("four named mouth expression targets are exported", html.includes('upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}') && html.includes('id="smile"') && ["sad","angry","surprised"].every(name=>html.includes('id="'+name+'"')));
+check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0}") && html.includes("upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3,relaxed:4}"));
+check("four named mouth expression targets are exported", html.includes('upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}') && html.includes('id="smile"') && ["sad","angry","surprised","relaxed"].every(name=>html.includes('id="'+name+'"')));
 check("eyebrows have named angry sad and surprised morph targets", html.includes("addBrowMorphTargets(brow,side)") && html.includes("mesh.updateMorphTargets()") && html.includes('mesh.morphTargetDictionary={angry:0,sad:1,surprised:2}'));
 check("mouth interior exports all five VRM vowel visemes", html.includes('mouthInterior.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4}') && ["aa","ih","ou","ee","oh"].every(name=>html.includes('id="'+name+'"')));
 check("lip and mouth-interior morph target name counts match their geometry targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised"]') && html.includes("mouthInteriorGeometry.userData.targetNames=Object.keys(visemeScales)"));
@@ -21,7 +21,7 @@ check("all five vowel sliders are included in rebuild state", html.includes('"su
 check("viseme preview sliders drive the mouth interior targets", html.includes('mouthInterior.morphTargetInfluences[index]=values[name]') && html.includes('name="mouth-viseme-interior"'));
 check("lower lip has matching five vowel morph targets", html.includes('lowerLip.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4}') && html.includes('lowerLip.morphTargetInfluences[index]=values[name]'));
 check("expression sliders also drive eyebrow shape targets", html.includes('brow.morphTargetInfluences[0]=values.angry') && html.includes('brow.morphTargetInfluences[1]=values.sad') && html.includes('brow.morphTargetInfluences[2]=values.surprised'));
-check("expression sliders drive independent morph influences", ["values.smile","values.sad","values.angry","values.surprised"].every(value=>html.includes("upperLip.morphTargetInfluences") && html.includes(value)));
+check("expression sliders drive independent morph influences", ["values.smile","values.sad","values.angry","values.surprised","values.relaxed"].every(value=>html.includes("upperLip.morphTargetInfluences") && html.includes(value)));
 check("render loop fully pauses while the page is hidden", html.includes("cancelAnimationFrame(frameId)") && html.includes("setRenderActive(document.visibilityState===\"visible\")"));
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
