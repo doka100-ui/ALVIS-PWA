@@ -74,8 +74,12 @@ async function verifyBrowser(browserType, verifyOffline) {
       const link = document.querySelector('link[href*="alvis-app.css"]');
       return !!link && link.rel === "stylesheet" && !!link.sheet;
     }, null, { timeout: 15000 });
-    await page.locator("#jarvisModeButton").click();
-    await page.waitForFunction(() => document.getElementById("chatPage")?.dataset.displayMode === "jarvis");
+    await page.waitForFunction(() => {
+      const chat = document.getElementById("chatPage");
+      const image = document.querySelector(".jarvis-stage .alvis-reference-image");
+      return chat?.dataset.displayMode === "jarvis" && !!image
+        && getComputedStyle(image).display === "none";
+    }, null, { timeout: 15000 });
     await page.waitForFunction(() => {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
       return !!ring && ring.getAnimations().length > 0;
