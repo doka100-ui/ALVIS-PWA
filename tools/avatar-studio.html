@@ -135,9 +135,11 @@ function rebuild(){
  const eyes=faceGroup.getObjectByName("facial-eyes");eyes.scale.x=values.eyeSize;eyes.children.forEach(o=>{o.position.x*=values.eyeSpacing;});
  faceGroup.getObjectByName("facial-nose").scale.setScalar(values.noseSize);
  faceGroup.getObjectByName("facial-mouth").scale.x=values.mouthSize;
- const lidOpen=1-values.blink;
- ["eyelid-left","eyelid-right"].forEach(name=>{const lid=eyes.getObjectByName(name);if(lid)lid.scale.y=.001+lidOpen*.001+values.blink*.12;});
- const mouth=faceGroup.getObjectByName("facial-mouth");mouth.position.y=values.smile*.035;mouth.scale.y=1+values.smile*.35;
+ ["eyelid-left","eyelid-right"].forEach(name=>{const lid=eyes.getObjectByName(name);if(lid?.morphTargetInfluences)lid.morphTargetInfluences[0]=values.blink;});
+ const mouth=faceGroup.getObjectByName("facial-mouth");
+ const upperLip=mouth.getObjectByName("upper-lip");
+ if(upperLip?.morphTargetInfluences)upperLip.morphTargetInfluences[0]=values.smile;
+ mouth.position.y=values.smile*.012;
  sliders.forEach(id=>document.getElementById(id+"Value").value=values[id].toFixed(2));
 }
 sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));
