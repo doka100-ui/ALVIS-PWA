@@ -38,6 +38,8 @@ button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;co
 <div class="control"><label for="noseSize">鼻の立体感 <output id="noseSizeValue">1.00</output></label><input id="noseSize" type="range" min=".7" max="1.35" step=".01" value="1"></div>
 <div class="control"><label for="mouthSize">唇の幅 <output id="mouthSizeValue">1.00</output></label><input id="mouthSize" type="range" min=".75" max="1.3" step=".01" value="1"></div>
 <div class="control"><label for="blink">まぶたを閉じる <output id="blinkValue">0.00</output></label><input id="blink" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="blinkLeft">左目ウインク <output id="blinkLeftValue">0.00</output></label><input id="blinkLeft" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="blinkRight">右目ウインク <output id="blinkRightValue">0.00</output></label><input id="blinkRight" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="smile">微笑み <output id="smileValue">0.00</output></label><input id="smile" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="sad">悲しみ <output id="sadValue">0.00</output></label><input id="sad" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="angry">怒り <output id="angryValue">0.00</output></label><input id="angry" type="range" min="0" max="1" step=".01" value="0"></div>
@@ -289,8 +291,8 @@ function makeFace(){
  }
 }
 makeFace();
-const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","smile","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh"];
-const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,smile:0,sad:0,angry:0,surprised:0,relaxed:0,aa:0,ih:0,ou:0,ee:0,oh:0};
+const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","blinkLeft","blinkRight","smile","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh"];
+const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,blinkLeft:0,blinkRight:0,smile:0,sad:0,angry:0,surprised:0,relaxed:0,aa:0,ih:0,ou:0,ee:0,oh:0};
 function rebuild(){
  const values=Object.fromEntries(sliders.map(id=>[id,Number(document.getElementById(id).value)]));
  root.remove(faceGroup);faceGroup.traverse(o=>{if(o.geometry)o.geometry.dispose()});makeFace();
@@ -299,7 +301,9 @@ function rebuild(){
  ["eyebrow-left","eyebrow-right"].forEach(name=>{const brow=eyes.getObjectByName(name);if(brow?.morphTargetInfluences){brow.morphTargetInfluences[0]=values.angry;brow.morphTargetInfluences[1]=values.sad;brow.morphTargetInfluences[2]=values.surprised;}});
  faceGroup.getObjectByName("facial-nose").scale.setScalar(values.noseSize);
  faceGroup.getObjectByName("facial-mouth").scale.x=values.mouthSize;
- ["eyelid-left","eyelid-right"].forEach(name=>{const lid=eyes.getObjectByName(name);if(lid?.morphTargetInfluences)lid.morphTargetInfluences[0]=values.blink;});
+ const leftLid=eyes.getObjectByName("eyelid-left"),rightLid=eyes.getObjectByName("eyelid-right");
+ if(leftLid?.morphTargetInfluences){leftLid.morphTargetInfluences[0]=values.blink;leftLid.morphTargetInfluences[1]=values.blinkLeft;}
+ if(rightLid?.morphTargetInfluences){rightLid.morphTargetInfluences[0]=values.blink;rightLid.morphTargetInfluences[1]=values.blinkRight;}
  const mouth=faceGroup.getObjectByName("facial-mouth");
  const upperLip=mouth.getObjectByName("upper-lip");
  if(upperLip?.morphTargetInfluences){upperLip.morphTargetInfluences[0]=values.smile;upperLip.morphTargetInfluences[1]=values.sad;upperLip.morphTargetInfluences[2]=values.angry;upperLip.morphTargetInfluences[3]=values.surprised;upperLip.morphTargetInfluences[4]=values.relaxed;}

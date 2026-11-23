@@ -70,3 +70,5 @@ check("nose and lips include fine anatomical contour details", html.includes("no
 check("bob includes independent fine hair strands on both sides", html.includes("for(let strand=0;strand<4;strand++)") && html.includes("hair-side-left") && html.includes("hair-side-right"));
 check("white top includes shoulder straps, neckline and rib details", html.includes("tank-strap-left") && html.includes("tank-neckline") && html.includes("ribIndex"));
 check("both single and independent left/right blink expressions are exported", html.includes('targetNames=["blink",sideBlink]') && html.includes('"blinkLeft","blinkRight"'));
+
+check("left and right wink controls are exposed and connected to the matching eyelids", ["blinkLeft","blinkRight"].every(id=>html.includes('id="'+id+'"') && html.includes('values.'+id)) && html.includes('leftLid.morphTargetInfluences[1]=values.blinkLeft') && html.includes('rightLid.morphTargetInfluences[1]=values.blinkRight'));
