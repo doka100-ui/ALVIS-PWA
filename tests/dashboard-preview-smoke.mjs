@@ -219,6 +219,17 @@ async function verifyBrowser(browserType, verifyOffline) {
     await page.locator('#appPanel > nav button[data-page="devicePage"]').click();
     await page.waitForFunction(() => !document.getElementById("devicePage").classList.contains("hidden"));
     await page.locator("#generateDevelopmentHandoff").waitFor({ state: "visible" });
+    await page.locator("#generateDevelopmentHandoff").click();
+    const generatedHandoff = await page.locator("#developmentHandoffOutput").inputValue();
+    assert.ok(generatedHandoff.includes("# ALVIS 開発管制・引き継ぎ"),
+      browserName + ": handoff generator must create the expected handoff document");
+    assert.ok(generatedHandoff.includes("リポジトリ: https://github.com/doka100-ui/ALVIS-PWA")
+      && generatedHandoff.includes("作業ブランチ: development"),
+      browserName + ": handoff must include the project repository and branch");
+    assert.ok(!/ALVIS_SYNC_TOKEN|password|密鍵|記憶本文|会話履歴の内容/.test(generatedHandoff),
+      browserName + ": handoff must not expose secrets or private user content");
+    assert.equal(await page.locator("#copyDevelopmentHandoff").isEnabled(), true,
+      browserName + ": copy button must be enabled after handoff generation");
     await returnToChat();
     await page.locator('.hud-side-right .hud-info-action[data-hud-action="memory"]').click();
     await page.waitForFunction(() => {
