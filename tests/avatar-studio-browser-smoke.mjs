@@ -119,22 +119,40 @@ try {
     let mounted;
     try {
       mounted = await runtime.mountVrmAvatar(host, new Blob([binary], { type:"model/gltf-binary" }));
-      return mounted.getDiagnostics();
+      const canvas = host.querySelector("canvas");
+      const gl = canvas?.getContext("webgl2") || canvas?.getContext("webgl");
+      const diagnostics = mounted.getDiagnostics();
+      const actions = {
+        manualLookAt: mounted.setLookAt(0, 1, 3),
+        automaticLookAt: mounted.setAutoLookAt(true),
+        happyExpression: mounted.setExpression("happy", 0.5),
+        happyEmotion: mounted.setEmotion("happy", 0.5),
+        vowelViseme: mounted.setMouthViseme("aa", 0.7),
+        headGesture: mounted.setHeadGesture("nod")
+      };
+      const render = { canvas:!!canvas, webgl:!!gl, width:canvas?.width||0, height:canvas?.height||0 };
+      return { diagnostics, actions, render };
     } finally {
       mounted?.dispose?.();
       host.remove();
     }
   }, buffer.toString("base64"));
-  assert.equal(runtimeDiagnostics.format, "VRM", "ALVIS runtime must parse the exported VRM");
-  assert.ok(runtimeDiagnostics.humanoidHead && runtimeDiagnostics.humanoidNeck && runtimeDiagnostics.headMotion, "ALVIS runtime must recognize humanoid head/neck bones");
-  assert.ok(runtimeDiagnostics.lookAt, "ALVIS runtime must recognize VRM lookAt");
-  assert.ok(runtimeDiagnostics.blink, "ALVIS runtime must recognize blink");
+  const diagnostics = runtimeDiagnostics.diagnostics;
+  assert.equal(diagnostics.format, "VRM", "ALVIS runtime must parse the exported VRM");
+  assert.ok(diagnostics.humanoidHead && diagnostics.humanoidNeck && diagnostics.headMotion, "ALVIS runtime must recognize humanoid head/neck bones");
+  assert.ok(diagnostics.lookAt, "ALVIS runtime must recognize VRM lookAt");
+  assert.ok(diagnostics.blink, "ALVIS runtime must recognize blink");
   for (const feature of ["happy","sad","angry","relaxed","surprised","aa","ih","ou","ee","oh"]) {
-    assert.ok(runtimeDiagnostics[feature], "ALVIS runtime must recognize VRM expression: "+feature);
+    assert.ok(diagnostics[feature], "ALVIS runtime must recognize VRM expression: "+feature);
   }
-  console.log("PASS existing ALVIS VRM runtime loaded the exported file: "+JSON.stringify(runtimeDiagnostics));
+  for (const [action, result] of Object.entries(runtimeDiagnostics.actions)) assert.equal(result, true, "ALVIS runtime interaction must succeed: "+action);
+  assert.ok(runtimeDiagnostics.render.canvas && runtimeDiagnostics.render.webgl && runtimeDiagnostics.render.width > 0 && runtimeDiagnostics.render.height > 0, "ALVIS runtime must render the VRM to a live WebGL canvas");
+  assert.deepEqual(pageErrors, [], "ALVIS VRM runtime must not throw browser errors");
+  console.log("PASS existing ALVIS VRM runtime parsed, rendered, and controlled the exported file: "+JSON.stringify(runtimeDiagnostics));
 
-  assert.ok(await page.evaluate(() => !!navigator.serviceWorker?.controller), "ALVIS page must be controlled by its service worker");
+  const cachedAvatarResponse = await page.goto(avatarUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
+  assert.ok(cachedAvatarResponse?.ok(), "Avatar Studio must reopen before the offline cache check");
+  assert.ok(await page.evaluate(() => !!navigator.serviceWorker?.controller), "Avatar Studio must be controlled by the ALVIS service worker");
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForSelector("#stage canvas", { timeout: 60000 });
