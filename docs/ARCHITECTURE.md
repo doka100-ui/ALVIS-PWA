@@ -1,4 +1,7 @@
-## VRM描画フレームの例外停止（v342）
+## アバターモデル保存のトランザクション方針（v343）
+- 新しいVRM/GLBは読み込み・表示成功後にIndexedDBへ保存する。
+- 読み込み失敗時は既存モデルBlobを再読み込みして復元し、既存保存データを先に破壊しない。
+- VRM/GLB保存キーとBlob形式は従来どおり。## VRM描画フレームの例外停止（v342）
 - animate callback内の描画処理をtry/catchで保護し、renderer.render成功後にだけ次のrequestAnimationFrameを予約する。
 - フレーム内例外時はframeRunning/frameId/lastFrameTimestampをリセットして連続エラーを防止。setActive(true)または表示状態の再同期で再開できる。
 - VRM scene/IndexedDBモデル、Qwen/Kokoroキャッシュ、暗号化記憶/履歴/同期/バックアップには触れない。
