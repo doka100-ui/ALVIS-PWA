@@ -571,7 +571,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v340";
+const ALVIS_APP_BUILD_ID="v341";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4773,7 +4773,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       "表情 (happy / sad / angry / relaxed / surprised): "+(report?.emotionPresets?.length?report.emotionPresets.join(" / "):"—"),
       "",
       "— はモデル側に対応データがありません"
-    ].join("\\n");
+    ].join("\n");
   };
   const portraitTemplate=host.querySelector(".alvis-avatar-preview");
   if(!portraitTemplate)return;
@@ -4867,7 +4867,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     if(opening){
       const report=window.ALVISAvatarGetDiagnostics?.();
       if(report)renderDiagnostics(report);
-      else if(diagnosticsPanel)diagnosticsPanel.textContent="VRMモデルを読み込むと、対応機能をここで確認できます。\\nGLB形式は表示専用のため、VRM形式で読み込んでください。";
+      else if(diagnosticsPanel)diagnosticsPanel.textContent="VRMモデルを読み込むと、対応機能をここで確認できます。\nGLB形式は表示専用のため、VRM形式で読み込んでください。";
     }
   });
   loadButton.addEventListener("click",()=>fileInput.click());
