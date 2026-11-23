@@ -74,12 +74,32 @@ async function verifyBrowser(browserType, verifyOffline) {
       const link = document.querySelector('link[href*="alvis-app.css"]');
       return !!link && link.rel === "stylesheet" && !!link.sheet;
     }, null, { timeout: 15000 });
-    await page.waitForFunction(() => {
-      const chat = document.getElementById("chatPage");
-      const image = document.querySelector(".jarvis-stage .alvis-reference-image");
-      return chat?.dataset.displayMode === "jarvis" && !!image
-        && getComputedStyle(image).display === "none";
-    }, null, { timeout: 15000 });
+    try {
+      await page.waitForFunction(() => {
+        const chat = document.getElementById("chatPage");
+        const image = document.querySelector(".jarvis-stage .alvis-reference-image");
+        return chat?.dataset.displayMode === "jarvis" && !!image
+          && getComputedStyle(image).display === "none";
+      }, null, { timeout: 15000 });
+    } catch (error) {
+      const state = await page.evaluate(() => {
+        const chat = document.getElementById("chatPage");
+        const image = document.querySelector(".jarvis-stage .alvis-reference-image");
+        const appCss = document.querySelector('link[href*="alvis-app.css"]');
+        return {
+          chatExists: !!chat,
+          chatHidden: chat?.classList.contains("hidden"),
+          displayMode: chat?.dataset.displayMode || null,
+          imageExists: !!image,
+          imageDisplay: image ? getComputedStyle(image).display : null,
+          appCssRel: appCss?.rel || null,
+          appCssLoaded: !!appCss?.sheet,
+          lockHidden: document.getElementById("lockPanel")?.classList.contains("hidden"),
+          appHidden: document.getElementById("appPanel")?.classList.contains("hidden")
+        };
+      });
+      throw new Error(browserName + ": live HUD did not initialize: " + JSON.stringify({state,pageErrors,error:error.message}));
+    }
     await page.waitForFunction(() => {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
       return !!ring && ring.getAnimations().length > 0;
