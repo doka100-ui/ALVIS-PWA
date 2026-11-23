@@ -1,3 +1,9 @@
+## Latest viseme target-index consistency correction (2026-11-23)
+- Corrected the mouth morph metadata so the upper-lip targetNames list contains exactly its four actual position targets, while the mouth-interior targetNames list contains exactly its five vowel targets.
+- Added the five vowel controls to the shared rebuild slider state; without this, their values would not be available to the preview update callback.
+- Added regression checks for target-name/geometry count alignment and vowel slider state. Prior CI exposed a static test mismatch; this correction also fixes the underlying source metadata mismatch.
+- Still no actual GLB export/import validation or VRM conversion.
+
 ## Latest Avatar Studio Japanese lip-sync viseme targets (2026-11-23)
 - Added a separate dark mouth-interior mesh with five named vowel morph targets: aa, ih, ou, ee, oh. Each has an independent preview slider and is exported as a mesh morph target, matching the existing ALVIS VRM runtime's standard vowel preset names.
 - This supplies a first lip-sync geometry target set, not a verified phoneme-to-voice animation. The mesh remains a prototype; actual GLB export/import, expression conversion to VRM, and iPad Safari playback are unverified.

@@ -1,3 +1,7 @@
+## Avatar Studio — モーフターゲット数と操作値の整合性
+- 各geometryのtargetNamesは実際のmorphAttributes.position数と一致させる。上唇4件、口内母音5件。
+- 母音スライダー5件を再構築処理の値収集対象へ含める。UI表示だけで値が反映されない状態を防ぐ。
+
 ## Avatar Studio — VRM母音リップシンク形状
 - 口内メッシュに aa / ih / ou / ee / oh の5つの名前付きモーフターゲットを作成し、プレビュー調整とGLB出力に対応する。
 - 名前はALVIS VRM runtimeの標準母音プリセットと一致させる。実際の音素タイミング・音声同期・VRM変換は別途検証する。
