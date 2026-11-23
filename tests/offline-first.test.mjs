@@ -1521,7 +1521,7 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
   const releaseCalls=[];
   let unloadCalls=0;
   const staleEngine={async unload(){unloadCalls++;}};
-  const release=(options)=>{releaseCalls.push(options);return 1;};
+  const release=(options)=>{releaseCalls.push(options);trace.push("GPU停止後のengine unload完了");return 1;};
   const runSuccessfulCleanup=makeGpuLossGuard(staleEngine,release,message=>trace.push(message));
   let publishedEngine=null;
   const successfulResult=await runSuccessfulCleanup();
@@ -1536,7 +1536,7 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
   const failedReleaseCalls=[];
   let failedUnloadCalls=0;
   const failedEngine={async unload(){failedUnloadCalls++;throw new Error("simulated unload failure");}};
-  const runFailedCleanup=makeGpuLossGuard(failedEngine,options=>{failedReleaseCalls.push(options);return 1;},message=>trace.push(message));
+  const runFailedCleanup=makeGpuLossGuard(failedEngine,options=>{failedReleaseCalls.push(options);trace.push("GPU停止後のengine unload失敗");return 1;},message=>trace.push(message));
   const failedResult=await runFailedCleanup();
   assert.ok(failedResult.error instanceof Error);
   assert.match(failedResult.error.message,/GPU deviceは個別解放を試みました/);
