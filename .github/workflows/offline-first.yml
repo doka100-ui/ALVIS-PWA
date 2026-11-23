@@ -11,6 +11,8 @@ on:
       - "startup-check.html"
       - "tests/offline-first.test.mjs"
       - "tests/alvis-dashboard.test.mjs"
+      - "tools/avatar-studio.html"
+      - "tests/avatar-studio.test.mjs"
       - "assets/alvis-dashboard-reference.avif"
       - ".github/workflows/offline-first.yml"
   pull_request:
@@ -19,6 +21,8 @@ on:
       - "index-integrated.html"
       - "service-worker.js"
       - "tests/offline-first.test.mjs"
+      - "tools/avatar-studio.html"
+      - "tests/avatar-studio.test.mjs"
       - ".github/workflows/offline-first.yml"
 
 permissions:
@@ -36,6 +40,8 @@ jobs:
           node-version: 22
       - name: Run offline-first regression tests
         run: node tests/offline-first.test.mjs
+      - name: Run isolated avatar studio regression tests
+        run: node tests/avatar-studio.test.mjs
   dashboard-image:
     runs-on: ubuntu-latest
     steps:
