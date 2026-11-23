@@ -1,3 +1,7 @@
+## Avatar upload status accuracy fix — 2026-11-23 (v339)
+- Fixed a misleading status: after VRM/GLB bytes were saved, an asynchronous display failure was previously overwritten by a 'saved' success message. showVrm/showModel now return explicit display outcomes, and upload status distinguishes saved-and-displayed from saved-but-display-failed.
+- Files remain stored in the existing IndexedDB keys; no delete/reset or format migration. This does not create the custom 18号 VRM model. Real iPad Safari import/display remains untested.
+
 ## Avatar implementation status clarified — 2026-11-23
 - Existing source already includes VRM runtime controls for gradual happy/angry/sad/relaxed/surprised expressions, automatic gaze, idle blinking/breathing/head motion, reply nods, and Japanese vowel/lip-sync; conversation emotion heuristics call these only in Avatar display mode.
 - The visible portrait is still a reference/fallback image until the user imports a real .vrm file. GLB is display-only through model-viewer; it does not provide VRM expressions, gaze, or speech animation. No custom 18号 VRM model asset is present or generated in the repository.
