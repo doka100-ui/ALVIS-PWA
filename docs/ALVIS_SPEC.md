@@ -1,3 +1,9 @@
+## v337 — Avatar非表示時のVRM描画停止
+- VRM runtimeにsetActive(enabled)を追加。非表示時はrequestAnimationFrameループを停止し、Avatarモード再表示時に同じVRMインスタンスで描画を再開する。
+- 表示モード切替とVRM読み込み完了の双方で現在のAvatar表示状態を同期し、初期モードがJARVISの場合にバックグラウンド描画を継続しない。
+- VRMモデル、表情、まばたき、視線、頭部ジェスチャ、音声口パク、IndexedDB保存形式は変更しない。モデル破棄・再読み込みは行わない。
+- Service Worker app shell cache v337。Qwen/Kokoroキャッシュ、暗号化データ、記憶/履歴/同期/バックアップは変更しない。実機SafariのGPU負荷測定は未実施。
+
 ## v326 — 初期化中のGPU device解放フォールバック
 - GPU停止またはログアウトがCreateMLCEngine完了直後に発生し、engine.unload()が失敗した場合、初期化試行で捕捉したGPUDeviceだけを個別destroyしてGPUリソースの残留を防ぐ。
 - unload成功時は重複destroyせず参照のみ解放。モデル初期化reject時も共通の限定的クリーンアップ処理を利用する。
