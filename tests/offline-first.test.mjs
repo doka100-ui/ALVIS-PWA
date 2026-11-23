@@ -1515,7 +1515,7 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
 {
   const gpuLossBranch="if(alvisGpuLossDuringLoad){\n       let cleanupError=null;\n       try{await engine.unload();}catch(error){\n         cleanupError=error;\n         alvisEngineCleanupError=String(error?.message||error||\"GPU停止後のモデル解放に失敗しました\").slice(0,180);\n         recordAlvisModelLoadTrace(\"GPU停止後のengine unload失敗：\"+alvisEngineCleanupError);\n       }\n       releaseCapturedAlvisModelDevices({destroy:!!cleanupError,reason:cleanupError?\"GPU停止後のengine unload失敗\":\"GPU停止後のengine unload完了\"});\n       if(cleanupError)recordAlvisModelLoadTrace(\"GPU停止後のengine unload失敗：\"+String(cleanupError?.message||cleanupError).slice(0,160));\n       throw new Error(\"モデル読み込み中にWebGPUが停止しました。古い実行エンジンの終了処理を行いました。\"+(cleanupError?\" GPU deviceは個別解放を試みました。\":\"\"));\n     }";
   const makeGpuLossGuard=new Function("engine","releaseCapturedAlvisModelDevices","recordAlvisModelLoadTrace",
-    "return async function(){let alvisEngineCleanupError=null;try{"+gpuLossBranch+"}catch(error){return {error,alvisEngineCleanupError};}};"
+    "return async function(){let alvisEngineCleanupError=null;const alvisGpuLossDuringLoad={reason:"unknown",message:"simulated GPU device loss"};try{"+gpuLossBranch+"}catch(error){return {error,alvisEngineCleanupError};}};"
   );
   const trace=[];
   const releaseCalls=[];
