@@ -173,7 +173,7 @@ async function verifyBrowser(browserType, verifyOffline) {
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
-    const refreshResponse = await page.request.get(new URL("refresh-v340.html", previewUrl).href);
+    const refreshResponse = await page.request.get(new URL("refresh-v341.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v340 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
