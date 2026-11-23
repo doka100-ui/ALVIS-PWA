@@ -1,3 +1,8 @@
+## v338 — VRM描画停止時のフレーム競合ガード
+- animate callbackの先頭でdisposed、activeEnabled、document.visibilityStateを確認。Avatarモード無効化後にコールバックが実行されても、次のrequestAnimationFrameを予約せず終了する。
+- startRenderLoop側のactiveEnabled確認と合わせて二重に停止条件を保証し、setActive(true)で既存モデルの描画を再開する。
+- モデル/IndexedDB保存形式/表情/口パク/視線/音声/ユーザーデータは変更しない。Service Worker cache v338。実機SafariのGPU測定は未実施。
+
 ## v337 — Avatar非表示時のVRM描画停止
 - VRM runtimeにsetActive(enabled)を追加。非表示時はrequestAnimationFrameループを停止し、Avatarモード再表示時に同じVRMインスタンスで描画を再開する。
 - 表示モード切替とVRM読み込み完了の双方で現在のAvatar表示状態を同期し、初期モードがJARVISの場合にバックグラウンド描画を継続しない。
