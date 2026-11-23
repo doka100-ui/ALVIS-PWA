@@ -44,7 +44,11 @@ export async function mountVrmAvatar(host, blob) {
     avatarBounds.getSize(avatarSize);
     avatarBounds.getCenter(avatarCenter);
   }
-  const avatarFocus = avatarCenter.clone();
+  const gazeBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
+  const gazeAnchor = new THREE.Vector3();
+  if (gazeBone) gazeBone.getWorldPosition(gazeAnchor);
+  else gazeAnchor.copy(avatarCenter);
+  const avatarFocus = gazeAnchor.clone();
 
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
   const fitAvatarCamera = () => {
@@ -57,7 +61,7 @@ export async function mountVrmAvatar(host, blob) {
     const horizontalDistance = Math.max(avatarSize.x, 0.35) / (2 * Math.tan(horizontalFov / 2));
     const distance = THREE.MathUtils.clamp(Math.max(verticalDistance, horizontalDistance) * 1.18, 0.85, 8.5);
     // Keep the gaze target between the avatar and camera, even for close-up head-only models.
-    avatarFocus.set(avatarCenter.x, avatarCenter.y, avatarCenter.z + Math.min(2.5, distance * 0.7));
+    avatarFocus.set(gazeAnchor.x, gazeAnchor.y, gazeAnchor.z + Math.min(2.5, distance * 0.7));
     camera.position.set(avatarCenter.x, avatarCenter.y, avatarCenter.z + distance);
     camera.lookAt(avatarCenter);
     camera.updateProjectionMatrix();
