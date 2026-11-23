@@ -1509,3 +1509,38 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
   assert.equal(successfulUnloadDestroyCount,0,"successful engine unload must not double-destroy its GPUDevice");
   assert.deepEqual(successfulDiagnostics.modelDevices,[],"successful unload must still release duplicate references");
 }
+
+
+// v336: execute the real post-initialization GPU-loss race guard before publishing the engine.
+{
+  const gpuLossBranch="if(alvisGpuLossDuringLoad){\n       let cleanupError=null;\n       try{await engine.unload();}catch(error){\n         cleanupError=error;\n         alvisEngineCleanupError=String(error?.message||error||\"GPU停止後のモデル解放に失敗しました\").slice(0,180);\n         recordAlvisModelLoadTrace(\"GPU停止後のengine unload失敗：\"+alvisEngineCleanupError);\n       }\n       releaseCapturedAlvisModelDevices({destroy:!!cleanupError,reason:cleanupError?\"GPU停止後のengine unload失敗\":\"GPU停止後のengine unload完了\"});\n       if(cleanupError)recordAlvisModelLoadTrace(\"GPU停止後のengine unload失敗：\"+String(cleanupError?.message||cleanupError).slice(0,160));\n       throw new Error(\"モデル読み込み中にWebGPUが停止しました。古い実行エンジンの終了処理を行いました。\"+(cleanupError?\" GPU deviceは個別解放を試みました。\":\"\"));\n     }";
+  const makeGpuLossGuard=new Function("engine","releaseCapturedAlvisModelDevices","recordAlvisModelLoadTrace",
+    "return async function(){let alvisEngineCleanupError=null;try{"+gpuLossBranch+"}catch(error){return {error,alvisEngineCleanupError};}};"
+  );
+  const trace=[];
+  const releaseCalls=[];
+  let unloadCalls=0;
+  const staleEngine={async unload(){unloadCalls++;}};
+  const release=(options)=>{releaseCalls.push(options);return 1;};
+  const runSuccessfulCleanup=makeGpuLossGuard(staleEngine,release,message=>trace.push(message));
+  let publishedEngine=null;
+  const successfulResult=await runSuccessfulCleanup();
+  if(!successfulResult)publishedEngine=staleEngine;
+  assert.ok(successfulResult?.error instanceof Error,"a GPU loss during initialization must reject the load attempt");
+  assert.match(successfulResult.error.message,/WebGPUが停止しました/);
+  assert.equal(unloadCalls,1,"the stale engine must be unloaded exactly once");
+  assert.deepEqual(releaseCalls,[{destroy:false,reason:"GPU停止後のengine unload完了"}],"successful unload must not double-destroy the device");
+  assert.equal(publishedEngine,null,"a GPU-lost engine must never be published as ready");
+  assert.ok(trace.some(message=>message.includes("GPU停止後のengine unload完了")),"the cleanup outcome must be traced");
+
+  const failedReleaseCalls=[];
+  let failedUnloadCalls=0;
+  const failedEngine={async unload(){failedUnloadCalls++;throw new Error("simulated unload failure");}};
+  const runFailedCleanup=makeGpuLossGuard(failedEngine,options=>{failedReleaseCalls.push(options);return 1;},message=>trace.push(message));
+  const failedResult=await runFailedCleanup();
+  assert.ok(failedResult.error instanceof Error);
+  assert.match(failedResult.error.message,/GPU deviceは個別解放を試みました/);
+  assert.match(failedResult.alvisEngineCleanupError,/simulated unload failure/);
+  assert.equal(failedUnloadCalls,1);
+  assert.deepEqual(failedReleaseCalls,[{destroy:true,reason:"GPU停止後のengine unload失敗"}],"failed unload must trigger targeted GPUDevice fallback destruction");
+}
