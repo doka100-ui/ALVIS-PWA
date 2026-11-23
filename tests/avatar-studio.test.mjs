@@ -9,7 +9,7 @@ check("touch orbit controls are enabled", html.includes("OrbitControls") && html
 check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize"].every(id => html.includes('id="'+id+'"')));
 check("blink and smile preview controls are present", ["blink","smile"].every(id => html.includes('id="'+id+'"')));
 check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("leftLid.morphTargetInfluences[0]=values.blink") && html.includes("rightLid.morphTargetInfluences[0]=values.blink"));
-check("eyelids contain exported blink and side-specific morph targets", html.includes('lidGeometry.userData.targetNames=["blink",sideBlink]') && html.includes("lidGeometry.morphAttributes.position=[closedAttribute,new THREE.Float32BufferAttribute(lidClosedPositions.slice(),3)]") && html.includes("lidSegmentsX=24,lidSegmentsY=8"));
+check("eyelids contain exported blink and side-specific morph targets", html.includes('lidGeometry.userData.targetNames=["blink",side<0?"blinkLeft":"blinkRight"]') && html.includes("lidGeometry.morphAttributes.position=[closedAttribute,new THREE.Float32BufferAttribute(lidClosedPositions.slice(),3)]") && html.includes("lidSegmentsX=24,lidSegmentsY=8"));
 check("upper lip contains five named expression morph targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised","relaxed"]') && html.includes("lipGeometry.morphAttributes.position=lipTargets"));
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));
 check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0,[sideBlink]:1}") && html.includes("upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3,relaxed:4}"));
@@ -70,7 +70,7 @@ check("brows use the light taupe tone from the approved model sheet", html.inclu
 check("nose and lips include fine anatomical contour details", html.includes("noseGroup") && html.includes("lipOutline") && html.includes("lipHighlight"));
 check("bob includes independent fine hair strands on both sides", html.includes("for(let strand=0;strand<4;strand++)") && html.includes("hair-side-left") && html.includes("hair-side-right"));
 check("white top includes shoulder straps, neckline and rib details", html.includes("tank-strap-left") && html.includes("tank-neckline") && html.includes("ribIndex"));
-check("both single and independent left/right blink expressions are exported", html.includes('targetNames=["blink",sideBlink]') && html.includes('"blinkLeft","blinkRight"'));
+check("both single and independent left/right blink expressions are exported", html.includes('targetNames=["blink",side<0?"blinkLeft":"blinkRight"]') && html.includes('"blinkLeft","blinkRight"'));
 
 check("left and right wink controls are exposed and connected to the matching eyelids", ["blinkLeft","blinkRight"].every(id=>html.includes('id="'+id+'"') && html.includes('values.'+id)) && html.includes('leftLid.morphTargetInfluences[1]=values.blinkLeft') && html.includes('rightLid.morphTargetInfluences[1]=values.blinkRight'));
 
