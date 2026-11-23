@@ -85,7 +85,19 @@ function makeFace(){
   curve(eyesGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
   curve(eyesGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
   curve(eyesGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);
-  const lid=ell(eyesGroup,skin,[x,.34,.785],[.225,.001,.035]);lid.name=side<0?"eyelid-left":"eyelid-right";
+  const lidGeometry=new THREE.SphereGeometry(1,32,24);
+  const lidBase=lidGeometry.attributes.position.clone();
+  const lidClosed=lidGeometry.attributes.position.clone();
+  for(let i=0;i<lidClosed.count;i++)lidClosed.setY(i,lidClosed.getY(i));
+  lidGeometry.attributes.position.array.forEach((_,i)=>{});
+  lidGeometry.morphAttributes.position=[lidClosed];
+  lidGeometry.morphAttributes.position[0].needsUpdate=true;
+  // The target is a full oval lid; the base mesh is a narrow resting edge.
+  for(let i=0;i<lidBase.count;i++)lidBase.setY(i,lidBase.getY(i)*.012);
+  lidGeometry.setAttribute("position",lidBase);
+  lidGeometry.morphAttributes.position=[lidClosed];
+  lidGeometry.userData.targetNames=["blink"];
+  const lid=new THREE.Mesh(lidGeometry,skin);lid.position.set(x,.34,.785);lid.scale.set(.225,.12,.035);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
@@ -94,7 +106,13 @@ function makeFace(){
  for(const side of [-1,1])ell(noseGroup,skinShade,[side*.105,-.17,.77],[.055,.04,.055],20);
  // lips
  const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
- ell(mouthGroup,lip,[0,-.43,.66],[.22,.055,.045]);
+ const lipGeometry=new THREE.SphereGeometry(1,32,20);
+ const lipBase=lipGeometry.attributes.position.clone();
+ const lipSmile=lipGeometry.attributes.position.clone();
+ for(let i=0;i<lipSmile.count;i++){const x=lipSmile.getX(i),y=lipSmile.getY(i);lipSmile.setY(i,y+Math.abs(x)*.42);}
+ lipGeometry.morphAttributes.position=[lipSmile];
+ lipGeometry.userData.targetNames=["happy"];
+ const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
  ell(mouthGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
  // hair cap, swept side fringe and bob side locks
  const cap=new THREE.Mesh(new THREE.SphereGeometry(1,48,32,0,Math.PI*2,0,Math.PI*.57),hair);
@@ -130,7 +148,7 @@ document.getElementById("reset").onclick=()=>{sliders.forEach(id=>document.getEl
 document.getElementById("front").onclick=()=>{controls.reset();camera.position.set(0,.15,7.2);controls.target.set(0,.05,0);};
 document.getElementById("export").onclick=async()=>{
  try{status.textContent="GLBを書き出しています…";const exporter=new GLTFExporter();const data=await exporter.parseAsync(root,{binary:true,onlyVisible:true});
- const blob=new Blob([data],{type:"model/gltf-binary"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.glb";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);status.textContent="GLBを書き出しました。VRMリグ・表情は次工程です。";
+ const blob=new Blob([data],{type:"model/gltf-binary"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.glb";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);status.textContent="GLBを書き出しました。blink / happy の形状ターゲットを含みます。VRM表情設定は次工程です。";
  }catch(e){status.textContent="書き出しに失敗: "+(e?.message||String(e));}
 };
 function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
