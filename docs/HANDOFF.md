@@ -1,3 +1,9 @@
+## Avatar implementation status clarified — 2026-11-23
+- Existing source already includes VRM runtime controls for gradual happy/angry/sad/relaxed/surprised expressions, automatic gaze, idle blinking/breathing/head motion, reply nods, and Japanese vowel/lip-sync; conversation emotion heuristics call these only in Avatar display mode.
+- The visible portrait is still a reference/fallback image until the user imports a real .vrm file. GLB is display-only through model-viewer; it does not provide VRM expressions, gaze, or speech animation. No custom 18号 VRM model asset is present or generated in the repository.
+- Added regression assertions for these existing integrations and corrected the preview smoke test to use the current v338 refresh page/cache version. No avatar model or user data was changed.
+- A real 3D avatar still requires a compatible VRM asset and actual iPad Safari validation; source-level checks do not prove animation quality on device.
+
 ## Latest Avatar in-flight frame cancellation guard — 2026-11-23 (v338)
 - VRM runtime animate callback now checks disposed, activeEnabled, and document.visibilityState before scheduling its next animation frame. This closes the narrow race where a callback already queued/running as Avatar mode is disabled could otherwise schedule another frame.
 - Existing startRenderLoop activeEnabled guard remains; setActive(true) resumes the same loaded VRM instance.
