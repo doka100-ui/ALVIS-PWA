@@ -6,6 +6,7 @@ on:
     paths:
       - "index-integrated.html"
       - "assets/alvis-app.css"
+      - "assets/alvis-vrm-runtime.js"
       - "service-worker.js"
       - "refresh.html"
       - "refresh-v291.html"
@@ -20,6 +21,7 @@ on:
       - "refresh-v344.html"
       - "refresh-v345.html"
       - "refresh-v346.html"
+      - "refresh-v347.html"
       - "startup-check.html"
       - "assets/alvis-dashboard-reference.avif"
       - "tests/alvis-dashboard.test.mjs"
