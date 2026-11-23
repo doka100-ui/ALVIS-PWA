@@ -1,3 +1,8 @@
+## v340 — VRMモデル破棄時のGPUリソース解放
+- アバターの差し替え/終了時にVRMUtils.deepDispose(vrm.scene)を呼び、モデルのgeometry・material・textureを解放してからrendererを破棄する。
+- three-vrm 3.5.5の公式APIに基づく。モデルBlobやIndexedDB保存形式、アップロード済みモデル、表情/視線/口パク制御、Qwen/Kokoroキャッシュ、暗号化記憶/履歴/同期/バックアップは変更しない。
+- Service Worker app shell cache v340。実機iPad SafariでのGPUメモリ回収量は未測定。
+
 ## v339 — Avatarモデル読込状態の誤表示を修正
 - VRM/GLBファイル保存後、描画処理の失敗を「保存成功」だけの表示で上書きしていた問題を修正。
 - showVrm/showModelは描画成功/失敗を返し、保存成功かつ表示失敗の場合は別の状態メッセージを表示する。非Avatarモード中に保存した場合は、次回表示時に読み込むため保存済みとして扱う。
