@@ -1,3 +1,8 @@
+## VRM描画フレームの例外停止（v342）
+- animate callback内の描画処理をtry/catchで保護し、renderer.render成功後にだけ次のrequestAnimationFrameを予約する。
+- フレーム内例外時はframeRunning/frameId/lastFrameTimestampをリセットして連続エラーを防止。setActive(true)または表示状態の再同期で再開できる。
+- VRM scene/IndexedDBモデル、Qwen/Kokoroキャッシュ、暗号化記憶/履歴/同期/バックアップには触れない。
+
 ## VRM診断パネルの表示（v341）
 - 診断項目は `Array.join("\\n")` で実改行へ連結し、Safariを含むブラウザの `textContent` で読みやすく表示する。診断データやモデル状態は変更しない。
 
