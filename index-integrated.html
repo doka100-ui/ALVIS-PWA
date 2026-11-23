@@ -571,7 +571,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v345";
+const ALVIS_APP_BUILD_ID="v346";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4836,11 +4836,30 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       viewer.setAttribute("shadow-intensity","0.8");
       viewer.setAttribute("exposure","1");
       viewer.setAttribute("alt","ALVIS 18号 3Dアバター");
-      viewer.addEventListener("load",()=>setStatus("ALVIS / 3D MODEL READY"),{once:true});
-      viewer.addEventListener("error",()=>{modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3Dモデルを読み込めないため、18号の画像を表示中");},{once:true});
-      host.replaceChildren(viewer);
+      // Do not report success until model-viewer confirms that the GLB has loaded.
+      await new Promise((resolve,reject)=>{
+        let settled=false;
+        const finish=(error)=>{
+          if(settled)return;
+          settled=true;
+          window.clearTimeout(timeout);
+          if(error)reject(error);else resolve();
+        };
+        const timeout=window.setTimeout(()=>finish(new Error("3D model load timed out.")),30000);
+        viewer.addEventListener("load",()=>{
+          setStatus("ALVIS / 3D MODEL READY");
+          finish();
+        },{once:true});
+        viewer.addEventListener("error",()=>finish(new Error("3D model failed to load.")),{once:true});
+        host.replaceChildren(viewer);
+      });
       return true;
-    }catch(error){modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3D表示に失敗したため、18号の画像を表示中");return false;}
+    }catch(error){
+      if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+      modelFailed=true;modelBlob=null;showPortrait(true);
+      setStatus("3D表示に失敗したため、18号の画像を表示中");
+      return false;
+    }
   }
   function showPortrait(force=false){
     if(modelBlob&&!force)return;
