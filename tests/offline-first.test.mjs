@@ -636,7 +636,7 @@ let maximumConcurrentInferenceCount=0;
 let unloadCompleted=false;
 let releaseSlowInference;
 const slowInferenceGate=new Promise(resolve=>{releaseSlowInference=resolve;});
-const shutdownProbeEngine={
+const fakeEngine={
   chat:{completions:{create:async({id,slow})=>{
     activeInferenceCount++;
     maximumConcurrentInferenceCount=Math.max(maximumConcurrentInferenceCount,activeInferenceCount);
@@ -647,14 +647,14 @@ const shutdownProbeEngine={
   }}},
   unload:async()=>{unloadCompleted=true;}
 };
-serializeInference(shutdownProbeEngine);
-const serializedResults=await Promise.all([1,2,3,4].map(id=>shutdownProbeEngine.chat.completions.create({id})));
+serializeInference(fakeEngine);
+const serializedResults=await Promise.all([1,2,3,4].map(id=>fakeEngine.chat.completions.create({id})));
 assert.deepEqual(serializedResults.map(item=>item.id),[1,2,3,4]);
 assert.equal(maximumConcurrentInferenceCount,1,"Qwen inference must never overlap");
-const slowRequest=shutdownProbeEngine.chat.completions.create({id:5,slow:true});
+const slowRequest=fakeEngine.chat.completions.create({id:5,slow:true});
 await Promise.resolve();
 await Promise.resolve();
-const pendingUnload=shutdownProbeEngine.unload();
+const pendingUnload=fakeEngine.unload();
 await Promise.resolve();
 assert.equal(unloadCompleted,false,"unload must wait while inference is active");
 releaseSlowInference();
@@ -1148,7 +1148,7 @@ const makeSerializedInference=new Function(serializedInferenceSource+"; return s
 let releaseShutdownProbeInference;
 const shutdownProbeGate=new Promise(resolve=>{releaseShutdownProbeInference=resolve;});
 const shutdownProbeEvents=[];
-const shutdownProbeEngine={
+const shutdownBehaviorEngine={
   chat:{completions:{create:async label=>{
     shutdownProbeEvents.push("start:"+label);
     if(label==="first")await shutdownProbeGate;
@@ -1157,7 +1157,7 @@ const shutdownProbeEngine={
   }}},
   unload:async()=>{shutdownProbeEvents.push("unload");}
 };
-const shutdownProbeWrappedEngine=makeSerializedInference(shutdownProbeEngine);
+const shutdownProbeWrappedEngine=makeSerializedInference(shutdownBehaviorEngine);
 const shutdownProbeFirst=shutdownProbeWrappedEngine.chat.completions.create("first");
 await Promise.resolve();
 assert.deepEqual(shutdownProbeEvents,["start:first"],"the first inference must begin before shutdown is requested");
