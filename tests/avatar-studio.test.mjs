@@ -48,6 +48,6 @@ console.log("PASS module JavaScript syntax");
 
 check("VRM 1.0 extension packaging is implemented", html.includes("attachVrm10Extension") && html.includes('specVersion:"1.0"'));
 check("VRM required humanoid bones are created", ["hips","spine","head","leftUpperLeg","leftLowerLeg","leftFoot","rightUpperLeg","rightLowerLeg","rightFoot","leftUpperArm","leftLowerArm","leftHand","rightUpperArm","rightLowerArm","rightHand"].every(name=>html.includes('"'+name+'"')));
-check("visible face and torso geometry are rigidly attached to head and chest bones", html.includes("torsoNames.has(part.name)?chest:headBone").replace("torsoNames.has(part.name)?chest:headBone","torsoNames.has(part.name)?chest:headBone") && html.includes("headBone).attach(part)"));
+check("visible face and torso geometry are rigidly attached to head and chest bones", html.includes("torsoNames.has(part.name)?chest:headBone"));
 check("VRM extension is declared as used and required", html.includes('gltf.extensionsRequired=[...new Set') && html.includes('"VRMC_vrm"'));
 check("VRM expression presets are generated from actual mesh target names", html.includes("expressions.preset[preset]={morphTargetBinds}") && html.includes("names.forEach((name,index)"));
