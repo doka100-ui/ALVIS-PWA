@@ -102,6 +102,9 @@ try {
   const skinMaterials=(gltf.materials||[]).filter(material=>material.pbrMetallicRoughness?.baseColorTexture?.index!==undefined);
   assert.ok(skinMaterials.some(material=>material.normalTexture?.index!==undefined), "VRM must export the generated skin tangent-space normal map");
   assert.ok(skinMaterials.some(material=>material.pbrMetallicRoughness?.metallicRoughnessTexture?.index!==undefined), "VRM must export the generated skin roughness map through the metallic-roughness texture");
+  assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.7), "VRM must export the iris clearcoat layer");
+  assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.8), "VRM must export the pupil clearcoat layer");
+
 
   for (const name of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
     assert.ok(targetNames.includes(name), "VRM must retain named morph target: "+name+"; found "+targetNames.join(", "));
