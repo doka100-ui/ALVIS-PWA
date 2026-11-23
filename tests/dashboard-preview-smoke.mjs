@@ -4,7 +4,7 @@ import { chromium, webkit } from "playwright";
 
 const previewUrl = process.env.ALVIS_PREVIEW_URL;
 assert.ok(previewUrl, "ALVIS_PREVIEW_URL must point to this commit's Cloudflare Pages preview");
-const expectedPages = ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage", "devicePage"];
+const expectedPages = ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage"];
 
 async function waitForDashboardImage(page) {
   await page.waitForFunction(() => {
@@ -211,6 +211,9 @@ async function verifyBrowser(browserType, verifyOffline) {
       }, pageId, { timeout: 15000 });
     }
 
+    await page.locator('#appPanel > nav button[data-page="devicePage"]').click();
+    await page.waitForFunction(() => !document.getElementById("devicePage").classList.contains("hidden"));
+    await page.locator("#generateDevelopmentHandoff").waitFor({ state: "visible" });
     await returnToChat();
     await page.locator('.hud-side-right .hud-info-action[data-hud-action="memory"]').click();
     await page.waitForFunction(() => {
