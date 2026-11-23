@@ -79,6 +79,7 @@ export async function mountVrmAvatar(host, blob) {
   let activeElapsed = 0;
   let lastFrameTimestamp = 0;
   let frameRunning = false;
+  let activeEnabled = true;
   // Normalized humanoid bones are optional; unsupported rigs simply keep their existing motion.
   const neckBone = vrm.humanoid?.getNormalizedBoneNode?.("neck") || null;
   const headBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
@@ -345,7 +346,7 @@ export async function mountVrmAvatar(host, blob) {
     renderer.render(scene, camera);
   };
   const startRenderLoop = () => {
-    if (disposed || frameRunning || document.visibilityState !== "visible") return;
+    if (disposed || !activeEnabled || frameRunning || document.visibilityState !== "visible") return;
     frameRunning = true;
     lastFrameTimestamp = 0;
     frameId = requestAnimationFrame(animate);
@@ -376,6 +377,13 @@ export async function mountVrmAvatar(host, blob) {
     setHeadGesture,
     getDiagnostics,
     setIdleEnabled(value) { idleEnabled = !!value; },
+    setActive(value) {
+      if (disposed) return false;
+      activeEnabled = !!value;
+      if (activeEnabled) startRenderLoop();
+      else stopRenderLoop();
+      return true;
+    },
     dispose() {
       if (disposed) return;
       disposed = true;
