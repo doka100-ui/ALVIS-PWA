@@ -190,6 +190,7 @@ function makeFace(){
   const glintMesh=ell(eyesGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);glintMesh.name=side<0?"eye-glint-left":"eye-glint-right";addEyeGazeMorphTargets(glintMesh);
   curve(eyesGroup,[[x-.22,.36,.71],[x-.15,.425,.738],[x-.06,.465,.747],[x+.04,.47,.747],[x+.15,.425,.738],[x+.22,.36,.71]],.015,lashMat);
   curve(eyesGroup,[[x-.20,.29,.71],[x-.10,.265,.729],[x,.255,.733],[x+.10,.265,.729],[x+.20,.29,.71]],.009,skinShade);
+  const waterline=curve(eyesGroup,[[x-.17,.292,.728],[x-.085,.274,.741],[x,.269,.744],[x+.085,.274,.741],[x+.17,.292,.728]],.0032,skinShade);waterline.name=side<0?"lower-eyelid-waterline-left":"lower-eyelid-waterline-right";
   curve(eyesGroup,[[x-.19,.49,.685],[x-.08,.515,.695],[x+.08,.515,.695],[x+.19,.49,.685]],.008,skinShade);
   const crease=curve(eyesGroup,[[x-.205,.505,.688],[x-.13,.545,.699],[x,.558,.702],[x+.13,.545,.699],[x+.205,.505,.688]],.0038,skinShade);crease.name=side<0?"upper-eyelid-crease-left":"upper-eyelid-crease-right";
   const innerCanthus=ell(eyesGroup,skin,[x-side*.205,.34,.713],[.018,.014,.012],16);innerCanthus.name=side<0?"eye-inner-canthus-left":"eye-inner-canthus-right";

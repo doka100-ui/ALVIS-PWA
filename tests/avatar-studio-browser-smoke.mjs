@@ -110,6 +110,7 @@ try {
   for (let strand=0;strand<5;strand++) assert.ok(gltf.nodes.some(node=>node.name==="hair-fringe-strand-"+strand),"VRM must preserve swept fringe strand "+strand);
   for (const nodeName of ["nostril-left","nostril-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve sculpted nose detail: "+nodeName);
   for (const nodeName of ["upper-eyelid-crease-left","upper-eyelid-crease-right","eye-inner-canthus-left","eye-inner-canthus-right","eye-outer-canthus-left","eye-outer-canthus-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve refined eye contour detail: "+nodeName);
+  for (const nodeName of ["lower-eyelid-waterline-left","lower-eyelid-waterline-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve lower eyelid waterlines: "+nodeName);
   assert.ok(gltf.nodes.some(node=>node.name==="facial-skull"),"VRM must preserve refined facial skull geometry");
   for (const [meshName,boneName] of [["upper-arm-left","leftUpperArm"],["upper-arm-right","rightUpperArm"]]) {
     const meshIndex=gltf.nodes.findIndex(node=>node.name===meshName),boneIndex=gltf.nodes.findIndex(node=>node.name===boneName);
