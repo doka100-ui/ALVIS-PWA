@@ -571,7 +571,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v331";
+const ALVIS_APP_BUILD_ID="v337";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4513,6 +4513,7 @@ function applyAlvisDisplayMode(mode,save=true){
   const chatPage=$("chatPage");
   if(!chatPage)return;
   chatPage.dataset.displayMode=safeMode;
+  window.ALVISAvatarSetActive?.(safeMode==="avatar");
   $("jarvisModeButton")?.setAttribute("aria-pressed",String(safeMode==="jarvis"));
   $("avatarModeButton")?.setAttribute("aria-pressed",String(safeMode==="avatar"));
   if(save){try{localStorage.setItem(ALVIS_DISPLAY_MODE_KEY,safeMode);}catch(error){}}
@@ -4793,6 +4794,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       const mounted=await runtime.mountVrmAvatar(host,blob);
       if(!isActive()){mounted.dispose();return;}
       vrmRuntime=mounted;
+      mounted.setActive?.(document.getElementById("chatPage")?.dataset.displayMode==="avatar");
+      window.ALVISAvatarSetActive=mounted.setActive;
       window.ALVISAvatarSetMouthOpen=mounted.setMouthOpen;
       window.ALVISAvatarSetMouthViseme=mounted.setMouthViseme;
       window.ALVISAvatarSetExpression=mounted.setExpression;
@@ -4839,6 +4842,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   function showPortrait(force=false){
     if(modelBlob&&!force)return;
     if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
+    window.ALVISAvatarSetActive=null;
     window.ALVISAvatarSetMouthOpen=null;
      window.ALVISAvatarSetMouthViseme=null;
     window.ALVISAvatarSetExpression=null;
