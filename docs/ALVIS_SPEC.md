@@ -1,3 +1,7 @@
+## v345 — WebGL初期化失敗時のVRM解放
+- WebGLRenderer生成が失敗した場合、VRM sceneのGPU関連リソースを解放してからエラーを返す。
+- モデルBlob、IndexedDB保存形式、既存ユーザーデータは変更しない。
+
 ## v344 — VRM WebGLコンテキスト復帰
 - WebGL context lost時は既定動作を許可して描画ループを停止する。
 - context restored時はフレーム時刻を初期化して描画を再開する。
