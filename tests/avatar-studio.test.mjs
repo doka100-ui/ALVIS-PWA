@@ -10,7 +10,7 @@ check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize"
 check("blink and smile preview controls are present", ["blink","smile"].every(id => html.includes('id="'+id+'"')));
 check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("lid.morphTargetInfluences[0]=values.blink"));
 check("eyelids contain an exported blink morph target", html.includes('lidGeometry.userData.targetNames=["blink"]') && html.includes("lidGeometry.morphAttributes.position=[lidClosed]"));
-check("upper lip contains an exported happy morph target", html.includes('lipGeometry.userData.targetNames=["happy"]') && html.includes("lipGeometry.morphAttributes.position=[lipSmile]"));
+check("upper lip contains four named expression morph targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised"]') && html.includes("lipGeometry.morphAttributes.position=lipTargets"));
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));
 check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0}") && html.includes("upperLip.morphTargetDictionary={happy:0}"));
 check("four named mouth expression targets are exported", html.includes('upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}') && ["happy","sad","angry","surprised"].every(name=>html.includes('id="'+name+'"')));
