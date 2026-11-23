@@ -1,3 +1,7 @@
+## Latest v341 VRM診断表示の改行修正（2026-11-23）
+- VRM診断パネルが `\\n` を文字として表示していたため、実改行に修正。VRM診断データ・モデル・IndexedDB保存形式は変更しない。
+- 回帰テストに改行エスケープの検査を追加。実機iPad Safariの視認性確認は未実施。
+
 ## Latest v340 VRM GPUリソース解放（2026-11-23）
 - VRM runtimeのdispose()で、アニメーション停止・イベント解除後にthree-vrm 3.5.5の `VRMUtils.deepDispose(vrm.scene)` を呼び、モデル配下のgeometry/material/textureをrenderer破棄前に解放するようにした。
 - VRM差し替えや表示終了を繰り返した際のGPUリソース残留リスクを減らす変更。保存済みBlob/IndexedDBやモデルファイル自体は削除しない。
