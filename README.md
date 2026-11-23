@@ -10,3 +10,8 @@ Personal offline-first AI memory system
 - [変更履歴](docs/CHANGELOG.md)
 
 通常の開発対象ブランチは `development` です。`main` は本番用のため、明示的な許可なしに変更しないでください。
+
+## 現在の開発版を開く
+- **ALVIS統合版（ALVISモード / アバターモード）:** https://development.alvis-pwa.pages.dev/index-integrated.html
+- **18号 Avatar Studio:** https://development.alvis-pwa.pages.dev/tools/avatar-studio.html
+- URLの正本・旧本番URLとの区別・更新時の確認手順は [docs/HANDOFF.md](docs/HANDOFF.md) を参照してください。
