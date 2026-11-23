@@ -431,15 +431,32 @@ function attachVrm10Extension(glbData){
  for(const chunk of chunks){outView.setUint32(cursor,chunk.data.length,true);outView.setUint32(cursor+4,chunk.type,true);out.set(chunk.data,cursor+8);cursor+=8+chunk.data.length;}
  return output;
 }
+function countAvatarTriangles(){
+ let triangles=0;
+ root.traverse(object=>{
+  if(!object.isMesh||!object.geometry)return;
+  const geometry=object.geometry;
+  const available=geometry.index?geometry.index.count:geometry.attributes.position?.count||0;
+  const drawCount=Number.isFinite(geometry.drawRange?.count)?Math.min(available,geometry.drawRange.count):available;
+  triangles+=Math.floor(Math.max(0,drawCount)/3);
+ });
+ return triangles;
+}
 document.getElementById("export").onclick=async()=>{
  try{
-  status.textContent="VRM 1.0を書き出しています…";
+  const triangleCount=countAvatarTriangles();
+  status.textContent="ポリゴン数を確認中: "+triangleCount.toLocaleString("ja-JP")+" triangles";
+  if(triangleCount>=75000){
+   status.textContent="書き出しを中止しました: "+triangleCount.toLocaleString("ja-JP")+" triangles（上限75,000未満）。形状の密度を下げてください。";
+   return;
+  }
+  status.textContent="VRM 1.0を書き出しています…（"+triangleCount.toLocaleString("ja-JP")+" triangles）";
   const exporter=new GLTFExporter();
   const glb=await exporter.parseAsync(root,{binary:true,onlyVisible:true});
   const vrm=attachVrm10Extension(glb);
   const blob=new Blob([vrm],{type:"model/gltf-binary"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.vrm";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
-  status.textContent="VRM 1.0を書き出しました。Humanoid骨格と表情・母音モーフを含みます。これは18号の完成モデルではなく制作試作です。";
+  status.textContent="VRM 1.0を書き出しました（"+triangleCount.toLocaleString("ja-JP")+" triangles）。Humanoid骨格と表情・母音モーフを含みます。これは18号の完成モデルではなく制作試作です。";
  }catch(e){status.textContent="VRM書き出しに失敗: "+(e?.message||String(e));}
 };
 function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
