@@ -174,7 +174,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
     const refreshResponse = await page.request.get(new URL("refresh-v338.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v331 Service Worker refresh page must return HTTP 200");
+    assert.ok(refreshResponse.ok(), browserName + ": v338 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
@@ -423,8 +423,8 @@ async function verifyRefreshFlow(browserType) {
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
     assert.equal(state.cacheName, "alvis-cache-v338-integrated",
-      browserName + ": refresh flow must verify the actual v331 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v331 before redirect");
+      browserName + ": refresh flow must verify the actual v338 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v338 before redirect");
   } finally {
     await browser.close();
   }
