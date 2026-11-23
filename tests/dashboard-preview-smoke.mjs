@@ -277,7 +277,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(generatedHandoff.includes("リポジトリ: https://github.com/doka100-ui/ALVIS-PWA")
       && generatedHandoff.includes("作業ブランチ: development"),
       browserName + ": handoff must include the project repository and branch");
-    assert.ok(!/ALVIS_SYNC_TOKEN(?:_KEY)?\\s*[:=]|password\\s*[:=]\\s*[^\\s]+|記憶本文[:：]\\s*[^\\s]+|会話履歴の内容[:：]\\s*[^\\s]+/.test(generatedHandoff),
+    assert.ok(!/ALVIS_SYNC_TOKEN(?:_KEY)?\s*[:=]|password\s*[:=]\s*[^\s]+|記憶本文[:：]\s*[^\s]+|会話履歴の内容[:：]\s*[^\s]+/.test(generatedHandoff),
       browserName + ": handoff must not expose secrets or private user content");
     assert.equal(await page.locator("#copyDevelopmentHandoff").isEnabled(), true,
       browserName + ": copy button must be enabled after handoff generation");
