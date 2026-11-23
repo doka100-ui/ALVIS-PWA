@@ -102,3 +102,5 @@ check("browser smoke verifies the Avatar Studio entry from both Chromium and Web
 check("Avatar Studio uses mobile-optimized sphere and tube segment counts", html.includes("seg=24") && html.includes("new THREE.SphereGeometry(1,48,36)") && html.includes("new THREE.TubeGeometry(path,24,r,6,false)") && html.includes("tubularSegments=24,radialSegments=5"));
 
 check("upper-body silhouette includes chest-attached shoulders and upper arms", html.includes('shoulder.name=side<0?"shoulder-left":"shoulder-right"') && html.includes('upperArm.name=side<0?"upper-arm-left":"upper-arm-right"') && html.includes('"shoulder-left","shoulder-right","upper-arm-left","upper-arm-right"'));
+
+check("skin hair eye and lip palette follows the approved light-blonde blue-eyed reference", html.includes("242+grain") && html.includes("216+grain") && html.includes("204+grain") && html.includes("hair=mat(0xe6d0a5") && html.includes("hairLight=mat(0xf4e3c4") && html.includes("iris=mat(0x7899bd") && html.includes("lip=mat(0xc98584"));
