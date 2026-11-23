@@ -1,6 +1,6 @@
 ## Latest VRM auto-framing for cropped avatars (2026-11-23 / v347)
 - VRM runtime now measures imported scene bounds and fits the perspective camera to actual mesh dimensions. Cropped upper-body and head-only models no longer rely on the old fixed full-body camera target/distance; framing recalculates when the host resizes.
-- Default gaze focus follows the measured avatar center. Existing expressions, blink, Japanese visemes, idle motion, and VRM storage format remain unchanged.
+- Default gaze focus follows the normalized head bone when available, otherwise the measured avatar center. Existing expressions, blink, Japanese visemes, idle motion, and VRM storage format remain unchanged.
 - Regression checks cover bounds-based framing and gaze anchoring. This is source-level/CI coverage; actual framing still needs a licensed VRM asset and iPad Safari validation. No model file was added; no IndexedDB data, memories, history, sync, backups, Qwen/Kokoro caches, or production main were changed.
 - v347 development preview only; main remains untouched.
 
