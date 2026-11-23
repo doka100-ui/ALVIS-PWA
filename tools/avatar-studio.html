@@ -37,6 +37,8 @@ button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;co
 <div class="control"><label for="eyeSpacing">目の間隔 <output id="eyeSpacingValue">1.00</output></label><input id="eyeSpacing" type="range" min=".85" max="1.18" step=".01" value="1"></div>
 <div class="control"><label for="noseSize">鼻の立体感 <output id="noseSizeValue">1.00</output></label><input id="noseSize" type="range" min=".7" max="1.35" step=".01" value="1"></div>
 <div class="control"><label for="mouthSize">唇の幅 <output id="mouthSizeValue">1.00</output></label><input id="mouthSize" type="range" min=".75" max="1.3" step=".01" value="1"></div>
+<div class="control"><label for="blink">まぶたを閉じる <output id="blinkValue">0.00</output></label><input id="blink" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="smile">微笑み <output id="smileValue">0.00</output></label><input id="smile" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">3DモデルをGLB保存</button></div>
 <div class="status" id="status" role="status">準備完了。各スライダーで形状を調整できます。</div>
 <div class="notice">これは顔形状の制作土台です。現段階では18号の完成モデル・VRM・表情リグではありません。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
@@ -83,6 +85,7 @@ function makeFace(){
   curve(eyesGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
   curve(eyesGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
   curve(eyesGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);
+  const lid=ell(eyesGroup,skin,[x,.34,.785],[.225,.001,.035]);lid.name=side<0?"eyelid-left":"eyelid-right";
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
@@ -108,8 +111,8 @@ function makeFace(){
  for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,8,24),gold);ring.position.set(side*.95,-.12,.02);ring.rotation.y=Math.PI/2;faceGroup.add(ring);}
 }
 makeFace();
-const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize"];
-const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1};
+const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","smile"];
+const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,smile:0};
 function rebuild(){
  const values=Object.fromEntries(sliders.map(id=>[id,Number(document.getElementById(id).value)]));
  root.remove(faceGroup);faceGroup.traverse(o=>{if(o.geometry)o.geometry.dispose()});makeFace();
@@ -117,6 +120,9 @@ function rebuild(){
  const eyes=faceGroup.getObjectByName("facial-eyes");eyes.scale.x=values.eyeSize;eyes.children.forEach(o=>{o.position.x*=values.eyeSpacing;});
  faceGroup.getObjectByName("facial-nose").scale.setScalar(values.noseSize);
  faceGroup.getObjectByName("facial-mouth").scale.x=values.mouthSize;
+ const lidOpen=1-values.blink;
+ ["eyelid-left","eyelid-right"].forEach(name=>{const lid=eyes.getObjectByName(name);if(lid)lid.scale.y=.001+lidOpen*.001+values.blink*.12;});
+ const mouth=faceGroup.getObjectByName("facial-mouth");mouth.position.y=values.smile*.035;mouth.scale.y=1+values.smile*.35;
  sliders.forEach(id=>document.getElementById(id+"Value").value=values[id].toFixed(2));
 }
 sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));

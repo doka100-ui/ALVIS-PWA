@@ -7,6 +7,9 @@ check("standalone mobile page is present", html.includes('<meta name="viewport"'
 check("Three.js is used for a real WebGL scene", html.includes("new THREE.WebGLRenderer") && html.includes("new THREE.Scene"));
 check("touch orbit controls are enabled", html.includes("OrbitControls") && html.includes("controls.enableDamping=true"));
 check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize"].every(id => html.includes('id="'+id+'"')));
+check("blink and smile preview controls are present", ["blink","smile"].every(id => html.includes('id="'+id+'"')));
+check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("lid.scale.y="));
+check("smile preview changes mouth pose without changing face geometry", html.includes("mouth.position.y=values.smile*.035") && html.includes("mouth.scale.y=1+values.smile*.35"));
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));
