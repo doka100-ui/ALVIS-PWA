@@ -193,14 +193,21 @@ function makeFace(){
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
- ell(noseGroup,skin,[0,.04,.68],[.088,.30,.145]);
- ell(noseGroup,skin,[0,-.13,.79],[.135,.095,.115]);
- for(const side of [-1,1]){
-  ell(noseGroup,skinShade,[side*.095,-.17,.775],[.046,.033,.046],20);
-  ell(noseGroup,lashMat,[side*.072,-.194,.842],[.021,.009,.008],16);
+ const noseGeometry=new THREE.SphereGeometry(1,48,32),nosePosition=noseGeometry.attributes.position;
+ for(let i=0;i<nosePosition.count;i++){
+  const x=nosePosition.getX(i),y=nosePosition.getY(i),z=nosePosition.getZ(i);
+  const tip=Math.exp(-Math.pow((y+.43)/.24,2));
+  const width=.72+.28*Math.exp(-Math.pow((y+.38)/.42,2));
+  nosePosition.setXYZ(i,x*.105*width,y*.29,z*(.065+.025*tip)+.035*tip);
  }
- curve(noseGroup,[[0,.30,.755],[0,.16,.80],[0,.015,.82]],.0035,skinShade);
- curve(noseGroup,[[-.045,-.23,.77],[0,-.245,.78],[.045,-.23,.77]],.004,skinShade);
+ noseGeometry.computeVertexNormals();
+ const noseMesh=new THREE.Mesh(noseGeometry,skin);noseMesh.position.set(0,.02,.72);noseMesh.name="sculpted-nose-bridge-tip";noseGroup.add(noseMesh);
+ for(const side of [-1,1]){
+  ell(noseGroup,skin,[side*.087,-.15,.785],[.048,.036,.043],24);
+  ell(noseGroup,lashMat,[side*.067,-.19,.836],[.018,.008,.006],16);
+ }
+ curve(noseGroup,[[0,.30,.79],[0,.16,.80],[0,.02,.825]],.0035,skinShade);
+ curve(noseGroup,[[-.045,-.225,.79],[0,-.238,.80],[.045,-.225,.79]],.0035,skinShade);
  // lips
  const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
  const lipGeometry=new THREE.SphereGeometry(1,32,20);

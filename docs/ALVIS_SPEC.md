@@ -1,3 +1,7 @@
+## Avatar Studio — continuous sculpted nose
+- Replace separate bridge/tip ellipsoid placeholders with one continuous deformed sphere surface whose width/depth profile transitions from the bridge to the tip; retain independent alar wings and nostril shadows.
+- Visual profile match remains subject to 3D preview review against the approved turnaround sheet.
+
 ## Avatar mode — Avatar Studio launch path
 - The avatar panel provides a separate-tab link to the same-origin local Avatar Studio. After exporting a .vrm, the user returns to ALVIS and selects it through the existing VRM file picker.
 - Opening the Studio does not read or write IndexedDB avatar records. The existing validated import/restore flow remains the only path that persists a newly selected VRM.
