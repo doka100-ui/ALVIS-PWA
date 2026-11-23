@@ -14,6 +14,7 @@ on:
       - "refresh-v304.html"
       - "refresh-v305.html"
       - "refresh-v339.html"
+      - "refresh-v340.html"
       - "startup-check.html"
       - "assets/alvis-dashboard-reference.avif"
       - "tests/alvis-dashboard.test.mjs"
