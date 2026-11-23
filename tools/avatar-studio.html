@@ -298,6 +298,18 @@ function makeFace(){
  }
  // Deep side-part seam and fine tapered strands across the crown and back of the bob.
  taperedCurve(faceGroup,[[-.17,.94,.48],[-.12,1.02,.40],[-.02,1.03,.25],[.12,.97,.10]],.009,hair);
+ // Five fine, swept fringe locks follow the approved side-parted bob silhouette.
+ for(let strand=0;strand<5;strand++){
+  const offset=(strand-2)*.075;
+  const lock=taperedCurve(faceGroup,[
+   [-.49+offset*.35,.79-Math.abs(offset)*.12,.635],
+   [-.34+offset*.45,.91-Math.abs(offset)*.08,.705],
+   [-.10+offset*.55,.88,.755],
+   [.15+offset*.55,.76,.745],
+   [.39+offset*.45,.57+Math.abs(offset)*.10,.665]
+  ],.012,strand%2?hairLight:hair);
+  lock.name="hair-fringe-strand-"+strand;
+ }
  for(let strand=-3;strand<=3;strand++){
   const x=strand*.18;
   taperedCurve(faceGroup,[[x*.15,.80,-.34],[x*.55,.43,-.64],[x,-.10,-.75],[x*.92,-.48,-.61]],.010,strand%2?hairLight:hair);
