@@ -1,3 +1,8 @@
+## Avatar Studio — 口元の基本表情と非表示時の描画停止
+- 口元に happy / sad / angry / surprised の4つの名前付きモーフターゲットを設け、個別スライダーでプレビューする。
+- タブ/ページが非表示になった間はrequestAnimationFrameをキャンセルし、表示復帰時に描画を再開する。非表示時の無駄なフレーム予約を避ける。
+- ソーステストだけでは実際のGLB変形・Safari描画を保証しない。実モデルで別途確認する。
+
 ## Avatar Studio — GLB表情ターゲット名の明示
 - まばたき用の左右まぶたメッシュに `blink`、笑顔用の上唇メッシュに `happy` の morphTargetDictionary を明示する。
 - geometry.userData.targetNames のみへ依存せず、GLTFExporterが参照するMesh側の辞書とindexを一致させる。

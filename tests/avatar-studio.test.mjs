@@ -13,6 +13,9 @@ check("eyelids contain an exported blink morph target", html.includes('lidGeomet
 check("upper lip contains an exported happy morph target", html.includes('lipGeometry.userData.targetNames=["happy"]') && html.includes("lipGeometry.morphAttributes.position=[lipSmile]"));
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));
 check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0}") && html.includes("upperLip.morphTargetDictionary={happy:0}"));
+check("four named mouth expression targets are exported", html.includes('upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3}') && ["happy","sad","angry","surprised"].every(name=>html.includes('id="'+name+'"')));
+check("expression sliders drive independent morph influences", ["values.smile","values.sad","values.angry","values.surprised"].every(value=>html.includes("upperLip.morphTargetInfluences") && html.includes(value)));
+check("render loop fully pauses while the page is hidden", html.includes("cancelAnimationFrame(frameId)") && html.includes("setRenderActive(document.visibilityState===\"visible\")"));
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));

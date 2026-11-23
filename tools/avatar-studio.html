@@ -39,6 +39,9 @@ button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;co
 <div class="control"><label for="mouthSize">唇の幅 <output id="mouthSizeValue">1.00</output></label><input id="mouthSize" type="range" min=".75" max="1.3" step=".01" value="1"></div>
 <div class="control"><label for="blink">まぶたを閉じる <output id="blinkValue">0.00</output></label><input id="blink" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="smile">微笑み <output id="smileValue">0.00</output></label><input id="smile" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="sad">悲しみ <output id="sadValue">0.00</output></label><input id="sad" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="angry">怒り <output id="angryValue">0.00</output></label><input id="angry" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="surprised">驚き <output id="surprisedValue">0.00</output></label><input id="surprised" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">3DモデルをGLB保存</button></div>
 <div class="status" id="status" role="status">準備完了。各スライダーで形状を調整できます。</div>
 <div class="notice">これは顔形状の制作土台です。現段階では18号の完成モデル・VRM・表情リグではありません。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
@@ -105,11 +108,11 @@ function makeFace(){
  const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
  const lipGeometry=new THREE.SphereGeometry(1,32,20);
  const lipBase=lipGeometry.attributes.position.clone();
- const lipSmile=lipGeometry.attributes.position.clone();
- for(let i=0;i<lipSmile.count;i++){const x=lipSmile.getX(i),y=lipSmile.getY(i);lipSmile.setY(i,y+Math.abs(x)*.42);}
- lipGeometry.morphAttributes.position=[lipSmile];
- lipGeometry.userData.targetNames=["happy"];
- const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0};upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
+ const makeLipTarget=(shape)=>{const target=lipBase.clone();for(let i=0;i<target.count;i++){const x=target.getX(i),y=target.getY(i),edge=Math.abs(x);let next=y;if(shape==="happy")next+=edge*.42;else if(shape==="sad")next-=edge*.34;else if(shape==="surprised")next+=(1-edge)*.48;else if(shape==="angry")next+=edge*.20-(1-edge)*.12;target.setY(i,next);}return target;};
+ const lipTargets=["happy","sad","angry","surprised"].map(makeLipTarget);
+ lipGeometry.morphAttributes.position=lipTargets;
+ lipGeometry.userData.targetNames=["happy","sad","angry","surprised"];
+ const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3};upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
  ell(mouthGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
  // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
  const rearBob=ell(faceGroup,hair,[0,-.20,-.34],[.82,.88,.43],48);
@@ -134,8 +137,8 @@ function makeFace(){
  for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,8,24),gold);ring.position.set(side*.95,-.12,.02);ring.rotation.y=Math.PI/2;faceGroup.add(ring);}
 }
 makeFace();
-const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","smile"];
-const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,smile:0};
+const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","smile","sad","angry","surprised"];
+const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,smile:0,sad:0,angry:0,surprised:0};
 function rebuild(){
  const values=Object.fromEntries(sliders.map(id=>[id,Number(document.getElementById(id).value)]));
  root.remove(faceGroup);faceGroup.traverse(o=>{if(o.geometry)o.geometry.dispose()});makeFace();
@@ -146,8 +149,8 @@ function rebuild(){
  ["eyelid-left","eyelid-right"].forEach(name=>{const lid=eyes.getObjectByName(name);if(lid?.morphTargetInfluences)lid.morphTargetInfluences[0]=values.blink;});
  const mouth=faceGroup.getObjectByName("facial-mouth");
  const upperLip=mouth.getObjectByName("upper-lip");
- if(upperLip?.morphTargetInfluences)upperLip.morphTargetInfluences[0]=values.smile;
- mouth.position.y=values.smile*.012;
+ if(upperLip?.morphTargetInfluences){upperLip.morphTargetInfluences[0]=values.smile;upperLip.morphTargetInfluences[1]=values.sad;upperLip.morphTargetInfluences[2]=values.angry;upperLip.morphTargetInfluences[3]=values.surprised;}
+ mouth.position.y=(values.smile-values.sad)*.012;
  sliders.forEach(id=>document.getElementById(id+"Value").value=values[id].toFixed(2));
 }
 sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));
@@ -160,7 +163,10 @@ document.getElementById("export").onclick=async()=>{
 };
 function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
 const ro=new ResizeObserver(resize);ro.observe(host);resize();
-let running=true;document.addEventListener("visibilitychange",()=>{running=document.visibilityState==="visible";});
-function animate(){requestAnimationFrame(animate);if(!running)return;controls.update();renderer.render(scene,camera);}animate();
+let running=false,frameId=0;
+function animate(){if(!running)return;frameId=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+function setRenderActive(active){if(active===running)return;running=active;if(running)animate();else if(frameId){cancelAnimationFrame(frameId);frameId=0;}}
+document.addEventListener("visibilitychange",()=>setRenderActive(document.visibilityState==="visible"));
+setRenderActive(document.visibilityState==="visible");
 </script>
 </body></html>

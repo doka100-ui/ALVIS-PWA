@@ -1,3 +1,9 @@
+## Latest Avatar Studio expression targets and hidden-tab rendering (2026-11-23)
+- Expanded the upper-lip morph target set to named happy, sad, angry, and surprised expressions with independent preview sliders and matching GLB mesh morph dictionaries.
+- Reworked the standalone prototype render loop to cancel requestAnimationFrame while the document is hidden and restart on visibility return, reducing idle GPU/CPU work on mobile Safari.
+- Added source regression checks for all four expression targets and render-loop suspension. This remains isolated from the production ALVIS runtime. Actual exported GLB deformation and iPad Safari visual behavior still require runtime validation.
+- No IndexedDB/user data, memories/history, sync, backups, Qwen/Kokoro caches, or production main changed.
+
 ## Latest Avatar Studio GLB morph naming fix (2026-11-23)
 - Explicitly assign semantic morph target dictionaries to eyelid meshes (blink) and upper-lip mesh (happy), rather than relying only on geometry userData targetNames. This aligns Three.js mesh morph metadata with the names consumed by GLTFExporter.
 - Added regression coverage for explicit names. This is still source/CI verification only; actual GLB export and import in an independent viewer, VRM conversion, and iPad Safari runtime remain unverified.
