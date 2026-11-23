@@ -86,7 +86,9 @@ try {
   assert.ok(vrmExtension, "export must include VRMC_vrm extension");
   assert.equal(vrmExtension.specVersion, "1.0", "export must declare VRM 1.0");
   assert.ok(gltf.extensionsRequired?.includes("VRMC_vrm"), "VRMC_vrm must be required");
-  assert.equal(vrmExtension.lookAt?.type, "expression", "VRM lookAt must use expression mode");\n  for (const key of ["rangeMapHorizontalInner","rangeMapHorizontalOuter","rangeMapVerticalDown","rangeMapVerticalUp"]) assert.equal(vrmExtension.lookAt[key]?.outputScale, 1, "lookAt range map must use normalized expression weights: "+key);\n  const humanBones = vrmExtension.humanoid?.humanBones || {};
+  assert.equal(vrmExtension.lookAt?.type, "expression", "VRM lookAt must use expression mode");
+  for (const key of ["rangeMapHorizontalInner","rangeMapHorizontalOuter","rangeMapVerticalDown","rangeMapVerticalUp"]) assert.equal(vrmExtension.lookAt[key]?.outputScale, 1, "lookAt range map must use normalized expression weights: "+key);
+  const humanBones = vrmExtension.humanoid?.humanBones || {};
   for (const bone of ["hips","spine","head","leftUpperLeg","leftLowerLeg","leftFoot","rightUpperLeg","rightLowerLeg","rightFoot","leftUpperArm","leftLowerArm","leftHand","rightUpperArm","rightLowerArm","rightHand"]) {
     assert.ok(Number.isInteger(humanBones[bone]?.node), "VRM required humanoid bone must map to a node: "+bone);
     assert.ok(gltf.nodes[humanBones[bone].node], "VRM bone node must exist: "+bone);
