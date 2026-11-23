@@ -182,3 +182,39 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 - Neither candidate resolves the current end-to-end requirements of free, privacy-clear multi-view photorealistic likeness generation plus facial expressions and a VRM pipeline usable on the user's iPad/iPhone.
 - No 18号 reference images were uploaded, no external account was created, and no app/runtime or user data was changed.
 - Sources: https://3dai.dev/en ; https://github.com/ekza-space/ekza-studio
+
+
+## 2026-11-23 追加候補の検証: MetaPerson / ImageTo3D / Grab3D / three.ws
+
+### MetaPerson Creator (Avatar SDK)
+- 公式ページは、写真1枚から全身の写実系アバターを作成し、初回は無料でGLB/glTF/FBXを書き出せると案内。ブラウザ/モバイル対応も表示。
+- ただし出力はGLB等で、ALVISが必要とするVRM表情・母音ブレンドシェイプは保証されない。初回無料はLOD1/JPG/1Kの標準設定に限定。
+- 重要: 公式EULAは個人名義アカウントを提供せず、法人/事業体名義のアカウントのみと明記。個人利用のALVIS制作経路として採用しない。
+- Privacy Policyは画像データを製品改善・コンピュータビジョンアルゴリズムの学習等に使う可能性を記載。サイトのMetaPerson Creator画像について、Mobile Apps向けの限定例外がそのまま適用されるとは確認できない。18号資料はアップロードしない。
+- 判定: 技術面は候補だが、利用資格・画像利用条件・顔表情リグの不一致により不採用。
+- Sources: https://avatarsdk.com/avatar-creator/ ; https://avatarsdk.com/eula/ ; https://avatarsdk.com/privacy-policy/
+
+### ImageTo3D (image-to-3d.app)
+- 公式ページは登録不要の無料日次レンダー、複数画像入力、GLB出力を案内。
+- Privacy Policy (2026-11-02) は、画像を選択したAI推論プロバイダー（例: Replicate / Google / fal.ai / Kie.ai）へ送信し、各社の保持・ログ条件が適用されると説明。アップロードと生成物はアカウントが有効な間保存され、ユーザー削除が必要。
+- 自社モデルの学習には使わないと記載されるが、第三者処理と第三者側の保持条件が残る。生成結果もGLBメッシュ中心で、顔の表情リグ/VRMは保証されない。
+- 判定: 無料試行は可能でも、18号画像の外部送信・長期保存を避けたい条件に合わない。アップロードしない。
+- Sources: https://image-to-3d.app/about ; https://image-to-3d.app/privacy-policy
+
+### Grab3D Auto-Rig Studio / Character Mixer
+- Auto-Rig Studioはブラウザ内でGLB等を処理し、ファイルをサーバーへ送信しないと明記。無料・アカウント不要。19本骨格、スキンウェイト、GLB/FBX出力に対応。
+- ただし公式の現行制限に「顔リグなし」とあり、表情/まばたき/母音口形状は作れない。VRM出力もAuto-Rig Studioの出力形式にはない。タッチ操作とiPad Safariは公式に保証されていない。
+- Character MixerはVRM出力を案内するが、198部品を組み合わせるスタイライズ/ローポリ系で、写真から18号の写実的な顔を再構成する機能ではない。
+- 判定: プライバシー保護されたGLBの身体リグ補助候補に留まる。顔リグの代替にはならず、iPad Safariでの操作確認前に本番工程へ採用しない。
+- Sources: https://grab3d.com/tools/ ; https://grab3d.com/tools/auto-rig/
+
+### three.ws Forge
+- 1〜6視点の写真入力と無料GLB生成を表示する一方、確認時の公開ページは「Generator not configured / no 3D engine is reachable」と表示。無料GPUエンジンが利用できる状態を確認できない。
+- APIキー利用の有料エンジンも併記されるため、無料条件を満たす保証なし。写真の取扱い・第三者処理条件も今回の確認では十分に確定できない。
+- 判定: 現状は利用不可候補。18号資料をアップロードせず、APIキーや支払いを設定しない。
+- Source: https://three.ws/forge?lang=en
+
+### 総合判断
+- 新たに見つかった候補も、現時点で「個人利用・無料・写真の扱いが明確・iPad Safari対応・18号の顔を保った写実的モデル・表情付きVRM」を同時に満たさない。
+- 18号画像のアップロード、外部アカウント作成、課金、ALVISアプリ本体変更は行っていない。
+- 次の調査は、ユーザー端末でのタッチ操作を前提に、オフライン/ローカルで実行可能な顔メッシュ作成と、VRM 1.0の顔表情リグ工程を分離して検証する。条件に合う経路がなければ、できないことを明示し、GLBだけを完成扱いにしない。
