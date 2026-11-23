@@ -68,6 +68,13 @@ try {
     await page.locator("#"+id).click();
     assert.ok(await page.locator("#stage canvas").count()===1, "Avatar Studio view preset must keep the live 3D canvas: "+id);
   }
+  await page.locator("#front").click();
+  await page.waitForTimeout(180);
+  const frontViewPixels=await page.locator("#stage canvas").screenshot();
+  await page.locator("#rightProfile").click();
+  await page.waitForTimeout(180);
+  const profileViewPixels=await page.locator("#stage canvas").screenshot();
+  assert.ok(!frontViewPixels.equals(profileViewPixels), "front and profile camera presets must produce different 3D views");
   const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
   await page.locator("#export").click();
   const download = await downloadPromise;
