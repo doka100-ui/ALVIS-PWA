@@ -1,3 +1,9 @@
+## 2026-11-23 — Avatar機能の実装状態を明確化・プレビュー検証の版ずれ修正（development）
+- 既存実装を確認し、VRM runtimeにはhappy/angry/sad/relaxed/surprisedの表情ブレンド、自動視線、まばたき、呼吸/頭部アイドル動作、返答時のうなずき、日本語5母音口パクがあり、会話応答からAvatarモード限定で表情制御へ接続されていることを回帰テストで確認するよう追加。
+- 実際の3D表示にはユーザーが対応VRMファイルを読み込む必要がある。現在の18号画像はVRM未導入時の参照画像であり、GLBは表示専用。リポジトリに専用18号VRMモデルは含まれない。
+- v338プレビューSmoke testが古いrefresh-v331.html / cache-v331を参照していたため、refresh-v338.html / cache-v338へ更新。前回ブラウザSmokeの失敗原因はアプリ画面ではなく、古いURLへの遷移待ちタイムアウト。
+- VRM本体、暗号化データ、記憶/履歴、Qwen/Kokoroキャッシュ、同期/バックアップ、本番mainは変更なし。CI再実行待ち。実機iPad Safariの表情/描画確認は未実施。
+
 ## 2026-11-23 — Avatar停止直後の描画フレーム競合を防止（development / v338）
 - VRM runtimeのanimate callback先頭でもactiveEnabledを確認し、Avatarモード停止後にすでにキュー済み/実行中だったフレームが次のrequestAnimationFrameを予約しないようにした。
 - setActive(false)による停止要求と、描画コールバック自身の継続条件を二重化。Avatarへ戻すと既存インスタンスの描画を再開。
