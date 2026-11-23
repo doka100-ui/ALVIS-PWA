@@ -1,3 +1,8 @@
+## Avatar Studio — Three.jsローカル同梱とオフライン再読込
+- Three.js r180本体・OrbitControls・GLTFExporterを `tools/vendor/` に同梱し、MITライセンスを保存する。Avatar Studioは同一オリジンから読み込み、CDN依存を持たない。
+- 既存Service Workerの同一オリジン資産オンデマンドキャッシュを利用し、オンラインで一度開いた後にオフライン再読込できるかChromiumで検証する。新たなモデルキャッシュ領域や保存形式は作らない。
+- iPad Safari実機でのオフライン再読込は引き続き未検証。
+
 ## Avatar Studio — 実ブラウザGLB受け入れテスト
 - Cloudflare Pages preview上でChromium/SwiftShaderのWebGL描画を確認し、表情・母音・まばたきスライダーを操作する。
 - GLBを実際にダウンロードし、GLB v2ヘッダー、JSONチャンク、blink/happy/sad/angry/surprised/aa/ih/ou/ee/ohのtargetNamesを検査する。

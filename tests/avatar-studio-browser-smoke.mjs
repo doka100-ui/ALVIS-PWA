@@ -19,11 +19,23 @@ const context = await browser.newContext({ acceptDownloads: true, viewport: { wi
 const page = await context.newPage();
 page.setDefaultTimeout(30000);
 const pageErrors = [];
-const failedRequests = [];
+const externalRequests = [];
+let trackExternalRequests = false;
 page.on("pageerror", error => pageErrors.push(error.message));
-page.on("requestfailed", request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText || "" }));
+page.on("request", request => {
+  if (!trackExternalRequests) return;
+  const requestUrl = new URL(request.url());
+  if (requestUrl.origin !== new URL(avatarUrl).origin) externalRequests.push(request.url());
+});
 
 try {
+  // Register/activate the existing ALVIS worker from the app shell first.
+  const shellResponse = await page.goto(previewUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
+  assert.ok(shellResponse?.ok(), "ALVIS app shell must return HTTP 200 before offline avatar checks");
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 120000 });
+  await page.waitForFunction(() => !!navigator.serviceWorker?.controller, null, { timeout: 30000 });
+  trackExternalRequests = true;
   const response = await page.goto(avatarUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
   assert.ok(response?.ok(), "Avatar Studio must return HTTP 200: " + avatarUrl);
   await page.waitForSelector("#stage canvas", { timeout: 60000 });
@@ -71,7 +83,21 @@ try {
     assert.ok(targetNames.includes(name), "GLB must retain named morph target: "+name+"; found "+targetNames.join(", "));
   }
   assert.deepEqual(pageErrors, [], "Avatar Studio must not throw browser runtime errors");
+  assert.deepEqual(externalRequests, [], "Avatar Studio must load Three.js and all modules from the same origin only");
+  assert.ok(await page.evaluate(() => !!navigator.serviceWorker?.controller), "Avatar Studio must be controlled by the ALVIS service worker");
+  await context.setOffline(true);
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });
+  await page.waitForSelector("#stage canvas", { timeout: 60000 });
+  await page.waitForFunction(() => {
+    const canvas = document.querySelector("#stage canvas");
+    if (!canvas) return false;
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    return !!gl && canvas.width > 0 && canvas.height > 0;
+  }, null, { timeout: 30000 });
+  assert.deepEqual(pageErrors, [], "Avatar Studio must reopen from the ALVIS cache without browser runtime errors");
   console.log("PASS Avatar Studio HTTP response");
+  console.log("PASS no external CDN requests from Avatar Studio");
+  console.log("PASS offline reload through the ALVIS service worker cache");
   console.log("PASS real WebGL renderer: "+JSON.stringify(renderInfo));
   console.log("PASS expression and five Japanese vowel viseme controls");
   console.log("PASS GLB binary download: "+fileInfo.size+" bytes");

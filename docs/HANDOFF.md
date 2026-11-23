@@ -1,3 +1,9 @@
+## Latest local Three.js dependency vendoring and offline browser verification (2026-11-23)
+- Replaced the Avatar Studio's jsDelivr import map with same-origin vendored Three.js r180 modules: core, module entry, OrbitControls, and GLTFExporter, plus the upstream MIT license. This removes the prototype's third-party CDN dependency.
+- The Avatar Studio browser smoke now first activates the existing ALVIS Service Worker, opens the standalone page, verifies WebGL and GLB morph names, then switches the browser offline and reloads the page from the Service Worker cache. It also asserts no external-origin requests occur while the Avatar Studio loads.
+- The ALVIS Service Worker already caches same-origin GET assets on demand, so after one successful online visit to the tool and its local modules they can be served from the existing app cache. The app shell install behavior and existing model caches are unchanged.
+- Chromium/SwiftShader plus Service Worker offline reload is CI coverage, not proof of iPad Safari behavior. No production user data or model caches were changed.
+
 ## Latest Avatar Studio real-browser and GLB export smoke test (2026-11-23)
 - Added a Chromium/SwiftShader preview smoke test that opens the deployed standalone Avatar Studio, verifies a live WebGL context, drives expression/viseme/blink sliders, downloads the GLB, parses its binary header and JSON chunk, and checks exported morph target names.
 - The dashboard preview workflow now runs this check for commits touching Avatar Studio. This validates the actual browser/export path in CI but does not replace iPad Safari GPU testing or an independent VRM import test.

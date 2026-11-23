@@ -27,6 +27,7 @@ on:
       - "tests/alvis-dashboard.test.mjs"
       - "tests/dashboard-preview-smoke.mjs"
       - "tools/avatar-studio.html"
+      - "tools/vendor/**"
       - "tests/avatar-studio.test.mjs"
       - "tests/avatar-studio-browser-smoke.mjs"
       - "docs/HANDOFF.md"

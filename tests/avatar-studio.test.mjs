@@ -25,6 +25,10 @@ check("expression sliders drive independent morph influences", ["values.smile","
 check("render loop fully pauses while the page is hidden", html.includes("cancelAnimationFrame(frameId)") && html.includes("setRenderActive(document.visibilityState===\"visible\")"));
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
+const vendorPaths = ["../tools/vendor/three.core.js","../tools/vendor/three.module.js","../tools/vendor/controls/OrbitControls.js","../tools/vendor/exporters/GLTFExporter.js","../tools/vendor/THREE-LICENSE.txt"];
+const vendorContents = await Promise.all(vendorPaths.map(path => readFile(new URL(path, import.meta.url), "utf8")));
+check("Three.js modules are vendored locally with license", vendorContents.slice(0,4).every(content => content.length > 10000) && vendorContents[4].includes("MIT License"));
+check("Avatar Studio import map has no external CDN dependency", html.includes('"three":"./vendor/three.module.js"') && html.includes('"three/addons/":"./vendor/"') && !html.includes("cdn.jsdelivr.net"));
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));
 const faceBuilder = html.slice(html.indexOf("function makeFace()"), html.indexOf("makeFace();"));
 check("shared eye and brow materials are declared", html.includes("eyeGlint=mat(0xffffff,.2)") && html.includes("browMat=mat(0x493a36,.8)"));
