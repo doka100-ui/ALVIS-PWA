@@ -111,13 +111,21 @@ function makeFace(){
  lipGeometry.userData.targetNames=["happy"];
  const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
  ell(mouthGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
- // hair cap, swept side fringe and bob side locks
+ // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
+ const rearBob=ell(faceGroup,hair,[0,-.20,-.34],[.82,.88,.43],48);
+ rearBob.name="hair-rear-bob";
  const cap=new THREE.Mesh(new THREE.SphereGeometry(1,48,32,0,Math.PI*2,0,Math.PI*.57),hair);
- cap.scale.set(.94,1.28,.78);cap.position.set(0,.25,-.015);faceGroup.add(cap);
- const fringe=ell(faceGroup,hairLight,[-.18,.72,.49],[.57,.20,.28]);fringe.rotation.z=-.24;fringe.rotation.y=-.15;
+ cap.scale.set(.94,1.28,.78);cap.position.set(0,.25,-.015);cap.name="hair-crown";faceGroup.add(cap);
+ const fringe=ell(faceGroup,hairLight,[-.18,.72,.49],[.57,.20,.28]);fringe.rotation.z=-.24;fringe.rotation.y=-.15;fringe.name="hair-swept-fringe";
+ // Fine curved ribbons create a visible side part and layered front strands without a solid helmet look.
+ curve(faceGroup,[[-.58,.79,.55],[-.36,.91,.61],[-.10,.91,.61],[.18,.83,.57],[.39,.69,.49]],.035,hair);
+ curve(faceGroup,[[-.42,.82,.58],[-.22,.88,.63],[.04,.83,.62],[.28,.70,.54],[.48,.52,.43]],.024,hairLight);
+ curve(faceGroup,[[-.24,.88,.60],[-.02,.84,.64],[.20,.73,.59],[.39,.55,.49],[.52,.34,.39]],.022,hair);
  for(const side of [-1,1]){
-  const lock=ell(faceGroup,hair,[side*.77,-.03,.05],[.22,.82,.34]);lock.rotation.z=side*-.08;
+  const lock=ell(faceGroup,hair,[side*.77,-.03,.05],[.22,.82,.34]);lock.rotation.z=side*-.08;lock.name=side<0?"hair-side-left":"hair-side-right";
   ell(faceGroup,hairLight,[side*.77,-.48,.10],[.20,.22,.30]);
+  curve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
+  curve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
  }
  // neck and simple upper shoulder bust
  ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);

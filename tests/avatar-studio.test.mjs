@@ -19,6 +19,9 @@ const faceBuilder = html.slice(html.indexOf("function makeFace()"), html.indexOf
 check("shared eye and brow materials are declared", html.includes("eyeGlint=mat(0xffffff,.2)") && html.includes("browMat=mat(0x493a36,.8)"));
 check("facial features use independent transform groups", ["facial-eyes","facial-nose","facial-mouth"].every(name => html.includes('name="'+name+'"')));
 check("face controls modify only their intended feature groups", html.includes('getObjectByName("facial-eyes")') && html.includes('getObjectByName("facial-nose")') && html.includes('getObjectByName("facial-mouth")'));
+check("bob hairstyle has a distinct rear volume and crown", html.includes('name="hair-rear-bob"') && html.includes('name="hair-crown"'));
+check("swept fringe includes separate curved strand geometry", (html.match(/curve\(faceGroup,/g)||[]).length >= 7 && html.includes('name="hair-swept-fringe"'));
+check("side hair has independent left/right locks", html.includes('name=side<0?"hair-side-left":"hair-side-right"'));
 check("jaw and cheek profile receives vertex sculpting", html.includes("const cheek=1+.055") && html.includes("const taper=.78+.22"));
 const moduleScript = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)].at(-1)?.[1];
 assert.ok(moduleScript, "module script exists");
