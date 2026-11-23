@@ -1,7 +1,12 @@
+## Latest v340 VRM GPUリソース解放（2026-11-23）
+- VRM runtimeのdispose()で、アニメーション停止・イベント解除後にthree-vrm 3.5.5の `VRMUtils.deepDispose(vrm.scene)` を呼び、モデル配下のgeometry/material/textureをrenderer破棄前に解放するようにした。
+- VRM差し替えや表示終了を繰り返した際のGPUリソース残留リスクを減らす変更。保存済みBlob/IndexedDBやモデルファイル自体は削除しない。
+- v340へ更新。Service Worker cache `alvis-cache-v340-integrated`、更新ページ `refresh-v340.html`。回帰テストに解放順序の確認を追加。
+- GitHub Actionsのv340 preview browser smokeは実行結果確認待ち。実機iPad SafariでのGPUメモリ回収量は未測定。
+
 ## Preview smoke test version alignment — 2026-11-23
-- The v339 browser smoke test checks `refresh-v339.html`, `alvis-cache-v339-integrated`, and `?refresh=339` consistently; the workflow also watches `refresh-v339.html` so future changes trigger the browser check. A second stale `waitForURL` assertion (`refresh=331`) was found and corrected to `refresh=339`.
-- The preceding v339 preview run failed because the smoke test still waited for v338/331 refresh markers, not because the dashboard itself had failed. A run for the fully corrected test is in progress.
-- Test/workflow only. No app runtime, user data, model cache, or production `main` changes.
+- v339ブラウザ検証の古いv338/331期待値をv339へ修正し、最新の検証run `45116854319` はChromium/WebKitとも成功。旧runの失敗はテストの古い遷移条件によるもので、アプリ本体の失敗ではなかった。
+- v340ではrefreshページ・Worker cache・Playwright遷移条件・workflow監視対象をすべてv340へ同期。
 
 ## Avatar upload status accuracy fix — 2026-11-23 (v339)
 - Fixed a misleading status: after VRM/GLB bytes were saved, an asynchronous display failure was previously overwritten by a 'saved' success message. showVrm/showModel now return explicit display outcomes, and upload status distinguishes saved-and-displayed from saved-but-display-failed.
