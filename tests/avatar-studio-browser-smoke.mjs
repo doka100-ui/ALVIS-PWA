@@ -107,6 +107,10 @@ try {
   assert.equal(vrmExtension.meta?.avatarPermission,"onlyAuthor","personal ALVIS avatar must be marked for author-only use");
   assert.equal(vrmExtension.meta?.allowRedistribution,false,"personal ALVIS avatar must not permit redistribution");
   for (const nodeName of ["shoulder-left","shoulder-right","upper-arm-left","upper-arm-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must include chest-attached upper-body geometry: "+nodeName);
+  for (const [meshName,boneName] of [["upper-arm-left","leftUpperArm"],["upper-arm-right","rightUpperArm"]]) {
+    const meshIndex=gltf.nodes.findIndex(node=>node.name===meshName),boneIndex=gltf.nodes.findIndex(node=>node.name===boneName);
+    assert.ok(meshIndex>=0&&boneIndex>=0&&gltf.nodes[boneIndex].children?.includes(meshIndex),"upper-arm mesh must be parented to its matching humanoid bone: "+meshName);
+  }
   assert.equal(vrmExtension.specVersion, "1.0", "export must declare VRM 1.0");
   assert.ok(gltf.extensionsRequired?.includes("VRMC_vrm"), "VRMC_vrm must be required");
   assert.equal(vrmExtension.lookAt?.type, "expression", "VRM lookAt must use expression mode");

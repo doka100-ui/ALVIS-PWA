@@ -350,9 +350,11 @@ function makeFace(){
  }
  // Reparent visible parts while preserving their world transforms.
  faceGroup.updateMatrixWorld(true);rigRoot.updateMatrixWorld(true);
- const torsoNames=new Set(["neck","upper-body","shoulder-left","shoulder-right","upper-arm-left","upper-arm-right","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
+ const torsoNames=new Set(["neck","upper-body","shoulder-left","shoulder-right","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
  for(const part of [...faceGroup.children]){
   if(part===rigRoot)continue;
+  const armBoneName=part.name==="upper-arm-left"?"leftUpperArm":part.name==="upper-arm-right"?"rightUpperArm":null;
+  if(armBoneName){bones[armBoneName].attach(part);continue;}
   (torsoNames.has(part.name)?chest:headBone).attach(part);
  }
 }
