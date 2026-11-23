@@ -1,3 +1,8 @@
+## v339 — Avatarモデル読込状態の誤表示を修正
+- VRM/GLBファイル保存後、描画処理の失敗を「保存成功」だけの表示で上書きしていた問題を修正。
+- showVrm/showModelは描画成功/失敗を返し、保存成功かつ表示失敗の場合は別の状態メッセージを表示する。非Avatarモード中に保存した場合は、次回表示時に読み込むため保存済みとして扱う。
+- IndexedDBの既存キー/形式、既存モデル、Qwen/Kokoroキャッシュ、記憶/履歴/暗号化/同期/バックアップは変更しない。Service Worker cache v339。
+
 ## v338 — VRM描画停止時のフレーム競合ガード
 - animate callbackの先頭でdisposed、activeEnabled、document.visibilityStateを確認。Avatarモード無効化後にコールバックが実行されても、次のrequestAnimationFrameを予約せず終了する。
 - startRenderLoop側のactiveEnabled確認と合わせて二重に停止条件を保証し、setActive(true)で既存モデルの描画を再開する。
