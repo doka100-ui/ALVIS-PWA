@@ -8,7 +8,7 @@ check("Three.js is used for a real WebGL scene", html.includes("new THREE.WebGLR
 check("touch orbit controls are enabled", html.includes("OrbitControls") && html.includes("controls.enableDamping=true"));
 check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize"].every(id => html.includes('id="'+id+'"')));
 check("blink and smile preview controls are present", ["blink","smile"].every(id => html.includes('id="'+id+'"')));
-check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("lid.morphTargetInfluences[0]=values.blink"));
+check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("leftLid.morphTargetInfluences[0]=values.blink") && html.includes("rightLid.morphTargetInfluences[0]=values.blink"));
 check("eyelids contain exported blink and side-specific morph targets", html.includes('lidGeometry.userData.targetNames=["blink",sideBlink]') && html.includes("lidGeometry.morphAttributes.position=[lidClosed,lidClosed.clone()]"));
 check("upper lip contains five named expression morph targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised","relaxed"]') && html.includes("lipGeometry.morphAttributes.position=lipTargets"));
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));

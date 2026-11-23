@@ -57,7 +57,7 @@ try {
   assert.ok(renderInfo.width > 0 && renderInfo.height > 0, "WebGL canvas must have a real drawing buffer");
   assert.ok(renderInfo.version.includes("WebGL"), "WebGL context must be active");
   assert.equal(await page.locator("#smile").count(), 1, "happy expression slider must exist");
-  for (const [id, value] of [["smile","0.65"],["sad","0.2"],["angry","0.15"],["surprised","0.1"],["relaxed","0.25"],["aa","0.7"],["ih","0.2"],["ou","0.3"],["ee","0.4"],["oh","0.5"],["blink","0.35"]]) {
+  for (const [id, value] of [["smile","0.65"],["sad","0.2"],["angry","0.15"],["surprised","0.1"],["relaxed","0.25"],["aa","0.7"],["ih","0.2"],["ou","0.3"],["ee","0.4"],["oh","0.5"],["blink","0.35"],["blinkLeft","0.8"],["blinkRight","0.6"]]) {
     await page.locator("#"+id).evaluate((element, next) => {
       element.value = next;
       element.dispatchEvent(new Event("input", { bubbles: true }));
