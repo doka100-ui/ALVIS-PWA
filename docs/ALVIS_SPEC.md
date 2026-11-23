@@ -1,3 +1,7 @@
+## Avatar診断表示の改行修正（v341）
+- VRMモデル診断パネルの項目を実際の改行で表示し、文字列 `\\n` が画面に露出しないようにする。
+- 診断内容・VRM解析・モデル保存形式には変更なし。
+
 ## v340 — VRMモデル破棄時のGPUリソース解放
 - アバターの差し替え/終了時にVRMUtils.deepDispose(vrm.scene)を呼び、モデルのgeometry・material・textureを解放してからrendererを破棄する。
 - three-vrm 3.5.5の公式APIに基づく。モデルBlobやIndexedDB保存形式、アップロード済みモデル、表情/視線/口パク制御、Qwen/Kokoroキャッシュ、暗号化記憶/履歴/同期/バックアップは変更しない。
