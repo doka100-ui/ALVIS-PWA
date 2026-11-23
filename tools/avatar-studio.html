@@ -178,6 +178,10 @@ function makeFace(){
  ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);
  const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;
  curve(faceGroup,[[-.22,-1.25,.23],[0,-1.32,.29],[.22,-1.25,.23]],.018,gold);
+ // Small pendant and the subtle barcode-like neck mark from the approved appearance brief.
+ curve(faceGroup,[[-.22,-1.25,.23],[-.15,-1.34,.27],[0,-1.39,.29],[.15,-1.34,.27],[.22,-1.25,.23]],.009,gold);
+ const pendant=new THREE.Mesh(new THREE.SphereGeometry(.035,20,16),gold);pendant.position.set(0,-1.405,.30);pendant.scale.set(.72,1.25,.35);pendant.name="necklace-pendant";faceGroup.add(pendant);
+ [0,.009,.021,.034,.049].forEach((offset,index)=>{const width=[.006,.003,.008,.004,.006][index];const bar=new THREE.Mesh(new THREE.BoxGeometry(width,.043,.006),dark);bar.position.set(.19+offset,-1.12,.247);bar.name="neck-mark-"+index;faceGroup.add(bar);});
  for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,8,24),gold);ring.position.set(side*.95,-.12,.02);ring.rotation.y=Math.PI/2;faceGroup.add(ring);}
 }
 makeFace();

@@ -1,3 +1,7 @@
+## Latest Avatar Studio reference accessory details (2026-11-23)
+- Added a small gold necklace pendant and subtle five-bar neck marking to reflect the visual details recorded in the approved 18号 model brief. Existing gold hoop earrings and white upper-body bust remain.
+- These are procedural placeholder meshes, not texture-baked details or a final likeness match.
+
 ## Latest Avatar Studio lower-lip viseme articulation (2026-11-23)
 - Added a separate lower-lip mesh with the same five vowel morph target names as the mouth interior. The five vowel preview sliders now deform both the mouth opening and lower lip.
 - This improves the shape basis for lip-sync but does not yet prove realistic speech articulation or audio timing. Real exported GLB/VRM runtime validation remains outstanding.
