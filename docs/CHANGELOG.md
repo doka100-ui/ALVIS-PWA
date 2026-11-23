@@ -1,3 +1,8 @@
+## 2026-11-23 — v341 VRM診断パネルの改行表示を修正（development）
+- `index-integrated.html` のVRM診断パネルで、複数行テキストが `\\n` の文字列として表示される問題を修正し、実際の改行で表示する。
+- 回帰テストを追加。診断ロジック、VRM/GLBモデル、IndexedDB、Qwen/Kokoroキャッシュ、記憶/履歴/暗号化/同期/バックアップは変更なし。本番mainは変更しない。
+- v341 build/cache/refreshページへ更新。自動テスト・プレビュー検証は実行後に記録する。
+
 ## 2026-11-23 — v340 VRMモデル破棄時のGPUリソース解放（development）
 - `assets/alvis-vrm-runtime.js` のdispose()に `VRMUtils.deepDispose(vrm.scene)` を追加。geometry/material/textureをrenderer.dispose()より前に解放し、モデル差し替え・終了時のGPUリソース残留リスクを軽減。
 - three-vrm 3.5.5公式APIを確認。IndexedDB内のVRM/GLB、モデルBlob、Qwen/Kokoroキャッシュ、記憶/履歴/AES-GCM/同期/バックアップは変更・削除なし。
