@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [app, appCss, sw, image, startupCheck] = await Promise.all([
+const [app, appCss, sw, image, startupCheck, avatarRuntime] = await Promise.all([
   readFile(new URL("../index-integrated.html", import.meta.url), "utf8"),
   readFile(new URL("../assets/alvis-app.css", import.meta.url), "utf8"),
   readFile(new URL("../service-worker.js", import.meta.url), "utf8"),
   readFile(new URL("../assets/alvis-dashboard-reference.avif", import.meta.url)),
-  readFile(new URL("../startup-check.html", import.meta.url), "utf8")
+  readFile(new URL("../startup-check.html", import.meta.url), "utf8"),
+  readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8")
 ]);
 const appStyles = app + appCss;
 const checks = [];
@@ -31,9 +32,13 @@ check("the outer ALVIS gear aligns to the globe core's exact 50%/42% anchor and 
 check("the ALVIS outer ring uses a smooth precision rim with 48 subtle index marks and retains its fine inner ring detailing", (app.match(/class="gear-tick/g)||[]).length===48 && !app.includes('class="gear-tooth"') && app.includes('r="168.5"') && app.includes('r="155"') && app.includes('r="145"') && app.includes('r="139"') && appCss.includes(".gear-tick-major"));
 check("the actual chat composer remains outside the static artwork", app.includes('id="chatInput"') && app.includes('id="sendChat"'));
 check("ALVIS and Avatar display modes remain separate", app.includes('id="jarvisModeButton"') && app.includes('id="avatarModeButton"') && app.includes('id="alvisAvatarCanvas"'));
+check("VRM rendering can be paused and resumed without disposing the loaded avatar", avatarRuntime.includes("activeEnabled = true") && avatarRuntime.includes("setActive(value)") && avatarRuntime.includes("if (activeEnabled) startRenderLoop();") && avatarRuntime.includes("else stopRenderLoop();"));
+check("switching away from Avatar mode suspends the VRM render loop and returning resumes it", app.includes('window.ALVISAvatarSetActive?.(safeMode==="avatar")') && app.includes('mounted.setActive?.(document.getElementById("chatPage")?.dataset.displayMode==="avatar")') && app.includes("window.ALVISAvatarSetActive=mounted.setActive"));
+check("the VRM render loop does not restart while Avatar mode is inactive", avatarRuntime.includes('if (disposed || !activeEnabled || frameRunning || document.visibilityState !== "visible") return;'));
+
 check("encrypted memory, history, synchronization, backup and Kokoro code remain", app.includes("encryptData") && app.includes("data.history") && app.includes("saveCloudCore") && app.toLowerCase().includes("backup") && app.includes("Kokoro"));
-check("the v331 app shell activates with only login-critical assets and caches app assets on demand", sw.includes('alvis-cache-v331-integrated') && sw.includes("REQUIRED_FILES_TO_CACHE") && sw.includes("url.origin === self.location.origin") && sw.includes("cache.put(cacheRequest, response.clone())"));
-check("the diagnostic distinguishes the page build, controlling Worker, and registered active Worker", app.includes('const ALVIS_APP_BUILD_ID="v331"') && app.includes("ALVIS_GET_BUILD_INFO") && sw.includes("ALVIS_GET_BUILD_INFO") && app.includes("現在この画面を制御するWorker版") && app.includes("登録済みactive Worker版"));
+check("the v331 app shell activates with only login-critical assets and caches app assets on demand", sw.includes('alvis-cache-v337-integrated') && sw.includes("REQUIRED_FILES_TO_CACHE") && sw.includes("url.origin === self.location.origin") && sw.includes("cache.put(cacheRequest, response.clone())"));
+check("the diagnostic distinguishes the page build, controlling Worker, and registered active Worker", app.includes('const ALVIS_APP_BUILD_ID="v337"') && app.includes("ALVIS_GET_BUILD_INFO") && sw.includes("ALVIS_GET_BUILD_INFO") && app.includes("現在この画面を制御するWorker版") && app.includes("登録済みactive Worker版"));
 check("self-directed goal proposals reject exact repeats before filling the editable task draft", app.includes("findDuplicateAutonomyTask(data.autonomyTasks,proposal.goal,proposal.firstAction)") && app.includes("buildAutonomyDuplicateRetryPrompt(promptText,repeatedTask)") && app.includes("別案を1回再提案しましたが") && app.includes('id="autonomyCycleButton"'));
 check("autonomy issue scans deduplicate the same normalized title and next action while allowing a different experiment", app.includes("function findDuplicateAutonomyIssue(issues,candidate)") && app.includes("findDuplicateAutonomyIssue(data.autonomyIssues,item)") && app.includes("findDuplicateAutonomyIssue(unique,item)") && app.includes("normalizeAutonomyTaskText(issue?.nextAction)"));
 check("autonomy retrospectives do not add duplicate learning text and next experiments or change existing approval", app.includes("function findDuplicateAutonomyLearning(learnings,candidate)") && app.includes("findDuplicateAutonomyLearning(data.learnings,learningCandidate)") && app.includes("if(duplicateLearningIndex===-1)data.learnings.push(learningCandidate)") && app.includes("既存メモの承認状態は変更していません"));
