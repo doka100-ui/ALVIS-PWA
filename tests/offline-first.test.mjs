@@ -95,7 +95,7 @@ assert.match(refresh,/timeout=30000/,"worker activation must have a timeout");
 assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
 assert.match(refresh,/location\.replace\(target\)/);
 assert.match(refresh,/ALVIS_GET_BUILD_INFO/);
-assert.ok(refresh.includes("alvis-cache-v\\\\d+-integrated"),"the shared refresh page must validate a version pattern without pinning one build");
+assert.ok(refresh.includes("alvis-cache-v\\d+-integrated"),"the shared refresh page must validate a version pattern without pinning one build");
 assert.ok(refresh.includes('const target="./index-integrated.html"'),"the shared refresh page must always return to the integrated app");
 assert.ok(refresh.includes('retry.addEventListener("click",update)'),"the refresh page must offer a retry after an update error");
 assert.ok(refresh.includes("open.hidden=false"),"the refresh page must offer a direct app link if updating fails");
