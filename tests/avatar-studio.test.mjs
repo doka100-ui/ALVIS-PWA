@@ -101,4 +101,4 @@ check("browser smoke verifies the Avatar Studio entry from both Chromium and Web
 
 check("Avatar Studio uses mobile-optimized sphere and tube segment counts", html.includes("seg=24") && html.includes("new THREE.SphereGeometry(1,48,36)") && html.includes("new THREE.TubeGeometry(path,24,r,6,false)") && html.includes("tubularSegments=24,radialSegments=5"));
 
-check("upper-body silhouette includes chest-attached shoulders and upper arms", ['shoulder-left','shoulder-right','upper-arm-left','upper-arm-right'].every(name=>html.includes('name='+(name.endsWith("left")?'side<0?"shoulder-left":"shoulder-right"':'side<0?"upper-arm-left":"upper-arm-right"')) ) && html.includes('"shoulder-left","shoulder-right","upper-arm-left","upper-arm-right"'));
+check("upper-body silhouette includes chest-attached shoulders and upper arms", html.includes('shoulder.name=side<0?"shoulder-left":"shoulder-right"') && html.includes('upperArm.name=side<0?"upper-arm-left":"upper-arm-right"') && html.includes('"shoulder-left","shoulder-right","upper-arm-left","upper-arm-right"'));
