@@ -398,11 +398,11 @@ async function verifyRefreshFlow(browserType) {
   try {
     const refreshUrl = new URL("refresh-v345.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.waitForURL(url =>
-      url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "343",
-      { timeout: 60000 }
-    );
+    await page.waitForFunction(() => {
+      const current = new URL(window.location.href);
+      return current.pathname.endsWith("/index-integrated.html") &&
+        current.searchParams.get("refresh") === "345";
+    }, null, { timeout: 60000 });
     const state = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.getRegistration("./");
       const worker = registration?.active;
