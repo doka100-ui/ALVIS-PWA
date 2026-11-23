@@ -563,7 +563,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v330";
+const ALVIS_APP_BUILD_ID="v331";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4345,7 +4345,81 @@ $("runDeviceDiagnostics").addEventListener("click",async()=>{
   }
 });
 
-$("copyDeviceDiagnostics").addEventListener("click",async()=>{
+$("generateDevelopmentHandoff").addEventListener("click",()=>{
+  const output=$("developmentHandoffOutput");
+  const status=$("developmentHandoffStatus");
+  const diagnosticText=$("deviceDiagnosticsStatus")?.textContent||"";
+  const allowedPrefixes=[
+    "この画面のコード版：","接続状態の目安：","ALVIS端末プロファイル：","自動選択モデル：","ブラウザ：","WebGPU：",
+    "GPUアダプター（default指定）：","GPUアダプター（high-performance指定）：","高性能指定GPU最大バッファ：",
+    "標準GPU情報：","標準GPU最大バッファ：","標準GPUデバイス作成：","WebLLM相当GPUデバイス作成：",
+    "Service Worker登録：","Service Worker制御：","登録済みWorker状態：","制御中Worker状態：",
+    "現在この画面を制御するWorker版：","登録済みactive Worker版：","WebLLMモデル重みキャッシュ：",
+    "ALVISアプリキャッシュ一覧：","制御中Workerのキャッシュ：","登録済みactive Workerのキャッシュ：",
+    "依存コードキャッシュ：","ブラウザ保存領域：","保存領域の永続化：","モデル起動時の永続化要求：",
+    "選択モデル：","WebLLM必要VRAM目安：","モデル重みキャッシュ事前確認：","モデル重みキャッシュ初期化後：",
+    "AIモデルの保存状態：","Kokoroモデルの保存状態："
+  ];
+  const safeDiagnostics=diagnosticText.split("\n").filter(line=>allowedPrefixes.some(prefix=>line.startsWith(prefix)))
+    .map(line=>line.replace(/https?:\/\/\S+/gi,"[URL省略]").replace(/[A-Za-z0-9_-]{48,}/g,"[長い識別子省略]"));
+  const diagnosticBlock=safeDiagnostics.length?safeDiagnostics.join("\n"):"端末診断は未実行です。必要なら「この端末を診断する」を実行してから再作成してください。";
+  const handoff=[
+    "# ALVIS 開発管制・引き継ぎ",
+    "作成日時: "+new Date().toISOString(),
+    "アプリ版: "+ALVIS_APP_BUILD_ID,
+    "リポジトリ: https://github.com/doka100-ui/ALVIS-PWA",
+    "作業ブランチ: development",
+    "公開アプリ: https://alvis-pwa.pages.dev/",
+    "",
+    "## プロジェクトの目的",
+    "ALVISはユーザー専用の自律成長型AIパートナー。オフライン優先・端末内推論を重視し、オンライン情報は確認と承認を経て知識へ反映する。",
+    "",
+    "## 現在の実装・保護対象",
+    "- 統合PWA、チャット、Qwen3/WebLLM、音声/Kokoro、Avatar表示、記憶候補の承認、長期記憶、会話履歴、成長計画、クラウド同期、暗号化バックアップ/復元、端末診断。",
+    "- 端末診断にはWebGPU/GPU、Service Worker、WebLLMキャッシュ件数、保存領域、モデル起動ログ等の読み取り専用確認がある。",
+    "- v330時点でChromium/WebKitの公開ブラウザ検証は成功。実機iPad SafariのQwen安定動作・完全オフライン再利用は未確認。WebGPU device lost/OOMとモデル再起動時のキャッシュ再利用は引き続き重点確認。",
+    "",
+    "## この引き継ぎ機能の範囲",
+    "- 現在のアプリ版・作成日時・固定の開発スナップショット・任意の端末診断要約をテキスト化する。",
+    "- GitHubの最新状態をリアルタイム取得する機能ではない。必ずGitHubのdevelopmentブランチと最新コミット、docs/HANDOFF.md、仕様書、docs/CHANGELOG.mdを照合する。",
+    "- 端末診断が未実行なら、その旨を記録する。診断内容は許可した技術項目だけを抽出する。",
+    "",
+    "## 次のAIが守ること",
+    "1. 作業開始前に最新のdocs/HANDOFF.mdと仕様書を読み、developmentブランチの最新コードを確認する。",
+    "2. 引き継ぎ文はスナップショットとして扱い、古い情報・未確認事項を事実と決めつけない。コード・テスト・実機結果を照合する。",
+    "3. 変更前に対象コードを読む。小さな変更を一度に一つずつ行い、テスト結果を確認する。",
+    "4. 既存のチャット、記憶、履歴、AES-GCM暗号化、同期、バックアップ、モデル/音声キャッシュ、オフライン動作を壊さない。データ・キャッシュの削除やリセットは禁止。必要なら事前にユーザーへ説明し明示承認を得る。",
+    "5. 実機iPad/iPhoneで確認していない内容を、実機テスト済みと表現しない。",
+    "6. パスワード、トークン、鍵、個人の記憶本文、会話履歴、バックアップ内容を引き継ぎへ含めない。",
+    "",
+    "## 端末診断要約（任意）",
+    diagnosticBlock,
+    "",
+    "## 再開時の最初の作業",
+    "GitHubの最新コミットとdocs/HANDOFF.mdを確認し、現在の作業状態・テスト状況・未解決事項を照合してから、ユーザーに次の一手を短く説明する。"
+  ].join("\n");
+  output.value=handoff;
+  $("copyDevelopmentHandoff").disabled=false;
+  status.textContent="引き継ぎ文を作成しました。内容を確認してからコピーしてください。診断情報："+(safeDiagnostics.length?"要約を含む":"未実行");
+});
+$("copyDevelopmentHandoff").addEventListener("click",async()=>{
+  const output=$("developmentHandoffOutput");
+  const status=$("developmentHandoffStatus");
+  const value=output?.value||"";
+  if(!value.trim()){status.textContent="先に引き継ぎ文を作成してください。";return;}
+  try{
+    if(navigator.clipboard?.writeText&&window.isSecureContext){
+      await navigator.clipboard.writeText(value);
+    }else{
+      output.focus();output.select();output.setSelectionRange(0,value.length);
+      if(!document.execCommand("copy"))throw new Error("copy unavailable");
+    }
+    status.textContent="引き継ぎ文をコピーしました。新しいAIのチャットへ貼り付けてください。";
+  }catch(error){
+    status.textContent="自動コピーできません。文章欄を長押ししてコピーしてください。";
+  }
+});
+\n$("copyDeviceDiagnostics").addEventListener("click",async()=>{
   const output=$("deviceDiagnosticsStatus");
   const status=$("copyDeviceDiagnosticsStatus");
   const button=$("copyDeviceDiagnostics");
