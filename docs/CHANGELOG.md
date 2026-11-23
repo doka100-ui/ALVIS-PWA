@@ -1814,3 +1814,9 @@
 - Chromium/WebKit/iPhone WebKitのブラウザ検査を、静止画の表示・キャッシュ検査からライブ球体と2本の回転リングの表示・動作検査へ更新。オフライン検査は必須CSSのキャッシュとアプリシェル再読込を確認する。
 - Avatarモード、Qwen/Kokoroモデル、依存キャッシュ、暗号化記憶、会話履歴、同期/バックアップは変更しない。モデルキャッシュやユーザーデータの削除なし。
 - Service Worker app-shell cache: `alvis-cache-v292-integrated`。実機iPhone Safariでの最終表示は配信後に確認する。
+
+
+## 2026-11-23 — Japanese viseme regression CI confirmation
+- Added behavioral coverage for Japanese kana-to-viseme mapping and speech-boundary handling; all 58 dashboard-image checks passed.
+- Offline-first regression and preview browser smoke workflows completed successfully. Browser smoke is Chromium/WebKit preview validation, not iPad Safari acceptance.
+- No runtime code or user data changed in this test-only verification step.

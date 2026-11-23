@@ -1,7 +1,7 @@
 ## Latest Japanese viseme regression coverage (2026-11-23)
 - Dashboard tests now execute the exact embedded Japanese kana-to-viseme helper functions in Node VM and cover hiragana/katakana vowel rows, contracted sounds, nasal/stop closures, long-vowel holds, punctuation, speech-boundary indices, and out-of-range indices.
 - Test-only change: no app runtime, voice engine, VRM, stored model, IndexedDB, memories, history, sync, backups, Qwen/Kokoro caches, or production main changes.
-- v347 preview browser smoke passed after the refresh query assertion correction. Re-run CI for this test coverage; real iPad Safari and an actual licensed 18号 VRM asset remain unverified.
+- CI for this test coverage completed successfully: offline-first checks passed, dashboard-image tests passed, and preview browser smoke passed (Chromium/WebKit). Real iPad Safari and an actual licensed 18号 VRM asset remain unverified.
 
 ## Latest v347 preview smoke test correction (2026-11-23 / test-only)
 - The latest v347 preview run `45151766352` failed because `tests/dashboard-preview-smoke.mjs` waited for `?refresh=346`, while `refresh-v347.html` correctly redirects to `?refresh=347`.
@@ -2688,3 +2688,9 @@
 - 既存のhasModelInCacheによるモデル重み確認と合わせ、再起動時の再取得原因を切り分けやすくする。完全オフライン再利用を保証する表示にはしない。
 - モデルID/context/WebLLMバージョン/Cache APIデータ/記憶・履歴・同期・バックアップ・画面デザインは変更しない。キャッシュ削除・移行・再取得は行わない。
 - Service Worker cache: `alvis-cache-v330-integrated`。更新ページ: `refresh-v330.html`。
+
+
+## Latest Japanese viseme regression CI result (2026-11-23)
+- Dashboard preview browser smoke run `45153037027` completed successfully, including the preview-browser-smoke job. Offline-first run `45153036921` also completed successfully. The dashboard-image test job reported 58/58 checks passed, including Japanese kana/viseme behavior tests.
+- This confirms automated regression and Chromium/WebKit preview behavior only. It does not validate an actual 18号 VRM model or iPad/iPhone Safari GPU behavior.
+- No model asset was added; no app runtime, IndexedDB, memories, history, sync, backups, Qwen/Kokoro caches, or production `main` were changed.
