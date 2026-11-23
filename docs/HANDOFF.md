@@ -1,6 +1,6 @@
 ## Preview smoke test version alignment — 2026-11-23
-- The v339 browser smoke test now checks `refresh-v339.html`, `alvis-cache-v339-integrated`, and `?refresh=339`; the workflow also watches `refresh-v339.html` so future changes trigger the browser check.
-- The preceding v339 preview run failed because its smoke test still waited for the v338 worker version, not because the dashboard itself had failed. Re-runs for the corrected test are in progress.
+- The v339 browser smoke test checks `refresh-v339.html`, `alvis-cache-v339-integrated`, and `?refresh=339` consistently; the workflow also watches `refresh-v339.html` so future changes trigger the browser check. A second stale `waitForURL` assertion (`refresh=331`) was found and corrected to `refresh=339`.
+- The preceding v339 preview run failed because the smoke test still waited for v338/331 refresh markers, not because the dashboard itself had failed. A run for the fully corrected test is in progress.
 - Test/workflow only. No app runtime, user data, model cache, or production `main` changes.
 
 ## Avatar upload status accuracy fix — 2026-11-23 (v339)
