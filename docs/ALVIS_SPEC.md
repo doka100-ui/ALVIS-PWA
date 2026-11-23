@@ -1,3 +1,7 @@
+## Avatar Studio — six turnaround camera presets
+- Add front, left/right three-quarter, left/right profile, and back camera presets to inspect the bust from all sides while retaining touch OrbitControls.
+- Browser smoke clicks each preset and confirms the WebGL canvas remains active.
+
 ## Avatar Studio — blink bind topology validation
 - Browser export smoke verifies VRM preset bind destinations: blink maps to both eyelid nodes, blinkLeft only to eyelid-left, and blinkRight only to eyelid-right.
 

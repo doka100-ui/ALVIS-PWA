@@ -64,6 +64,10 @@ try {
     }, value);
     assert.equal(await page.locator("#"+id+"Value").evaluate(element => element.value), Number(value).toFixed(2), id+" slider must update its value output");
   }
+  for (const id of ["front","rightAngle","rightProfile","back","leftAngle","leftProfile"]) {
+    await page.locator("#"+id).click();
+    assert.ok(await page.locator("#stage canvas").count()===1, "Avatar Studio view preset must keep the live 3D canvas: "+id);
+  }
   const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
   await page.locator("#export").click();
   const download = await downloadPromise;

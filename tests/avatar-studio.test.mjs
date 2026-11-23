@@ -85,3 +85,5 @@ check("ALVIS model diagnostics report independent left/right wink support", appH
 check("face base includes subtle cheekbone and chin projection sculpting", html.includes("const cheekbone=.028*Math.exp") && html.includes("const chin=.018*Math.exp") && html.includes("z*depth+cheekbone+chin"));
 
 check("eyelid blink target closes from the upper lid edge across the almond eye", html.includes("openEdge=.095*shape,closedEdge=-.095*shape") && html.includes("lidClosedPositions.push(localX,top+(closedEdge-top)*t,z)") && html.includes("lidGeometry.computeVertexNormals()"));
+
+check("Avatar Studio provides six named inspection views around the 3D bust", ["front","rightAngle","rightProfile","back","leftAngle","leftProfile"].every(id=>html.includes('id="'+id+'"') && html.includes(id+":[") ) && html.includes("function setAvatarView(name)"));

@@ -50,7 +50,7 @@ button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;co
 <div class="control"><label for="ou">母音 ou <output id="ouValue">0.00</output></label><input id="ou" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="ee">母音 ee <output id="eeValue">0.00</output></label><input id="ee" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="oh">母音 oh <output id="ohValue">0.00</output></label><input id="oh" type="range" min="0" max="1" step=".01" value="0"></div>
-<div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">VRM 1.0を書き出し</button></div>
+<div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面</button><button id="rightAngle">右斜め</button><button id="rightProfile">右横顔</button><button id="back">背面</button><button id="leftAngle">左斜め</button><button id="leftProfile">左横顔</button><button class="primary" id="export" style="grid-column:1/-1">VRM 1.0を書き出し</button></div>
 <div class="status" id="status" role="status">準備完了。各スライダーで形状を調整できます。</div>
 <div class="notice">これは手続き生成のVRM 1.0骨格・表情データ付き試作です。18号の顔一致や完成品質は未確認です。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
 </aside>
@@ -352,7 +352,12 @@ function rebuild(){
 }
 sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));
 document.getElementById("reset").onclick=()=>{sliders.forEach(id=>document.getElementById(id).value=defaults[id]);rebuild();};
-document.getElementById("front").onclick=()=>{controls.reset();camera.position.set(0,.15,7.2);controls.target.set(0,.05,0);};
+const avatarViewPresets={front:[0,.15,7.2],rightAngle:[4.8,.15,5.6],rightProfile:[7.2,.15,0],back:[0,.15,-7.2],leftAngle:[-4.8,.15,5.6],leftProfile:[-7.2,.15,0]};
+function setAvatarView(name){
+ const position=avatarViewPresets[name];if(!position)return;
+ controls.target.set(0,.05,0);camera.position.set(...position);camera.lookAt(controls.target);controls.update();
+}
+Object.keys(avatarViewPresets).forEach(name=>document.getElementById(name).addEventListener("click",()=>setAvatarView(name)));
 function attachVrm10Extension(glbData){
  const source=new Uint8Array(glbData);
  const view=new DataView(source.buffer,source.byteOffset,source.byteLength);

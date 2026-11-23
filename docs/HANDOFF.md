@@ -1,3 +1,7 @@
+## Avatar Studioに6方向の確認カメラを追加 (2026-11-23)
+- 正面・左右斜め・左右横顔・背面の6つのカメラプリセットを追加。OrbitControlsの自由回転は維持し、各視点ボタンで基準構図へ移動できる。
+- Browser smokeで6ボタンを順番に操作し、WebGL canvasが維持されることを検査する。これは見た目の品質判定ではなく、ターンアラウンド確認の操作支援。
+
 ## VRM左右まぶたのbind先を実書き出しで検証 (2026-11-23)
 - Browser smokeでVRMのblink presetが左右両方のeyelid nodeにbindされ、blinkLeftはeyelid-leftだけ、blinkRightはeyelid-rightだけにbindされることをGLB JSONから検査する。
 - 左右別の名前が存在するだけでなく、誤った側へ結び付いていないことを受け入れ条件にする。
