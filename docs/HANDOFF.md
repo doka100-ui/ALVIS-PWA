@@ -1,3 +1,8 @@
+## Latest v346 GLB読み込み完了後にのみ保存（2026-11-23）
+- GLBはmodel-viewerのloadイベントを待ってから表示成功を返す。errorまたは30秒タイムアウト時は失敗とし、仮Object URLをrevokeして旧保存モデルの復元経路へ戻す。
+- v345ではVRM WebGL初期化失敗時のVRMリソース解放を追加。v346 CI確認待ち。実機iPad Safariは未確認。
+- build/cache/refresh v346。IndexedDBの旧モデル、記憶/履歴/同期/バックアップ、Qwen/Kokoroキャッシュは変更なし。main未変更。
+
 ## Latest v345 WebGL初期化失敗時のVRM GPUリソース解放（2026-11-23）
 - WebGLRendererの生成が失敗した場合、すでに読み込んだVRM sceneをVRMUtils.deepDisposeで解放してからエラーを返す。GPU context allocation failure時のVRMアセット残留を抑制。
 - v344でWebGL context lost/restored対応も追加。v344 offline regressionは成功、browser preview smokeは結果確認待ち。v345テストはCI確認待ち。
