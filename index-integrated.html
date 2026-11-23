@@ -571,7 +571,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v342";
+const ALVIS_APP_BUILD_ID="v343";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4877,13 +4877,29 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     if(extension!=="glb"&&extension!=="vrm"){setStatus("GLBまたはVRM形式のファイルを選択してください");return;}
     try{
       if(extension==="vrm"){
-        await saveModel(file,VRM_KEY);
+        const previous=await readModel(VRM_KEY);
         const displayed=await showVrm(file);
-        setStatus(displayed?"ALVIS / VRM MODEL SAVED ON DEVICE":"VRM MODEL SAVED — DISPLAY FAILED; CHECK MODEL COMPATIBILITY");
+        if(displayed){
+          await saveModel(file,VRM_KEY);
+          setStatus("ALVIS / VRM MODEL LOADED & SAVED ON DEVICE");
+        }else if(previous){
+          const restored=await showVrm(previous);
+          setStatus(restored?"NEW VRM REJECTED — PREVIOUS SAVED AVATAR RESTORED":"NEW VRM REJECTED — PREVIOUS AVATAR KEPT ON DEVICE");
+        }else{
+          setStatus("VRM LOAD FAILED — NO MODEL WAS SAVED");
+        }
       }else{
-        await saveModel(file,MODEL_KEY);
+        const previous=await readModel(MODEL_KEY);
         const displayed=await showModel(file);
-        setStatus(displayed?"ALVIS / 3D MODEL SAVED ON DEVICE":"3D MODEL SAVED — DISPLAY FAILED; CHECK MODEL COMPATIBILITY");
+        if(displayed){
+          await saveModel(file,MODEL_KEY);
+          setStatus("ALVIS / 3D MODEL LOADED & SAVED ON DEVICE");
+        }else if(previous){
+          const restored=await showModel(previous);
+          setStatus(restored?"NEW 3D MODEL REJECTED — PREVIOUS MODEL RESTORED":"NEW 3D MODEL REJECTED — PREVIOUS MODEL KEPT ON DEVICE");
+        }else{
+          setStatus("3D MODEL LOAD FAILED — NO MODEL WAS SAVED");
+        }
       }
     }catch(error){setStatus("MODEL SAVE FAILED — 端末の空き容量を確認");}
     fileInput.value="";
