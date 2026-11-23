@@ -1,3 +1,10 @@
+## VRM 1.0 export prototype (2026-11-23)
+- Avatar Studio now builds a named humanoid node hierarchy (hips/spine/chest/neck/head, both shoulder/arm/hand chains, and both leg/foot chains). Visible head meshes are rigidly parented to the head bone and neck/upper-body meshes to the chest bone; the cropped bust intentionally has no visible arm/leg geometry.
+- Export packages the GLB binary as a .vrm with VRMC_vrm 1.0 metadata, humanoid node mappings, and preset morphTargetBinds for blink, happy/sad/angry/surprised/relaxed and aa/ih/ou/ee/oh.
+- Chromium browser smoke parses the exported VRM JSON chunk and checks extension version, required humanoid node mappings, expression binds, and bind indices against actual mesh morph target counts.
+- This is a first procedural VRM 1.0 packaging milestone, not yet independently validated by @pixiv/three-vrm or an external VRM validator. Bone deformation is rigid parenting, not a weighted skinned mesh; arms/legs are hierarchy-only because this is an upper-body crop. LookAt, full face fidelity to 18号, iPad Safari, and main-app integration remain outstanding. Do not call this the finished 18号 model.
+- No production runtime, IndexedDB, memories/history, sync, backups, Qwen/Kokoro caches, or main branch changed.
+
 ## Verified Avatar Studio browser/export result (2026-11-23)
 - Commit `697bee83ff0a2ab213100c1085b075c889324d31`, preview run `45172947684`: dashboard browser smoke and standalone Avatar Studio smoke both succeeded.
 - Chromium/SwiftShader reported WebGL 2.0; Avatar Studio made no external-origin requests; the page reloaded offline through the existing ALVIS Service Worker cache.

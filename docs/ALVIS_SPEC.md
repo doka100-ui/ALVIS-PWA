@@ -1,3 +1,9 @@
+## Avatar Studio — first VRM 1.0 package export
+- Avatar Studio creates a VRMC_vrm 1.0 extension over the locally generated GLB binary, with VRM meta, required humanoid node mappings, and preset expression morphTargetBinds.
+- The cropped bust includes a head-to-chest rigid bone hierarchy. Required arm/leg bones are present as hierarchy-only nodes; no visible limb geometry or weighted skinning is claimed.
+- Browser smoke checks the exported VRM JSON chunk, required bones, expression binds, and morph indices. Independent VRM loader/validator and iPad Safari checks are still required.
+- This procedural prototype is not yet the final 18号 likeness or main-app model.
+
 ## Avatar Studio — Chromium実書き出し確認結果
 - 2026-11-23のCloudflare previewでWebGL 2.0表示、外部CDN通信なし、Service Workerキャッシュ経由のオフライン再読込を確認。
 - GLB v2（1,627,416 bytes）を実際にダウンロードし、blink / happy / sad / angry / surprised / relaxed / aa / ih / ou / ee / oh のtargetNamesをJSONチャンク内で確認。

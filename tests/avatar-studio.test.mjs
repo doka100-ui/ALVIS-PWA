@@ -45,3 +45,9 @@ assert.ok(moduleScript, "module script exists");
 const syntax = spawnSync(process.execPath, ["--check", "--input-type=module"], { input: moduleScript, encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr || "avatar studio module syntax check failed");
 console.log("PASS module JavaScript syntax");
+
+check("VRM 1.0 extension packaging is implemented", html.includes("attachVrm10Extension") && html.includes('specVersion:"1.0"'));
+check("VRM required humanoid bones are created", ["hips","spine","head","leftUpperLeg","leftLowerLeg","leftFoot","rightUpperLeg","rightLowerLeg","rightFoot","leftUpperArm","leftLowerArm","leftHand","rightUpperArm","rightLowerArm","rightHand"].every(name=>html.includes('"'+name+'"')));
+check("visible face and torso geometry are rigidly attached to head and chest bones", html.includes("headBone).attach(part)") && html.includes("chest).attach(part)"));
+check("VRM extension is declared as used and required", html.includes('gltf.extensionsRequired=[...new Set') && html.includes('"VRMC_vrm"'));
+check("VRM expression presets are generated from actual mesh target names", html.includes("expressions.preset[preset]={morphTargetBinds}") && html.includes("names.forEach((name,index)"));

@@ -67,7 +67,7 @@ try {
   const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
   await page.locator("#export").click();
   const download = await downloadPromise;
-  assert.equal(download.suggestedFilename(), "alvis-face-prototype.glb", "export must use the expected GLB filename");
+  assert.equal(download.suggestedFilename(), "alvis-face-prototype.vrm", "export must use the expected VRM filename");
   const filePath = await download.path();
   assert.ok(filePath, "GLB download must produce a file");
   const [buffer, fileInfo] = await Promise.all([readFile(filePath), stat(filePath)]);
@@ -80,7 +80,26 @@ try {
   const gltf = JSON.parse(buffer.toString("utf8", 20, 20 + jsonLength).trim());
   const targetNames = (gltf.meshes || []).flatMap(mesh => mesh.extras?.targetNames || []);
   for (const name of ["blink","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh"]) {
-    assert.ok(targetNames.includes(name), "GLB must retain named morph target: "+name+"; found "+targetNames.join(", "));
+    assert.ok(targetNames.includes(name), "VRM must retain named morph target: "+name+"; found "+targetNames.join(", "));
+  }
+  const vrmExtension = gltf.extensions?.VRMC_vrm;
+  assert.ok(vrmExtension, "export must include VRMC_vrm extension");
+  assert.equal(vrmExtension.specVersion, "1.0", "export must declare VRM 1.0");
+  assert.ok(gltf.extensionsRequired?.includes("VRMC_vrm"), "VRMC_vrm must be required");
+  const humanBones = vrmExtension.humanoid?.humanBones || {};
+  for (const bone of ["hips","spine","head","leftUpperLeg","leftLowerLeg","leftFoot","rightUpperLeg","rightLowerLeg","rightFoot","leftUpperArm","leftLowerArm","leftHand","rightUpperArm","rightLowerArm","rightHand"]) {
+    assert.ok(Number.isInteger(humanBones[bone]?.node), "VRM required humanoid bone must map to a node: "+bone);
+    assert.ok(gltf.nodes[humanBones[bone].node], "VRM bone node must exist: "+bone);
+  }
+  for (const expression of ["blink","happy","sad","angry","surprised","aa","ih","ou","ee","oh"]) {
+    const binds = vrmExtension.expressions?.preset?.[expression]?.morphTargetBinds || [];
+    assert.ok(binds.length > 0, "VRM preset must have morph target binds: "+expression);
+    for (const bind of binds) {
+      assert.ok(gltf.nodes[bind.node]?.mesh !== undefined, "expression bind must point to a mesh node: "+expression);
+      const targetCount = gltf.meshes[gltf.nodes[bind.node].mesh].primitives[0].targets?.length || 0;
+      assert.ok(bind.index >= 0 && bind.index < targetCount, "expression bind index must exist: "+expression);
+      assert.equal(bind.weight, 1, "expression bind must use full normalized weight: "+expression);
+    }
   }
   assert.deepEqual(pageErrors, [], "Avatar Studio must not throw browser runtime errors");
   assert.deepEqual(externalRequests, [], "Avatar Studio must load Three.js and all modules from the same origin only");
@@ -100,8 +119,8 @@ try {
   console.log("PASS offline reload through the ALVIS service worker cache");
   console.log("PASS real WebGL renderer: "+JSON.stringify(renderInfo));
   console.log("PASS expression and five Japanese vowel viseme controls");
-  console.log("PASS GLB binary download: "+fileInfo.size+" bytes");
-  console.log("PASS exported GLB contains blink, emotion, and vowel morph target names");
+  console.log("PASS VRM 1.0 binary download: "+fileInfo.size+" bytes");
+  console.log("PASS VRMC_vrm extension, required humanoid bones, and expression morph binds");
 } finally {
   await context.close();
   await browser.close();

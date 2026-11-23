@@ -48,9 +48,9 @@ button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;co
 <div class="control"><label for="ou">母音 ou <output id="ouValue">0.00</output></label><input id="ou" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="ee">母音 ee <output id="eeValue">0.00</output></label><input id="ee" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="oh">母音 oh <output id="ohValue">0.00</output></label><input id="oh" type="range" min="0" max="1" step=".01" value="0"></div>
-<div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">3DモデルをGLB保存</button></div>
+<div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">VRM 1.0を書き出し</button></div>
 <div class="status" id="status" role="status">準備完了。各スライダーで形状を調整できます。</div>
-<div class="notice">これは顔形状の制作土台です。現段階では18号の完成モデル・VRM・表情リグではありません。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
+<div class="notice">これは手続き生成のVRM 1.0骨格・表情データ付き試作です。18号の顔一致や完成品質は未確認です。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
 </aside>
 </main>
 <script type="module">
@@ -176,15 +176,42 @@ function makeFace(){
   curve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
   curve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
  }
- // neck and simple upper shoulder bust
- ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);
- const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;
- curve(faceGroup,[[-.22,-1.25,.23],[0,-1.32,.29],[.22,-1.25,.23]],.018,gold);
+ // Neck and upper-body geometry are separate rigid parts for the humanoid rig.
+ const neck=ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);neck.name="neck";
+ const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;bust.name="upper-body";
+ const necklaceTop=curve(faceGroup,[[-.22,-1.25,.23],[0,-1.32,.29],[.22,-1.25,.23]],.018,gold);necklaceTop.name="necklace-chain";
  // Small pendant and the subtle barcode-like neck mark from the approved appearance brief.
- curve(faceGroup,[[-.22,-1.25,.23],[-.15,-1.34,.27],[0,-1.39,.29],[.15,-1.34,.27],[.22,-1.25,.23]],.009,gold);
+ const necklaceLoop=curve(faceGroup,[[-.22,-1.25,.23],[-.15,-1.34,.27],[0,-1.39,.29],[.15,-1.34,.27],[.22,-1.25,.23]],.009,gold);necklaceLoop.name="necklace-loop";
  const pendant=new THREE.Mesh(new THREE.SphereGeometry(.035,20,16),gold);pendant.position.set(0,-1.405,.30);pendant.scale.set(.72,1.25,.35);pendant.name="necklace-pendant";faceGroup.add(pendant);
  [0,.009,.021,.034,.049].forEach((offset,index)=>{const width=[.006,.003,.008,.004,.006][index];const bar=new THREE.Mesh(new THREE.BoxGeometry(width,.043,.006),dark);bar.position.set(.19+offset,-1.12,.247);bar.name="neck-mark-"+index;faceGroup.add(bar);});
- for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,8,24),gold);ring.position.set(side*.95,-.12,.02);ring.rotation.y=Math.PI/2;faceGroup.add(ring);}
+ for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,8,24),gold);ring.position.set(side*.95,-.12,.02);ring.rotation.y=Math.PI/2;ring.name=side<0?"earring-left":"earring-right";faceGroup.add(ring);}
+ // VRM 1.0 humanoid hierarchy. The crop intentionally has no visible arms or legs,
+ // but the required humanoid joints remain available for compatible runtimes.
+ const rigRoot=new THREE.Group();rigRoot.name="ALVIS-Humanoid";faceGroup.add(rigRoot);
+ const bones={};
+ const addBone=(name,parent,position)=>{const bone=new THREE.Bone();bone.name=name;bone.position.set(...position);(parent||rigRoot).add(bone);bones[name]=bone;return bone;};
+ const hips=addBone("hips",null,[0,-1.58,0]);
+ const spine=addBone("spine",hips,[0,.28,0]);
+ const chest=addBone("chest",spine,[0,.30,0]);
+ const neckBone=addBone("neck",chest,[0,.35,0]);
+ const headBone=addBone("head",neckBone,[0,.25,0]);
+ for(const side of [-1,1]){
+  const prefix=side<0?"left":"right";
+  const shoulder=addBone(prefix+"Shoulder",chest,[side*.20,.12,0]);
+  const upperArm=addBone(prefix+"UpperArm",shoulder,[side*.15,0,0]);
+  const lowerArm=addBone(prefix+"LowerArm",upperArm,[side*.28,0,0]);
+  addBone(prefix+"Hand",lowerArm,[side*.24,0,0]);
+  const upperLeg=addBone(prefix+"UpperLeg",hips,[side*.10,-.08,0]);
+  const lowerLeg=addBone(prefix+"LowerLeg",upperLeg,[0,-.42,0]);
+  addBone(prefix+"Foot",lowerLeg,[0,-.42,.06]);
+ }
+ // Reparent visible parts while preserving their world transforms.
+ faceGroup.updateMatrixWorld(true);rigRoot.updateMatrixWorld(true);
+ const torsoNames=new Set(["neck","upper-body","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
+ for(const part of [...faceGroup.children]){
+  if(part===rigRoot)continue;
+  (torsoNames.has(part.name)?chest:headBone).attach(part);
+ }
 }
 makeFace();
 const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","smile","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh"];
@@ -211,10 +238,66 @@ function rebuild(){
 sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));
 document.getElementById("reset").onclick=()=>{sliders.forEach(id=>document.getElementById(id).value=defaults[id]);rebuild();};
 document.getElementById("front").onclick=()=>{controls.reset();camera.position.set(0,.15,7.2);controls.target.set(0,.05,0);};
+function attachVrm10Extension(glbData){
+ const source=new Uint8Array(glbData);
+ const view=new DataView(source.buffer,source.byteOffset,source.byteLength);
+ if(source.byteLength<20||view.getUint32(0,true)!==0x46546c67||view.getUint32(4,true)!==2)throw new Error("GLB 2.0として読み取れません");
+ const chunks=[];let offset=12;
+ while(offset<source.byteLength){
+  const length=view.getUint32(offset,true),type=view.getUint32(offset+4,true);
+  if(offset+8+length>source.byteLength)throw new Error("GLBチャンクが破損しています");
+  chunks.push({type,data:source.slice(offset+8,offset+8+length)});offset+=8+length;
+ }
+ const jsonChunk=chunks.find(chunk=>chunk.type===0x4e4f534a);
+ if(!jsonChunk)throw new Error("GLB JSONチャンクがありません");
+ const gltf=JSON.parse(new TextDecoder().decode(jsonChunk.data).trim());
+ const nodeIndices=new Map((gltf.nodes||[]).map((node,index)=>[node.name,index]));
+ const requiredBones=["hips","spine","head","leftUpperLeg","leftLowerLeg","leftFoot","rightUpperLeg","rightLowerLeg","rightFoot","leftUpperArm","leftLowerArm","leftHand","rightUpperArm","rightLowerArm","rightHand"];
+ const humanBones={};
+ for(const name of requiredBones){if(!nodeIndices.has(name))throw new Error("Humanoidボーンが不足しています: "+name);humanBones[name]={node:nodeIndices.get(name)};}
+ for(const name of ["chest","neck","leftShoulder","rightShoulder"])if(nodeIndices.has(name))humanBones[name]={node:nodeIndices.get(name)};
+ const expressions={preset:{}};
+ const presetNames=["happy","angry","sad","relaxed","surprised","aa","ih","ou","ee","oh","blink"];
+ for(const preset of presetNames){
+  const morphTargetBinds=[];
+  (gltf.nodes||[]).forEach((node,nodeIndex)=>{
+   if(node.mesh===undefined)return;
+   const names=gltf.meshes?.[node.mesh]?.extras?.targetNames||[];
+   names.forEach((name,index)=>{if(name===preset)morphTargetBinds.push({node:nodeIndex,index,weight:1});});
+  });
+  if(morphTargetBinds.length)expressions.preset[preset]={morphTargetBinds};
+ }
+ for(const required of ["blink","happy","angry","sad","surprised","aa","ih","ou","ee","oh"])if(!expressions.preset[required])throw new Error("VRM表情モーフが不足しています: "+required);
+ gltf.extensions=gltf.extensions||{};
+ gltf.extensions.VRMC_vrm={
+  specVersion:"1.0",
+  meta:{name:"ALVIS Face Prototype",version:"0.1.0",authors:["ALVIS Project"],licenseUrl:"https://vrm.dev/licenses/1.0/",avatarPermission:"onlyAuthor",commercialUsage:"personalNonProfit",creditNotation:"unnecessary",allowRedistribution:false,modification:"prohibited"},
+  humanoid:{humanBones},
+  expressions
+ };
+ gltf.extensionsUsed=[...new Set([...(gltf.extensionsUsed||[]),"VRMC_vrm"])];
+ gltf.extensionsRequired=[...new Set([...(gltf.extensionsRequired||[]),"VRMC_vrm"])];
+ const jsonBytes=new TextEncoder().encode(JSON.stringify(gltf));
+ const jsonPaddedLength=(jsonBytes.length+3)&~3;
+ const paddedJson=new Uint8Array(jsonPaddedLength);paddedJson.fill(0x20);paddedJson.set(jsonBytes);
+ chunks[chunks.indexOf(jsonChunk)]={type:0x4e4f534a,data:paddedJson};
+ const totalLength=12+chunks.reduce((sum,chunk)=>sum+8+chunk.data.length,0);
+ const output=new ArrayBuffer(totalLength),outView=new DataView(output),out=new Uint8Array(output);
+ outView.setUint32(0,0x46546c67,true);outView.setUint32(4,2,true);outView.setUint32(8,totalLength,true);
+ let cursor=12;
+ for(const chunk of chunks){outView.setUint32(cursor,chunk.data.length,true);outView.setUint32(cursor+4,chunk.type,true);out.set(chunk.data,cursor+8);cursor+=8+chunk.data.length;}
+ return output;
+}
 document.getElementById("export").onclick=async()=>{
- try{status.textContent="GLBを書き出しています…";const exporter=new GLTFExporter();const data=await exporter.parseAsync(root,{binary:true,onlyVisible:true});
- const blob=new Blob([data],{type:"model/gltf-binary"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.glb";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);status.textContent="GLBを書き出しました。blink / happy の形状ターゲットを含みます。VRM表情設定は次工程です。";
- }catch(e){status.textContent="書き出しに失敗: "+(e?.message||String(e));}
+ try{
+  status.textContent="VRM 1.0を書き出しています…";
+  const exporter=new GLTFExporter();
+  const glb=await exporter.parseAsync(root,{binary:true,onlyVisible:true});
+  const vrm=attachVrm10Extension(glb);
+  const blob=new Blob([vrm],{type:"model/gltf-binary"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.vrm";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  status.textContent="VRM 1.0を書き出しました。Humanoid骨格と表情・母音モーフを含みます。これは18号の完成モデルではなく制作試作です。";
+ }catch(e){status.textContent="VRM書き出しに失敗: "+(e?.message||String(e));}
 };
 function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
 const ro=new ResizeObserver(resize);ro.observe(host);resize();
