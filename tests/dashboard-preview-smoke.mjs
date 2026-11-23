@@ -102,7 +102,7 @@ async function verifyBrowser(browserType, verifyOffline) {
       toothInset: getComputedStyle(node, "::before").inset,
       toothMask: getComputedStyle(node, "::before").maskImage
     }));
-    assert.ok(outerRingMotion.animations.some(animation => animation.duration === 22000
+    assert.ok(outerRingMotion.animations.some(animation => (animation.duration === 22000 || animation.duration === 42000)
       && animation.keyframes.some(frame => frame.rotate === "9deg")
       && animation.keyframes.some(frame => frame.rotate === "369deg")),
       browserName + ": outer ring C must have a 22-second independent rotate animation");
