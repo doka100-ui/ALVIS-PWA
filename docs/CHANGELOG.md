@@ -1,3 +1,10 @@
+## 2026-11-23 — Avatar停止直後の描画フレーム競合を防止（development / v338）
+- VRM runtimeのanimate callback先頭でもactiveEnabledを確認し、Avatarモード停止後にすでにキュー済み/実行中だったフレームが次のrequestAnimationFrameを予約しないようにした。
+- setActive(false)による停止要求と、描画コールバック自身の継続条件を二重化。Avatarへ戻すと既存インスタンスの描画を再開。
+- アバターモデル、表情、口パク、視線、頭部動作、モデル保存、Qwen/Kokoroキャッシュ、記憶/履歴/同期/バックアップは変更なし。
+- Service Worker app shell cache v338、refresh-v338.html。developmentのみ。本番mainは変更なし。
+- 回帰テストに「停止後のコールバックが次フレームを予約しない」条件を追加。実機iPad GPU/電力測定は未確認。
+
 ## 2026-11-23 — Avatarモード非表示中のVRM描画を停止（development / v337）
 - VRM runtimeにsetActiveを追加し、Avatarモード以外ではrequestAnimationFrameの描画ループを停止。Avatarモードへ戻ると同じVRMインスタンスで再開する。
 - アバター切替時に表示状態をruntimeへ伝え、VRM読み込み完了後も現在の表示モードに同期する。モデルを破棄/再読込せず、表情・口パク・視線などの機能を維持。
