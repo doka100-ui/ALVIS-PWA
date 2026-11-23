@@ -1,3 +1,8 @@
+## Preview smoke test version alignment — 2026-11-23
+- The v339 browser smoke test now checks `refresh-v339.html`, `alvis-cache-v339-integrated`, and `?refresh=339`; the workflow also watches `refresh-v339.html` so future changes trigger the browser check.
+- The preceding v339 preview run failed because its smoke test still waited for the v338 worker version, not because the dashboard itself had failed. Re-runs for the corrected test are in progress.
+- Test/workflow only. No app runtime, user data, model cache, or production `main` changes.
+
 ## Avatar upload status accuracy fix — 2026-11-23 (v339)
 - Fixed a misleading status: after VRM/GLB bytes were saved, an asynchronous display failure was previously overwritten by a 'saved' success message. showVrm/showModel now return explicit display outcomes, and upload status distinguishes saved-and-displayed from saved-but-display-failed.
 - Files remain stored in the existing IndexedDB keys; no delete/reset or format migration. This does not create the custom 18号 VRM model. Real iPad Safari import/display remains untested.
@@ -5,7 +10,7 @@
 ## Avatar implementation status clarified — 2026-11-23
 - Existing source already includes VRM runtime controls for gradual happy/angry/sad/relaxed/surprised expressions, automatic gaze, idle blinking/breathing/head motion, reply nods, and Japanese vowel/lip-sync; conversation emotion heuristics call these only in Avatar display mode.
 - The visible portrait is still a reference/fallback image until the user imports a real .vrm file. GLB is display-only through model-viewer; it does not provide VRM expressions, gaze, or speech animation. No custom 18号 VRM model asset is present or generated in the repository.
-- Added regression assertions for these existing integrations and corrected the preview smoke test to use the current v338 refresh page/cache version. No avatar model or user data was changed.
+- Added regression assertions for these existing integrations. The preview smoke test's v338 references were subsequently found stale against v339 and corrected in the latest test-only commit. No avatar model or user data was changed.
 - A real 3D avatar still requires a compatible VRM asset and actual iPad Safari validation; source-level checks do not prove animation quality on device.
 
 ## Latest Avatar in-flight frame cancellation guard — 2026-11-23 (v338)
