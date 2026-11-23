@@ -571,7 +571,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v338";
+const ALVIS_APP_BUILD_ID="v339";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4784,15 +4784,15 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   async function loadViewer(){if(!viewerReady){viewerReady=import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js").catch(error=>{viewerReady=null;throw error;});}return viewerReady;}
   async function showVrm(blob){
     vrmBlob=blob;modelBlob=null;modelFailed=false;
-    if(!isActive())return;
+    if(!isActive())return true;
     setStatus("ALVIS / VRM AVATAR LOADING");
     if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
     try{
       const runtime=await import("./assets/alvis-vrm-runtime.js");
-      if(!isActive())return;
+      if(!isActive())return true;
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
       const mounted=await runtime.mountVrmAvatar(host,blob);
-      if(!isActive()){mounted.dispose();return;}
+      if(!isActive()){mounted.dispose();return true;}
       vrmRuntime=mounted;
       mounted.setActive?.(document.getElementById("chatPage")?.dataset.displayMode==="avatar");
       window.ALVISAvatarSetActive=mounted.setActive;
@@ -4807,21 +4807,23 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       renderDiagnostics(report);
       const features=[report.blink&&"BLINK",report.aa&&report.oh&&"LIP SYNC",report.mouthVisemes?.length===5&&"5 VOWELS",report.lookAt&&"LOOK AT",report.headMotion&&"HEAD MOTION"].filter(Boolean);
       setStatus("ALVIS / VRM READY"+(features.length?" — "+features.join(" · "):" — BASIC MODEL"));
+      return true;
     }catch(error){
       modelFailed=true;
       if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
       showPortrait(true);
       setStatus("VRM表示に失敗しました。対応VRMモデルを確認してください。");
+      return false;
     }
   }
   async function showModel(blob){
     modelBlob=blob;vrmBlob=null;modelFailed=false;
-    if(!isActive())return;
+    if(!isActive())return true;
     if(vrmRuntime){vrmRuntime.dispose();vrmRuntime=null;}
     setStatus("ALVIS / 3D MODEL LOADING");
     try{
       await loadViewer();
-      if(!isActive())return;
+      if(!isActive())return true;
       if(currentUrl)URL.revokeObjectURL(currentUrl);
       currentUrl=URL.createObjectURL(blob);
       const viewer=document.createElement("model-viewer");
@@ -4837,7 +4839,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       viewer.addEventListener("load",()=>setStatus("ALVIS / 3D MODEL READY"),{once:true});
       viewer.addEventListener("error",()=>{modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3Dモデルを読み込めないため、18号の画像を表示中");},{once:true});
       host.replaceChildren(viewer);
-    }catch(error){modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3D表示に失敗したため、18号の画像を表示中");}
+      return true;
+    }catch(error){modelFailed=true;modelBlob=null;showPortrait(true);setStatus("3D表示に失敗したため、18号の画像を表示中");return false;}
   }
   function showPortrait(force=false){
     if(modelBlob&&!force)return;
@@ -4873,8 +4876,15 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     const extension=file.name.toLowerCase().split(".").pop();
     if(extension!=="glb"&&extension!=="vrm"){setStatus("GLBまたはVRM形式のファイルを選択してください");return;}
     try{
-      if(extension==="vrm"){await saveModel(file,VRM_KEY);await showVrm(file);setStatus("ALVIS / VRM MODEL SAVED ON DEVICE");}
-      else{await saveModel(file,MODEL_KEY);await showModel(file);setStatus("ALVIS / 3D MODEL SAVED ON DEVICE");}
+      if(extension==="vrm"){
+        await saveModel(file,VRM_KEY);
+        const displayed=await showVrm(file);
+        setStatus(displayed?"ALVIS / VRM MODEL SAVED ON DEVICE":"VRM MODEL SAVED — DISPLAY FAILED; CHECK MODEL COMPATIBILITY");
+      }else{
+        await saveModel(file,MODEL_KEY);
+        const displayed=await showModel(file);
+        setStatus(displayed?"ALVIS / 3D MODEL SAVED ON DEVICE":"3D MODEL SAVED — DISPLAY FAILED; CHECK MODEL COMPATIBILITY");
+      }
     }catch(error){setStatus("MODEL SAVE FAILED — 端末の空き容量を確認");}
     fileInput.value="";
   });
