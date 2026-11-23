@@ -1,3 +1,8 @@
+## 2026-11-23 — v345 WebGL初期化失敗時のVRMリソース解放
+- WebGLRenderer生成が失敗した場合に、読み込み済みVRM sceneのgeometry/material/textureをVRMUtils.deepDisposeで解放してからエラーを再throwする。
+- GPU context allocation failure時の残留を減らす回帰テストを追加。v344 context loss/restoration対応は継続。
+- build/cache/refresh v345へ更新。既存モデル・ユーザーデータには変更なし。CI確認待ち。
+
 ## 2026-11-23 — v344 VRM WebGLコンテキスト復帰
 - VRM canvasのWebGLコンテキスト喪失時はpreventDefaultして描画を停止し、ブラウザのcontext restoredイベント後に再開する。診断へ喪失状態を追加し、dispose時にイベントリスナーを解除。
 - 自動回帰テストを追加。build ID / Service Worker cache / refresh pageをv344へ更新。
