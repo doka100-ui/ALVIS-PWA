@@ -1,3 +1,9 @@
+## 2026-11-23 — WebGPU部分初期化時のdevice解放を実動作テスト化（development / v335）
+- `releaseCapturedAlvisModelDevices()`をNode上で実行し、初期化失敗時の個別destroy、destroy例外の記録、参照解放を検証。
+- engine.unload成功時は二重destroyせず、保持している重複参照だけを解放することを確認。
+- CI: offline-first regression / dashboard-image ともに成功。コミット `611698c3cc9947cf9103f0ec8237cd6938695473`、Actions run [45109216991](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45109216991)。
+- テストのみ変更。アプリ/WebGPU実装、モデル設定/キャッシュ、記憶/履歴/同期/バックアップ、本番`main`は変更なし。実機SafariのGPU停止・OOM復旧は未確認。
+
 ## 2026-11-23 — Service Workerのキャッシュ/オフライン動作を実行テスト化（development / v334）
 - `tests/offline-first.test.mjs`から実際の`service-worker.js`をNode VM上で実行し、Cache APIと通信を分離して検証。
 - 古いALVISアプリ/依存キャッシュだけを削除し、WebLLMのモデル重み・config・WASMキャッシュを保持することを確認。
