@@ -1,3 +1,8 @@
+## Latest Avatar Studio Japanese lip-sync viseme targets (2026-11-23)
+- Added a separate dark mouth-interior mesh with five named vowel morph targets: aa, ih, ou, ee, oh. Each has an independent preview slider and is exported as a mesh morph target, matching the existing ALVIS VRM runtime's standard vowel preset names.
+- This supplies a first lip-sync geometry target set, not a verified phoneme-to-voice animation. The mesh remains a prototype; actual GLB export/import, expression conversion to VRM, and iPad Safari playback are unverified.
+- No production VRM runtime, voice engine, memories/history, IndexedDB, sync, backups, or Qwen/Kokoro caches changed.
+
 ## Latest Avatar Studio eyebrow expression rig (2026-11-23)
 - Added separate left/right eyebrow meshes with named angry, sad, and surprised position morph targets. The existing expression sliders now drive both mouth and brow targets, so these preview expressions are no longer mouth-only.
 - Added source regression checks for eyebrow target dictionaries and slider wiring. The prototype is still not a finished face likeness or a VRM model; exported GLB deformation and visual quality require runtime inspection.

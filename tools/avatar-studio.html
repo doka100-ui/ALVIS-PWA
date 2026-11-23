@@ -42,6 +42,11 @@ button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;co
 <div class="control"><label for="sad">悲しみ <output id="sadValue">0.00</output></label><input id="sad" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="angry">怒り <output id="angryValue">0.00</output></label><input id="angry" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="control"><label for="surprised">驚き <output id="surprisedValue">0.00</output></label><input id="surprised" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="aa">母音 aa <output id="aaValue">0.00</output></label><input id="aa" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="ih">母音 ih <output id="ihValue">0.00</output></label><input id="ih" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="ou">母音 ou <output id="ouValue">0.00</output></label><input id="ou" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="ee">母音 ee <output id="eeValue">0.00</output></label><input id="ee" type="range" min="0" max="1" step=".01" value="0"></div>
+<div class="control"><label for="oh">母音 oh <output id="ohValue">0.00</output></label><input id="oh" type="range" min="0" max="1" step=".01" value="0"></div>
 <div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">3DモデルをGLB保存</button></div>
 <div class="status" id="status" role="status">準備完了。各スライダーで形状を調整できます。</div>
 <div class="notice">これは顔形状の制作土台です。現段階では18号の完成モデル・VRM・表情リグではありません。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
@@ -126,8 +131,21 @@ function makeFace(){
  const makeLipTarget=(shape)=>{const target=lipBase.clone();for(let i=0;i<target.count;i++){const x=target.getX(i),y=target.getY(i),edge=Math.abs(x);let next=y;if(shape==="happy")next+=edge*.42;else if(shape==="sad")next-=edge*.34;else if(shape==="surprised")next+=(1-edge)*.48;else if(shape==="angry")next+=edge*.20-(1-edge)*.12;target.setY(i,next);}return target;};
  const lipTargets=["happy","sad","angry","surprised"].map(makeLipTarget);
  lipGeometry.morphAttributes.position=lipTargets;
- lipGeometry.userData.targetNames=["happy","sad","angry","surprised"];
+ lipGeometry.userData.targetNames=["happy","sad","angry","surprised","aa","ih","ou","ee","oh"];
  const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3};upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
+ const mouthInteriorGeometry=new THREE.SphereGeometry(1,32,20);
+ const mouthInteriorBase=mouthInteriorGeometry.attributes.position.clone();
+ const visemeScales={aa:[1,3.8],ih:[1.45,1.55],ou:[.62,2.6],ee:[1.7,1.2],oh:[.82,3.1]};
+ const visemeTargets=Object.entries(visemeScales).map(([name,scale])=>{
+  const target=mouthInteriorBase.clone();
+  for(let i=0;i<target.count;i++){target.setX(i,target.getX(i)*scale[0]);target.setY(i,target.getY(i)*scale[1]);}
+  return target;
+ });
+ mouthInteriorGeometry.morphAttributes.position=visemeTargets;
+ mouthInteriorGeometry.userData.targetNames=Object.keys(visemeScales);
+ const mouthInterior=new THREE.Mesh(mouthInteriorGeometry,dark);
+ mouthInterior.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4};
+ mouthInterior.position.set(0,-.465,.625);mouthInterior.scale.set(.17,.045,.022);mouthInterior.name="mouth-viseme-interior";mouthGroup.add(mouthInterior);
  ell(mouthGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
  // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
  const rearBob=ell(faceGroup,hair,[0,-.20,-.34],[.82,.88,.43],48);
@@ -153,7 +171,7 @@ function makeFace(){
 }
 makeFace();
 const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize","blink","smile","sad","angry","surprised"];
-const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,smile:0,sad:0,angry:0,surprised:0};
+const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1,blink:0,smile:0,sad:0,angry:0,surprised:0,aa:0,ih:0,ou:0,ee:0,oh:0};
 function rebuild(){
  const values=Object.fromEntries(sliders.map(id=>[id,Number(document.getElementById(id).value)]));
  root.remove(faceGroup);faceGroup.traverse(o=>{if(o.geometry)o.geometry.dispose()});makeFace();
@@ -166,6 +184,8 @@ function rebuild(){
  const mouth=faceGroup.getObjectByName("facial-mouth");
  const upperLip=mouth.getObjectByName("upper-lip");
  if(upperLip?.morphTargetInfluences){upperLip.morphTargetInfluences[0]=values.smile;upperLip.morphTargetInfluences[1]=values.sad;upperLip.morphTargetInfluences[2]=values.angry;upperLip.morphTargetInfluences[3]=values.surprised;}
+ const mouthInterior=mouth.getObjectByName("mouth-viseme-interior");
+ if(mouthInterior?.morphTargetInfluences){["aa","ih","ou","ee","oh"].forEach((name,index)=>{mouthInterior.morphTargetInfluences[index]=values[name];});}
  mouth.position.y=(values.smile-values.sad)*.012;
  sliders.forEach(id=>document.getElementById(id+"Value").value=values[id].toFixed(2));
 }
