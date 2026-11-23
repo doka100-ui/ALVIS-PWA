@@ -1,3 +1,7 @@
+## Avatar Studio — tapered bob hair strands
+- Add a tapered tube helper for hair strands, replace uniform side-lock curves with tapered strands, and add a deep side-part seam plus seven rear bob flow strands.
+- Hair remains procedural geometry; final photoreal hair texture and exact reference match remain outstanding.
+
 ## Avatar runtime — chest breathing motion test
 - Browser smoke samples the normalized chest-bone Y position before and after 1.5 seconds and asserts a nonzero low-amplitude displacement, not merely the presence of a chest node.
 

@@ -101,6 +101,22 @@ const skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.
 let faceGroup;
 function ell(parent,material,pos,scale,seg=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
 function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,32,r,8,false),material);parent.add(m);return m}
+function taperedCurve(parent,points,r,material){
+ const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
+ const tubularSegments=32,radialSegments=6,geometry=new THREE.TubeGeometry(path,tubularSegments,r,radialSegments,false);
+ const position=geometry.attributes.position;
+ for(let row=0;row<=tubularSegments;row++){
+  const t=row/tubularSegments,center=path.getPointAt(t),taper=.08+.92*Math.pow(1-t,1.05);
+  for(let column=0;column<=radialSegments;column++){
+   const index=row*(radialSegments+1)+column;
+   const vertex=new THREE.Vector3().fromBufferAttribute(position,index);
+   vertex.sub(center).multiplyScalar(taper).add(center);
+   position.setXYZ(index,vertex.x,vertex.y,vertex.z);
+  }
+ }
+ geometry.computeVertexNormals();
+ const mesh=new THREE.Mesh(geometry,material);parent.add(mesh);return mesh;
+}
 function almondEye(parent,material,position,halfWidth,halfHeight){
  const shape=new THREE.Shape();
  shape.moveTo(-halfWidth,0);
@@ -273,12 +289,18 @@ function makeFace(){
  for(const side of [-1,1]){
   const lock=ell(faceGroup,hair,[side*.77,-.03,.05],[.22,.82,.34]);lock.rotation.z=side*-.08;lock.name=side<0?"hair-side-left":"hair-side-right";
   ell(faceGroup,hairLight,[side*.77,-.48,.10],[.20,.22,.30]);
-  curve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
-  curve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
+  taperedCurve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
+  taperedCurve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
   for(let strand=0;strand<4;strand++){
    const offset=strand*.035;
    curve(faceGroup,[[side*(.64+offset),.56,.42],[side*(.78+offset),.28,.43],[side*(.82+offset),-.05,.38],[side*(.78+offset*.5),-.36,.31],[side*(.67+offset*.4),-.58,.22]],.0065,strand%2?hair:hairLight);
   }
+ }
+ // Deep side-part seam and fine tapered strands across the crown and back of the bob.
+ taperedCurve(faceGroup,[[-.17,.94,.48],[-.12,1.02,.40],[-.02,1.03,.25],[.12,.97,.10]],.009,hair);
+ for(let strand=-3;strand<=3;strand++){
+  const x=strand*.18;
+  taperedCurve(faceGroup,[[x*.15,.80,-.34],[x*.55,.43,-.64],[x,-.10,-.75],[x*.92,-.48,-.61]],.010,strand%2?hairLight:hair);
  }
  // Neck and upper-body geometry are separate rigid parts for the humanoid rig.
  const neck=ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);neck.name="neck";
