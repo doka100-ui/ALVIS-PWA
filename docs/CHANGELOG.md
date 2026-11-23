@@ -1,3 +1,9 @@
+## 2026-11-23 — Qwen初期化中のWebGPU停止競合を実動作テスト化（development / v336）
+- `CreateMLCEngine`完了前にWebGPU device lostが発生した場合、古いエンジンを公開せずunloadして初期化を失敗扱いにする実際のガード分岐をテスト。
+- unload成功時の二重destroy回避、unload失敗時の捕捉済みGPUDevice個別解放フォールバック、エラー診断保持を確認。
+- CI: offline-first regression / dashboard-image ともに成功。コミット `1860c415f7d31e5bb456d5e229a0394a722359d6`、Actions run [45109978493](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45109978493)。
+- テストと資料のみ変更。アプリ実装、Service Worker、Qwen/Kokoroキャッシュ、記憶/履歴/同期/バックアップ、本番 `main` は変更なし。実機SafariのGPU停止/OOM復旧は未確認。
+
 ## 2026-11-23 — WebGPU部分初期化時のdevice解放を実動作テスト化（development / v335）
 - `releaseCapturedAlvisModelDevices()`をNode上で実行し、初期化失敗時の個別destroy、destroy例外の記録、参照解放を検証。
 - engine.unload成功時は二重destroyせず、保持している重複参照だけを解放することを確認。
