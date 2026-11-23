@@ -305,6 +305,14 @@ function makeFace(){
  // Neck and upper-body geometry are separate rigid parts for the humanoid rig.
  const neck=ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);neck.name="neck";
  const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;bust.name="upper-body";
+ // Exposed shoulders and cropped upper arms complete the bust silhouette.
+ // These remain rigid chest-attached meshes to keep the mobile rig inexpensive.
+ for(const side of [-1,1]){
+  const shoulder=ell(faceGroup,skin,[side*.66,-1.47,-.045],[.34,.29,.29],32);
+  shoulder.name=side<0?"shoulder-left":"shoulder-right";
+  const upperArm=ell(faceGroup,skin,[side*.94,-1.72,-.045],[.23,.42,.23],32);
+  upperArm.name=side<0?"upper-arm-left":"upper-arm-right";
+ }
  const tankStraps=mat(0xf8f6f2,.82),rib=mat(0xe4ddd6,.9);
  for(const side of [-1,1]){
   const strap=curve(faceGroup,[[side*.37,-1.40,.24],[side*.43,-1.52,.28],[side*.47,-1.68,.27]],.045,tankStraps);strap.name=side<0?"tank-strap-left":"tank-strap-right";
@@ -342,7 +350,7 @@ function makeFace(){
  }
  // Reparent visible parts while preserving their world transforms.
  faceGroup.updateMatrixWorld(true);rigRoot.updateMatrixWorld(true);
- const torsoNames=new Set(["neck","upper-body","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
+ const torsoNames=new Set(["neck","upper-body","shoulder-left","shoulder-right","upper-arm-left","upper-arm-right","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
  for(const part of [...faceGroup.children]){
   if(part===rigRoot)continue;
   (torsoNames.has(part.name)?chest:headBone).attach(part);

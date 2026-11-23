@@ -1852,3 +1852,8 @@
 - VRM 1.0メタデータの `avatarPermission` を `everyone` から `onlyAuthor` へ変更。`allowRedistribution: false` は維持。
 - 静的回帰テストとChromium/WebKitブラウザsmokeに利用権限の検証を追加。
 - ALVIS本体のVRM読み込み処理・ユーザーデータ保存処理は変更しない。
+
+
+## 2026-11-23 — 上半身シルエットを補強
+- 顔/首/衣服に加えて左右の肩と上腕の形状を追加し、胸部Humanoidボーンへ剛体アタッチ。スキニング複雑化を避け、iPad向けの軽量構成を維持。
+- 静的テストと書き出しVRMのノード存在検査を追加。
