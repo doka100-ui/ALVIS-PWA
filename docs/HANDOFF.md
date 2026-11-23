@@ -1,3 +1,7 @@
+## VRM prototype metadata permissions (2026-11-23)
+- VRM metadata is configured for avatar use, personal non-profit use, modification permitted, and redistribution disabled. This avoids marking the user-facing ALVIS prototype as author-only or unmodifiable.
+- These metadata flags are embedded usage declarations; they do not replace legal review or grant rights to any third-party reference material.
+
 ## VRM lookAt expression rig (2026-11-23)
 - Added named lookUp/lookDown/lookLeft/lookRight morph targets to both irises, pupils, and eye glints.
 - VRMC_vrm.lookAt now declares expression-based gaze with all four horizontal/vertical range maps; corresponding preset morphTargetBinds are generated from the exported mesh targets.

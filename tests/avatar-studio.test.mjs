@@ -54,3 +54,5 @@ check("VRM expression presets are generated from actual mesh target names", html
 
 check("both eyes export named VRM look-at morph targets", html.includes("addEyeGazeMorphTargets(irisMesh)") && html.includes("addEyeGazeMorphTargets(pupilMesh)") && html.includes('mesh.morphTargetDictionary={lookUp:0,lookDown:1,lookLeft:2,lookRight:3}'));
 check("VRM look-at expression presets and range maps are included", html.includes('lookAt:{type:"expression"') && ["lookUp","lookDown","lookLeft","lookRight"].every(name=>html.includes('"'+name+'"')));
+
+check("VRM metadata permits personal use and local modification without redistribution", html.includes('avatarPermission:"everyone"') && html.includes('commercialUsage:"personalNonProfit"') && html.includes('allowRedistribution:false') && html.includes('modification:"allowModification"'));

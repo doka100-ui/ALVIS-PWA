@@ -1,3 +1,7 @@
+## Avatar Studio — VRM metadata permissions
+- The prototype VRM meta declares avatar permission everyone, personalNonProfit commercial usage, allowModification, and allowRedistribution=false.
+- The metadata does not grant rights to third-party likenesses or reference assets.
+
 ## Avatar Studio — VRM lookAt expression support
 - Both eyes include named lookUp/lookDown/lookLeft/lookRight morph targets for iris, pupil, and glint geometry.
 - VRMC_vrm.lookAt is emitted in expression mode with horizontal/vertical range maps and matching preset morphTargetBinds.
