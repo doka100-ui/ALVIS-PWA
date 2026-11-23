@@ -1,3 +1,8 @@
+## Avatar Studio — GLB表情ターゲット名の明示
+- まばたき用の左右まぶたメッシュに `blink`、笑顔用の上唇メッシュに `happy` の morphTargetDictionary を明示する。
+- geometry.userData.targetNames のみへ依存せず、GLTFExporterが参照するMesh側の辞書とindexを一致させる。
+- 自動テストはソース設定を検査する。実GLBの独立ビューア読込・VRM変換・iPad Safari動作は別途実機検証が必要。
+
 ## v347 — 上半身・顔のみVRMの自動フレーミング
 - Head/Chest等のHumanoidボーンがあれば上半身を優先して構図を決め、顔だけ等で上半身アンカーがない場合はVRMシーンの表示境界からカメラ距離・注視中心を自動調整する。
 - 上半身/顔のみのクロップモデルでも固定全身カメラに依存しない。画面サイズ変更時も再計算する。

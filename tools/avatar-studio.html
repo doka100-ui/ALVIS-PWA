@@ -94,7 +94,7 @@ function makeFace(){
   lidGeometry.setAttribute("position",lidBase);
   lidGeometry.morphAttributes.position=[lidClosed];
   lidGeometry.userData.targetNames=["blink"];
-  const lid=new THREE.Mesh(lidGeometry,skin);lid.position.set(x,.34,.785);lid.scale.set(.225,.12,.035);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
+  const lid=new THREE.Mesh(lidGeometry,skin);lid.morphTargetDictionary={blink:0};lid.position.set(x,.34,.785);lid.scale.set(.225,.12,.035);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
@@ -109,7 +109,7 @@ function makeFace(){
  for(let i=0;i<lipSmile.count;i++){const x=lipSmile.getX(i),y=lipSmile.getY(i);lipSmile.setY(i,y+Math.abs(x)*.42);}
  lipGeometry.morphAttributes.position=[lipSmile];
  lipGeometry.userData.targetNames=["happy"];
- const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
+ const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0};upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
  ell(mouthGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
  // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
  const rearBob=ell(faceGroup,hair,[0,-.20,-.34],[.82,.88,.43],48);

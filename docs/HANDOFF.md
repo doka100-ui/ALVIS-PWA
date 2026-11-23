@@ -1,3 +1,8 @@
+## Latest Avatar Studio GLB morph naming fix (2026-11-23)
+- Explicitly assign semantic morph target dictionaries to eyelid meshes (blink) and upper-lip mesh (happy), rather than relying only on geometry userData targetNames. This aligns Three.js mesh morph metadata with the names consumed by GLTFExporter.
+- Added regression coverage for explicit names. This is still source/CI verification only; actual GLB export and import in an independent viewer, VRM conversion, and iPad Safari runtime remain unverified.
+- No main app runtime, model files, IndexedDB, memories/history, sync, backups, Qwen/Kokoro caches, or production main changed.
+
 ## Latest 18号 avatar generation / rigging candidate review (2026-11-23)
 - MetaPerson Creator advertises one free photo-based rigged GLB avatar, but its EULA says accounts are only for business entities, not individuals. Its privacy policy permits image data use for product improvement/computer-vision training; its output is GLB/FBX without guaranteed VRM facial expressions. Rejected for personal ALVIS use; no upload.
 - ImageTo3D advertises free daily multi-image GLB generation, but its privacy policy says uploads are sent to selected third-party inference providers and uploads/outputs remain stored while the account is active. No facial rig/VRM guarantee. Rejected for 18号 references; no upload.
