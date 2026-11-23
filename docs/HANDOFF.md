@@ -1,3 +1,7 @@
+## iPad向けジオメトリを75k三角形以下へ軽量化 (2026-11-23)
+- 直近のVRMは91,136 trianglesで100k上限には収まるが、iPad余力を確保するためSphereGeometry/TubeGeometryの分割数を見直し、目の細部やシルエットを保ちつつ目標を75,000 triangles未満へ引き下げ。
+- Browser smokeの受け入れ上限も75kへ変更。実測三角形数をCIログに出し、実機Safari負荷は別途確認する。
+
 # ALVIS 開発引き継ぎ（現行）
 
 更新: 2026-11-23

@@ -1,3 +1,7 @@
+## Avatar Studio — tighter mobile geometry budget
+- Reduce non-silhouette sphere/tube subdivisions while retaining the face outline, almond-eye geometry, and fine details.
+- Enforce under 75,000 triangles in the exported VRM (previous cap 100,000) and report the actual count in browser smoke. Real iPad Safari profiling remains required.
+
 # ALVIS PWA 現行仕様
 
 更新: 2026-11-23

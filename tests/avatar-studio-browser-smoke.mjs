@@ -94,7 +94,7 @@ try {
     const count=primitive.indices!==undefined?gltf.accessors[primitive.indices]?.count:gltf.accessors[primitive.attributes.POSITION]?.count;
     return subtotal+(count||0)/(primitive.indices!==undefined?3:3);
   },0),0);
-  assert.ok(triangleCount>0&&triangleCount<100000,"VRM must stay below the 100k-triangle mobile performance budget; got "+triangleCount);
+  assert.ok(triangleCount>0&&triangleCount<75000,"VRM must stay below the 75k-triangle mobile performance budget; got "+triangleCount);
   console.log("PASS mobile geometry budget: "+triangleCount+" triangles");
 
   assert.ok((gltf.images||[]).length>0 && (gltf.textures||[]).length>0, "VRM must embed its locally generated skin texture");

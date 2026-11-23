@@ -99,11 +99,11 @@ const skinTexture=makeSkinTexture();
 const skin=mat(0xffffff,.74);skin.map=skinTexture;skin.bumpMap=skinTexture;skin.bumpScale=.0025;skin.needsUpdate=true;
 const skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),irisRing=mat(0x526d7d,.36),irisFiber=mat(0xc0d1d6,.38),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),lipHighlight=mat(0xe7a0a0,.48),lipOutline=mat(0x985c62,.7),dark=mat(0x493a36,.8),lashMat=mat(0x4b4140,.76),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0x927c69,.82);
 let faceGroup;
-function ell(parent,material,pos,scale,seg=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
-function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,32,r,8,false),material);parent.add(m);return m}
+function ell(parent,material,pos,scale,seg=24){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
+function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,24,r,6,false),material);parent.add(m);return m}
 function taperedCurve(parent,points,r,material){
  const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
- const tubularSegments=32,radialSegments=6,geometry=new THREE.TubeGeometry(path,tubularSegments,r,radialSegments,false);
+ const tubularSegments=24,radialSegments=5,geometry=new THREE.TubeGeometry(path,tubularSegments,r,radialSegments,false);
  const position=geometry.attributes.position;
  for(let row=0;row<=tubularSegments;row++){
   const t=row/tubularSegments,center=path.getPointAt(t),taper=.08+.92*Math.pow(1-t,1.05);
@@ -166,7 +166,7 @@ function addEyeGazeMorphTargets(mesh){
 function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
- const geo=new THREE.SphereGeometry(1,64,48);const pos=geo.attributes.position;
+ const geo=new THREE.SphereGeometry(1,48,36);const pos=geo.attributes.position;
  for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.055*Math.exp(-Math.pow((y-.02)/.24,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));const cheekbone=.028*Math.exp(-Math.pow((Math.abs(x)-.58)/.20,2))*Math.exp(-Math.pow((y-.02)/.25,2));const chin=.018*Math.exp(-Math.pow(x/.38,2))*Math.exp(-Math.pow((y+.82)/.14,2));pos.setXYZ(i,x*taper*cheek,y,z*depth+cheekbone+chin);}
  geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
  // ears
@@ -179,9 +179,9 @@ function makeFace(){
   almondEye(eyesGroup,white,[x,.34,.675],.225,.105);
   const irisMesh=ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";addEyeGazeMorphTargets(irisMesh);
   const pupilMesh=ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";addEyeGazeMorphTargets(pupilMesh);
-  const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,36),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";eyesGroup.add(irisBorder);
-  for(let ray=0;ray<14;ray++){
-   const angle=ray*Math.PI*2/14;
+  const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,24),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";eyesGroup.add(irisBorder);
+  for(let ray=0;ray<12;ray++){
+   const angle=ray*Math.PI*2/12;
    const r1=.045,r2=.061;
    const a=[x+Math.cos(angle)*r1,.34+Math.sin(angle)*r1*1.05,.761];
    const b=[x+Math.cos(angle)*r2,.34+Math.sin(angle)*r2*1.05,.759];
@@ -223,7 +223,7 @@ function makeFace(){
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
- const noseGeometry=new THREE.SphereGeometry(1,48,32),nosePosition=noseGeometry.attributes.position;
+ const noseGeometry=new THREE.SphereGeometry(1,36,24),nosePosition=noseGeometry.attributes.position;
  for(let i=0;i<nosePosition.count;i++){
   const x=nosePosition.getX(i),y=nosePosition.getY(i),z=nosePosition.getZ(i);
   const tip=Math.exp(-Math.pow((y+.43)/.24,2));
@@ -240,7 +240,7 @@ function makeFace(){
  curve(noseGroup,[[-.045,-.225,.79],[0,-.238,.80],[.045,-.225,.79]],.0035,skinShade);
  // lips
  const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
- const lipGeometry=new THREE.SphereGeometry(1,32,20);
+ const lipGeometry=new THREE.SphereGeometry(1,24,16);
  const lipBase=lipGeometry.attributes.position.clone();
  const makeLipTarget=(shape)=>{const target=lipBase.clone();for(let i=0;i<target.count;i++){const x=target.getX(i),y=target.getY(i),edge=Math.abs(x);let next=y;if(shape==="happy")next+=edge*.42;else if(shape==="sad")next-=edge*.34;else if(shape==="surprised")next+=(1-edge)*.48;else if(shape==="angry")next+=edge*.20-(1-edge)*.12;else if(shape==="relaxed")next+=edge*.08;target.setY(i,next);}return target;};
  const lipTargets=["happy","sad","angry","surprised","relaxed"].map(makeLipTarget);
@@ -279,7 +279,7 @@ function makeFace(){
  // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
  const rearBob=ell(faceGroup,hair,[0,-.20,-.34],[.82,.88,.43],48);
  rearBob.name="hair-rear-bob";
- const cap=new THREE.Mesh(new THREE.SphereGeometry(1,48,32,0,Math.PI*2,0,Math.PI*.57),hair);
+ const cap=new THREE.Mesh(new THREE.SphereGeometry(1,36,24,0,Math.PI*2,0,Math.PI*.57),hair);
  cap.scale.set(.94,1.28,.78);cap.position.set(0,.25,-.015);cap.name="hair-crown";faceGroup.add(cap);
  const fringe=ell(faceGroup,hairLight,[-.18,.72,.49],[.57,.20,.28]);fringe.rotation.z=-.24;fringe.rotation.y=-.15;fringe.name="hair-swept-fringe";
  // Fine curved ribbons create a visible side part and layered front strands without a solid helmet look.
