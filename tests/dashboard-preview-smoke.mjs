@@ -4,7 +4,7 @@ import { chromium, webkit } from "playwright";
 
 const previewUrl = process.env.ALVIS_PREVIEW_URL;
 assert.ok(previewUrl, "ALVIS_PREVIEW_URL must point to this commit's Cloudflare Pages preview");
-const expectedPages = ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage"];
+const expectedPages = ["chatPage", "candidatePage", "memoryPage", "historyPage", "syncPage", "devicePage"];
 
 async function waitForDashboardImage(page) {
   await page.waitForFunction(() => {
@@ -117,13 +117,15 @@ async function verifyBrowser(browserType, verifyOffline) {
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
-    const refreshResponse = await page.request.get(new URL("refresh-v330.html", previewUrl).href);
+    const refreshResponse = await page.request.get(new URL("refresh-v331.html", previewUrl).href);
     assert.ok(refreshResponse.ok(), browserName + ": v330 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
     assert.ok(refreshHtml.includes("alvis-cache-v330-integrated"), browserName + ": refresh page must verify the v330 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=330"), browserName + ": refresh page must return to the integrated app only after v330 activation");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=331"), browserName + ": refresh page must return to the integrated app only after v331 activation");
+    assert.ok((await page.locator("#generateDevelopmentHandoff").count())===1, browserName + ": development handoff generator must exist");
+    assert.ok((await page.locator("#developmentHandoffOutput").count())===1, browserName + ": handoff output must exist");
 
     const deferredImageState = await page.locator(".alvis-reference-image").evaluate(image => ({
       loading: image.loading,
@@ -324,7 +326,7 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v330.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v331.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
