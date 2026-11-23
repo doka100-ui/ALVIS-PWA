@@ -89,9 +89,6 @@ function makeFace(){
   const lidBase=lidGeometry.attributes.position.clone();
   const lidClosed=lidGeometry.attributes.position.clone();
   for(let i=0;i<lidClosed.count;i++)lidClosed.setY(i,lidClosed.getY(i));
-  lidGeometry.attributes.position.array.forEach((_,i)=>{});
-  lidGeometry.morphAttributes.position=[lidClosed];
-  lidGeometry.morphAttributes.position[0].needsUpdate=true;
   // The target is a full oval lid; the base mesh is a narrow resting edge.
   for(let i=0;i<lidBase.count;i++)lidBase.setY(i,lidBase.getY(i)*.012);
   lidGeometry.setAttribute("position",lidBase);
