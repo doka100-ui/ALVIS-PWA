@@ -1,7 +1,7 @@
 ## VRM cropped-avatar camera framing (v347)
 - After parsing the VRM scene, update its world matrices and calculate a THREE.Box3 from the visible scene. Keep a safe default center/size if the bounds are empty.
 - Derive camera distance from vertical and horizontal FOV using the host aspect ratio, with bounded min/max distance. Re-run the fit during ResizeObserver callbacks.
-- Use the measured scene center for camera lookAt and the default look-at target. This supports full-body, upper-body, and head-only VRM scene bounds without changing the VRM file or stored Blob.
+- Use the measured scene center for camera lookAt; use the normalized head bone for default gaze when present, otherwise the measured center. This supports full-body, upper-body, and head-only VRM scene bounds without changing the VRM file or stored Blob.
 
 ## VRM WebGL初期化失敗時の解放（v345）
 - GLTF/VRM解析後のWebGLRenderer生成をtry/catchで保護する。
