@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import vm from "node:vm";
 
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
@@ -8,8 +8,8 @@ const appStyles = app + "\n" + appCss;
 const sw = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../manifest-integrated.json", import.meta.url), "utf8"));
 const refresh = await readFile(new URL("../refresh.html", import.meta.url), "utf8");
-const refresh292 = await readFile(new URL("../refresh-v292.html", import.meta.url), "utf8");
-const refresh330 = await readFile(new URL("../refresh-v330.html", import.meta.url), "utf8");
+const rootFiles = await readdir(new URL("../", import.meta.url));
+assert.deepEqual(rootFiles.filter(name => /^refresh-v\d+\.html$/.test(name)), [], "version-specific refresh pages must not return to the published root");
  
 // v276: offline Face ID unlock uses an iOS platform passkey PRF to wrap
 // the existing vault password; the AES-GCM vault format and password fallback remain intact.
@@ -95,21 +95,13 @@ assert.match(refresh,/timeout=25000/,"worker activation must have a timeout");
 assert.match(refresh,/registration\.installing\|\|registration\.waiting/);
 assert.match(refresh,/location\.replace\(target\)/);
 assert.match(refresh,/ALVIS_GET_BUILD_INFO/);
-assert.match(refresh,/alvis-cache-v290-integrated/);
-assert.match(refresh,/refresh=290/);
-assert.match(refresh,/Workerのバージョン応答がありません/);
-assert.match(refresh,/index-integrated\.html\?refresh=290/);
-assert.doesNotMatch(refresh,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
-
-
-
-// v292: use a never-before-cached URL to escape stale refresh.html responses served by old workers.
-assert.match(refresh292,/alvis-cache-v292-integrated/);
-assert.match(refresh292,/refresh=292/);
-assert.match(refresh292,/registration\.update\(\)/);
-assert.match(refresh292,/ALVIS_GET_BUILD_INFO/);
-assert.match(refresh292,/location\.replace\(target\)/);
-assert.doesNotMatch(refresh292,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
+assert.match(refresh,/alvis-cache-v\\d\+-integrated/,"the shared refresh page must accept the active ALVIS build without pinning one version");
+assert.match(refresh,/location\\.replace\\(target\\)/);
+assert.match(refresh,/const target="\\.\\/index-integrated\\.html"/,"the shared refresh page must always return to the integrated app");
+assert.match(refresh,/retry\\.addEventListener\\("click",update\\)/,"the refresh page must offer a retry after an update error");
+assert.match(refresh,/open\\.hidden=false/,"the refresh page must offer a direct app link if updating fails");
+assert.doesNotMatch(refresh,/alvis-cache-v290-integrated|alvis-cache-v331-integrated|alvis-cache-v347-integrated|refresh=\\d+/,"the shared refresh page must not contain version-pinned checks or URLs");
+assert.doesNotMatch(refresh,/caches\\.delete|deleteDatabase|localStorage\\.clear|indexedDB\\.deleteDatabase/,"refresh must never clear user data or model caches");
 
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
@@ -134,12 +126,6 @@ assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
 assert.match(sw,/alvis-cache-v347-integrated/);
-assert.match(refresh330,/alvis-cache-v330-integrated/);
-assert.match(refresh330,/refresh=330/);
-assert.match(refresh330,/registration\.update\(\)/);
-assert.match(refresh330,/ALVIS_GET_BUILD_INFO/);
-assert.match(refresh330,/location\.replace\(target\)/);
-assert.doesNotMatch(refresh330,/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
