@@ -174,12 +174,12 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
     const refreshResponse = await page.request.get(new URL("refresh-v341.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v340 Service Worker refresh page must return HTTP 200");
+    assert.ok(refreshResponse.ok(), browserName + ": v341 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v340-integrated"), browserName + ": refresh page must verify the v340 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=340"), browserName + ": refresh page must return to the integrated app only after v340 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v341-integrated"), browserName + ": refresh page must verify the v341 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=341"), browserName + ": refresh page must return to the integrated app only after v341 activation");
     assert.ok((await page.locator("#generateDevelopmentHandoff").count())===1, browserName + ": development handoff generator must exist");
     assert.ok((await page.locator("#developmentHandoffOutput").count())===1, browserName + ": handoff output must exist");
 
@@ -396,11 +396,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v340.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v341.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForURL(url =>
       url.pathname.endsWith("/index-integrated.html") &&
-      url.searchParams.get("refresh") === "340",
+      url.searchParams.get("refresh") === "341",
       { timeout: 60000 }
     );
     const state = await page.evaluate(async () => {
@@ -422,9 +422,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v340-integrated",
-      browserName + ": refresh flow must verify the actual v340 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v340 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v341-integrated",
+      browserName + ": refresh flow must verify the actual v341 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v341 before redirect");
   } finally {
     await browser.close();
   }
