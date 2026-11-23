@@ -99,6 +99,10 @@ try {
 
   assert.ok((gltf.images||[]).length>0 && (gltf.textures||[]).length>0, "VRM must embed its locally generated skin texture");
   assert.ok((gltf.materials||[]).some(material=>material.pbrMetallicRoughness?.baseColorTexture?.index!==undefined), "VRM must assign the skin base-color texture to a PBR material");
+  const skinMaterials=(gltf.materials||[]).filter(material=>material.pbrMetallicRoughness?.baseColorTexture?.index!==undefined);
+  assert.ok(skinMaterials.some(material=>material.normalTexture?.index!==undefined), "VRM must export the generated skin tangent-space normal map");
+  assert.ok(skinMaterials.some(material=>material.pbrMetallicRoughness?.metallicRoughnessTexture?.index!==undefined), "VRM must export the generated skin roughness map through the metallic-roughness texture");
+
   for (const name of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
     assert.ok(targetNames.includes(name), "VRM must retain named morph target: "+name+"; found "+targetNames.join(", "));
   }
