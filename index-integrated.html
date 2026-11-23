@@ -4844,11 +4844,11 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
           settled=true;
           window.clearTimeout(timeout);
           if(error)reject(error);else resolve();
+          return true;
         };
         const timeout=window.setTimeout(()=>finish(new Error("3D model load timed out.")),30000);
         viewer.addEventListener("load",()=>{
-          setStatus("ALVIS / 3D MODEL READY");
-          finish();
+          if(finish())setStatus("ALVIS / 3D MODEL READY");
         },{once:true});
         viewer.addEventListener("error",()=>finish(new Error("3D model failed to load.")),{once:true});
         host.replaceChildren(viewer);
