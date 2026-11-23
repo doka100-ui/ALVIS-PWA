@@ -1,3 +1,8 @@
+## VRMアバターのGPUリソース解放（v340）
+- VRM runtimeのdispose()は描画ループ/イベント/ResizeObserverを停止・解除した後、three-vrm 3.5.5の `VRMUtils.deepDispose(vrm.scene)` でモデル配下のgeometry・material・textureを解放し、その後WebGLRendererをdispose/forceContextLossする。
+- モデル差し替え時は毎回新しいBlobからGLTFを解析するため、破棄対象のVRM sceneは他のアバターと共有しない。保存済みBlob/IndexedDBはそのまま保持する。
+- 自動テストはdeepDisposeの呼び出しとrenderer破棄より前であることを確認する。GPUメモリが実際に回収される量・タイミングはSafari実機で測定が必要。
+
 ## 完成見本の疑似要素オーバーレイ除去（v275）
 - 透明なメニュー/操作領域を担う左右の `.hud-side-left/right` に残っていた旧ガラス背景（`::before`）と棒グラフ（`::after`）をALVIS静止画モードだけ非表示にする。画像の色・明るさ・パネル・球体・リング・投影装置・台座は画像バイナリそのまま。
 - Playwrightは左右のbefore/after contentがすべてnoneであること、画像とステージのopacityが1であることを確認する。
