@@ -1093,6 +1093,42 @@ assert.match(app,/catch\(error\)\{[\s\S]*?alvisStoragePersistenceStatus="要求�
 assert.match(sw,/alvis-cache-v\d+-integrated/,"v230 app shell must use refreshed cache");
 
 
+// v332: exercise persistent-storage outcomes instead of relying only on source-pattern checks.
+const persistenceStart=app.indexOf("function requestAlvisStoragePersistence(){");
+const persistenceEnd=app.indexOf("\n\nconst $",persistenceStart);
+assert.ok(persistenceStart>=0&&persistenceEnd>persistenceStart,"storage persistence helper must be isolated for behavioral tests");
+const persistenceSource=app.slice(persistenceStart,persistenceEnd);
+const makePersistenceHarness=new Function("navigator",`
+  let alvisStoragePersistenceStatus="未要求";
+  const diagnosticTraces=[];
+  function persistAlvisDiagnosticState(){}
+  function recordAlvisModelLoadTrace(message){diagnosticTraces.push(message);}
+  ${persistenceSource}
+  return {
+    run:requestAlvisStoragePersistence,
+    get status(){return alvisStoragePersistenceStatus;},
+    get traces(){return diagnosticTraces;}
+  };
+`);
+const grantedPersistence=makePersistenceHarness({storage:{persist:()=>Promise.resolve(true)}});
+assert.equal(await grantedPersistence.run(),true);
+assert.equal(grantedPersistence.status,"ブラウザから許可済み");
+const deniedPersistence=makePersistenceHarness({storage:{persist:()=>Promise.resolve(false)}});
+assert.equal(await deniedPersistence.run(),false);
+assert.equal(deniedPersistence.status,"ブラウザが未許可");
+const rejectedPersistence=makePersistenceHarness({storage:{persist:()=>Promise.reject(new Error("permission denied"))}});
+assert.equal(await rejectedPersistence.run(),false);
+assert.match(rejectedPersistence.status,/要求失敗（permission denied）/);
+const thrownPersistence=makePersistenceHarness({storage:{persist:()=>{throw new Error("synchronous failure");}}});
+assert.equal(await thrownPersistence.run(),false);
+assert.match(thrownPersistence.status,/要求失敗（synchronous failure）/);
+const unsupportedPersistence=makePersistenceHarness({});
+assert.equal(await unsupportedPersistence.run(),false);
+assert.equal(unsupportedPersistence.status,"このブラウザでは要求非対応");
+for(const harness of [grantedPersistence,deniedPersistence,rejectedPersistence,thrownPersistence,unsupportedPersistence]){
+  assert.ok(harness.traces.length>0,"every storage outcome must leave a diagnostic trace");
+}
+
 // v231: make engine shutdown idempotent and reject queued inference after shutdown begins.
 const serializedInferenceStart=app.indexOf("function serializeAlvisInference(engine){");
 const serializedInferenceEnd=app.indexOf("\n// WebGPU device lifecycle diagnostics.",serializedInferenceStart);
