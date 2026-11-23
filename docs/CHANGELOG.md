@@ -1,3 +1,8 @@
+## 2026-11-23 — v344 VRM WebGLコンテキスト復帰
+- VRM canvasのWebGLコンテキスト喪失時はpreventDefaultして描画を停止し、ブラウザのcontext restoredイベント後に再開する。診断へ喪失状態を追加し、dispose時にイベントリスナーを解除。
+- 自動回帰テストを追加。build ID / Service Worker cache / refresh pageをv344へ更新。
+- 実機iPad SafariでのGPU復帰成功は未確認。保存済みモデルやユーザーデータは変更なし。
+
 ## 2026-11-23 — v343 アバター差し替え時の既存モデル保護（development）
 - VRM/GLBアップロードを「表示成功後に保存」へ変更。失敗時は以前のIndexedDB保存モデルを復元し、無効なファイルで既存モデルを上書きしない。
 - VRM/GLBそれぞれに保存順序と既存モデル復元の回帰テストを追加。
