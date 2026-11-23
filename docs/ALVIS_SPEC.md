@@ -1,3 +1,6 @@
+## Avatar runtime diagnostics — split blink
+- Diagnostics panel reports independent left/right wink support only when both VRM blinkLeft and blinkRight expressions are available. Existing single blink support remains separate.
+
 ## Avatar Studio — continuous sculpted nose
 - Replace separate bridge/tip ellipsoid placeholders with one continuous deformed sphere surface whose width/depth profile transitions from the bridge to the tip; retain independent alar wings and nostril shadows.
 - Visual profile match remains subject to 3D preview review against the approved turnaround sheet.
