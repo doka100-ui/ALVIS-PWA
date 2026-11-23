@@ -2,7 +2,7 @@
 - VRM runtimeのdispose()で、アニメーション停止・イベント解除後にthree-vrm 3.5.5の `VRMUtils.deepDispose(vrm.scene)` を呼び、モデル配下のgeometry/material/textureをrenderer破棄前に解放するようにした。
 - VRM差し替えや表示終了を繰り返した際のGPUリソース残留リスクを減らす変更。保存済みBlob/IndexedDBやモデルファイル自体は削除しない。
 - v340へ更新。Service Worker cache `alvis-cache-v340-integrated`、更新ページ `refresh-v340.html`。回帰テストに解放順序の確認を追加。
-- GitHub Actionsのv340 preview browser smokeは実行結果確認待ち。実機iPad SafariでのGPUメモリ回収量は未測定。
+- GitHub Actions preview browser smoke run `45117389378` はCloudflare Pages preview上のChromium/WebKitともに成功（2026-11-23）。これはプレビュー画面のブラウザ検証であり、実機iPad SafariでのGPUメモリ回収量・モデル差し替え時の実GPU安定性は未測定。
 
 ## Preview smoke test version alignment — 2026-11-23
 - v339ブラウザ検証の古いv338/331期待値をv339へ修正し、最新の検証run `45116854319` はChromium/WebKitとも成功。旧runの失敗はテストの古い遷移条件によるもので、アプリ本体の失敗ではなかった。
