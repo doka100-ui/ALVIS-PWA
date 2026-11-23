@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#061426">
   <title>ALVIS 更新</title>
   <style>
     :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#061426;color:#eaf6ff}
@@ -12,30 +13,33 @@
     h1{font-size:20px;letter-spacing:.08em;margin:0 0 18px}
     p{line-height:1.7;color:#c6dced}
     #status{color:#8de4ff;font-weight:600}
-    button{width:100%;padding:14px;border:1px solid #4a9bc5;border-radius:10px;background:#123b5b;color:#fff;font-size:16px}
+    button,a{display:block;width:100%;box-sizing:border-box;text-align:center;padding:14px;border:1px solid #4a9bc5;border-radius:10px;background:#123b5b;color:#fff;font-size:16px;text-decoration:none}
+    a{margin-top:10px}
   </style>
 </head>
 <body>
 <main>
   <h1>ALVIS SYSTEM UPDATE</h1>
-  <p id="status">Service Workerの更新を確認しています…</p>
-  <p>記憶・会話履歴・Qwenモデルの保存データには触れません。</p>
+  <p id="status">ALVISの更新状態を確認しています…</p>
+  <p>記憶・会話履歴・暗号化バックアップ・Qwenモデルの保存データは消去しません。</p>
   <button id="retry" type="button" hidden>もう一度確認</button>
+  <a id="open" href="./index-integrated.html" hidden>ALVISを開く</a>
 </main>
 <script>
 (() => {
   const status=document.getElementById("status");
   const retry=document.getElementById("retry");
-  const target="./index-integrated.html?refresh=290";
+  const open=document.getElementById("open");
+  const target="./index-integrated.html";
   const withTimeout=(promise,timeout,message)=>Promise.race([
     promise,
     new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),timeout))
   ]);
-  const wait=(worker,timeout=25000)=>new Promise((resolve,reject)=>{
+  const waitForActivation=(worker,timeout=30000)=>new Promise((resolve,reject)=>{
     if(worker.state==="activated"){resolve();return;}
     if(worker.state==="redundant"){reject(new Error("新しいWorkerの準備に失敗しました"));return;}
     let done=false;
-    const finish=(error)=>{
+    const finish=error=>{
       if(done)return;done=true;clearTimeout(timer);
       worker.removeEventListener("statechange",change);
       error?reject(error):resolve();
@@ -44,64 +48,51 @@
       if(worker.state==="activated")finish();
       else if(worker.state==="redundant")finish(new Error("新しいWorkerの準備に失敗しました"));
     };
-    const timer=setTimeout(()=>finish(new Error("新しいWorkerの有効化に時間がかかっています。再試行してください")),timeout);
+    const timer=setTimeout(()=>finish(new Error("更新の有効化に時間がかかっています。再試行してください")),timeout);
     worker.addEventListener("statechange",change);change();
   });
+  async function getBuildInfo(worker){
+    return withTimeout(new Promise((resolve,reject)=>{
+      const channel=new MessageChannel();
+      const timer=setTimeout(()=>{channel.port1.close();reject(new Error("Workerから応答がありません"));},3000);
+      channel.port1.onmessage=event=>{
+        clearTimeout(timer);channel.port1.close();
+        resolve(event.data?.cacheName||"");
+      };
+      try{worker.postMessage({type:"ALVIS_GET_BUILD_INFO"},[channel.port2]);}
+      catch(error){clearTimeout(timer);channel.port1.close();reject(error);}
+    }),3500,"Workerの確認がタイムアウトしました");
+  }
   async function update(){
-    retry.hidden=true;
+    retry.hidden=true;open.hidden=true;
     try{
       if(!("serviceWorker" in navigator))throw new Error("このブラウザはService Workerに対応していません");
       status.textContent="登録済みWorkerを確認しています…";
-      let registration=await withTimeout(
-        navigator.serviceWorker.getRegistration("./"),
-        8000,
-        "登録確認に時間がかかっています。通信状態を確認して再試行してください"
-      );
+      let registration=await withTimeout(navigator.serviceWorker.getRegistration("./"),8000,"登録確認がタイムアウトしました");
       if(!registration)registration=await withTimeout(
         navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}),
-        12000,
-        "Worker登録に時間がかかっています。再試行してください"
+        12000,"Worker登録がタイムアウトしました"
       );
-      status.textContent="最新のアプリ更新を取得しています…";
-      await withTimeout(
-        registration.update(),
-        15000,
-        "更新確認がタイムアウトしました。通信状態を確認して再試行してください"
-      );
-      let worker=registration.installing||registration.waiting;
-      if(!worker){
-        await new Promise(resolve=>{
-          const timer=setTimeout(resolve,4000);
-          registration.addEventListener("updatefound",()=>{clearTimeout(timer);resolve();},{once:true});
-        });
-        worker=registration.installing||registration.waiting;
-      }
-      if(worker){
+      status.textContent="最新の更新を取得しています…";
+      await withTimeout(registration.update(),20000,"更新確認がタイムアウトしました。通信状態を確認してください");
+      let installing=registration.installing||registration.waiting;
+      if(installing){
         status.textContent="新しいALVISを有効化しています…";
-        await wait(worker);
+        await waitForActivation(installing);
       }else if(!registration.active||registration.active.state!=="activated"){
-        throw new Error("新しいWorkerを確認できませんでした。再試行してください");
+        throw new Error("有効なALVIS Workerを確認できませんでした");
       }
-      status.textContent="新しいWorkerの実バージョンを確認しています…";
-      const activeWorker=registration.active;
-      if(!activeWorker||activeWorker.state!=="activated")throw new Error("更新後のWorkerが有効化されていません");
-      const workerVersion=await withTimeout(new Promise((resolve,reject)=>{
-        const channel=new MessageChannel();
-        channel.port1.onmessage=event=>{
-          channel.port1.close();
-          resolve(event.data?.cacheName||"");
-        };
-        try{activeWorker.postMessage({type:"ALVIS_GET_BUILD_INFO"},[channel.port2]);}
-        catch(error){channel.port1.close();reject(error);}
-      }),3000,"Workerのバージョン応答がありません");
-      if(workerVersion!=="alvis-cache-v290-integrated"){
-        throw new Error("最新版を確認できません。検出したWorker："+(workerVersion||"不明"));
+      const active=registration.active;
+      if(!active||active.state!=="activated")throw new Error("更新後のWorkerが有効化されていません");
+      const cacheName=await getBuildInfo(active);
+      if(!/^alvis-cache-v\d+-integrated$/.test(cacheName)){
+        throw new Error("ALVISのビルド情報を確認できませんでした（"+(cacheName||"応答なし")+"）");
       }
-      status.textContent="v290を確認しました。ALVISを開いています…";
+      status.textContent="最新のALVISを確認しました。アプリを開いています…";
       location.replace(target);
     }catch(error){
-      status.textContent="更新できませんでした："+String(error?.message||error);
-      retry.hidden=false;
+      status.textContent="自動更新を確認できませんでした："+String(error?.message||error);
+      retry.hidden=false;open.hidden=false;
     }
   }
   retry.addEventListener("click",update);

@@ -21,10 +21,13 @@
 ## URLの正本（最優先・旧URLとの取り違え防止）
 - **現在の開発版・ALVISモード/アバターモード統合画面:** https://development.alvis-pwa.pages.dev/index-integrated.html
 - **18号 Avatar Studio（制作・調整ページ）:** https://development.alvis-pwa.pages.dev/tools/avatar-studio.html
+- **共通更新確認ページ（バージョン固定URLを作らない）:** https://development.alvis-pwa.pages.dev/refresh.html
 - 上記2つを開発作業・ユーザー案内時の正本とする。URLを回答する前に、この節とdevelopmentブランチの最新デプロイ状態を確認する。
 - https://alvis-pwa.pages.dev/ は旧来の本番URL。開発版の案内として使用しない。ルートURLだけを案内せず、必ず index-integrated.html を含む統合画面URLを使う。
 - deployment-id付きのPreview URLはコミット単位の一時URL。ユーザーが「最新版」と指定した場合、最新コミットのCloudflare Pages成功デプロイとPreview smoke成功を照合してから案内する。履歴にある古いdeployment-idを再利用しない。
 - deploymentの状態を確認できない場合は、成功済みと断定しない。旧本番URLを代替として送らず、確認できている開発版URLと未確認事項を明示する。
+- 更新確認ページは `refresh.html` の1つだけを使う。`refresh-v数字.html` のようなバージョン固定ページを追加しない。
+- 更新ページの整理履歴は `docs/REFRESH_PAGE_HISTORY.md` に記録する。過去HTMLの原本はGit履歴で保持する。
 - 新しいチャットへ引き継ぐ際も、この節を最初に確認し、URLを過去会話の記憶だけから推測しない。
 
 # ALVIS 開発引き継ぎ（現行）
@@ -32,7 +35,7 @@
 更新: 2026-11-23
 リポジトリ: `doka100-ui/ALVIS-PWA`
 作業ブランチ: `development`
-本番URL: https://alvis-pwa.pages.dev/
+旧本番URL（開発版案内には使用しない）: https://alvis-pwa.pages.dev/
 
 ## 最優先ルール
 - 作業前にこの文書・`docs/ALVIS_SPEC.md`・必要に応じて`docs/ALVIS_18_AVATAR_MODEL_BRIEF.md`を読む。

@@ -14,4 +14,5 @@ Personal offline-first AI memory system
 ## 現在の開発版を開く
 - **ALVIS統合版（ALVISモード / アバターモード）:** https://development.alvis-pwa.pages.dev/index-integrated.html
 - **18号 Avatar Studio:** https://development.alvis-pwa.pages.dev/tools/avatar-studio.html
+- **共通更新確認ページ:** https://development.alvis-pwa.pages.dev/refresh.html
 - URLの正本・旧本番URLとの区別・更新時の確認手順は [docs/HANDOFF.md](docs/HANDOFF.md) を参照してください。
