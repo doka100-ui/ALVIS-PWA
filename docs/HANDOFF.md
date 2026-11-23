@@ -1,3 +1,9 @@
+## Latest WebGPU cleanup behavioral coverage — 2026-11-23 (v335 test-only)
+- Added execution tests for `releaseCapturedAlvisModelDevices()`: on partial initialization failure it attempts to destroy only the captured devices, records individual destroy failures, and always releases retained references.
+- Verified the successful `engine.unload()` path releases duplicate references without calling `GPUDevice.destroy()` a second time.
+- CI: offline-first regression and dashboard-image both passed on commit `611698c3cc9947cf9103f0ec8237cd6938695473` (run [45109216991](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45109216991)).
+- Test-only. No app/WebGPU runtime code, Service Worker, model settings/cache, user data, sync/backups, or production `main` changed. Real Safari GPU-loss/OOM recovery remains device-level validation.
+
 ## Latest Service Worker offline/cache behavioral tests — 2026-11-23 (v334 test-only)
 - `tests/offline-first.test.mjs` now executes the real `service-worker.js` handlers inside an isolated Node VM with mocked Cache API/network.
 - Verified activation removes stale `alvis-cache-*` and `alvis-deps-*` entries while preserving `webllm/model`, `webllm/config`, and `webllm/wasm` caches.
