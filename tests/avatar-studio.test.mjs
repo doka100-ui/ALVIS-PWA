@@ -82,7 +82,7 @@ check("nose bridge and tip form one continuous sculpted 3D surface", html.includ
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
-check("face base includes subtle cheekbone and chin projection sculpting", html.includes("const cheekbone=.028*Math.exp") && html.includes("const chin=.018*Math.exp") && html.includes("z*depth+cheekbone+chin"));
+check("face base includes refined cheekbone, jaw taper and chin projection sculpting", html.includes("const cheekbone=.038*Math.exp") && html.includes("const jawTaper=1-.045") && html.includes("const chin=.024*Math.exp") && html.includes("x*taper*cheek*jawTaper") && html.includes("z*depth+cheekbone+chin"));
 
 check("eyelid blink target closes from the upper lid edge across the almond eye", html.includes("openEdge=.095*shape,closedEdge=-.095*shape") && html.includes("lidClosedPositions.push(localX,top+(closedEdge-top)*t,z)") && html.includes("lidGeometry.computeVertexNormals()"));
 
