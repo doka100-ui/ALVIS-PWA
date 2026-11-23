@@ -1826,3 +1826,9 @@
 - Official documentation confirms unpurchased-credit accounts receive a reduced preview GLB without blendshapes; full downloads are locked until credits are purchased. The output is a neutral head without skeleton/animation and does not supply hair/body.
 - Default image processing uses third-party AI routes; Scan Reconstruction avoids those routes but requires a consistent multi-view capture session. Existing references are not confirmed to meet this requirement.
 - Rejected KeenFace as a zero-cost complete VRM path. No account, upload, paid credit, or app changes were made.
+
+
+## 2026-11-23 — 3D generation and browser rigging candidate recheck
+- 3dai.dev advertises free multi-view GLB generation and 24-hour deletion, but publicly accessible terms/privacy and output licence details remain insufficiently clear; 18号 uploads remain on hold.
+- Ekza Studio documents a new Rig & Skin/Auto-Rig path to VRM 1.0, but explicitly supports Chrome/Edge while Safari remains future work; it is alpha and its modeling tools do not provide photorealistic face sculpting.
+- No reference upload, external account, runtime code, or user data changes.

@@ -2703,3 +2703,11 @@
 - Privacy Policy: Scan Reconstruction is OFF by default. OFF routes image screening/reference generation/quality checks through fal/OpenRouter/Google/OpenAI. ON avoids those image-processing routes but requires 2–15 photos from one consistent capture session; the existing reference set is not known to meet that capture condition. Source photos and generated heads remain in active cloud storage until user deletion/account closure. No 18号 image was uploaded.
 - Decision: do not register/upload/submit any 18号 reference images to KeenFace under the assumption that the free signup credits provide a complete usable model. Do not purchase credits. Keep the candidate rejected for the current free-only requirement unless a genuinely free full-file path is documented later.
 - Sources: https://keenface.ai/pricing ; https://keenface.ai/docs/reference ; https://keenface.ai/legal/privacy-policy
+
+
+## 3D generation and browser rigging candidate recheck (2026-11-23)
+- 3dai.dev currently presents a no-sign-up/free multi-view image-to-GLB flow using a dedicated RTX GPU and says images/models auto-delete after 24 hours. However, the publicly accessible page still does not establish a complete privacy policy, data-controller identity, no-training commitment, or output licence/ownership terms. It remains a technical candidate only; do not upload 18号 references until those conditions are independently confirmed.
+- Ekza Studio's current GitHub README now documents an integrated M6b Rig & Skin MVP and five-step Auto-Rig flow that can export VRM 1.0 from a static humanoid GLB. But the project explicitly lists Chrome/Edge as supported and Safari as a future V1 target; the app is alpha, and its modeling workflow is low-poly box modeling rather than photorealistic facial sculpting. It may be a later rigging tool only if a compatible environment is available; it is not currently a proven iPad Safari route.
+- Neither candidate resolves the current end-to-end requirements of free, privacy-clear multi-view photorealistic likeness generation plus facial expressions and a VRM pipeline usable on the user's iPad/iPhone.
+- No 18号 reference images were uploaded, no external account was created, and no app/runtime or user data was changed.
+- Sources: https://3dai.dev/en ; https://github.com/ekza-space/ekza-studio
