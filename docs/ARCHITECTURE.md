@@ -1,3 +1,8 @@
+## VRM WebGL初期化失敗時の解放（v345）
+- GLTF/VRM解析後のWebGLRenderer生成をtry/catchで保護する。
+- context生成に失敗した場合はVRMUtils.deepDispose(vrm.scene)を試みてから元の例外を再throwする。
+- 通常disposeおよびcontext lost/restoredイベント処理は従来のv340/v344の設計を維持する。
+
 ## VRM WebGLコンテキスト復帰（v344）
 - renderer.domElementのwebglcontextlostでpreventDefault、contextLostフラグ設定、描画停止。
 - webglcontextrestoredでcontextLost解除・lastFrameTimestamp初期化・描画再開。startRenderLoopはcontextLost中の開始を拒否。
