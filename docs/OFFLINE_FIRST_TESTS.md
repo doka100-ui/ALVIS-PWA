@@ -16,6 +16,7 @@ These checks protect the ALVIS design rule that local Qwen is the primary infere
 - Device profile selection keeps iPadOS desktop-class Safari on the iPad model/context profile.
 - Inference serialization prevents overlapping requests and safely sequences model unload.
 - Targeted GPUDevice cleanup is behavior-tested for partial initialization failure, destroy exceptions, and avoiding a second destroy after successful engine unload.
+- The actual post-initialization GPU-loss race guard is executed with simulated engine/device-loss outcomes: a stale engine is never published, successful unload avoids double-destroy, and failed unload requests targeted captured-device cleanup.
 - Storage-persistence request outcomes (granted, denied, rejected, synchronous throw, unsupported) are handled without blocking model startup.
 - Service Worker handlers execute in an isolated Node VM with mocked Cache API/network:
   - old ALVIS-owned app/dependency caches are retired;
