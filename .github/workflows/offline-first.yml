@@ -6,6 +6,7 @@ on:
     paths:
       - "index-integrated.html"
       - "service-worker.js"
+      - "assets/alvis-vrm-runtime.js"
       - "refresh.html"
       - "startup-check.html"
       - "tests/offline-first.test.mjs"
