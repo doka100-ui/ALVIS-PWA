@@ -112,7 +112,7 @@ async function verifyBrowser(browserType, verifyOffline) {
         && Math.abs(Math.abs(angles[angles.length - 1] - angles[0]) - 360) < 0.1;
     }), browserName + ": outer ring C must complete one independent 360-degree rotation in 42 seconds: " + JSON.stringify(outerRingMotion.animations));
     assert.ok(Math.abs(outerRingMotion.topRatio - 0.42) < 0.01,
-      browserName + ": outer ring C must share the globe core's 42% vertical anchor");
+      browserName + ": outer ring C vertical anchor mismatch: ratio=" + outerRingMotion.topRatio + ", top=" + outerRingMotion.top + ", parentHeight=" + outerRingMotion.parentHeight);
     assert.ok(Math.abs(outerRingMotion.leftRatio - 0.5) < 0.01,
       browserName + ": outer ring C must share the globe core's 50% horizontal anchor");
     assert.equal(outerRingMotion.translate, "-50% -50%", browserName + ": outer ring C must center its own bounds on the globe anchor");
