@@ -1,3 +1,7 @@
+## Latest v343 アバター差し替え時の既存モデル保護（2026-11-23）
+- VRM/GLBの新規ファイルは表示に成功した後にのみIndexedDBへ保存する。読み込み失敗時は既存保存モデルを読み直して復元し、無効ファイルで正常モデルを上書きしない。
+- v343 build ID / Service Worker cache / refresh page。保存形式や既存モデルのデータは変更しない。本番mainは変更しない。自動テストとChromium/WebKitプレビュー検証は結果確認待ち。
+
 ## Latest v342 VRM描画エラー時の連続フレーム予約を防止（2026-11-23）
 - VRM runtimeのanimate callbackで、描画処理が正常終了した後にだけ次のrequestAnimationFrameを予約するよう変更。
 - 1フレーム内で例外が発生した場合はcatchでループ状態を停止し、同じエラーを毎フレーム繰り返さない。Avatarモードを切り替えて再有効化すると再開できる。
