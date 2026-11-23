@@ -1,3 +1,6 @@
+## Avatar Studio — cheekbone and chin surface sculpt
+- Add subtle cheekbone projection and chin rounding to the face base mesh through vertex displacement, preserving the tapered oval silhouette.
+
 ## Avatar runtime diagnostics — split blink
 - Diagnostics panel reports independent left/right wink support only when both VRM blinkLeft and blinkRight expressions are available. Existing single blink support remains separate.
 

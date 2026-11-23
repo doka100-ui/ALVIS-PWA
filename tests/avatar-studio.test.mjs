@@ -81,3 +81,5 @@ check("browser smoke exercises WebKit Avatar Studio and ALVIS VRM runtime", (awa
 check("nose bridge and tip form one continuous sculpted 3D surface", html.includes("const noseGeometry=new THREE.SphereGeometry(1,48,32)") && html.includes("const tip=Math.exp(-Math.pow((y+.43)/.24,2))") && html.includes('noseMesh.name="sculpted-nose-bridge-tip"') && !html.includes('ell(noseGroup,skin,[0,.04,.68]'));
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
+
+check("face base includes subtle cheekbone and chin projection sculpting", html.includes("const cheekbone=.028*Math.exp") && html.includes("const chin=.018*Math.exp") && html.includes("z*depth+cheekbone+chin"));

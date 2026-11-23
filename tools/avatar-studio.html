@@ -151,7 +151,7 @@ function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
  const geo=new THREE.SphereGeometry(1,64,48);const pos=geo.attributes.position;
- for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.055*Math.exp(-Math.pow((y-.02)/.24,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));pos.setXYZ(i,x*taper*cheek,y,z*depth);}
+ for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.055*Math.exp(-Math.pow((y-.02)/.24,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));const cheekbone=.028*Math.exp(-Math.pow((Math.abs(x)-.58)/.20,2))*Math.exp(-Math.pow((y-.02)/.25,2));const chin=.018*Math.exp(-Math.pow(x/.38,2))*Math.exp(-Math.pow((y+.82)/.14,2));pos.setXYZ(i,x*taper*cheek,y,z*depth+cheekbone+chin);}
  geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
  // ears
  for(const side of [-1,1]){ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ell(faceGroup,skinShade,[side*.94,.02,.075],[.065,.16,.035]);}
