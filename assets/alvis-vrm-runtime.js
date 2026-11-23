@@ -35,9 +35,33 @@ export async function mountVrmAvatar(host, blob) {
 
   scene.add(vrm.scene);
 
+  // Fit the camera to the visible mesh bounds so cropped upper-body/head-only VRMs fit.
+  vrm.scene.updateMatrixWorld(true);
+  const avatarBounds = new THREE.Box3().setFromObject(vrm.scene);
+  const avatarSize = new THREE.Vector3(0.5, 1.6, 0.5);
+  const avatarCenter = new THREE.Vector3(0, 1.05, 0);
+  if (!avatarBounds.isEmpty()) {
+    avatarBounds.getSize(avatarSize);
+    avatarBounds.getCenter(avatarCenter);
+  }
+  const avatarFocus = avatarCenter.clone();
+  avatarFocus.z += 2.5;
+
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
-  camera.position.set(0, 1.35, 3.2);
-  camera.lookAt(0, 1.05, 0);
+  const fitAvatarCamera = () => {
+    const width = Math.max(1, host.clientWidth || 320);
+    const height = Math.max(1, host.clientHeight || 180);
+    camera.aspect = width / height;
+    const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+    const verticalDistance = Math.max(avatarSize.y, 0.35) / (2 * Math.tan(verticalFov / 2));
+    const horizontalDistance = Math.max(avatarSize.x, 0.35) / (2 * Math.tan(horizontalFov / 2));
+    const distance = THREE.MathUtils.clamp(Math.max(verticalDistance, horizontalDistance) * 1.18, 0.85, 8.5);
+    camera.position.set(avatarCenter.x, avatarCenter.y, avatarCenter.z + distance);
+    camera.lookAt(avatarCenter);
+    camera.updateProjectionMatrix();
+  };
+  fitAvatarCamera();
 
   let renderer;
   try {
@@ -76,7 +100,7 @@ export async function mountVrmAvatar(host, blob) {
   let emotionTargetWeight = 0;
   // Avatar-only automatic gaze: gently shifts focus while keeping the user as the default target.
   let autoLookAtEnabled = !!vrm.lookAt?.target;
-  const lookAtCurrent = new THREE.Vector3(0, 1.35, 2.5);
+  const lookAtCurrent = avatarFocus.clone();
   const lookAtDestination = lookAtCurrent.clone();
   let nextGazeChangeAt = 2.8 + Math.random() * 2.2;
   const expressionAvailability = new Map();
@@ -148,10 +172,14 @@ export async function mountVrmAvatar(host, blob) {
     return true;
   };
 
-  const setLookAt = (x = 0, y = 1.35, z = 2.5) => {
+  const setLookAt = (x = avatarFocus.x, y = avatarFocus.y, z = avatarFocus.z) => {
     if (!vrm.lookAt?.target) return false;
     autoLookAtEnabled = false;
-    lookAtDestination.set(Number(x) || 0, Number(y) || 1.35, Number(z) || 2.5);
+    lookAtDestination.set(
+      Number.isFinite(Number(x)) ? Number(x) : avatarFocus.x,
+      Number.isFinite(Number(y)) ? Number(y) : avatarFocus.y,
+      Number.isFinite(Number(z)) ? Number(z) : avatarFocus.z
+    );
     lookAtCurrent.copy(lookAtDestination);
     vrm.lookAt.target.position.copy(lookAtCurrent);
     return true;
@@ -161,7 +189,7 @@ export async function mountVrmAvatar(host, blob) {
     if (!vrm.lookAt?.target) return false;
     autoLookAtEnabled = !!enabled;
     if (autoLookAtEnabled) {
-      lookAtDestination.set(0, 1.35, 2.5);
+      lookAtDestination.copy(avatarFocus);
       nextGazeChangeAt = activeElapsed + 1.5 + Math.random() * 1.5;
     }
     return true;
@@ -220,8 +248,7 @@ export async function mountVrmAvatar(host, blob) {
     const width = Math.max(1, host.clientWidth);
     const height = Math.max(1, host.clientHeight);
     renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    fitAvatarCamera();
   };
 
   const resizeObserver = new ResizeObserver(resize);
