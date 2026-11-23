@@ -1,3 +1,6 @@
+## Avatar Studio entry-link browser validation
+- Chromium and WebKit runtime smoke confirm the integrated ALVIS page exposes the same-origin `./tools/avatar-studio.html` entry link.
+
 ## Avatar Studio — mobile geometry budget
 - Browser smoke calculates triangle counts from exported GLB primitives and enforces a strict under-100,000-triangle budget to keep the upper-body prototype lightweight for iPad-class devices.
 - This budget does not replace real iPad Safari performance testing.

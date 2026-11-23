@@ -160,7 +160,8 @@ try {
       const render = { canvas:!!canvas, webgl:!!gl, width:canvas?.width||0, height:canvas?.height||0 };
       await new Promise(resolve=>setTimeout(resolve,1500));
       const chestAfter = chestBone?.position?.y ?? chestBefore;
-      return { diagnostics, actions, render, chestDelta:chestAfter-chestBefore };
+      const studioLink=document.querySelector("#alvisAvatarStudioLink")?.getAttribute("href")||null;
+      return { diagnostics, actions, render, chestDelta:chestAfter-chestBefore, studioLink };
     } finally {
       mounted?.dispose?.();
       host.remove();
@@ -179,6 +180,7 @@ try {
   for (const [action, result] of Object.entries(runtimeDiagnostics.actions)) assert.equal(result, true, "ALVIS runtime interaction must succeed: "+action);
   assert.ok(runtimeDiagnostics.render.canvas && runtimeDiagnostics.render.webgl && runtimeDiagnostics.render.width > 0 && runtimeDiagnostics.render.height > 0, "ALVIS runtime must render the VRM to a live WebGL canvas");
   assert.ok(Math.abs(runtimeDiagnostics.chestDelta)>0.0005, "ALVIS runtime must apply a visible low-amplitude chest breathing motion");
+  assert.equal(runtimeDiagnostics.studioLink,"./tools/avatar-studio.html","ALVIS avatar mode must link to the local Avatar Studio");
   assert.deepEqual(pageErrors, [], "ALVIS VRM runtime must not throw browser errors");
   console.log("PASS existing ALVIS VRM runtime parsed, rendered, and controlled the exported file: "+JSON.stringify(runtimeDiagnostics));
 
@@ -262,7 +264,8 @@ try {
       const diagnostics=mounted.getDiagnostics();
       const actions={leftWink:mounted.setExpression("blinkLeft",0.7),rightWink:mounted.setExpression("blinkRight",0.6),look:mounted.setLookAt(0,1,3)};
       const canvas=host.querySelector("canvas");
-      return {diagnostics,actions,render:!!canvas&&(!!canvas.getContext("webgl2")||!!canvas.getContext("webgl"))};
+      const studioLink=document.querySelector("#alvisAvatarStudioLink")?.getAttribute("href")||null;
+      return {diagnostics,actions,render:!!canvas&&(!!canvas.getContext("webgl2")||!!canvas.getContext("webgl")),studioLink};
     }finally{mounted?.dispose?.();host.remove();}
   },safariBuffer.toString("base64"));
   assert.equal(safariRuntime.diagnostics.format,"VRM","WebKit ALVIS runtime must parse VRM 1.0");
@@ -270,6 +273,7 @@ try {
   assert.ok(safariRuntime.diagnostics.chestMotion,"WebKit runtime must recognize chest motion");
   assert.ok(Object.values(safariRuntime.actions).every(Boolean),"WebKit runtime must control wink and gaze expressions");
   assert.ok(safariRuntime.render,"WebKit runtime must render the VRM");
+  assert.equal(safariRuntime.studioLink,"./tools/avatar-studio.html","WebKit ALVIS page must expose the local Avatar Studio entry");
   assert.deepEqual(safariErrors,[],"WebKit Avatar Studio and runtime must not throw browser errors");
   assert.deepEqual(safariExternalRequests,[],"WebKit Avatar Studio must not request external assets");
   console.log("PASS WebKit Avatar Studio rendering, independent wink controls, VRM export and ALVIS runtime import: "+JSON.stringify({safariRender,safariRuntime}));

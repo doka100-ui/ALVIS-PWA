@@ -96,3 +96,5 @@ check("bob hair includes tapered strand geometry and a distinct side-part seam",
 check("side and back bob locks use tapered strand geometry", html.includes("taperedCurve(faceGroup,[[side*.68,.47,.43]") && html.includes("taperedCurve(faceGroup,[[x*.15,.80,-.34]"));
 
 check("browser smoke enforces a sub-100k triangle mobile geometry budget", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("triangleCount<100000"));
+
+check("browser smoke verifies the Avatar Studio entry from both Chromium and WebKit app pages", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes('studioLink,"./tools/avatar-studio.html"'));
