@@ -1,3 +1,6 @@
+## Avatar runtime — chest breathing motion test
+- Browser smoke samples the normalized chest-bone Y position before and after 1.5 seconds and asserts a nonzero low-amplitude displacement, not merely the presence of a chest node.
+
 ## VRM runtime — subtle chest breathing
 - When a VRM exposes a normalized chest bone, apply a low-amplitude ±0.003 vertical chest translation on a slow sine cycle during idle. Preserve existing scene sway and head motion; do not scale/deform the face.
 - Expose chestMotion in diagnostics and report BREATHING in the avatar status. Models without a chest bone retain existing behavior.

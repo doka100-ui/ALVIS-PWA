@@ -139,6 +139,9 @@ try {
       const canvas = host.querySelector("canvas");
       const gl = canvas?.getContext("webgl2") || canvas?.getContext("webgl");
       const diagnostics = mounted.getDiagnostics();
+      mounted.setIdleEnabled(true);
+      const chestBone = mounted.vrm.humanoid?.getNormalizedBoneNode?.("chest");
+      const chestBefore = chestBone?.position?.y ?? 0;
       const actions = {
         manualLookAt: mounted.setLookAt(0, 1, 3),
         automaticLookAt: mounted.setAutoLookAt(true),
@@ -148,7 +151,9 @@ try {
         headGesture: mounted.setHeadGesture("nod")
       };
       const render = { canvas:!!canvas, webgl:!!gl, width:canvas?.width||0, height:canvas?.height||0 };
-      return { diagnostics, actions, render };
+      await new Promise(resolve=>setTimeout(resolve,1500));
+      const chestAfter = chestBone?.position?.y ?? chestBefore;
+      return { diagnostics, actions, render, chestDelta:chestAfter-chestBefore };
     } finally {
       mounted?.dispose?.();
       host.remove();
@@ -166,6 +171,7 @@ try {
   }
   for (const [action, result] of Object.entries(runtimeDiagnostics.actions)) assert.equal(result, true, "ALVIS runtime interaction must succeed: "+action);
   assert.ok(runtimeDiagnostics.render.canvas && runtimeDiagnostics.render.webgl && runtimeDiagnostics.render.width > 0 && runtimeDiagnostics.render.height > 0, "ALVIS runtime must render the VRM to a live WebGL canvas");
+  assert.ok(Math.abs(runtimeDiagnostics.chestDelta)>0.0005, "ALVIS runtime must apply a visible low-amplitude chest breathing motion");
   assert.deepEqual(pageErrors, [], "ALVIS VRM runtime must not throw browser errors");
   console.log("PASS existing ALVIS VRM runtime parsed, rendered, and controlled the exported file: "+JSON.stringify(runtimeDiagnostics));
 

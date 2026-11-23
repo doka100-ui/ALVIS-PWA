@@ -89,3 +89,5 @@ check("eyelid blink target closes from the upper lid edge across the almond eye"
 check("Avatar Studio provides six named inspection views around the 3D bust", ["front","rightAngle","rightProfile","back","leftAngle","leftProfile"].every(id=>html.includes('id="'+id+'"') && html.includes(id+":[") ) && html.includes("function setAvatarView(name)"));
 
 check("VRM runtime exposes subtle chest breathing for rigs with a chest bone", (await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8")).includes("Math.sin(elapsed * 0.92) * 0.003") && (await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8")).includes("chestMotion: !!chestBone") && appHtml.includes('report.chestMotion&&"BREATHING"'));
+
+check("browser smoke measures chest-bone motion rather than only checking for a chest node", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("chestDelta") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("low-amplitude chest breathing motion"));
