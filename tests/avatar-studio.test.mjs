@@ -39,7 +39,7 @@ check("bob hairstyle has a distinct rear volume and crown", html.includes('name=
 check("swept fringe includes separate curved strand geometry", (html.match(/curve\(faceGroup,/g)||[]).length >= 6 && html.includes('name="hair-swept-fringe"'));
 check("side hair has independent left/right locks", html.includes('name=side<0?"hair-side-left":"hair-side-right"'));
 check("necklace pendant and barcode-style neck details are modeled", html.includes('name="necklace-pendant"') && html.includes('name="neck-mark-"+index'));
-check("jaw and cheek profile receives vertex sculpting", html.includes("const cheek=1+.055") && html.includes("const taper=.78+.22"));
+check("jaw and cheek profile receives refined vertex sculpting", html.includes("const cheek=1+.068") && html.includes("const cheekbone=.038") && html.includes("const jawTaper=1-.045") && html.includes("const taper=.78+.22"));
 const moduleScript = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)].at(-1)?.[1];
 assert.ok(moduleScript, "module script exists");
 const syntax = spawnSync(process.execPath, ["--check", "--input-type=module"], { input: moduleScript, encoding: "utf8" });
