@@ -1,4 +1,5 @@
 ## iPad向けジオメトリを75k三角形以下へ軽量化 (2026-11-23)
+- 追加: 頬骨・顎ラインの頂点造形を微調整し、`facial-skull` のVRM出力をunit/browser smokeで検証。
 - 追加: 鼻孔の陰影を肌になじむ暖色へ変更し、左右の鼻孔ノードをVRM browser smokeで確認。
 - 追加: 18号のサイドパート・ボブを補強する前髪テーパー毛束5本を追加。VRM出力ノードをunit/browser smokeで検査。
 - 追加: 上腕メッシュを左右のHumanoid UpperArmボーンへ個別接続。肩はChestに残し、VRM内のノード親子関係もbrowser smokeで確認する。

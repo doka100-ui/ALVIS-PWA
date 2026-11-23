@@ -108,3 +108,5 @@ check("skin hair eye and lip palette follows the approved light-blonde blue-eyed
 check("five named tapered fringe locks layer the swept side-parted bob", html.includes('for(let strand=0;strand<5;strand++)') && html.includes('lock.name="hair-fringe-strand-"+strand') && html.includes("Five fine, swept fringe locks"));
 
 check("nose recesses use soft warm shading rather than hard dark lash material", html.includes('noseShadow=mat(0x986f67,.94)') && html.includes('nostril.name=side<0?"nostril-left":"nostril-right"'));
+
+check("facial skull has refined cheekbone and tapered jaw sculpt", html.includes('const cheek=1+.068*Math.exp') && html.includes('const cheekbone=.038*Math.exp') && html.includes('const jawTaper=1-.045*Math.exp') && html.includes('skull.name="facial-skull"'));
