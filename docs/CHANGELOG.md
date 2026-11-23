@@ -1,3 +1,8 @@
+## 2026-11-23 — v339プレビューブラウザ検証のリダイレクト条件も修正（development）
+- refresh-v339.htmlの遷移先は `?refresh=339` だが、PlaywrightのwaitForURLが古い `refresh=331` を待っていたため一致させた。
+- v338の更新ページ/キャッシュ名の修正と合わせ、検証スクリプト内の版番号をv339へ統一。修正後の最新runを確認中。
+- テストのみ変更。ALVIS本体・保存データ・モデル/音声キャッシュ・本番mainは変更なし。
+
 ## 2026-11-23 — v339プレビューブラウザ検証の版ずれ修正（development）
 - 自動ブラウザ検証がrefresh-v338.html / cache-v338を待っていたため、現行v339のrefresh-v339.html / cache-v339 / refresh=339を確認するよう修正。
 - GitHub Actionsの監視対象にもrefresh-v339.htmlを追加し、今後この更新ページだけの変更でもプレビュー検証が起動するようにした。
