@@ -105,7 +105,36 @@ try {
   }
   assert.deepEqual(pageErrors, [], "Avatar Studio must not throw browser runtime errors");
   assert.deepEqual(externalRequests, [], "Avatar Studio must load Three.js and all modules from the same origin only");
-  assert.ok(await page.evaluate(() => !!navigator.serviceWorker?.controller), "Avatar Studio must be controlled by the ALVIS service worker");
+
+  // Validate the exported .vrm with the exact VRM loader used by ALVIS itself.
+  trackExternalRequests = false;
+  const appResponse = await page.goto(previewUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
+  assert.ok(appResponse?.ok(), "ALVIS runtime page must return HTTP 200 for VRM loader validation");
+  const runtimeDiagnostics = await page.evaluate(async (base64) => {
+    const runtime = await import("./assets/alvis-vrm-runtime.js");
+    const binary = Uint8Array.from(atob(base64), character => character.charCodeAt(0));
+    const host = document.createElement("div");
+    Object.assign(host.style, { position:"fixed", left:"0", top:"0", width:"420px", height:"520px", opacity:"0.02", pointerEvents:"none" });
+    document.body.appendChild(host);
+    let mounted;
+    try {
+      mounted = await runtime.mountVrmAvatar(host, new Blob([binary], { type:"model/gltf-binary" }));
+      return mounted.getDiagnostics();
+    } finally {
+      mounted?.dispose?.();
+      host.remove();
+    }
+  }, buffer.toString("base64"));
+  assert.equal(runtimeDiagnostics.format, "VRM", "ALVIS runtime must parse the exported VRM");
+  assert.ok(runtimeDiagnostics.humanoidHead && runtimeDiagnostics.humanoidNeck && runtimeDiagnostics.headMotion, "ALVIS runtime must recognize humanoid head/neck bones");
+  assert.ok(runtimeDiagnostics.lookAt, "ALVIS runtime must recognize VRM lookAt");
+  assert.ok(runtimeDiagnostics.blink, "ALVIS runtime must recognize blink");
+  for (const feature of ["happy","sad","angry","relaxed","surprised","aa","ih","ou","ee","oh"]) {
+    assert.ok(runtimeDiagnostics[feature], "ALVIS runtime must recognize VRM expression: "+feature);
+  }
+  console.log("PASS existing ALVIS VRM runtime loaded the exported file: "+JSON.stringify(runtimeDiagnostics));
+
+  assert.ok(await page.evaluate(() => !!navigator.serviceWorker?.controller), "ALVIS page must be controlled by its service worker");
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForSelector("#stage canvas", { timeout: 60000 });
