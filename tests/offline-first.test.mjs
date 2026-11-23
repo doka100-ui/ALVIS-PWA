@@ -1100,14 +1100,16 @@ assert.ok(persistenceStart>=0&&persistenceEnd>persistenceStart,"storage persiste
 const persistenceSource=app.slice(persistenceStart,persistenceEnd);
 const makePersistenceHarness=new Function("navigator",`
   let alvisStoragePersistenceStatus="未要求";
+  let diagnosticStateWrites=0;
   const diagnosticTraces=[];
-  function persistAlvisDiagnosticState(){}
+  function persistAlvisDiagnosticState(){diagnosticStateWrites++;}
   function recordAlvisModelLoadTrace(message){diagnosticTraces.push(message);}
   ${persistenceSource}
   return {
     run:requestAlvisStoragePersistence,
     get status(){return alvisStoragePersistenceStatus;},
-    get traces(){return diagnosticTraces;}
+    get traces(){return diagnosticTraces;},
+    get stateWrites(){return diagnosticStateWrites;}
   };
 `);
 const grantedPersistence=makePersistenceHarness({storage:{persist:()=>Promise.resolve(true)}});
@@ -1126,7 +1128,7 @@ const unsupportedPersistence=makePersistenceHarness({});
 assert.equal(await unsupportedPersistence.run(),false);
 assert.equal(unsupportedPersistence.status,"このブラウザでは要求非対応");
 for(const harness of [grantedPersistence,deniedPersistence,rejectedPersistence,thrownPersistence,unsupportedPersistence]){
-  assert.ok(harness.traces.length>0,"every storage outcome must leave a diagnostic trace");
+  assert.ok(harness.stateWrites>0,"every storage outcome must persist its diagnostic status");
 }
 
 // v231: make engine shutdown idempotent and reject queued inference after shutdown begins.
