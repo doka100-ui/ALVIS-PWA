@@ -227,7 +227,7 @@ export async function mountVrmAvatar(host, blob) {
       lastFrameTimestamp = 0;
       return;
     }
-    frameId = requestAnimationFrame(animate);
+    try {
     const delta = lastFrameTimestamp
       ? Math.min(Math.max(0, (timestamp - lastFrameTimestamp) / 1000), 0.05)
       : 0;
@@ -344,6 +344,15 @@ export async function mountVrmAvatar(host, blob) {
       headBone.quaternion.copy(headBaseQuaternion).multiply(headOffsetQuaternion);
     }
     renderer.render(scene, camera);
+    // Schedule the next frame only after this frame completed successfully.
+    frameId = requestAnimationFrame(animate);
+    } catch (error) {
+      // Stop a failing loop instead of repeatedly throwing on every animation frame.
+      frameRunning = false;
+      frameId = 0;
+      lastFrameTimestamp = 0;
+      console.error("[ALVIS VRM] Render loop stopped after a frame error.", error);
+    }
   };
   const startRenderLoop = () => {
     if (disposed || !activeEnabled || frameRunning || document.visibilityState !== "visible") return;
