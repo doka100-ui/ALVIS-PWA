@@ -221,7 +221,7 @@ export async function mountVrmAvatar(host, blob) {
   host.replaceChildren(renderer.domElement);
 
   const animate = (timestamp = 0) => {
-    if (disposed || document.visibilityState !== "visible") {
+    if (disposed || !activeEnabled || document.visibilityState !== "visible") {
       frameRunning = false;
       frameId = 0;
       lastFrameTimestamp = 0;
