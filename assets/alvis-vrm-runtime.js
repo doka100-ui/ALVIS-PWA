@@ -393,6 +393,9 @@ export async function mountVrmAvatar(host, blob) {
       window.removeEventListener("pageshow", handleVisibilityChange);
       resizeObserver.disconnect();
       try { vrm.expressionManager?.setValue("blink", 0); } catch (_) {}
+      // Release the model's GPU-backed geometry, materials, and textures before dropping the renderer.
+      // The VRM was parsed from its own Blob, so these resources are not shared with another avatar.
+      try { VRMUtils.deepDispose(vrm.scene); } catch (_) {}
       renderer.dispose();
       renderer.forceContextLoss?.();
       if (renderer.domElement.parentNode === host) {
