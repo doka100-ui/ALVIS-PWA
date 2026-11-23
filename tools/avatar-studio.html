@@ -78,10 +78,10 @@ function makeFace(){
   ell(faceGroup,white,[x,.34,.675],[.225,.115,.07]);
   ell(faceGroup,iris,[x,.34,.735],[.078,.084,.025]);
   ell(faceGroup,pupil,[x,.34,.755],[.037,.052,.014]);
-  ell(faceGroup,mat(0xffffff,.2),[x-.018,.375,.77],[.018,.018,.008],16);
+  ell(faceGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);
   curve(faceGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
   curve(faceGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
-  curve(faceGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,hair);
+  curve(faceGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);
  }
  // nose bridge and tip, nostrils
  ell(faceGroup,skin,[0,.04,.68],[.105,.30,.16]);
