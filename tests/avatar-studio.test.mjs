@@ -62,3 +62,11 @@ const vrmRuntimeSource = await readFile(new URL("../assets/alvis-vrm-runtime.js"
 check("ALVIS VRM runtime dependencies resolve through the main app import map", appHtml.includes('"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"') && appHtml.includes('"@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"') && vrmRuntimeSource.includes('from "three/addons/loaders/GLTFLoader.js"'));
 
 check("VRM runtime creates, tracks, and disposes an actual LookAt target", vrmRuntimeSource.includes("const lookAtTarget = vrm.lookAt ? new THREE.Object3D() : null;") && vrmRuntimeSource.includes("vrm.lookAt.target = lookAtTarget") && vrmRuntimeSource.includes("if (lookAtTarget) lookAtTarget.position.copy(avatarFocus)") && vrmRuntimeSource.includes("if (lookAtTarget) scene.remove(lookAtTarget)"));
+
+check("procedural skin base-color and subtle pore texture are exported locally", html.includes("function makeSkinTexture()") && html.includes("skin.map=skinTexture") && html.includes("skin.bumpScale=.0025"));
+check("eyes include iris rings, radial fibers, and individual lash strands", html.includes("iris-border-left") && html.includes("for(let ray=0;ray<14;ray++)") && html.includes("for(let lash=0;lash<4;lash++)"));
+check("brows use the light taupe tone from the approved model sheet", html.includes("browMat=mat(0x927c69"));
+check("nose and lips include fine anatomical contour details", html.includes("noseGroup") && html.includes("lipOutline") && html.includes("lipHighlight"));
+check("bob includes independent fine hair strands on both sides", html.includes("for(let strand=0;strand<4;strand++)") && html.includes("hair-side-left") && html.includes("hair-side-right"));
+check("white top includes shoulder straps, neckline and rib details", html.includes("tank-strap-left") && html.includes("tank-neckline") && html.includes("ribIndex"));
+check("both single and independent left/right blink expressions are exported", html.includes('targetNames=["blink",sideBlink]') && html.includes('"blinkLeft","blinkRight"'));

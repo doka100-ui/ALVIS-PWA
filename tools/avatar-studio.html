@@ -70,7 +70,32 @@ const key=new THREE.DirectionalLight(0xffe8d5,3.0);key.position.set(-3,4,5);scen
 const rim=new THREE.DirectionalLight(0x8acbff,2.1);rim.position.set(3,2,-4);scene.add(rim);
 const root=new THREE.Group();scene.add(root);
 const mat=(color,rough=.65,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
-const skin=mat(0xf0cbb8,.72),skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),dark=mat(0x493a36,.8),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0x493a36,.8);
+function makeSkinTexture(){
+ const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;
+ const ctx=canvas.getContext("2d"),image=ctx.createImageData(512,512);
+ let seed=180018;
+ for(let i=0;i<image.data.length;i+=4){
+  seed=(seed*1664525+1013904223)>>>0;
+  const grain=((seed>>>24)-128)*.055;
+  image.data[i]=Math.max(0,Math.min(255,239+grain));
+  image.data[i+1]=Math.max(0,Math.min(255,204+grain));
+  image.data[i+2]=Math.max(0,Math.min(255,187+grain));
+  image.data[i+3]=255;
+ }
+ ctx.putImageData(image,0,0);
+ seed=180018;
+ for(let i=0;i<1800;i++){
+  seed=(seed*1664525+1013904223)>>>0;const x=(seed>>>16)%512;
+  seed=(seed*1664525+1013904223)>>>0;const y=(seed>>>16)%512;
+  const radius=.35+((seed>>>24)/255)*.65;
+  ctx.fillStyle="rgba(116,75,66,0.10)";ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+ }
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;
+ return texture;
+}
+const skinTexture=makeSkinTexture();
+const skin=mat(0xffffff,.74);skin.map=skinTexture;skin.bumpMap=skinTexture;skin.bumpScale=.0025;skin.needsUpdate=true;
+const skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),irisRing=mat(0x526d7d,.36),irisFiber=mat(0xc0d1d6,.38),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),lipHighlight=mat(0xe7a0a0,.48),lipOutline=mat(0x985c62,.7),dark=mat(0x493a36,.8),lashMat=mat(0x4b4140,.76),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0x927c69,.82);
 let faceGroup;
 function ell(parent,material,pos,scale,seg=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
 function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,32,r,8,false),material);parent.add(m);return m}
@@ -121,26 +146,44 @@ function makeFace(){
   ell(eyesGroup,white,[x,.34,.675],[.225,.115,.07]);
   const irisMesh=ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";addEyeGazeMorphTargets(irisMesh);
   const pupilMesh=ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";addEyeGazeMorphTargets(pupilMesh);
+  const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,36),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";eyesGroup.add(irisBorder);
+  for(let ray=0;ray<14;ray++){
+   const angle=ray*Math.PI*2/14;
+   const r1=.045,r2=.061;
+   const a=[x+Math.cos(angle)*r1,.34+Math.sin(angle)*r1*1.05,.761];
+   const b=[x+Math.cos(angle)*r2,.34+Math.sin(angle)*r2*1.05,.759];
+   curve(eyesGroup,[a,[(a[0]+b[0])/2,(a[1]+b[1])/2,.762],b],.0015,irisFiber);
+  }
   const glintMesh=ell(eyesGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);glintMesh.name=side<0?"eye-glint-left":"eye-glint-right";addEyeGazeMorphTargets(glintMesh);
-  curve(eyesGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
-  curve(eyesGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
-  const brow=curve(eyesGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);brow.name=side<0?"eyebrow-left":"eyebrow-right";addBrowMorphTargets(brow,side);
+  curve(eyesGroup,[[x-.22,.36,.71],[x-.15,.425,.738],[x-.06,.465,.747],[x+.04,.47,.747],[x+.15,.425,.738],[x+.22,.36,.71]],.015,lashMat);
+  curve(eyesGroup,[[x-.20,.29,.71],[x-.10,.265,.729],[x,.255,.733],[x+.10,.265,.729],[x+.20,.29,.71]],.009,skinShade);
+  curve(eyesGroup,[[x-.19,.49,.685],[x-.08,.515,.695],[x+.08,.515,.695],[x+.19,.49,.685]],.008,skinShade);
+  for(let lash=0;lash<4;lash++){
+   const t=lash/3, lx=x+side*(.15+t*.065), ly=.425-t*.065;
+   curve(eyesGroup,[[lx,ly,.739],[lx+side*.018,ly+.018,.746],[lx+side*.034,ly+.038,.742]],.0035,lashMat);
+  }
+  const brow=curve(eyesGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.023,browMat);brow.name=side<0?"eyebrow-left":"eyebrow-right";addBrowMorphTargets(brow,side);
   const lidGeometry=new THREE.SphereGeometry(1,32,24);
   const lidBase=lidGeometry.attributes.position.clone();
   const lidClosed=lidGeometry.attributes.position.clone();
   for(let i=0;i<lidClosed.count;i++)lidClosed.setY(i,lidClosed.getY(i));
-  // The target is a full oval lid; the base mesh is a narrow resting edge.
   for(let i=0;i<lidBase.count;i++)lidBase.setY(i,lidBase.getY(i)*.012);
   lidGeometry.setAttribute("position",lidBase);
-  lidGeometry.morphAttributes.position=[lidClosed];
-  lidGeometry.userData.targetNames=["blink"];
-  const lid=new THREE.Mesh(lidGeometry,skin);lid.morphTargetDictionary={blink:0};lid.position.set(x,.34,.785);lid.scale.set(.225,.12,.035);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
+  const sideBlink=side<0?"blinkLeft":"blinkRight";
+  lidGeometry.morphAttributes.position=[lidClosed,lidClosed.clone()];
+  lidGeometry.userData.targetNames=["blink",sideBlink];
+  const lid=new THREE.Mesh(lidGeometry,skin);lid.updateMorphTargets();lid.morphTargetDictionary={blink:0,[sideBlink]:1};lid.position.set(x,.34,.785);lid.scale.set(.225,.12,.035);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
- ell(noseGroup,skin,[0,.04,.68],[.105,.30,.16]);
- ell(noseGroup,skin,[0,-.13,.79],[.15,.105,.13]);
- for(const side of [-1,1])ell(noseGroup,skinShade,[side*.105,-.17,.77],[.055,.04,.055],20);
+ ell(noseGroup,skin,[0,.04,.68],[.088,.30,.145]);
+ ell(noseGroup,skin,[0,-.13,.79],[.135,.095,.115]);
+ for(const side of [-1,1]){
+  ell(noseGroup,skinShade,[side*.095,-.17,.775],[.046,.033,.046],20);
+  ell(noseGroup,lashMat,[side*.072,-.194,.842],[.021,.009,.008],16);
+ }
+ curve(noseGroup,[[0,.30,.755],[0,.16,.80],[0,.015,.82]],.0035,skinShade);
+ curve(noseGroup,[[-.045,-.23,.77],[0,-.245,.78],[.045,-.23,.77]],.004,skinShade);
  // lips
  const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
  const lipGeometry=new THREE.SphereGeometry(1,32,20);
@@ -150,6 +193,10 @@ function makeFace(){
  lipGeometry.morphAttributes.position=lipTargets;
  lipGeometry.userData.targetNames=["happy","sad","angry","surprised","relaxed"];
  const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3,relaxed:4};upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
+ curve(mouthGroup,[[-.22,-.43,.694],[-.14,-.408,.704],[-.075,-.415,.709],[0,-.432,.711],[.075,-.415,.709],[.14,-.408,.704],[.22,-.43,.694]],.005,lipOutline);
+ curve(mouthGroup,[[-.13,-.505,.695],[0,-.516,.705],[.13,-.505,.695]],.006,lipHighlight);
+ curve(mouthGroup,[[-.055,-.53,.64],[0,-.54,.65],[.055,-.53,.64]],.003,skinShade);
+ curve(mouthGroup,[[-.035,-.29,.704],[0,-.34,.716],[.035,-.29,.704]],.004,skinShade);
  const mouthInteriorGeometry=new THREE.SphereGeometry(1,32,20);
  const mouthInteriorBase=mouthInteriorGeometry.attributes.position.clone();
  const visemeScales={aa:[1,3.8],ih:[1.45,1.55],ou:[.62,2.6],ee:[1.7,1.2],oh:[.82,3.1]};
@@ -190,10 +237,23 @@ function makeFace(){
   ell(faceGroup,hairLight,[side*.77,-.48,.10],[.20,.22,.30]);
   curve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
   curve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
+  for(let strand=0;strand<4;strand++){
+   const offset=strand*.035;
+   curve(faceGroup,[[side*(.64+offset),.56,.42],[side*(.78+offset),.28,.43],[side*(.82+offset),-.05,.38],[side*(.78+offset*.5),-.36,.31],[side*(.67+offset*.4),-.58,.22]],.0065,strand%2?hair:hairLight);
+  }
  }
  // Neck and upper-body geometry are separate rigid parts for the humanoid rig.
  const neck=ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);neck.name="neck";
  const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;bust.name="upper-body";
+ const tankStraps=mat(0xf8f6f2,.82),rib=mat(0xe4ddd6,.9);
+ for(const side of [-1,1]){
+  const strap=curve(faceGroup,[[side*.37,-1.40,.24],[side*.43,-1.52,.28],[side*.47,-1.68,.27]],.045,tankStraps);strap.name=side<0?"tank-strap-left":"tank-strap-right";
+ }
+ curve(faceGroup,[[-.48,-1.53,.285],[-.32,-1.64,.34],[0,-1.69,.365],[.32,-1.64,.34],[.48,-1.53,.285]],.012,tankStraps).name="tank-neckline";
+ for(let ribIndex=-4;ribIndex<=4;ribIndex++){
+  const x=ribIndex*.105,z=.355-Math.abs(ribIndex)*.012;
+  curve(faceGroup,[[x,-1.55,z],[x*.96,-1.68,z+.008],[x*.88,-1.82,z-.005]],.002,rib);
+ }
  const necklaceTop=curve(faceGroup,[[-.22,-1.25,.23],[0,-1.32,.29],[.22,-1.25,.23]],.018,gold);necklaceTop.name="necklace-chain";
  // Small pendant and the subtle barcode-like neck mark from the approved appearance brief.
  const necklaceLoop=curve(faceGroup,[[-.22,-1.25,.23],[-.15,-1.34,.27],[0,-1.39,.29],[.15,-1.34,.27],[.22,-1.25,.23]],.009,gold);necklaceLoop.name="necklace-loop";
@@ -272,7 +332,7 @@ function attachVrm10Extension(glbData){
  for(const name of requiredBones){if(!nodeIndices.has(name))throw new Error("Humanoidボーンが不足しています: "+name);humanBones[name]={node:nodeIndices.get(name)};}
  for(const name of ["chest","neck","leftShoulder","rightShoulder"])if(nodeIndices.has(name))humanBones[name]={node:nodeIndices.get(name)};
  const expressions={preset:{}};
- const presetNames=["happy","angry","sad","relaxed","surprised","aa","ih","ou","ee","oh","blink","lookUp","lookDown","lookLeft","lookRight"];
+ const presetNames=["happy","angry","sad","relaxed","surprised","aa","ih","ou","ee","oh","blink","blinkLeft","blinkRight","lookUp","lookDown","lookLeft","lookRight"];
  for(const preset of presetNames){
   const morphTargetBinds=[];
   (gltf.nodes||[]).forEach((node,nodeIndex)=>{
@@ -282,7 +342,7 @@ function attachVrm10Extension(glbData){
   });
   if(morphTargetBinds.length)expressions.preset[preset]={morphTargetBinds};
  }
- for(const required of ["blink","happy","angry","sad","surprised","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"])if(!expressions.preset[required])throw new Error("VRM表情モーフが不足しています: "+required);
+ for(const required of ["blink","blinkLeft","blinkRight","happy","angry","sad","surprised","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"])if(!expressions.preset[required])throw new Error("VRM表情モーフが不足しています: "+required);
  gltf.extensions=gltf.extensions||{};
  gltf.extensions.VRMC_vrm={
   specVersion:"1.0",

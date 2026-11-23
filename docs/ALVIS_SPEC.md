@@ -1,3 +1,8 @@
+## Avatar Studio — 18号参照シートに基づく顔ディテールと左右独立blink
+- 参照シートの青灰色の瞳、明るい眉、金色アクセサリー、ブロンドボブ、白いリブ調トップに合わせ、ローカル生成の肌色テクスチャ、虹彩リング/繊維、まつ毛、鼻/唇輪郭、細い髪束、トップの肩紐/ネックライン/リブを追加。
+- VRM 1.0にblink、blinkLeft、blinkRightを別々のpresetとして出力し、ALVIS runtimeの診断で左右独立blinkを確認する。
+- 顔の同一性・完成品質は未認定。iPad Safari実機確認が必要。参照画像の外部送信なし。
+
 ## VRM LookAt target initialization
 - The ALVIS runtime now initializes the optional three-vrm VRMLookAt.target Object3D when a parsed VRM contains a LookAt component, tracks the focus position on resize, and removes the target during disposal.
 - This enables existing ALVIS setLookAt/setAutoLookAt controls to operate on VRM files with a LookAt extension.

@@ -142,6 +142,7 @@ try {
   assert.ok(diagnostics.humanoidHead && diagnostics.humanoidNeck && diagnostics.headMotion, "ALVIS runtime must recognize humanoid head/neck bones");
   assert.ok(diagnostics.lookAt, "ALVIS runtime must recognize VRM lookAt");
   assert.ok(diagnostics.blink, "ALVIS runtime must recognize blink");
+  assert.ok(diagnostics.blinkLeft && diagnostics.blinkRight, "ALVIS runtime must recognize independent left/right blink expressions");
   for (const feature of ["happy","sad","angry","relaxed","surprised","aa","ih","ou","ee","oh"]) {
     assert.ok(diagnostics[feature], "ALVIS runtime must recognize VRM expression: "+feature);
   }

@@ -1,3 +1,10 @@
+## 18号参照シートに基づく顔・目・髪・衣服ディテール強化 (2026-11-23)
+- Libraryに保存されていた承認済み「ALVIS 18号 3Dアバター展示シート」をローカルで確認し、青灰色の瞳、明るい眉、金色の細部、ブロンドのボブ、白いリブ調トップという外観要件を再照合した。参照画像は外部サービスへ送信していない。
+- Avatar Studioにローカル生成の肌色/微細テクスチャを追加し、目の虹彩リング・放射状ディテール・まつ毛、明るい眉、鼻/唇の輪郭、左右の細い髪束、白いトップの肩紐/ネックライン/リブを追加した。
+- まばたきは従来のblinkに加えてblinkLeft/blinkRightを左右別のVRM presetとして出力する。ブラウザ smoke はALVIS runtimeの左右独立blink認識を必須チェックする。
+- これは手続き生成メッシュの見た目改善であり、参照画像との顔同一性や写実品質を完成認定するものではない。実機Safari/iPadのGPU負荷は未検証。
+- 参照画像の外部送信、課金、main branch更新、既存アプリデータ/モデルキャッシュ変更は行っていない。
+
 ## VRM LookAt target initialization fix (2026-11-23)
 - The exported VRM included a valid VRMC_vrm.lookAt expression setup, but the existing ALVIS runtime only checked for vrm.lookAt.target and never created that optional target object. This made the UI report LookAt unavailable even when the VRM component parsed.
 - Runtime now creates a THREE.Object3D target when a VRM LookAt component exists, positions it at the avatar focus, keeps it aligned when the camera framing changes, and removes it on dispose.
