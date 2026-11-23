@@ -1,3 +1,10 @@
+## Latest automated regression coverage — 2026-11-23 (v332/v333 test-only)
+- Added behavioral tests for the existing `requestAlvisStoragePersistence()` helper: permission granted, permission denied, Promise rejection, synchronous exception, and unsupported API. Each path must return safely and persist a diagnostic status. The app already invokes this request without awaiting it, so a browser denial does not block Qwen initialization.
+- Added a behavioral test for `serializeAlvisInference()` using a fake engine: one in-flight request is allowed to finish, queued work is rejected after shutdown begins, concurrent unload calls share one promise, and the original unload runs once after active inference settles.
+- GitHub Actions offline-first regression and dashboard-image checks passed on commit `7f4a4af0611e623ab84551cd216ae5738ff5de6e` (run [45108569440](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45108569440)).
+- These changes modify tests only. No application runtime code, Service Worker cache version, encrypted user data, memories, history, sync, backups, Qwen/Kokoro caches, or production branch changed.
+- This CI coverage does not replace iPad Safari/WebGPU acceptance. Actual restart inference, airplane-mode behavior, and storage persistence remain device-level checks.
+
 ## Latest iPad Safari diagnostic — 2026-11-23 (v331)
 - User-provided device diagnostic identified the ALVIS profile as iPad; Safari reported WebGPU available, adapter discovery succeeded, GPU device creation succeeded, and the WebLLM-equivalent device requirements were accepted.
 - Existing WebLLM Cache API contained 76 model-weight entries, 1 config entry, and 1 WASM entry. Reported browser storage use was 2,182.5 MB / estimated quota 39,321.6 MB; model cache estimate was about 2,159 MB. No cache was deleted, moved, or rewritten by the diagnostic.
