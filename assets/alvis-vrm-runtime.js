@@ -45,9 +45,24 @@ export async function mountVrmAvatar(host, blob) {
     avatarBounds.getCenter(avatarCenter);
   }
   const gazeBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
+  const upperBodyBone = vrm.humanoid?.getNormalizedBoneNode?.("chest")
+    || vrm.humanoid?.getNormalizedBoneNode?.("upperChest")
+    || vrm.humanoid?.getNormalizedBoneNode?.("spine")
+    || null;
   const gazeAnchor = new THREE.Vector3();
+  const upperBodyAnchor = new THREE.Vector3();
   if (gazeBone) gazeBone.getWorldPosition(gazeAnchor);
   else gazeAnchor.copy(avatarCenter);
+  // Prefer a head-to-chest crop when humanoid anchors exist; otherwise frame the mesh bounds.
+  if (gazeBone && upperBodyBone) {
+    upperBodyBone.getWorldPosition(upperBodyAnchor);
+    avatarCenter.set(
+      (gazeAnchor.x + upperBodyAnchor.x) / 2,
+      (gazeAnchor.y + upperBodyAnchor.y) / 2,
+      (gazeAnchor.z + upperBodyAnchor.z) / 2
+    );
+    avatarSize.y = Math.max(Math.abs(gazeAnchor.y - upperBodyAnchor.y) + 0.55, 0.6);
+  }
   const avatarFocus = gazeAnchor.clone();
 
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
