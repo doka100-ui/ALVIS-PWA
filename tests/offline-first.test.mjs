@@ -99,8 +99,8 @@ assert.ok(refresh.includes("alvis-cache-v\\d+-integrated"),"the shared refresh p
 assert.ok(refresh.includes('const target="./index-integrated.html"'),"the shared refresh page must always return to the integrated app");
 assert.ok(refresh.includes('retry.addEventListener("click",update)'),"the refresh page must offer a retry after an update error");
 assert.ok(refresh.includes("open.hidden=false"),"the refresh page must offer a direct app link if updating fails");
-assert.doesNotMatch(refresh,/alvis-cache-v290-integrated|alvis-cache-v331-integrated|alvis-cache-v347-integrated|refresh=\\d+/,"the shared refresh page must not contain version-pinned checks or URLs");
-assert.doesNotMatch(refresh,/caches\\.delete|deleteDatabase|localStorage\\.clear|indexedDB\\.deleteDatabase/,"refresh must never clear user data or model caches");
+assert.ok(!refresh.includes("alvis-cache-v290-integrated") && !refresh.includes("alvis-cache-v331-integrated") && !refresh.includes("alvis-cache-v347-integrated") && !refresh.includes("refresh=290"),"the shared refresh page must not contain version-pinned checks or URLs");
+assert.ok(!/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/.test(refresh),"refresh must never clear user data or model caches");
 
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
 // v254: reduce HUD effects while iOS standalone pinch-zoom is active.
