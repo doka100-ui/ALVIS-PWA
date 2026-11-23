@@ -22,10 +22,28 @@ async function verifyBrowser(browserType, verifyOffline) {
   });
   const page = await context.newPage();
   page.setDefaultTimeout(15000);
+  await page.addInitScript(() => {
+    window.__alvisWindowErrors = [];
+    window.addEventListener("error", event => {
+      window.__alvisWindowErrors.push({
+        message: event.message || "",
+        filename: event.filename || "",
+        lineno: event.lineno || 0,
+        colno: event.colno || 0,
+        stack: event.error?.stack || ""
+      });
+    });
+    window.addEventListener("unhandledrejection", event => {
+      window.__alvisWindowErrors.push({
+        message: String(event.reason?.message || event.reason || "unhandled rejection"),
+        stack: event.reason?.stack || ""
+      });
+    });
+  });
   const pageErrors = [];
   const consoleErrors = [];
   const imageResponses = [];
-  page.on("pageerror", error => pageErrors.push({ message: error.message, stack: error.stack || "" }));
+  page.on("pageerror", error => pageErrors.push({ name: error.name || "", message: error.message, stack: error.stack || "" }));
   page.on("console", message => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
@@ -102,7 +120,8 @@ async function verifyBrowser(browserType, verifyOffline) {
           appHidden: document.getElementById("appPanel")?.classList.contains("hidden")
         };
       });
-      throw new Error(browserName + ": live HUD did not initialize: " + JSON.stringify({state,pageErrors,consoleErrors,error:error.message}));
+      const windowErrors = await page.evaluate(() => window.__alvisWindowErrors || []);
+      throw new Error(browserName + ": live HUD did not initialize: " + JSON.stringify({state,pageErrors,consoleErrors,windowErrors,error:error.message}));
     }
     await page.waitForFunction(() => {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
