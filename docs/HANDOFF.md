@@ -1,3 +1,8 @@
+## Latest Japanese viseme regression coverage (2026-11-23)
+- Dashboard tests now execute the exact embedded Japanese kana-to-viseme helper functions in Node VM and cover hiragana/katakana vowel rows, contracted sounds, nasal/stop closures, long-vowel holds, punctuation, speech-boundary indices, and out-of-range indices.
+- Test-only change: no app runtime, voice engine, VRM, stored model, IndexedDB, memories, history, sync, backups, Qwen/Kokoro caches, or production main changes.
+- v347 preview browser smoke passed after the refresh query assertion correction. Re-run CI for this test coverage; real iPad Safari and an actual licensed 18号 VRM asset remain unverified.
+
 ## Latest v347 preview smoke test correction (2026-11-23 / test-only)
 - The latest v347 preview run `45151766352` failed because `tests/dashboard-preview-smoke.mjs` waited for `?refresh=346`, while `refresh-v347.html` correctly redirects to `?refresh=347`.
 - Corrected only the Playwright expected query value to 347. The observed failure was a 60-second redirect-wait timeout, not evidence of a VRM rendering/runtime failure.

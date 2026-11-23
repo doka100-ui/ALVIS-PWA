@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runInNewContext } from "node:vm";
 import { readFile } from "node:fs/promises";
 
 const [app, appCss, sw, image, startupCheck, avatarRuntime] = await Promise.all([
@@ -10,6 +11,17 @@ const [app, appCss, sw, image, startupCheck, avatarRuntime] = await Promise.all(
   readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8")
 ]);
 const appStyles = app + appCss;
+const visemeStart = app.indexOf("function getAlvisKanaViseme(");
+const visemeEnd = app.indexOf("function loadSpeechVoices(", visemeStart);
+assert.ok(visemeStart >= 0 && visemeEnd > visemeStart, "Japanese viseme helpers must remain available");
+const visemeCalls = [];
+const visemeHelpers = runInNewContext(
+  app.slice(visemeStart, visemeEnd) + "\n({ getAlvisKanaViseme, updateAlvisSpeechViseme })",
+  { window: {
+    ALVISAvatarSetMouthOpen: value => visemeCalls.push(["open", value]),
+    ALVISAvatarSetMouthViseme: (name, strength) => visemeCalls.push(["viseme", name, strength])
+  } }
+);
 const checks = [];
 function check(name, condition) {
   assert.ok(condition, name);
@@ -30,6 +42,18 @@ check("the local AI launch button remains connected to the live HUD", stage.incl
 check("the right memory and growth hotspots are wired to existing page navigation", stage.includes('class="hud-info-action hud-interface-action" data-hud-action="memory"') && stage.includes('class="hud-info-action hud-interface-action" data-hud-action="growth"') && app.includes('.hud-interface-action[data-hud-action]'));
 check("the outer ALVIS gear aligns to the globe core's exact 50%/42% anchor and keeps its independent rotation", app.includes('duration:22000') && appCss.includes("from{rotate:9deg}") && appCss.includes("to{rotate:369deg}") && appCss.includes("left:50%!important;top:42%!important") && appCss.includes("translate:-50% -50%!important") && appCss.includes("transform:none!important"));
 check("the ALVIS outer ring uses a smooth precision rim with 48 subtle index marks and retains its fine inner ring detailing", (app.match(/class="gear-tick/g)||[]).length===48 && !app.includes('class="gear-tooth"') && app.includes('r="168.5"') && app.includes('r="155"') && app.includes('r="145"') && app.includes('r="139"') && appCss.includes(".gear-tick-major"));
+check("Japanese viseme mapping covers all five vowel rows and katakana normalization", ["あ","い","う","え","お","カ","キ","ク","ケ","コ"].every((kana,index)=>visemeHelpers.getAlvisKanaViseme(kana)===["aa","ih","ou","ee","oh","aa","ih","ou","ee","oh"][index]));
+check("Japanese contracted sounds use the small kana vowel and nasal/stop sounds close the mouth", visemeHelpers.getAlvisKanaViseme("きゃ")==="aa" && visemeHelpers.getAlvisKanaViseme("しゅ")==="ou" && visemeHelpers.getAlvisKanaViseme("ん")==="closed" && visemeHelpers.getAlvisKanaViseme("っ")==="closed");
+check("Japanese long-vowel marks hold the previous mouth shape and punctuation is neutral", visemeHelpers.getAlvisKanaViseme("ー")==="hold" && visemeHelpers.getAlvisKanaViseme("、")==="");
+visemeCalls.length=0;
+visemeHelpers.updateAlvisSpeechViseme("こんにちは",{charIndex:0});
+check("speech boundary character indices drive the expected Japanese vowel viseme", visemeCalls.length===1 && visemeCalls[0][0]==="viseme" && visemeCalls[0][1]==="oh");
+visemeCalls.length=0;
+visemeHelpers.updateAlvisSpeechViseme("こんにちは",{charIndex:1});
+check("nasal mora boundaries close the avatar mouth", visemeCalls.length===1 && visemeCalls[0][0]==="open" && visemeCalls[0][1]===0);
+visemeCalls.length=0;
+visemeHelpers.updateAlvisSpeechViseme("こんにちは",{charIndex:99});
+check("invalid speech boundary indices do not change the avatar mouth", visemeCalls.length===0);
 check("the actual chat composer remains outside the static artwork", app.includes('id="chatInput"') && app.includes('id="sendChat"'));
 check("ALVIS and Avatar display modes remain separate", app.includes('id="jarvisModeButton"') && app.includes('id="avatarModeButton"') && app.includes('id="alvisAvatarCanvas"'));
 check("disposing a VRM releases its scene geometry, materials, and textures", avatarRuntime.includes("VRMUtils.deepDispose(vrm.scene)") && avatarRuntime.indexOf("VRMUtils.deepDispose(vrm.scene)") < avatarRuntime.indexOf("renderer.dispose();"));
