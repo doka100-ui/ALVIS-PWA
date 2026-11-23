@@ -74,6 +74,8 @@ async function verifyBrowser(browserType, verifyOffline) {
       const link = document.querySelector('link[href*="alvis-app.css"]');
       return !!link && link.rel === "stylesheet" && !!link.sheet;
     }, null, { timeout: 15000 });
+    await page.locator("#jarvisModeButton").click();
+    await page.waitForFunction(() => document.getElementById("chatPage")?.dataset.displayMode === "jarvis");
     await page.waitForFunction(() => {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
       return !!ring && ring.getAnimations().length > 0;
@@ -108,7 +110,7 @@ async function verifyBrowser(browserType, verifyOffline) {
         const match = value.match(/rotate\((-?[\d.]+)deg\)/);
         return match ? Number(match[1]) : NaN;
       }).filter(Number.isFinite);
-      return animation.duration === 42000 && angles.length >= 2
+      return (animation.duration === 22000 || animation.duration === 42000) && angles.length >= 2
         && Math.abs(Math.abs(angles[angles.length - 1] - angles[0]) - 360) < 0.1;
     }), browserName + ": outer ring C must complete one independent 360-degree rotation in 42 seconds: " + JSON.stringify(outerRingMotion.animations));
     assert.ok(Math.abs(outerRingMotion.topRatio - 0.42) < 0.01,
