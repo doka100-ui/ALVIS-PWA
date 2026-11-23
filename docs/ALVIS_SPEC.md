@@ -1,3 +1,7 @@
+## ALVIS VRM runtime import-map aliases
+- Added three/addons/ and @pixiv/three-vrm 3.5.5 mappings to the integrated app import map, matching the imports in assets/alvis-vrm-runtime.js. Existing three/examples/jsm/ mapping and Three.js 0.186.0 version are retained.
+- Browser preview smoke loads the exported .vrm through the same runtime module used by ALVIS.
+
 ## Avatar Studio — VRM metadata permissions
 - The prototype VRM meta declares avatar permission everyone, personalNonProfit commercial usage, allowModification, and allowRedistribution=false.
 - The metadata does not grant rights to third-party likenesses or reference assets.

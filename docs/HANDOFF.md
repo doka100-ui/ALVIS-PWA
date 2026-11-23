@@ -1,3 +1,9 @@
+## ALVIS VRM runtime import-map compatibility (2026-11-23)
+- The integrated app import map did not provide the module specifiers used by assets/alvis-vrm-runtime.js: three/addons/ and @pixiv/three-vrm. Added both mappings, keeping Three.js at the app's existing 0.186.0 version and using the already established three-vrm 3.5.5 module.
+- Existing three/examples/jsm/ and talking-avatar mappings remain unchanged. This narrowly enables the existing VRM loader module to resolve its imports.
+- The new preview browser smoke loads the generated VRM through the actual ALVIS VRM runtime and checks recognized humanoid, lookAt, blink, expression, and vowel capabilities.
+- No stored data, model caches, chat, voice, sync, or backup formats are changed.
+
 ## VRM prototype metadata permissions (2026-11-23)
 - VRM metadata is configured for avatar use, personal non-profit use, modification permitted, and redistribution disabled. This avoids marking the user-facing ALVIS prototype as author-only or unmodifiable.
 - These metadata flags are embedded usage declarations; they do not replace legal review or grant rights to any third-party reference material.

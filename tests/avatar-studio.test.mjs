@@ -56,3 +56,5 @@ check("both eyes export named VRM look-at morph targets", html.includes("addEyeG
 check("VRM look-at expression presets and range maps are included", html.includes('lookAt:{type:"expression"') && ["lookUp","lookDown","lookLeft","lookRight"].every(name=>html.includes('"'+name+'"')));
 
 check("VRM metadata permits personal use and local modification without redistribution", html.includes('avatarPermission:"everyone"') && html.includes('commercialUsage:"personalNonProfit"') && html.includes('allowRedistribution:false') && html.includes('modification:"allowModification"'));
+
+check("ALVIS VRM runtime dependencies resolve through the main app import map", appHtml.includes('"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"') && appHtml.includes('"@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"') && html.includes('from "three/addons/loaders/GLTFLoader.js"'));
