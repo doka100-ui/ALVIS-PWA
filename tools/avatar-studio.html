@@ -118,7 +118,7 @@ function makeSkinTextures(){
 }
 const skinTextures=makeSkinTextures();
 const skin=mat(0xffffff,.76);skin.map=skinTextures.color;skin.normalMap=skinTextures.normal;skin.normalScale.set(.22,.22);skin.roughnessMap=skinTextures.roughness;skin.needsUpdate=true;
-const skinShade=mat(0xe3b9a9,.8),noseShadow=mat(0x986f67,.94),hair=mat(0xe6d0a5,.48),hairLight=mat(0xf4e3c4,.48),white=mat(0xf8f4ef,.7),iris=mat(0x7899bd,.28),irisRing=mat(0x506f90,.36),irisFiber=mat(0xc4d5e6,.38),pupil=mat(0x26384a,.25),lip=mat(0xc98584,.55),lipHighlight=mat(0xe7aaa5,.48),lipOutline=mat(0x985f65,.7),dark=mat(0x493a36,.8),lashMat=mat(0x4b4140,.76),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0xa38a76,.82);
+const skinShade=mat(0xe3b9a9,.8),noseShadow=mat(0x986f67,.94),hair=mat(0xe6d0a5,.48),hairLight=mat(0xf4e3c4,.48),white=mat(0xf8f4ef,.7),sclera=new THREE.MeshPhysicalMaterial({color:0xf8f5f1,roughness:.34,metalness:0,clearcoat:.24,clearcoatRoughness:.22,ior:1.38}),iris=new THREE.MeshPhysicalMaterial({color:0x7899bd,roughness:.24,metalness:0,clearcoat:.72,clearcoatRoughness:.12,ior:1.42}),irisRing=mat(0x506f90,.36),irisFiber=mat(0xc4d5e6,.38),pupil=new THREE.MeshPhysicalMaterial({color:0x26384a,roughness:.16,metalness:0,clearcoat:.82,clearcoatRoughness:.08,ior:1.42}),lip=mat(0xc98584,.55),lipHighlight=mat(0xe7aaa5,.48),lipOutline=mat(0x985f65,.7),dark=mat(0x493a36,.8),lashMat=mat(0x4b4140,.76),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0xa38a76,.82);
 let faceGroup;
 function ell(parent,material,pos,scale,seg=24){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
 function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,24,r,6,false),material);parent.add(m);return m}
@@ -197,7 +197,7 @@ function makeFace(){
  for(const side of [-1,1]){
   const x=side*.37;
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
-  almondEye(eyesGroup,white,[x,.34,.675],.225,.105);
+  almondEye(eyesGroup,sclera,[x,.34,.675],.225,.105);
   const irisMesh=ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";addEyeGazeMorphTargets(irisMesh);
   const pupilMesh=ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";addEyeGazeMorphTargets(pupilMesh);
   const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,24),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";eyesGroup.add(irisBorder);
