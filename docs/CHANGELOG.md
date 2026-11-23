@@ -1,3 +1,9 @@
+## 2026-11-23 — Qwen起動前の保存領域要求・推論終了処理の動作テスト追加（development）
+- `tests/offline-first.test.mjs`へ、`navigator.storage.persist()`の許可/拒否/Promise reject/同期例外/API非対応の5経路を実行するテストを追加。いずれもモデル起動を妨げず、診断状態が記録されることを確認。
+- `serializeAlvisInference()`の実動作テストを追加。実行中推論の完了待ち、終了要求後の待機推論拒否、同時unloadのPromise共有、unload一度だけを検証。
+- CI: offline-first regression / dashboard-image ともに成功。検証コミット `7f4a4af0611e623ab84551cd216ae5738ff5de6e`、Actions run [45108569440](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45108569440)。
+- テストファイルのみ変更。アプリ実装・モデル設定・Service Worker・既存データ・モデル/音声キャッシュ・本番 `main` は変更なし。iPad Safari実機の再起動/オフライン推論は引き続き未確認。
+
 ## 2026-11-23 — iPad Safari v331実機診断の記録
 - ユーザー提供の診断結果から、WebGPUデバイス作成成功、WebLLM Cache APIのモデル重み76件・config 1件・WASM 1件、約2,159MBのモデルキャッシュ読み込み完了を引き継ぎ資料へ記録。
 - 保存領域の永続化は未許可。キャッシュ消失を意味するものではないが、ブラウザによる消去リスクとして明記。
