@@ -1,3 +1,7 @@
+## Avatar Studio — eyelid closure geometry
+- Replace the thin-line-to-sphere blink morph with a subdivided upper-eyelid surface whose lower boundary moves from the upper almond-eye edge to the lower edge when blink is applied. Preserve blink, blinkLeft and blinkRight morph names and VRM preset mappings.
+- Verify actual closed-eye appearance visually; browser import/render tests do not prove eyelid deformation quality.
+
 ## Avatar Studio — cheekbone and chin surface sculpt
 - Add subtle cheekbone projection and chin rounding to the face base mesh through vertex displacement, preserving the tapered oval silhouette.
 

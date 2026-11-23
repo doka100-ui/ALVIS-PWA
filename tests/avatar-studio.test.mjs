@@ -9,7 +9,7 @@ check("touch orbit controls are enabled", html.includes("OrbitControls") && html
 check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize"].every(id => html.includes('id="'+id+'"')));
 check("blink and smile preview controls are present", ["blink","smile"].every(id => html.includes('id="'+id+'"')));
 check("blink controls independent eyelid meshes", html.includes('name=side<0?"eyelid-left":"eyelid-right"') && html.includes("leftLid.morphTargetInfluences[0]=values.blink") && html.includes("rightLid.morphTargetInfluences[0]=values.blink"));
-check("eyelids contain exported blink and side-specific morph targets", html.includes('lidGeometry.userData.targetNames=["blink",sideBlink]') && html.includes("lidGeometry.morphAttributes.position=[lidClosed,lidClosed.clone()]"));
+check("eyelids contain exported blink and side-specific morph targets", html.includes('lidGeometry.userData.targetNames=["blink",sideBlink]') && html.includes("lidGeometry.morphAttributes.position=[closedAttribute,new THREE.Float32BufferAttribute(lidClosedPositions.slice(),3)]") && html.includes("lidSegmentsX=24,lidSegmentsY=8"));
 check("upper lip contains five named expression morph targets", html.includes('lipGeometry.userData.targetNames=["happy","sad","angry","surprised","relaxed"]') && html.includes("lipGeometry.morphAttributes.position=lipTargets"));
 check("smile preview drives the happy morph target", html.includes("upperLip.morphTargetInfluences[0]=values.smile"));
 check("GLB morph targets have explicit semantic names", html.includes("lid.morphTargetDictionary={blink:0,[sideBlink]:1}") && html.includes("upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3,relaxed:4}"));
@@ -83,3 +83,5 @@ check("nose bridge and tip form one continuous sculpted 3D surface", html.includ
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
 check("face base includes subtle cheekbone and chin projection sculpting", html.includes("const cheekbone=.028*Math.exp") && html.includes("const chin=.018*Math.exp") && html.includes("z*depth+cheekbone+chin"));
+
+check("eyelid blink target closes from the upper lid edge across the almond eye", html.includes("openEdge=.095*shape,closedEdge=-.095*shape") && html.includes("lidClosedPositions.push(localX,top+(closedEdge-top)*t,z)") && html.includes("lidGeometry.computeVertexNormals()"));

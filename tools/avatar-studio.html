@@ -180,16 +180,30 @@ function makeFace(){
    curve(eyesGroup,[[lx,ly,.739],[lx+side*.018,ly+.018,.746],[lx+side*.034,ly+.038,.742]],.0035,lashMat);
   }
   const brow=curve(eyesGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.023,browMat);brow.name=side<0?"eyebrow-left":"eyebrow-right";addBrowMorphTargets(brow,side);
-  const lidGeometry=new THREE.SphereGeometry(1,32,24);
-  const lidBase=lidGeometry.attributes.position.clone();
-  const lidClosed=lidGeometry.attributes.position.clone();
-  for(let i=0;i<lidClosed.count;i++)lidClosed.setY(i,lidClosed.getY(i));
-  for(let i=0;i<lidBase.count;i++)lidBase.setY(i,lidBase.getY(i)*.012);
-  lidGeometry.setAttribute("position",lidBase);
+  const lidSegmentsX=24,lidSegmentsY=8,lidPositions=[],lidClosedPositions=[],lidIndices=[];
+  for(let row=0;row<=lidSegmentsY;row++){
+   const t=row/lidSegmentsY;
+   for(let column=0;column<=lidSegmentsX;column++){
+    const u=column/lidSegmentsX*2-1,shape=Math.sqrt(Math.max(0,1-u*u));
+    const top=.17+.03*shape,openEdge=.095*shape,closedEdge=-.095*shape;
+    const localX=u*.225,z=.008*shape;
+    lidPositions.push(localX,top+(openEdge-top)*t,z);
+    lidClosedPositions.push(localX,top+(closedEdge-top)*t,z);
+   }
+  }
+  for(let row=0;row<lidSegmentsY;row++)for(let column=0;column<lidSegmentsX;column++){
+   const a=row*(lidSegmentsX+1)+column,b=a+1,c=a+lidSegmentsX+1,d=c+1;
+   lidIndices.push(a,c,b,b,c,d);
+  }
+  const lidGeometry=new THREE.BufferGeometry();
+  lidGeometry.setIndex(lidIndices);
+  lidGeometry.setAttribute("position",new THREE.Float32BufferAttribute(lidPositions,3));
+  const closedAttribute=new THREE.Float32BufferAttribute(lidClosedPositions,3);
+  lidGeometry.morphAttributes.position=[closedAttribute,new THREE.Float32BufferAttribute(lidClosedPositions.slice(),3)];
+  lidGeometry.userData.targetNames=["blink",side<0?"blinkLeft":"blinkRight"];
+  lidGeometry.computeVertexNormals();
   const sideBlink=side<0?"blinkLeft":"blinkRight";
-  lidGeometry.morphAttributes.position=[lidClosed,lidClosed.clone()];
-  lidGeometry.userData.targetNames=["blink",sideBlink];
-  const lid=new THREE.Mesh(lidGeometry,skin);lid.updateMorphTargets();lid.morphTargetDictionary={blink:0,[sideBlink]:1};lid.position.set(x,.34,.785);lid.scale.set(.225,.12,.035);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
+  const lid=new THREE.Mesh(lidGeometry,skin);lid.updateMorphTargets();lid.morphTargetDictionary={blink:0,[sideBlink]:1};lid.position.set(x,.34,.785);lid.name=side<0?"eyelid-left":"eyelid-right";eyesGroup.add(lid);
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
