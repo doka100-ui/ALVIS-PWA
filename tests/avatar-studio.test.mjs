@@ -66,7 +66,7 @@ check("ALVIS VRM runtime dependencies resolve through the main app import map", 
 
 check("VRM runtime creates, tracks, and disposes an actual LookAt target", vrmRuntimeSource.includes("const lookAtTarget = vrm.lookAt ? new THREE.Object3D() : null;") && vrmRuntimeSource.includes("vrm.lookAt.target = lookAtTarget") && vrmRuntimeSource.includes("if (lookAtTarget) lookAtTarget.position.copy(avatarFocus)") && vrmRuntimeSource.includes("if (lookAtTarget) scene.remove(lookAtTarget)"));
 
-check("procedural skin base-color and subtle pore texture are exported locally", html.includes("function makeSkinTexture()") && html.includes("skin.map=skinTexture") && html.includes("skin.bumpScale=.0025"));
+check("procedural skin base-color, tangent normal detail, and roughness maps are generated locally for VRM export", html.includes("function makeSkinTextures()") && html.includes("skin.map=skinTextures.color") && html.includes("skin.normalMap=skinTextures.normal") && html.includes("skin.normalScale.set(.22,.22)") && html.includes("skin.roughnessMap=skinTextures.roughness") && html.includes("new THREE.CanvasTexture(normalCanvas)") && html.includes("new THREE.CanvasTexture(roughnessCanvas)"));
 check("eyes include iris rings, radial fibers, and individual lash strands", html.includes("iris-border-left") && html.includes("for(let ray=0;ray<12;ray++)") && html.includes("ray*Math.PI*2/12") && html.includes("for(let lash=0;lash<4;lash++)"));
 check("brows use the light taupe tone from the approved model sheet", html.includes("browMat=mat(0xa38a76"));
 check("nose and lips include fine anatomical contour details", html.includes("noseGroup") && html.includes("lipOutline") && html.includes("lipHighlight"));
