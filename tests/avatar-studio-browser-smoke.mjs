@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 
 const previewUrl = process.env.ALVIS_PREVIEW_URL;
 assert.ok(previewUrl, "ALVIS_PREVIEW_URL must point to this commit's Cloudflare Pages preview");
@@ -174,4 +174,71 @@ try {
 } finally {
   await context.close();
   await browser.close();
+}
+
+const safariBrowser = await webkit.launch({ headless: true });
+const safariContext = await safariBrowser.newContext({ acceptDownloads: true, viewport: { width: 900, height: 900 } });
+const safariPage = await safariContext.newPage();
+safariPage.setDefaultTimeout(30000);
+const safariErrors = [];
+const safariExternalRequests = [];
+safariPage.on("pageerror", error => safariErrors.push({ message:error.message, stack:error.stack||"" }));
+safariPage.on("request", request => {
+  const requestUrl = new URL(request.url());
+  if (requestUrl.origin !== new URL(avatarUrl).origin) safariExternalRequests.push(request.url());
+});
+try {
+  const response = await safariPage.goto(avatarUrl, { waitUntil:"domcontentloaded", timeout:120000 });
+  assert.ok(response?.ok(), "WebKit must load Avatar Studio");
+  await safariPage.waitForSelector("#stage canvas", { timeout:60000 });
+  await safariPage.waitForFunction(() => {
+    const canvas=document.querySelector("#stage canvas");
+    if(!canvas)return false;
+    const gl=canvas.getContext("webgl2")||canvas.getContext("webgl");
+    return !!gl&&canvas.width>0&&canvas.height>0;
+  }, null, { timeout:30000 });
+  const safariRender = await safariPage.locator("#stage canvas").evaluate(canvas => {
+    const gl=canvas.getContext("webgl2")||canvas.getContext("webgl");
+    return {width:canvas.width,height:canvas.height,version:gl.getParameter(gl.VERSION)};
+  });
+  for (const [id,value] of [["blinkLeft","0.75"],["blinkRight","0.4"],["smile","0.3"],["aa","0.6"]]) {
+    await safariPage.locator("#"+id).evaluate((element,next)=>{
+      element.value=next;element.dispatchEvent(new Event("input",{bubbles:true}));
+    },value);
+    assert.equal(await safariPage.locator("#"+id+"Value").evaluate(element=>element.value),Number(value).toFixed(2), "WebKit "+id+" control must respond");
+  }
+  const safariDownloadPromise=safariPage.waitForEvent("download",{timeout:60000});
+  await safariPage.locator("#export").click();
+  const safariDownload=await safariDownloadPromise;
+  const safariPath=await safariDownload.path();
+  assert.ok(safariPath,"WebKit must export a VRM file");
+  const safariBuffer=await readFile(safariPath);
+  assert.equal(safariBuffer.toString("ascii",0,4),"glTF","WebKit VRM output must be a GLB binary");
+  const safariRuntimeResponse=await safariPage.goto(previewUrl,{waitUntil:"domcontentloaded",timeout:120000});
+  assert.ok(safariRuntimeResponse?.ok(),"WebKit must load the ALVIS runtime page");
+  const safariRuntime=await safariPage.evaluate(async base64=>{
+    const runtime=await import("./assets/alvis-vrm-runtime.js");
+    const binary=Uint8Array.from(atob(base64),c=>c.charCodeAt(0));
+    const host=document.createElement("div");
+    Object.assign(host.style,{position:"fixed",left:"0",top:"0",width:"360px",height:"460px",opacity:"0.02",pointerEvents:"none"});
+    document.body.appendChild(host);
+    let mounted;
+    try{
+      mounted=await runtime.mountVrmAvatar(host,new Blob([binary],{type:"model/gltf-binary"}));
+      const diagnostics=mounted.getDiagnostics();
+      const actions={leftWink:mounted.setExpression("blinkLeft",0.7),rightWink:mounted.setExpression("blinkRight",0.6),look:mounted.setLookAt(0,1,3)};
+      const canvas=host.querySelector("canvas");
+      return {diagnostics,actions,render:!!canvas&&(!!canvas.getContext("webgl2")||!!canvas.getContext("webgl"))};
+    }finally{mounted?.dispose?.();host.remove();}
+  },safariBuffer.toString("base64"));
+  assert.equal(safariRuntime.diagnostics.format,"VRM","WebKit ALVIS runtime must parse VRM 1.0");
+  assert.ok(safariRuntime.diagnostics.blinkLeft&&safariRuntime.diagnostics.blinkRight,"WebKit runtime must recognize split blink expressions");
+  assert.ok(Object.values(safariRuntime.actions).every(Boolean),"WebKit runtime must control wink and gaze expressions");
+  assert.ok(safariRuntime.render,"WebKit runtime must render the VRM");
+  assert.deepEqual(safariErrors,[],"WebKit Avatar Studio and runtime must not throw browser errors");
+  assert.deepEqual(safariExternalRequests,[],"WebKit Avatar Studio must not request external assets");
+  console.log("PASS WebKit Avatar Studio rendering, independent wink controls, VRM export and ALVIS runtime import: "+JSON.stringify({safariRender,safariRuntime}));
+} finally {
+  await safariContext.close();
+  await safariBrowser.close();
 }

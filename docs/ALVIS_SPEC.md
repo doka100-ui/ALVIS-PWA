@@ -1,3 +1,7 @@
+## Avatar Studio — WebKit compatibility smoke
+- Playwright WebKit now exercises the standalone WebGL Avatar Studio, left/right wink UI, VRM export, and import/control/render through the ALVIS VRM runtime.
+- This is Safari-engine CI coverage only; it is not equivalent to iPad Safari on Apple GPU.
+
 ## Avatar Studio — almond-shaped sclera geometry
 - Replace spherical eye-white placeholders with a curved almond-outline ShapeGeometry with a shallow convex dome, retaining separate iris, pupil, glint, lids, lashes and lookAt morphs.
 - This is a procedural approximation of the approved reference shape; face identity and photorealism remain unverified.

@@ -1,3 +1,8 @@
+## WebKit/Safari系ブラウザのAvatar Studio受け入れテスト追加 (2026-11-23)
+- Chromiumに加えてPlaywright WebKitでもAvatar StudioのWebGL描画、左右ウインク/表情/母音UI、VRM書き出し、ALVIS本体のVRM runtime読み込み・左右blink/視線操作を検証する。
+- WebKitはSafari系エンジンの互換性チェックであり、iPad実機Safari/Apple GPUでの性能保証ではない。実機検証は別途必要。
+- 外部画像送信・課金・main branch更新なし。
+
 ## 18号の目元形状をアーモンド形メッシュへ変更 (2026-11-23)
 - 参照展示シートの横長で目尻が細くなる目の形に合わせ、球体の白目をBezier輪郭のShapeGeometryへ変更。表面に浅いドーム状の奥行きを付け、虹彩/瞳/まつ毛は既存の独立3Dパーツを維持。
 - 新しい目形状の存在とドーム深度を静的テストで確認。実際の見た目は次のChromium/SwiftShaderプレビューで確認する。

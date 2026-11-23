@@ -74,3 +74,5 @@ check("both single and independent left/right blink expressions are exported", h
 check("left and right wink controls are exposed and connected to the matching eyelids", ["blinkLeft","blinkRight"].every(id=>html.includes('id="'+id+'"') && html.includes('values.'+id)) && html.includes('leftLid.morphTargetInfluences[1]=values.blinkLeft') && html.includes('rightLid.morphTargetInfluences[1]=values.blinkRight'));
 
 check("sclera uses a curved almond-shaped mesh instead of a spherical placeholder", html.includes("function almondEye(") && html.includes("new THREE.ShapeGeometry(shape,32)") && html.includes("vertices.setZ(i,.038*dome)") && html.includes("almondEye(eyesGroup,white,[x,.34,.675],.225,.105)"));
+
+check("browser smoke exercises WebKit Avatar Studio and ALVIS VRM runtime", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("webkit.launch") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("WebKit runtime must recognize split blink expressions"));
