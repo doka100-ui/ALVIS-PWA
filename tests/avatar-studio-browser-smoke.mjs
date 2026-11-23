@@ -104,6 +104,8 @@ try {
   assert.ok(skinMaterials.some(material=>material.pbrMetallicRoughness?.metallicRoughnessTexture?.index!==undefined), "VRM must export the generated skin roughness map through the metallic-roughness texture");
   assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.7), "VRM must export the iris clearcoat layer");
   assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.8), "VRM must export the pupil clearcoat layer");
+  assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_sheen?.sheenColorFactor?.some(value=>value>0.7)), "VRM must export the blonde hair sheen layer");
+  assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.12 && material.extensions?.KHR_materials_sheen), "VRM must export layered sheen and clearcoat on the hair material");
 
 
   for (const name of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
