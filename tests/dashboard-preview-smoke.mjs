@@ -153,10 +153,10 @@ async function verifyBrowser(browserType, verifyOffline) {
     }));
     assert.ok(outerRingMotion.animations.some(animation => {
       const angles = animation.keyframes.map(frame => {
-        const direct = String(frame.rotate || "").match(/^(-?[\\d.]+)deg$/);
+        const direct = String(frame.rotate || "").match(/^(-?[\d.]+)deg$/);
         if (direct) return Number(direct[1]);
         const value = String(frame.transform || "");
-        const match = value.match(/rotate\\((-?[\\d.]+)deg\\)/);
+        const match = value.match(/rotate\((-?[\d.]+)deg\)/);
         return match ? Number(match[1]) : NaN;
       }).filter(Number.isFinite);
       return (animation.duration === 22000 || animation.duration === 42000) && angles.length >= 2
