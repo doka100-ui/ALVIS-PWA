@@ -1,3 +1,7 @@
+## Latest v344 VRM WebGLコンテキスト復帰（2026-11-23）
+- VRM canvasのwebglcontextlostでpreventDefaultし描画ループを停止。webglcontextrestoredで経過時間をリセットして描画を再開する。contextLost状態は診断データに含め、dispose時にイベントを解除する。
+- build/cache/refresh v344。実機iPad Safariでの実GPU復帰は未確認。ユーザーデータ・VRM Blob・Qwen/Kokoroキャッシュ・記憶/履歴/同期/バックアップは変更しない。本番mainは変更しない。
+
 ## Latest v343 アバター差し替え時の既存モデル保護（2026-11-23）
 - VRM/GLBの新規ファイルは表示に成功した後にのみIndexedDBへ保存する。読み込み失敗時は既存保存モデルを読み直して復元し、無効ファイルで正常モデルを上書きしない。
 - v343 build ID / Service Worker cache / refresh page。保存形式や既存モデルのデータは変更しない。本番mainは変更しない。自動テストとChromium/WebKitプレビュー検証は結果確認待ち。
