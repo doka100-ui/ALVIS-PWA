@@ -79,7 +79,9 @@ try {
   assert.equal(jsonType, 0x4e4f534a, "GLB first chunk must be JSON");
   const gltf = JSON.parse(buffer.toString("utf8", 20, 20 + jsonLength).trim());
   const targetNames = (gltf.meshes || []).flatMap(mesh => mesh.extras?.targetNames || []);
-  for (const name of ["blink","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
+  assert.ok((gltf.images||[]).length>0 && (gltf.textures||[]).length>0, "VRM must embed its locally generated skin texture");
+  assert.ok((gltf.materials||[]).some(material=>material.pbrMetallicRoughness?.baseColorTexture?.index!==undefined), "VRM must assign the skin base-color texture to a PBR material");
+  for (const name of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
     assert.ok(targetNames.includes(name), "VRM must retain named morph target: "+name+"; found "+targetNames.join(", "));
   }
   const vrmExtension = gltf.extensions?.VRMC_vrm;
@@ -93,7 +95,7 @@ try {
     assert.ok(Number.isInteger(humanBones[bone]?.node), "VRM required humanoid bone must map to a node: "+bone);
     assert.ok(gltf.nodes[humanBones[bone].node], "VRM bone node must exist: "+bone);
   }
-  for (const expression of ["blink","happy","sad","angry","surprised","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
+  for (const expression of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
     const binds = vrmExtension.expressions?.preset?.[expression]?.morphTargetBinds || [];
     assert.ok(binds.length > 0, "VRM preset must have morph target binds: "+expression);
     for (const bind of binds) {
