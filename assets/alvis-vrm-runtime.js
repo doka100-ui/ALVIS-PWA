@@ -144,6 +144,8 @@ export async function mountVrmAvatar(host, blob) {
   // Normalized humanoid bones are optional; unsupported rigs simply keep their existing motion.
   const neckBone = vrm.humanoid?.getNormalizedBoneNode?.("neck") || null;
   const headBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
+  const chestBone = vrm.humanoid?.getNormalizedBoneNode?.("chest") || null;
+  const chestBasePosition = chestBone?.position?.clone?.() || null;
   const neckBaseQuaternion = neckBone?.quaternion?.clone?.() || null;
   const headBaseQuaternion = headBone?.quaternion?.clone?.() || null;
   const neckOffsetQuaternion = new THREE.Quaternion();
@@ -253,6 +255,7 @@ export async function mountVrmAvatar(host, blob) {
       humanoidNeck: !!neckBone,
       humanoidHead: !!headBone,
       headMotion: !!(neckBone || headBone),
+      chestMotion: !!chestBone,
       lookAt: !!vrm.lookAt?.target,
       blink: hasExpression("blink") || (hasExpression("blinkLeft") && hasExpression("blinkRight")),
       blinkLeft: hasExpression("blinkLeft"),
@@ -372,6 +375,11 @@ export async function mountVrmAvatar(host, blob) {
     }
 
     vrm.update(delta);
+
+    // Gentle chest translation adds a breathing cue without scaling the face or deforming the rig.
+    if (idleEnabled && chestBone && chestBasePosition) {
+      chestBone.position.y = chestBasePosition.y + Math.sin(elapsed * 0.92) * 0.003;
+    }
 
     // Small idle head adjustments plus a brief, smooth nod after a reply.
     if (idleEnabled && elapsed >= nextHeadMotionAt) {

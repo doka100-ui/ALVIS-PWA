@@ -157,6 +157,7 @@ try {
   const diagnostics = runtimeDiagnostics.diagnostics;
   assert.equal(diagnostics.format, "VRM", "ALVIS runtime must parse the exported VRM");
   assert.ok(diagnostics.humanoidHead && diagnostics.humanoidNeck && diagnostics.headMotion, "ALVIS runtime must recognize humanoid head/neck bones");
+  assert.ok(diagnostics.chestMotion, "ALVIS runtime must recognize chest bone for subtle breathing");
   assert.ok(diagnostics.lookAt, "ALVIS runtime must recognize VRM lookAt");
   assert.ok(diagnostics.blink, "ALVIS runtime must recognize blink");
   assert.ok(diagnostics.blinkLeft && diagnostics.blinkRight, "ALVIS runtime must recognize independent left/right blink expressions");
@@ -253,6 +254,7 @@ try {
   },safariBuffer.toString("base64"));
   assert.equal(safariRuntime.diagnostics.format,"VRM","WebKit ALVIS runtime must parse VRM 1.0");
   assert.ok(safariRuntime.diagnostics.blinkLeft&&safariRuntime.diagnostics.blinkRight,"WebKit runtime must recognize split blink expressions");
+  assert.ok(safariRuntime.diagnostics.chestMotion,"WebKit runtime must recognize chest motion");
   assert.ok(Object.values(safariRuntime.actions).every(Boolean),"WebKit runtime must control wink and gaze expressions");
   assert.ok(safariRuntime.render,"WebKit runtime must render the VRM");
   assert.deepEqual(safariErrors,[],"WebKit Avatar Studio and runtime must not throw browser errors");

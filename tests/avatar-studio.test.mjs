@@ -87,3 +87,5 @@ check("face base includes subtle cheekbone and chin projection sculpting", html.
 check("eyelid blink target closes from the upper lid edge across the almond eye", html.includes("openEdge=.095*shape,closedEdge=-.095*shape") && html.includes("lidClosedPositions.push(localX,top+(closedEdge-top)*t,z)") && html.includes("lidGeometry.computeVertexNormals()"));
 
 check("Avatar Studio provides six named inspection views around the 3D bust", ["front","rightAngle","rightProfile","back","leftAngle","leftProfile"].every(id=>html.includes('id="'+id+'"') && html.includes(id+":[") ) && html.includes("function setAvatarView(name)"));
+
+check("VRM runtime exposes subtle chest breathing for rigs with a chest bone", (await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8")).includes("Math.sin(elapsed * 0.92) * 0.003") && (await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8")).includes("chestMotion: !!chestBone") && appHtml.includes('report.chestMotion&&"BREATHING"'));

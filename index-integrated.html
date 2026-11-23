@@ -4808,7 +4808,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       window.ALVISAvatarGetDiagnostics=mounted.getDiagnostics;
       const report=mounted.getDiagnostics();
       renderDiagnostics(report);
-      const features=[report.blink&&"BLINK",report.blinkLeft&&report.blinkRight&&"WINK",report.aa&&report.oh&&"LIP SYNC",report.mouthVisemes?.length===5&&"5 VOWELS",report.lookAt&&"LOOK AT",report.headMotion&&"HEAD MOTION"].filter(Boolean);
+      const features=[report.blink&&"BLINK",report.blinkLeft&&report.blinkRight&&"WINK",report.aa&&report.oh&&"LIP SYNC",report.mouthVisemes?.length===5&&"5 VOWELS",report.lookAt&&"LOOK AT",report.headMotion&&"HEAD MOTION",report.chestMotion&&"BREATHING"].filter(Boolean);
       setStatus("ALVIS / VRM READY"+(features.length?" — "+features.join(" · "):" — BASIC MODEL"));
       return true;
     }catch(error){

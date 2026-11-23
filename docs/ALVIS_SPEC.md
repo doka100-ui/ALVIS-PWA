@@ -1,3 +1,7 @@
+## VRM runtime — subtle chest breathing
+- When a VRM exposes a normalized chest bone, apply a low-amplitude ±0.003 vertical chest translation on a slow sine cycle during idle. Preserve existing scene sway and head motion; do not scale/deform the face.
+- Expose chestMotion in diagnostics and report BREATHING in the avatar status. Models without a chest bone retain existing behavior.
+
 ## Avatar Studio — six turnaround camera presets
 - Add front, left/right three-quarter, left/right profile, and back camera presets to inspect the bust from all sides while retaining touch OrbitControls.
 - Browser smoke clicks each preset and confirms the WebGL canvas remains active.
