@@ -102,10 +102,15 @@ async function verifyBrowser(browserType, verifyOffline) {
       toothInset: getComputedStyle(node, "::before").inset,
       toothMask: getComputedStyle(node, "::before").maskImage
     }));
-    assert.ok(outerRingMotion.animations.some(animation => (animation.duration === 22000 || animation.duration === 42000)
-      && animation.keyframes.some(frame => frame.rotate === "9deg")
-      && animation.keyframes.some(frame => frame.rotate === "369deg")),
-      browserName + ": outer ring C animation mismatch: " + JSON.stringify(outerRingMotion.animations));
+    assert.ok(outerRingMotion.animations.some(animation => {
+      const angles = animation.keyframes.map(frame => {
+        const value = frame.rotate || frame.transform || "";
+        const match = value.match(/rotate\\((-?[\\d.]+)deg\\)/);
+        return match ? Number(match[1]) : NaN;
+      }).filter(Number.isFinite);
+      return animation.duration === 42000 && angles.length >= 2
+        && Math.abs(Math.abs(angles[angles.length - 1] - angles[0]) - 360) < 0.1;
+    }), browserName + ": outer ring C must complete one independent 360-degree rotation in 42 seconds: " + JSON.stringify(outerRingMotion.animations));
     assert.ok(Math.abs(outerRingMotion.topRatio - 0.42) < 0.01,
       browserName + ": outer ring C must share the globe core's 42% vertical anchor");
     assert.ok(Math.abs(outerRingMotion.leftRatio - 0.5) < 0.01,
