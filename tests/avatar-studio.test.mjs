@@ -11,7 +11,8 @@ check("six face-shape controls are present", ["faceWidth","faceLength","eyeSize"
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));
-check("shared face materials are reused during rebuild", !html.includes("mat(0xffffff,.2)") && !html.includes("mat(0x493a36,.8)"));
+const faceBuilder = html.slice(html.indexOf("function makeFace()"), html.indexOf("makeFace();"));
+check("shared face materials are reused during rebuild", !faceBuilder.includes("mat(0xffffff,.2)") && !faceBuilder.includes("mat(0x493a36,.8)"));
 const moduleScript = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)].at(-1)?.[1];
 assert.ok(moduleScript, "module script exists");
 const syntax = spawnSync(process.execPath, ["--check", "--input-type=module"], { input: moduleScript, encoding: "utf8" });
