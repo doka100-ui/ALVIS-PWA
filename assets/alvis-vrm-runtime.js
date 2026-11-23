@@ -45,7 +45,6 @@ export async function mountVrmAvatar(host, blob) {
     avatarBounds.getCenter(avatarCenter);
   }
   const avatarFocus = avatarCenter.clone();
-  avatarFocus.z += 2.5;
 
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
   const fitAvatarCamera = () => {
@@ -57,6 +56,8 @@ export async function mountVrmAvatar(host, blob) {
     const verticalDistance = Math.max(avatarSize.y, 0.35) / (2 * Math.tan(verticalFov / 2));
     const horizontalDistance = Math.max(avatarSize.x, 0.35) / (2 * Math.tan(horizontalFov / 2));
     const distance = THREE.MathUtils.clamp(Math.max(verticalDistance, horizontalDistance) * 1.18, 0.85, 8.5);
+    // Keep the gaze target between the avatar and camera, even for close-up head-only models.
+    avatarFocus.set(avatarCenter.x, avatarCenter.y, avatarCenter.z + Math.min(2.5, distance * 0.7));
     camera.position.set(avatarCenter.x, avatarCenter.y, avatarCenter.z + distance);
     camera.lookAt(avatarCenter);
     camera.updateProjectionMatrix();
@@ -301,9 +302,9 @@ export async function mountVrmAvatar(host, blob) {
       if (elapsed >= nextGazeChangeAt) {
         const glance = Math.random() < 0.68;
         lookAtDestination.set(
-          glance ? (Math.random() - 0.5) * 0.34 : 0,
-          1.35 + (glance ? (Math.random() - 0.5) * 0.14 : 0),
-          2.5
+          avatarFocus.x + (glance ? (Math.random() - 0.5) * 0.34 : 0),
+          avatarFocus.y + (glance ? (Math.random() - 0.5) * 0.14 : 0),
+          avatarFocus.z
         );
         nextGazeChangeAt = elapsed + 2.8 + Math.random() * 3.8;
       }
