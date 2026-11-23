@@ -80,6 +80,7 @@ export async function mountVrmAvatar(host, blob) {
   let lastFrameTimestamp = 0;
   let frameRunning = false;
   let activeEnabled = true;
+  let contextLost = false;
   // Normalized humanoid bones are optional; unsupported rigs simply keep their existing motion.
   const neckBone = vrm.humanoid?.getNormalizedBoneNode?.("neck") || null;
   const headBone = vrm.humanoid?.getNormalizedBoneNode?.("head") || null;
@@ -184,6 +185,7 @@ export async function mountVrmAvatar(host, blob) {
     return {
       format: "VRM",
       name: metaName || "名称なし",
+      webglContextLost: contextLost,
       humanoidNeck: !!neckBone,
       humanoidHead: !!headBone,
       headMotion: !!(neckBone || headBone),
@@ -355,7 +357,7 @@ export async function mountVrmAvatar(host, blob) {
     }
   };
   const startRenderLoop = () => {
-    if (disposed || !activeEnabled || frameRunning || document.visibilityState !== "visible") return;
+    if (disposed || contextLost || !activeEnabled || frameRunning || document.visibilityState !== "visible") return;
     frameRunning = true;
     lastFrameTimestamp = 0;
     frameId = requestAnimationFrame(animate);
@@ -366,10 +368,25 @@ export async function mountVrmAvatar(host, blob) {
     frameRunning = false;
     lastFrameTimestamp = 0;
   };
+  const handleWebGLContextLost = (event) => {
+    // Three.js can restore the context after this event only when the browser is allowed to.
+    event.preventDefault();
+    contextLost = true;
+    stopRenderLoop();
+    console.warn("[ALVIS VRM] WebGL context lost; waiting for browser restoration.");
+  };
+  const handleWebGLContextRestored = () => {
+    contextLost = false;
+    lastFrameTimestamp = 0;
+    console.info("[ALVIS VRM] WebGL context restored; resuming avatar rendering.");
+    startRenderLoop();
+  };
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") startRenderLoop();
     else stopRenderLoop();
   };
+  renderer.domElement.addEventListener("webglcontextlost", handleWebGLContextLost, false);
+  renderer.domElement.addEventListener("webglcontextrestored", handleWebGLContextRestored, false);
   document.addEventListener("visibilitychange", handleVisibilityChange);
   window.addEventListener("pagehide", stopRenderLoop);
   window.addEventListener("pageshow", handleVisibilityChange);
@@ -397,6 +414,8 @@ export async function mountVrmAvatar(host, blob) {
       if (disposed) return;
       disposed = true;
       stopRenderLoop();
+      renderer.domElement.removeEventListener("webglcontextlost", handleWebGLContextLost, false);
+      renderer.domElement.removeEventListener("webglcontextrestored", handleWebGLContextRestored, false);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pagehide", stopRenderLoop);
       window.removeEventListener("pageshow", handleVisibilityChange);
