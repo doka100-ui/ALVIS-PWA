@@ -1,3 +1,8 @@
+## 2026-11-23 — v340 VRMモデル破棄時のGPUリソース解放（development）
+- `assets/alvis-vrm-runtime.js` のdispose()に `VRMUtils.deepDispose(vrm.scene)` を追加。geometry/material/textureをrenderer.dispose()より前に解放し、モデル差し替え・終了時のGPUリソース残留リスクを軽減。
+- three-vrm 3.5.5公式APIを確認。IndexedDB内のVRM/GLB、モデルBlob、Qwen/Kokoroキャッシュ、記憶/履歴/AES-GCM/同期/バックアップは変更・削除なし。
+- build ID / Service Worker cacheをv340へ更新し、refresh-v340.htmlを追加。Playwright/オフライン回帰テストとworkflow監視対象をv340へ同期。自動CI結果・iPad Safari実機GPU回収量は確認待ち。
+
 ## 2026-11-23 — v339プレビューブラウザ検証のリダイレクト条件も修正（development）
 - refresh-v339.htmlの遷移先は `?refresh=339` だが、PlaywrightのwaitForURLが古い `refresh=331` を待っていたため一致させた。
 - v338の更新ページ/キャッシュ名の修正と合わせ、検証スクリプト内の版番号をv339へ統一。修正後の最新runを確認中。
