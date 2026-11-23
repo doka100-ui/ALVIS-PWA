@@ -1,3 +1,10 @@
+## 2026-11-23 — Service Workerのキャッシュ/オフライン動作を実行テスト化（development / v334）
+- `tests/offline-first.test.mjs`から実際の`service-worker.js`をNode VM上で実行し、Cache APIと通信を分離して検証。
+- 古いALVISアプリ/依存キャッシュだけを削除し、WebLLMのモデル重み・config・WASMキャッシュを保持することを確認。
+- 保存済みWebLLMモデル重みのキャッシュヒット、信頼済みCDN依存ファイルの保存、オフライン時の統合アプリシェル表示、未キャッシュ依存ファイルの明示的503応答を確認。
+- CI: offline-first regression / dashboard-image ともに成功。コミット `8298a091ad976fa975f4bb98f161616b4e3b9199`、Actions run [45109069726](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45109069726)。
+- テストと資料のみ変更。実アプリ・Service Worker・キャッシュバージョン・ユーザーデータ・Qwen/Kokoroキャッシュ・本番`main`は変更なし。iPad Safari実機の機内モード再起動・推論は未確認。
+
 ## 2026-11-23 — Qwen起動前の保存領域要求・推論終了処理の動作テスト追加（development）
 - `tests/offline-first.test.mjs`へ、`navigator.storage.persist()`の許可/拒否/Promise reject/同期例外/API非対応の5経路を実行するテストを追加。いずれもモデル起動を妨げず、診断状態が記録されることを確認。
 - `serializeAlvisInference()`の実動作テストを追加。実行中推論の完了待ち、終了要求後の待機推論拒否、同時unloadのPromise共有、unload一度だけを検証。
