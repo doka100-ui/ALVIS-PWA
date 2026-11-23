@@ -2694,3 +2694,12 @@
 - Dashboard preview browser smoke run `45153037027` completed successfully, including the preview-browser-smoke job. Offline-first run `45153036921` also completed successfully. The dashboard-image test job reported 58/58 checks passed, including Japanese kana/viseme behavior tests.
 - This confirms automated regression and Chromium/WebKit preview behavior only. It does not validate an actual 18号 VRM model or iPad/iPhone Safari GPU behavior.
 - No model asset was added; no app runtime, IndexedDB, memories, history, sync, backups, Qwen/Kokoro caches, or production `main` were changed.
+
+
+## KeenFace free-tier and privacy recheck (2026-11-23)
+- Rechecked current official pricing, API reference and Privacy Policy (Privacy Policy last updated 2026-11-10).
+- Important correction: the advertised 450 sign-up credits do not guarantee production-quality downloadable files. Official API docs state that accounts that have not purchased credits receive a preview GLB instead of full files; the preview has reduced mesh and no blendshapes. Full head creation is 150 credits and the ARKit option is a separate file variant request, but full file access is locked until credits have been purchased. Therefore KeenFace is not a qualifying zero-cost path for ALVIS's required facial expressions/lip-sync.
+- Official model output is a head-only neutral GLB, without skeleton or ready-made animation; hair is removed/cleaned in Default PBR processing. It cannot by itself meet the full upper-body VRM requirement and needs separate hair/body/rigger work.
+- Privacy Policy: Scan Reconstruction is OFF by default. OFF routes image screening/reference generation/quality checks through fal/OpenRouter/Google/OpenAI. ON avoids those image-processing routes but requires 2–15 photos from one consistent capture session; the existing reference set is not known to meet that capture condition. Source photos and generated heads remain in active cloud storage until user deletion/account closure. No 18号 image was uploaded.
+- Decision: do not register/upload/submit any 18号 reference images to KeenFace under the assumption that the free signup credits provide a complete usable model. Do not purchase credits. Keep the candidate rejected for the current free-only requirement unless a genuinely free full-file path is documented later.
+- Sources: https://keenface.ai/pricing ; https://keenface.ai/docs/reference ; https://keenface.ai/legal/privacy-policy
