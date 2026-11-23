@@ -105,7 +105,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     assert.ok(outerRingMotion.animations.some(animation => {
       const angles = animation.keyframes.map(frame => {
         const value = frame.rotate || frame.transform || "";
-        const match = value.match(/rotate\\((-?[\\d.]+)deg\\)/);
+        const match = value.match(/rotate\((-?[\d.]+)deg\)/);
         return match ? Number(match[1]) : NaN;
       }).filter(Number.isFinite);
       return animation.duration === 42000 && angles.length >= 2
