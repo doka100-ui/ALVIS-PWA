@@ -1,3 +1,9 @@
+## Latest VRM auto-framing for cropped avatars (2026-11-23 / v347)
+- VRM runtime now measures imported scene bounds and fits the perspective camera to actual mesh dimensions. Cropped upper-body and head-only models no longer rely on the old fixed full-body camera target/distance; framing recalculates when the host resizes.
+- Default gaze focus follows the measured avatar center. Existing expressions, blink, Japanese visemes, idle motion, and VRM storage format remain unchanged.
+- Regression checks cover bounds-based framing and gaze anchoring. This is source-level/CI coverage; actual framing still needs a licensed VRM asset and iPad Safari validation. No model file was added; no IndexedDB data, memories, history, sync, backups, Qwen/Kokoro caches, or production main were changed.
+- v347 development preview only; main remains untouched.
+
 ## Latest avatar model scope decision (2026-11-23)
 - ユーザーは18号の3Dアバターについて、全身でなくてもよく、上半身のみを第一候補、顔のみでも許容すると明示。モデルの画面内構図・メッシュ範囲は上半身または顔だけでよい。最終デザインは既存の球体/ホログラムの世界観を尊重し、無断で別デザインへ変更しない。
 - 現行アップロード経路はVRMファイルを読み込むため、上半身/顔のみのVRMでも形式・必要なVRM humanoid/表情データを満たせば利用可能。実装上の次のブロッカーは、利用許諾を確認した実モデルファイルの確保とiPad Safari実機検証。
