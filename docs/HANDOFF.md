@@ -1,3 +1,10 @@
+## Latest WebGPU initialization-loss race behavioral test — 2026-11-23 (v336 test-only)
+- Added execution coverage for the actual post-`CreateMLCEngine` initialization guard that handles a GPU device lost before the engine is published to chat.
+- Verified the resolved-but-stale engine is unloaded once and rejected rather than becoming the active `aiEngine`; when `engine.unload()` succeeds, the targeted fallback does not destroy the GPUDevice a second time.
+- Verified that if `engine.unload()` fails, only the captured model device cleanup fallback is requested and the error is retained for diagnostics.
+- CI: offline-first regression and dashboard-image both passed on commit `1860c415f7d31e5bb456d5e229a0394a722359d6` (run [45109978493](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45109978493)).
+- Test-only. No runtime app/WebGPU code, Service Worker, model/cache settings, user data, sync/backups, or production `main` changed. This simulated test does not prove real iPad Safari GPU-loss/OOM recovery.
+
 ## Latest WebGPU cleanup behavioral coverage — 2026-11-23 (v335 test-only)
 - Added execution tests for `releaseCapturedAlvisModelDevices()`: on partial initialization failure it attempts to destroy only the captured devices, records individual destroy failures, and always releases retained references.
 - Verified the successful `engine.unload()` path releases duplicate references without calling `GPUDevice.destroy()` a second time.
