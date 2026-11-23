@@ -1,3 +1,10 @@
+## Latest Service Worker offline/cache behavioral tests — 2026-11-23 (v334 test-only)
+- `tests/offline-first.test.mjs` now executes the real `service-worker.js` handlers inside an isolated Node VM with mocked Cache API/network.
+- Verified activation removes stale `alvis-cache-*` and `alvis-deps-*` entries while preserving `webllm/model`, `webllm/config`, and `webllm/wasm` caches.
+- Verified a pre-existing WebLLM model-cache hit is returned without a network fetch; successful trusted CDN dependencies are stored in `alvis-deps-v2`; cached integrated-shell navigation works offline; and an uncached offline dependency returns explicit HTTP 503 text rather than HTML.
+- CI: offline-first regression and dashboard-image jobs passed on commit `8298a091ad976fa975f4bb98f161616b4e3b9199` (run [45109069726](https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45109069726)).
+- Test-only change. Runtime app, Service Worker behavior/cache version, user data, Qwen/Kokoro caches, sync/backups, and production `main` were not changed. This is a simulated worker test, not iPad Safari airplane-mode acceptance.
+
 ## Latest automated regression coverage — 2026-11-23 (v332/v333 test-only)
 - Added behavioral tests for the existing `requestAlvisStoragePersistence()` helper: permission granted, permission denied, Promise rejection, synchronous exception, and unsupported API. Each path must return safely and persist a diagnostic status. The app already invokes this request without awaiting it, so a browser denial does not block Qwen initialization.
 - Added a behavioral test for `serializeAlvisInference()` using a fake engine: one in-flight request is allowed to finish, queued work is rejected after shutdown begins, concurrent unload calls share one promise, and the original unload runs once after active inference settles.
