@@ -1846,3 +1846,9 @@
 - 75,000 triangles以上の場合は書き出しを中止し、密度調整を案内する。上限未満なら実測数を成功メッセージにも表示する。
 - モデル形状、VRMリグ、既存ALVIS本体、記憶/履歴/暗号化/同期/バックアップ、Qwen/Kokoroキャッシュは変更しない。
 - ソース反映後の文字列・ガード存在確認は成功。ブラウザ実行テストとGitHub Actionsの結果は未確認（commit statusにチェックなし）。
+
+
+## 2026-11-23 — 個人アバターのVRM利用権限を修正
+- VRM 1.0メタデータの `avatarPermission` を `everyone` から `onlyAuthor` へ変更。`allowRedistribution: false` は維持。
+- 静的回帰テストとChromium/WebKitブラウザsmokeに利用権限の検証を追加。
+- ALVIS本体のVRM読み込み処理・ユーザーデータ保存処理は変更しない。

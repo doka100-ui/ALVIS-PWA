@@ -1,4 +1,5 @@
 ## iPad向けジオメトリを75k三角形以下へ軽量化 (2026-11-23)
+- 追加: 個人専用VRMの利用権限を `avatarPermission: onlyAuthor` に修正し、再配布不可を維持。unit/browser smokeでも権限メタデータを検査する。
 - 追加: Avatar StudioのVRM書き出し直前に可視メッシュの三角形数を実測し、75,000以上なら出力を停止するガードを実装。成功時も実測数を表示する。コード反映済みだが、今回のブラウザ実行テストは未確認。
 - 直近のVRMは91,136 trianglesで100k上限には収まるが、iPad余力を確保するためSphereGeometry/TubeGeometryの分割数を見直し、目の細部やシルエットを保ちつつ目標を75,000 triangles未満へ引き下げ。
 - Browser smokeの受け入れ上限も75kへ変更。実測三角形数をCIログに出し、実機Safari負荷は別途確認する。

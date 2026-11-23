@@ -56,3 +56,7 @@
 - IndexedDBのALVIS記憶データと既存アバターモデル
 - Qwen/Kokoroのモデルファイル・キャッシュ
 - 本番main branch
+
+
+## Avatar ownership metadata
+- Exported personal ALVIS VRM metadata must set `avatarPermission: onlyAuthor` and `allowRedistribution: false`; local ALVIS loading remains supported. Do not label the private project avatar for unrestricted public use.
