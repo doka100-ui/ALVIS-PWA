@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<title>ALVIS Avatar Studio — Local Prototype</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#111a2b;--line:#263650;--cyan:#79d9ec;--muted:#9aabc2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#edf5ff;font:15px system-ui,-apple-system,sans-serif}
+header{padding:16px 18px;border-bottom:1px solid var(--line)}h1{font-size:19px;margin:0 0 5px}p{margin:0;color:var(--muted);line-height:1.55}
+main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;padding:14px;max-width:1200px;margin:auto}
+#stage{height:min(72vh,720px);min-height:390px;background:radial-gradient(ellipse at 50% 38%,#23344e,#0b1220 68%);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%}.hint{position:absolute;left:12px;bottom:10px;color:#b8c9dc;font-size:12px;pointer-events:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;align-self:start}
+.panel h2{font-size:15px;margin:0 0 12px}.control{margin:0 0 15px}.control label{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:7px}.control output{color:var(--cyan);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--cyan);min-height:28px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+button{border:1px solid #38506d;background:#1b2b43;color:#f1f7ff;border-radius:10px;padding:12px 9px;font-weight:600;min-height:44px}
+button.primary{background:#174b61;border-color:#39849a}.status{font-size:12px;color:#b7cadc;margin-top:12px;min-height:36px;white-space:pre-wrap}
+.notice{font-size:12px;border-top:1px solid var(--line);margin-top:14px;padding-top:12px;color:#9aabc2}
+@media(max-width:760px){main{grid-template-columns:1fr;padding:10px}#stage{height:54vh;min-height:330px}.panel{width:100%}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<header><h1>ALVIS Avatar Studio</h1><p>ローカル3D造形プロトタイプ — 外部画像生成・画像アップロードなし</p></header>
+<main>
+<section id="stage" aria-label="3D顔モデルプレビュー"><div class="hint">ドラッグ：回転 ／ ピンチ・ホイール：拡大縮小</div></section>
+<aside class="panel">
+<h2>顔のプロポーション調整</h2>
+<div class="control"><label for="faceWidth">顔幅 <output id="faceWidthValue">1.00</output></label><input id="faceWidth" type="range" min=".82" max="1.18" step=".01" value="1"></div>
+<div class="control"><label for="faceLength">顔の縦長さ <output id="faceLengthValue">1.00</output></label><input id="faceLength" type="range" min=".88" max="1.16" step=".01" value="1"></div>
+<div class="control"><label for="eyeSize">目の大きさ <output id="eyeSizeValue">1.00</output></label><input id="eyeSize" type="range" min=".82" max="1.2" step=".01" value="1"></div>
+<div class="control"><label for="eyeSpacing">目の間隔 <output id="eyeSpacingValue">1.00</output></label><input id="eyeSpacing" type="range" min=".85" max="1.18" step=".01" value="1"></div>
+<div class="control"><label for="noseSize">鼻の立体感 <output id="noseSizeValue">1.00</output></label><input id="noseSize" type="range" min=".7" max="1.35" step=".01" value="1"></div>
+<div class="control"><label for="mouthSize">唇の幅 <output id="mouthSizeValue">1.00</output></label><input id="mouthSize" type="range" min=".75" max="1.3" step=".01" value="1"></div>
+<div class="actions"><button id="reset">初期値に戻す</button><button id="front">正面を見る</button><button class="primary" id="export" style="grid-column:1/-1">3DモデルをGLB保存</button></div>
+<div class="status" id="status" role="status">準備完了。各スライダーで形状を調整できます。</div>
+<div class="notice">これは顔形状の制作土台です。現段階では18号の完成モデル・VRM・表情リグではありません。調整値はこのページ内だけで扱い、既存ALVISデータへ保存しません。</div>
+</aside>
+</main>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+
+const host=document.querySelector("#stage"), status=document.querySelector("#status");
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0b1220);
+const camera=new THREE.PerspectiveCamera(32,1,.1,100);camera.position.set(0,.15,7.2);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:"low-power"});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;host.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.target.set(0,.05,0);controls.minDistance=4.5;controls.maxDistance=10;
+scene.add(new THREE.HemisphereLight(0xdceaff,0x594b45,2));
+const key=new THREE.DirectionalLight(0xffe8d5,3.0);key.position.set(-3,4,5);scene.add(key);
+const rim=new THREE.DirectionalLight(0x8acbff,2.1);rim.position.set(3,2,-4);scene.add(rim);
+const root=new THREE.Group();scene.add(root);
+const mat=(color,rough=.65,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
+const skin=mat(0xf0cbb8,.72),skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),dark=mat(0x493a36,.8),gold=mat(0xc6a15a,.3,.7);
+let faceGroup;
+function ell(parent,material,pos,scale,seg=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
+function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,32,r,8,false),material);parent.add(m);return m}
+function makeFace(){
+ faceGroup=new THREE.Group();root.add(faceGroup);
+ // Sculpted oval base; the lower jaw tapers toward the chin.
+ const geo=new THREE.SphereGeometry(1,64,48);const pos=geo.attributes.position;
+ for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.82+.18*((y+1)/2);pos.setXYZ(i,x*taper,y,z*(.94+.06*((y+1)/2)));}
+ geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
+ // ears
+ for(const side of [-1,1]){ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ell(faceGroup,skinShade,[side*.94,.02,.075],[.065,.16,.035]);}
+ // eye sockets, whites, irises and upper/lower lids
+ for(const side of [-1,1]){
+  const x=side*.37;
+  ell(faceGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
+  ell(faceGroup,white,[x,.34,.675],[.225,.115,.07]);
+  ell(faceGroup,iris,[x,.34,.735],[.078,.084,.025]);
+  ell(faceGroup,pupil,[x,.34,.755],[.037,.052,.014]);
+  ell(faceGroup,mat(0xffffff,.2),[x-.018,.375,.77],[.018,.018,.008],16);
+  curve(faceGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
+  curve(faceGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
+  curve(faceGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,hair);
+ }
+ // nose bridge and tip, nostrils
+ ell(faceGroup,skin,[0,.04,.68],[.105,.30,.16]);
+ ell(faceGroup,skin,[0,-.13,.79],[.15,.105,.13]);
+ for(const side of [-1,1])ell(faceGroup,skinShade,[side*.105,-.17,.77],[.055,.04,.055],20);
+ // lips
+ ell(faceGroup,lip,[0,-.43,.66],[.22,.055,.045]);
+ ell(faceGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
+ // hair cap, swept side fringe and bob side locks
+ const cap=new THREE.Mesh(new THREE.SphereGeometry(1,48,32,0,Math.PI*2,0,Math.PI*.57),hair);
+ cap.scale.set(.94,1.28,.78);cap.position.set(0,.25,-.015);faceGroup.add(cap);
+ const fringe=ell(faceGroup,hairLight,[-.18,.72,.49],[.57,.20,.28]);fringe.rotation.z=-.24;fringe.rotation.y=-.15;
+ for(const side of [-1,1]){
+  const lock=ell(faceGroup,hair,[side*.77,-.03,.05],[.22,.82,.34]);lock.rotation.z=side*-.08;
+  ell(faceGroup,hairLight,[side*.77,-.48,.10],[.20,.22,.30]);
+ }
+ // neck and simple upper shoulder bust
+ ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);
+ const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;
+ curve(faceGroup,[[-.22,-1.25,.23],[0,-1.32,.29],[.22,-1.25,.23]],.018,gold);
+ for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,8,24),gold);ring.position.set(side*.95,-.12,.02);ring.rotation.y=Math.PI/2;faceGroup.add(ring);}
+}
+makeFace();
+const sliders=["faceWidth","faceLength","eyeSize","eyeSpacing","noseSize","mouthSize"];
+const defaults={faceWidth:1,faceLength:1,eyeSize:1,eyeSpacing:1,noseSize:1,mouthSize:1};
+function rebuild(){
+ const values=Object.fromEntries(sliders.map(id=>[id,Number(document.getElementById(id).value)]));
+ root.remove(faceGroup);faceGroup.traverse(o=>{if(o.geometry)o.geometry.dispose()});makeFace();
+ faceGroup.scale.set(values.faceWidth,values.faceLength,1);
+ // Apply focused feature proportions after the base sculpt.
+ faceGroup.children.forEach(o=>{
+  if(o.position.y>.20&&o.position.y<.52&&Math.abs(o.position.x)<.7){o.scale.x*=values.eyeSize;if(Math.abs(o.position.x)>.2)o.position.x*=values.eyeSpacing;}
+  if(o.position.y<.2&&o.position.y>-.25&&Math.abs(o.position.x)<.2)o.scale.multiplyScalar(values.noseSize);
+  if(o.position.y<-.35&&o.position.y>-.55)o.scale.x*=values.mouthSize;
+ });
+ sliders.forEach(id=>document.getElementById(id+"Value").value=values[id].toFixed(2));
+}
+sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));
+document.getElementById("reset").onclick=()=>{sliders.forEach(id=>document.getElementById(id).value=defaults[id]);rebuild();};
+document.getElementById("front").onclick=()=>{controls.reset();camera.position.set(0,.15,7.2);controls.target.set(0,.05,0);};
+document.getElementById("export").onclick=async()=>{
+ try{status.textContent="GLBを書き出しています…";const exporter=new GLTFExporter();const data=await exporter.parseAsync(root,{binary:true,onlyVisible:true});
+ const blob=new Blob([data],{type:"model/gltf-binary"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.glb";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);status.textContent="GLBを書き出しました。VRMリグ・表情は次工程です。";
+ }catch(e){status.textContent="書き出しに失敗: "+(e?.message||String(e));}
+};
+function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
+const ro=new ResizeObserver(resize);ro.observe(host);resize();
+let running=true;document.addEventListener("visibilitychange",()=>{running=document.visibilityState==="visible";});
+function animate(){requestAnimationFrame(animate);if(!running)return;controls.update();renderer.render(scene,camera);}animate();
+</script>
+</body></html>
