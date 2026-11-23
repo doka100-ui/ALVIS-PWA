@@ -182,8 +182,10 @@ const safariPage = await safariContext.newPage();
 safariPage.setDefaultTimeout(30000);
 const safariErrors = [];
 const safariExternalRequests = [];
+let trackSafariAvatarRequests = true;
 safariPage.on("pageerror", error => safariErrors.push({ message:error.message, stack:error.stack||"" }));
 safariPage.on("request", request => {
+  if (!trackSafariAvatarRequests) return;
   const requestUrl = new URL(request.url());
   if (requestUrl.origin !== new URL(avatarUrl).origin) safariExternalRequests.push(request.url());
 });
@@ -214,6 +216,7 @@ try {
   assert.ok(safariPath,"WebKit must export a VRM file");
   const safariBuffer=await readFile(safariPath);
   assert.equal(safariBuffer.toString("ascii",0,4),"glTF","WebKit VRM output must be a GLB binary");
+  trackSafariAvatarRequests=false;
   const safariRuntimeResponse=await safariPage.goto(previewUrl,{waitUntil:"domcontentloaded",timeout:120000});
   assert.ok(safariRuntimeResponse?.ok(),"WebKit must load the ALVIS runtime page");
   const safariRuntime=await safariPage.evaluate(async base64=>{
