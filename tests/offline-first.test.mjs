@@ -1481,3 +1481,31 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
   assert.equal(missingResponse.status,503,"uncached offline dependencies must fail explicitly rather than return HTML");
   assert.match(await missingResponse.text(),/オフライン/);
 }
+
+
+// v335: behavior-test targeted GPUDevice cleanup used after partial model initialization.
+{
+  const cleanupStart=app.indexOf("function releaseCapturedAlvisModelDevices({destroy=false,reason=\"\"}={}){");
+  const cleanupEnd=app.indexOf("\n\nfunction getAlvisGpuDiagnosticSummary",cleanupStart);
+  assert.ok(cleanupStart>=0&&cleanupEnd>cleanupStart,"targeted GPU device cleanup helper must exist");
+  const cleanupSource=app.slice(cleanupStart,cleanupEnd);
+  const makeGpuCleanup=new Function("alvisGpuDiagnostics","recordAlvisModelLoadTrace",cleanupSource+"; return releaseCapturedAlvisModelDevices;");
+  const trace=[];
+  const destroyed=[];
+  const firstDevice={destroy(){destroyed.push("first");}};
+  const throwingDevice={destroy(){throw new Error("device already lost");}};
+  const diagnostics={modelDevices:[firstDevice,throwingDevice]};
+  const cleanup=makeGpuCleanup(diagnostics,message=>trace.push(message));
+  assert.equal(cleanup({destroy:true,reason:"simulated partial initialization failure"}),2);
+  assert.deepEqual(diagnostics.modelDevices,[],"captured references must always be released");
+  assert.deepEqual(destroyed,["first"],"only live device destroy calls should complete");
+  assert.ok(trace.some(message=>message.includes("個別解放失敗")),"a device destroy exception must be recorded without aborting cleanup");
+  assert.ok(trace.some(message=>message.includes("2件")),"cleanup must report how many captured devices were released");
+
+  let successfulUnloadDestroyCount=0;
+  const successfulDiagnostics={modelDevices:[{destroy(){successfulUnloadDestroyCount++;}}]};
+  const successfulCleanup=makeGpuCleanup(successfulDiagnostics,message=>trace.push(message));
+  assert.equal(successfulCleanup({destroy:false,reason:"engine unload succeeded"}),1);
+  assert.equal(successfulUnloadDestroyCount,0,"successful engine unload must not double-destroy its GPUDevice");
+  assert.deepEqual(successfulDiagnostics.modelDevices,[],"successful unload must still release duplicate references");
+}
