@@ -1,3 +1,10 @@
+## Latest Avatar rendering efficiency update — 2026-11-23 (v337)
+- Added setActive(enabled) to the VRM runtime. When Avatar mode is hidden, its animation/requestAnimationFrame loop stops; switching back resumes the same VRM instance without reloading or disposing the model.
+- The app synchronizes the current display mode both during mode changes and after asynchronous VRM mounting, so a model loaded while JARVIS mode is selected does not keep rendering invisibly.
+- Added dashboard regression assertions for pause/resume wiring and inactive-loop guards. Bumped the app shell cache to alvis-cache-v337-integrated and added refresh-v337.html.
+- No changes to model files, VRM expression/lip-sync/gaze behavior, IndexedDB model storage, Qwen/Kokoro caches, encrypted memories/history, sync/backups, or production main.
+- CI and iPad Safari GPU/power measurements are pending; source-level regression coverage is not proof of real-device GPU savings.
+
 ## Latest WebGPU initialization-loss race behavioral test — 2026-11-23 (v336 test-only)
 - Added execution coverage for the actual post-`CreateMLCEngine` initialization guard that handles a GPU device lost before the engine is published to chat.
 - Verified the resolved-but-stale engine is unloaded once and rejected rather than becoming the active `aiEngine`; when `engine.unload()` succeeds, the targeted fallback does not destroy the GPUDevice a second time.
