@@ -60,3 +60,5 @@ check("VRM metadata permits personal use and local modification without redistri
 const appHtml = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const vrmRuntimeSource = await readFile(new URL("../assets/alvis-vrm-runtime.js", import.meta.url), "utf8");
 check("ALVIS VRM runtime dependencies resolve through the main app import map", appHtml.includes('"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"') && appHtml.includes('"@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"') && vrmRuntimeSource.includes('from "three/addons/loaders/GLTFLoader.js"'));
+
+check("VRM runtime creates, tracks, and disposes an actual LookAt target", vrmRuntimeSource.includes("const lookAtTarget = vrm.lookAt ? new THREE.Object3D() : null;") && vrmRuntimeSource.includes("vrm.lookAt.target = lookAtTarget") && vrmRuntimeSource.includes("if (lookAtTarget) lookAtTarget.position.copy(avatarFocus)") && vrmRuntimeSource.includes("if (lookAtTarget) scene.remove(lookAtTarget)"));

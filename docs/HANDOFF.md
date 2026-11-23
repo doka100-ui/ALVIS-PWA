@@ -1,3 +1,8 @@
+## VRM LookAt target initialization fix (2026-11-23)
+- The exported VRM included a valid VRMC_vrm.lookAt expression setup, but the existing ALVIS runtime only checked for vrm.lookAt.target and never created that optional target object. This made the UI report LookAt unavailable even when the VRM component parsed.
+- Runtime now creates a THREE.Object3D target when a VRM LookAt component exists, positions it at the avatar focus, keeps it aligned when the camera framing changes, and removes it on dispose.
+- Browser smoke uses the actual ALVIS VRM runtime to verify LookAt availability and the model's other expression capabilities. Existing model bytes and saved data are unchanged.
+
 ## ALVIS VRM runtime import-map compatibility (2026-11-23)
 - The integrated app import map did not provide the module specifiers used by assets/alvis-vrm-runtime.js: three/addons/ and @pixiv/three-vrm. Added both mappings, keeping Three.js at the app's existing 0.186.0 version and using the already established three-vrm 3.5.5 module.
 - Existing three/examples/jsm/ and talking-avatar mappings remain unchanged. This narrowly enables the existing VRM loader module to resolve its imports.

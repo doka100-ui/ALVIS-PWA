@@ -1,3 +1,7 @@
+## VRM LookAt target initialization
+- The ALVIS runtime now initializes the optional three-vrm VRMLookAt.target Object3D when a parsed VRM contains a LookAt component, tracks the focus position on resize, and removes the target during disposal.
+- This enables existing ALVIS setLookAt/setAutoLookAt controls to operate on VRM files with a LookAt extension.
+
 ## ALVIS VRM runtime import-map aliases
 - Added three/addons/ and @pixiv/three-vrm 3.5.5 mappings to the integrated app import map, matching the imports in assets/alvis-vrm-runtime.js. Existing three/examples/jsm/ mapping and Three.js 0.186.0 version are retained.
 - Browser preview smoke loads the exported .vrm through the same runtime module used by ALVIS.

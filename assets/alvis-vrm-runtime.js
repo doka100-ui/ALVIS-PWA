@@ -64,6 +64,14 @@ export async function mountVrmAvatar(host, blob) {
     avatarSize.y = Math.max(Math.abs(gazeAnchor.y - upperBodyAnchor.y) + 0.55, 0.6);
   }
   const avatarFocus = gazeAnchor.clone();
+  // three-vrm exposes LookAt.target as an optional input object; create it so ALVIS can drive gaze.
+  const lookAtTarget = vrm.lookAt ? new THREE.Object3D() : null;
+  if (lookAtTarget) {
+    lookAtTarget.name = "ALVIS-look-at-target";
+    lookAtTarget.position.copy(avatarFocus);
+    scene.add(lookAtTarget);
+    vrm.lookAt.target = lookAtTarget;
+  }
 
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 30);
   const fitAvatarCamera = () => {
@@ -77,6 +85,7 @@ export async function mountVrmAvatar(host, blob) {
     const distance = THREE.MathUtils.clamp(Math.max(verticalDistance, horizontalDistance) * 1.18, 0.85, 8.5);
     // Keep the gaze target between the avatar and camera, even for close-up head-only models.
     avatarFocus.set(gazeAnchor.x, gazeAnchor.y, gazeAnchor.z + Math.min(2.5, distance * 0.7));
+    if (lookAtTarget) lookAtTarget.position.copy(avatarFocus);
     camera.position.set(avatarCenter.x, avatarCenter.y, avatarCenter.z + distance);
     camera.lookAt(avatarCenter);
     camera.updateProjectionMatrix();
@@ -474,6 +483,7 @@ export async function mountVrmAvatar(host, blob) {
       window.removeEventListener("pagehide", stopRenderLoop);
       window.removeEventListener("pageshow", handleVisibilityChange);
       resizeObserver.disconnect();
+      if (lookAtTarget) scene.remove(lookAtTarget);
       try { vrm.expressionManager?.setValue("blink", 0); } catch (_) {}
       // Release the model's GPU-backed geometry, materials, and textures before dropping the renderer.
       // The VRM was parsed from its own Blob, so these resources are not shared with another avatar.
