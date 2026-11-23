@@ -1,3 +1,8 @@
+## 2026-11-23 — v346 GLB読み込み完了後に保存
+- model-viewerのload/errorイベントを待つPromiseを追加。30秒以内にloadしなければタイムアウトとして失敗扱いにする。
+- GLBロード失敗/タイムアウト時は一時Object URLを解放し、既存保存モデルを残すv343の復元処理へ接続する。
+- build/cache/refresh v346。自動回帰テスト追加。実機iPad Safari未確認。
+
 ## 2026-11-23 — v345 WebGL初期化失敗時のVRMリソース解放
 - WebGLRenderer生成が失敗した場合に、読み込み済みVRM sceneのgeometry/material/textureをVRMUtils.deepDisposeで解放してからエラーを再throwする。
 - GPU context allocation failure時の残留を減らす回帰テストを追加。v344 context loss/restoration対応は継続。
