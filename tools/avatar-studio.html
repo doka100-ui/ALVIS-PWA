@@ -59,7 +59,7 @@ const key=new THREE.DirectionalLight(0xffe8d5,3.0);key.position.set(-3,4,5);scen
 const rim=new THREE.DirectionalLight(0x8acbff,2.1);rim.position.set(3,2,-4);scene.add(rim);
 const root=new THREE.Group();scene.add(root);
 const mat=(color,rough=.65,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
-const skin=mat(0xf0cbb8,.72),skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),dark=mat(0x493a36,.8),gold=mat(0xc6a15a,.3,.7);
+const skin=mat(0xf0cbb8,.72),skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),dark=mat(0x493a36,.8),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0x493a36,.8);
 let faceGroup;
 function ell(parent,material,pos,scale,seg=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
 function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,32,r,8,false),material);parent.add(m);return m}
@@ -78,10 +78,10 @@ function makeFace(){
   ell(faceGroup,white,[x,.34,.675],[.225,.115,.07]);
   ell(faceGroup,iris,[x,.34,.735],[.078,.084,.025]);
   ell(faceGroup,pupil,[x,.34,.755],[.037,.052,.014]);
-  ell(faceGroup,mat(0xffffff,.2),[x-.018,.375,.77],[.018,.018,.008],16);
+  ell(faceGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);
   curve(faceGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
   curve(faceGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
-  curve(faceGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,hair);
+  curve(faceGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);
  }
  // nose bridge and tip, nostrils
  ell(faceGroup,skin,[0,.04,.68],[.105,.30,.16]);
