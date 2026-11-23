@@ -23,8 +23,12 @@ async function verifyBrowser(browserType, verifyOffline) {
   const page = await context.newPage();
   page.setDefaultTimeout(15000);
   const pageErrors = [];
+  const consoleErrors = [];
   const imageResponses = [];
-  page.on("pageerror", error => pageErrors.push(error.message));
+  page.on("pageerror", error => pageErrors.push({ message: error.message, stack: error.stack || "" }));
+  page.on("console", message => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
   page.on("response", response => {
     if (response.url().includes("/assets/alvis-dashboard-reference.avif")) {
       imageResponses.push({
@@ -98,7 +102,7 @@ async function verifyBrowser(browserType, verifyOffline) {
           appHidden: document.getElementById("appPanel")?.classList.contains("hidden")
         };
       });
-      throw new Error(browserName + ": live HUD did not initialize: " + JSON.stringify({state,pageErrors,error:error.message}));
+      throw new Error(browserName + ": live HUD did not initialize: " + JSON.stringify({state,pageErrors,consoleErrors,error:error.message}));
     }
     await page.waitForFunction(() => {
       const ring = document.querySelector(".jarvis-stage .hud-orbit-a");
