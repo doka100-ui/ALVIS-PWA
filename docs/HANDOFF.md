@@ -1,3 +1,11 @@
+## Latest Avatar in-flight frame cancellation guard — 2026-11-23 (v338)
+- VRM runtime animate callback now checks disposed, activeEnabled, and document.visibilityState before scheduling its next animation frame. This closes the narrow race where a callback already queued/running as Avatar mode is disabled could otherwise schedule another frame.
+- Existing startRenderLoop activeEnabled guard remains; setActive(true) resumes the same loaded VRM instance.
+- Added dashboard regression coverage asserting the inactive callback guard appears before the next requestAnimationFrame scheduling call. Updated offline regression expectations to v338.
+- Bumped app shell cache to alvis-cache-v338-integrated and added refresh-v338.html.
+- No avatar model bytes, expression/lip-sync/gaze/head motion behavior, IndexedDB model storage, Qwen/Kokoro caches, encrypted memory/history, sync/backups, or production main were changed.
+- CI required; actual iPad Safari GPU/power impact remains unmeasured.
+
 ## Latest Avatar rendering efficiency update — 2026-11-23 (v337)
 - Added setActive(enabled) to the VRM runtime. When Avatar mode is hidden, its animation/requestAnimationFrame loop stops; switching back resumes the same VRM instance without reloading or disposing the model.
 - The app synchronizes the current display mode both during mode changes and after asynchronous VRM mounting, so a model loaded while JARVIS mode is selected does not keep rendering invisibly.
