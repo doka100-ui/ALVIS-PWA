@@ -1,3 +1,8 @@
+## Latest Avatar Studio eyebrow expression rig (2026-11-23)
+- Added separate left/right eyebrow meshes with named angry, sad, and surprised position morph targets. The existing expression sliders now drive both mouth and brow targets, so these preview expressions are no longer mouth-only.
+- Added source regression checks for eyebrow target dictionaries and slider wiring. The prototype is still not a finished face likeness or a VRM model; exported GLB deformation and visual quality require runtime inspection.
+- No main ALVIS runtime, user data, IndexedDB, memories/history, sync, backups, or Qwen/Kokoro caches changed.
+
 ## Latest Avatar Studio expression targets and hidden-tab rendering (2026-11-23)
 - Expanded the upper-lip morph target set to named happy, sad, angry, and surprised expressions with independent preview sliders and matching GLB mesh morph dictionaries.
 - Reworked the standalone prototype render loop to cancel requestAnimationFrame while the document is hidden and restart on visibility return, reducing idle GPU/CPU work on mobile Safari.
