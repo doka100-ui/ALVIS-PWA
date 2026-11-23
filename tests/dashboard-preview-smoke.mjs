@@ -401,7 +401,7 @@ async function verifyRefreshFlow(browserType) {
     await page.waitForFunction(() => {
       const current = new URL(window.location.href);
       return current.pathname.endsWith("/index-integrated.html") &&
-        current.searchParams.get("refresh") === "345";
+        current.searchParams.get("refresh") === "346";
     }, null, { timeout: 60000 });
     const state = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.getRegistration("./");
