@@ -1,3 +1,8 @@
+## Latest avatar model scope decision (2026-11-23)
+- ユーザーは18号の3Dアバターについて、全身でなくてもよく、上半身のみを第一候補、顔のみでも許容すると明示。モデルの画面内構図・メッシュ範囲は上半身または顔だけでよい。最終デザインは既存の球体/ホログラムの世界観を尊重し、無断で別デザインへ変更しない。
+- 現行アップロード経路はVRMファイルを読み込むため、上半身/顔のみのVRMでも形式・必要なVRM humanoid/表情データを満たせば利用可能。実装上の次のブロッカーは、利用許諾を確認した実モデルファイルの確保とiPad Safari実機検証。
+- 最新preview browser smoke run 45149457162 は成功（Chromium/WebKit）。これは実機iPad SafariのGPU/描画確認ではない。development SHA 7cc3c8427ad13a8875bfb5b9e537381b83424ef9、production main SHA 077c24c07d4e429485f4e912c8589ca510190874 は別々で、mainは未変更。
+
 ## Latest v346 GLB読み込み完了後にのみ保存（2026-11-23）
 - GLBはmodel-viewerのloadイベントを待ってから表示成功を返す。errorまたは30秒タイムアウト時は失敗とし、仮Object URLをrevokeして旧保存モデルの復元経路へ戻す。timeout後に遅れてloadイベントが届いても成功表示へ変わらないようにした。
 - v346 offline-first regression run 45148507812 は成功。Chromium/WebKit preview run 45148876373 は再確認中（Cloudflare preview deployは成功、Playwrightブラウザ導入待ち）。
