@@ -33,6 +33,7 @@ check("Avatar Studio import map has no external CDN dependency", html.includes('
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));
 const faceBuilder = html.slice(html.indexOf("function makeFace()"), html.indexOf("makeFace();"));
 check("shared eye and brow materials are declared", html.includes("eyeGlint=mat(0xffffff,.2)") && html.includes("browMat=mat(0xa38a76,.82)"));
+check("blonde bob uses subtle physical sheen and clearcoat materials", html.includes("hair=new THREE.MeshPhysicalMaterial") && html.includes("sheen:.2") && html.includes("sheen:.24") && html.includes("sheenRoughness:.58") && html.includes("clearcoat:.12") && html.includes("hairLight=new THREE.MeshPhysicalMaterial"));
 check("sclera iris and pupil use layered physical eye-surface materials", html.includes("sclera=new THREE.MeshPhysicalMaterial") && html.includes("clearcoat:.24") && html.includes("iris=new THREE.MeshPhysicalMaterial") && html.includes("clearcoat:.72") && html.includes("pupil=new THREE.MeshPhysicalMaterial") && html.includes("clearcoat:.82") && html.includes("almondEye(eyesGroup,sclera"));
 check("upper eyelid crease and inner/outer eye corners are modeled on both sides", ["upper-eyelid-crease-left","upper-eyelid-crease-right","eye-inner-canthus-left","eye-inner-canthus-right","eye-outer-canthus-left","eye-outer-canthus-right"].every(name=>html.includes(name)));
 check("subtle lower eyelid waterlines are modeled symmetrically", ["lower-eyelid-waterline-left","lower-eyelid-waterline-right"].every(name=>html.includes(name)));
