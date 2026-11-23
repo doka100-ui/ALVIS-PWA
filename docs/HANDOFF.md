@@ -18,6 +18,15 @@
 - 直近のVRMは91,136 trianglesで100k上限には収まるが、iPad余力を確保するためSphereGeometry/TubeGeometryの分割数を見直し、目の細部やシルエットを保ちつつ目標を75,000 triangles未満へ引き下げ。
 - Browser smokeの受け入れ上限も75kへ変更。実測三角形数をCIログに出し、実機Safari負荷は別途確認する。
 
+## URLの正本（最優先・旧URLとの取り違え防止）
+- **現在の開発版・ALVISモード/アバターモード統合画面:** https://development.alvis-pwa.pages.dev/index-integrated.html
+- **18号 Avatar Studio（制作・調整ページ）:** https://development.alvis-pwa.pages.dev/tools/avatar-studio.html
+- 上記2つを開発作業・ユーザー案内時の正本とする。URLを回答する前に、この節とdevelopmentブランチの最新デプロイ状態を確認する。
+- https://alvis-pwa.pages.dev/ は旧来の本番URL。開発版の案内として使用しない。ルートURLだけを案内せず、必ず index-integrated.html を含む統合画面URLを使う。
+- deployment-id付きのPreview URLはコミット単位の一時URL。ユーザーが「最新版」と指定した場合、最新コミットのCloudflare Pages成功デプロイとPreview smoke成功を照合してから案内する。履歴にある古いdeployment-idを再利用しない。
+- deploymentの状態を確認できない場合は、成功済みと断定しない。旧本番URLを代替として送らず、確認できている開発版URLと未確認事項を明示する。
+- 新しいチャットへ引き継ぐ際も、この節を最初に確認し、URLを過去会話の記憶だけから推測しない。
+
 # ALVIS 開発引き継ぎ（現行）
 
 更新: 2026-11-23
