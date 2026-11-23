@@ -50,7 +50,7 @@ try {
       element.value = next;
       element.dispatchEvent(new Event("input", { bubbles: true }));
     }, value);
-    assert.equal(await page.locator("#"+id+"Value").inputValue(), Number(value).toFixed(2), id+" slider must update its value output");
+    assert.equal(await page.locator("#"+id+"Value").evaluate(element => element.value), Number(value).toFixed(2), id+" slider must update its value output");
   }
   const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
   await page.locator("#export").click();
