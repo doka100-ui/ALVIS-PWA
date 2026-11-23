@@ -1839,3 +1839,10 @@
 - 3dai.dev advertises free multi-view GLB generation and 24-hour deletion, but publicly accessible terms/privacy and output licence details remain insufficiently clear; 18号 uploads remain on hold.
 - Ekza Studio documents a new Rig & Skin/Auto-Rig path to VRM 1.0, but explicitly supports Chrome/Edge while Safari remains future work; it is alpha and its modeling tools do not provide photorealistic face sculpting.
 - No reference upload, external account, runtime code, or user data changes.
+
+
+## 2026-11-23 — Avatar StudioのVRM書き出し三角形数ガード
+- VRM書き出し直前に可視メッシュの三角形数を集計し、実数を画面の状態欄へ表示する。
+- 75,000 triangles以上の場合は書き出しを中止し、密度調整を案内する。上限未満なら実測数を成功メッセージにも表示する。
+- モデル形状、VRMリグ、既存ALVIS本体、記憶/履歴/暗号化/同期/バックアップ、Qwen/Kokoroキャッシュは変更しない。
+- ソース反映後の文字列・ガード存在確認は成功。ブラウザ実行テストとGitHub Actionsの結果は未確認（commit statusにチェックなし）。
