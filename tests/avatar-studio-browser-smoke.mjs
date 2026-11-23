@@ -21,7 +21,7 @@ page.setDefaultTimeout(30000);
 const pageErrors = [];
 const externalRequests = [];
 let trackExternalRequests = false;
-page.on("pageerror", error => pageErrors.push(error.message));
+page.on("pageerror", error => pageErrors.push({ message: error.message, stack: error.stack || "" }));
 page.on("request", request => {
   if (!trackExternalRequests) return;
   const requestUrl = new URL(request.url());
