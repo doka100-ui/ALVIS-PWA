@@ -1,3 +1,12 @@
+## Latest iPad Safari diagnostic — 2026-11-23 (v331)
+- User-provided device diagnostic identified the ALVIS profile as iPad; Safari reported WebGPU available, adapter discovery succeeded, GPU device creation succeeded, and the WebLLM-equivalent device requirements were accepted.
+- Existing WebLLM Cache API contained 76 model-weight entries, 1 config entry, and 1 WASM entry. Reported browser storage use was 2,182.5 MB / estimated quota 39,321.6 MB; model cache estimate was about 2,159 MB. No cache was deleted, moved, or rewritten by the diagnostic.
+- Qwen3-4B initialization reported model-weight progress from 46/74 through 74/74 (2,159 MB, 100%), shader modules 4/4, then “Finish loading on WebGPU - apple”. The cache pre-check was not detected and the post-init check was detected; this is not evidence that weights were downloaded again, nor proof that every runtime dependency is cached.
+- Browser storage persistence was reported as not granted. This is an eviction risk, not proof that Safari has removed or will remove the cache. Do not clear site data or Cache Storage; keep existing model data intact.
+- After the user reloaded the page in the same Safari tab, they confirmed the Qwen3-4B status remained displayed as loaded. This is a positive UI observation only: it does not by itself prove that the WebLLM engine survived a document reload, that inference succeeded after reload, or that the app works in airplane mode.
+- Complete iPad Pro M1/Safari offline acceptance remains pending. The required airplane-mode reopen, model initialization, local inference, approved-memory recall, TTS, save/reload, and reconnect/sync checks in `docs/OFFLINE_ACCEPTANCE.md` must still be performed on-device with test data. Do not claim complete offline support yet.
+- No code, encrypted user data, memories, history, sync state, backups, WebLLM/Kokoro caches, or production branch were changed as part of this diagnostic review.
+
 ## v331 公開プレビュー検証結果（2026-11-23）
 - 修正コミット `6804c5db133fbc69ffabcd24aa3bf426af31b510` のCloudflare Pages previewでPlaywrightブラウザ検証が成功。Chromium/WebKitのrefresh-v331 Worker更新、HUD球体・リング回転、メニュー/記憶/成長/チャット操作、引き継ぎ文生成と機密情報チェック、コピー操作、Chromiumオフライン再読み込み、iPhone幅WebKitのログイン/HUD表示を確認。
 - これは公開プレビュー上の自動ブラウザ検証であり、iPad/iPhone実機Safariでの手動操作・コピー、Qwen実機推論、モデルキャッシュ再利用、完全オフライン動作を保証しない。実機確認は別途必要。
