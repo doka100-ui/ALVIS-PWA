@@ -1,3 +1,7 @@
+## Avatar mode — Avatar Studio launch path
+- The avatar panel provides a separate-tab link to the same-origin local Avatar Studio. After exporting a .vrm, the user returns to ALVIS and selects it through the existing VRM file picker.
+- Opening the Studio does not read or write IndexedDB avatar records. The existing validated import/restore flow remains the only path that persists a newly selected VRM.
+
 ## Avatar Studio — WebKit compatibility smoke
 - Playwright WebKit now exercises the standalone WebGL Avatar Studio, left/right wink UI, VRM export, and import/control/render through the ALVIS VRM runtime.
 - This is Safari-engine CI coverage only; it is not equivalent to iPad Safari on Apple GPU.

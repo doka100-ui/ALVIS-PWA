@@ -1,3 +1,8 @@
+## ALVISアバターモードからAvatar Studioを起動できるようにする (2026-11-23)
+- アバターモードにローカルのAvatar Studioを開くリンクを追加。別タブで制作・調整し、VRMを書き出した後にALVISへ戻って既存の「3D / VRMモデルを読み込む」から選択できる。
+- Studio起動だけでは既存IndexedDBモデルや保存データを変更しない。新しいVRMはユーザーが既存のファイル選択を実行した場合にのみ既存の安全な表示/保存フローへ渡る。
+- 本体のモデル保存キー、バックアップ、記憶/履歴、Qwen/Kokoroキャッシュは変更しない。リンクはdevelopment previewにのみ含む。
+
 ## WebKit/Safari系ブラウザのAvatar Studio受け入れテスト追加 (2026-11-23)
 - Chromiumに加えてPlaywright WebKitでもAvatar StudioのWebGL描画、左右ウインク/表情/母音UI、VRM書き出し、ALVIS本体のVRM runtime読み込み・左右blink/視線操作を検証する。
 - WebKitはSafari系エンジンの互換性チェックであり、iPad実機Safari/Apple GPUでの性能保証ではない。実機検証は別途必要。
