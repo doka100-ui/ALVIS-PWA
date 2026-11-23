@@ -1,3 +1,9 @@
+## Latest v342 VRM描画エラー時の連続フレーム予約を防止（2026-11-23）
+- VRM runtimeのanimate callbackで、描画処理が正常終了した後にだけ次のrequestAnimationFrameを予約するよう変更。
+- 1フレーム内で例外が発生した場合はcatchでループ状態を停止し、同じエラーを毎フレーム繰り返さない。Avatarモードを切り替えて再有効化すると再開できる。
+- VRMモデル/IndexedDB、表情/視線/口パク、Qwen/Kokoroキャッシュ、記憶/履歴/AES-GCM/同期/バックアップは変更なし。実機iPad Safariでの再現・GPU安定性は未確認。
+- build ID / Service Worker cache v342、refresh-v342.htmlへ更新。Chromium/WebKit preview smokeとオフライン回帰テストはCI結果確認待ち。
+
 ## Latest v341 VRM診断表示の改行修正（2026-11-23）
 - VRM診断パネルが `\\n` を文字として表示していたため、実改行に修正。VRM診断データ・モデル・IndexedDB保存形式は変更しない。
 - 回帰テストに改行エスケープの検査を追加。実機iPad Safariの視認性確認は未実施。
