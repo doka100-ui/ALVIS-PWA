@@ -1,3 +1,8 @@
+## VRM WebGLコンテキスト復帰（v344）
+- renderer.domElementのwebglcontextlostでpreventDefault、contextLostフラグ設定、描画停止。
+- webglcontextrestoredでcontextLost解除・lastFrameTimestamp初期化・描画再開。startRenderLoopはcontextLost中の開始を拒否。
+- dispose時にcanvasイベントリスナーを解除する。Three.jsが管理するWebGLRendererのcontext restoration動作を利用する。
+
 ## アバターモデル保存のトランザクション方針（v343）
 - 新しいVRM/GLBは読み込み・表示成功後にIndexedDBへ保存する。
 - 読み込み失敗時は既存モデルBlobを再読み込みして復元し、既存保存データを先に破壊しない。
