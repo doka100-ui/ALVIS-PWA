@@ -191,6 +191,9 @@ function makeFace(){
   curve(eyesGroup,[[x-.22,.36,.71],[x-.15,.425,.738],[x-.06,.465,.747],[x+.04,.47,.747],[x+.15,.425,.738],[x+.22,.36,.71]],.015,lashMat);
   curve(eyesGroup,[[x-.20,.29,.71],[x-.10,.265,.729],[x,.255,.733],[x+.10,.265,.729],[x+.20,.29,.71]],.009,skinShade);
   curve(eyesGroup,[[x-.19,.49,.685],[x-.08,.515,.695],[x+.08,.515,.695],[x+.19,.49,.685]],.008,skinShade);
+  const crease=curve(eyesGroup,[[x-.205,.505,.688],[x-.13,.545,.699],[x,.558,.702],[x+.13,.545,.699],[x+.205,.505,.688]],.0038,skinShade);crease.name=side<0?"upper-eyelid-crease-left":"upper-eyelid-crease-right";
+  const innerCanthus=ell(eyesGroup,skin,[x-side*.205,.34,.713],[.018,.014,.012],16);innerCanthus.name=side<0?"eye-inner-canthus-left":"eye-inner-canthus-right";
+  const outerCanthus=ell(eyesGroup,skin,[x+side*.205,.34,.708],[.016,.013,.011],16);outerCanthus.name=side<0?"eye-outer-canthus-left":"eye-outer-canthus-right";
   for(let lash=0;lash<4;lash++){
    const t=lash/3, lx=x+side*(.15+t*.065), ly=.425-t*.065;
    curve(eyesGroup,[[lx,ly,.739],[lx+side*.018,ly+.018,.746],[lx+side*.034,ly+.038,.742]],.0035,lashMat);

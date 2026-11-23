@@ -33,6 +33,7 @@ check("Avatar Studio import map has no external CDN dependency", html.includes('
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));
 const faceBuilder = html.slice(html.indexOf("function makeFace()"), html.indexOf("makeFace();"));
 check("shared eye and brow materials are declared", html.includes("eyeGlint=mat(0xffffff,.2)") && html.includes("browMat=mat(0xa38a76,.82)"));
+check("upper eyelid crease and inner/outer eye corners are modeled on both sides", ["upper-eyelid-crease-left","upper-eyelid-crease-right","eye-inner-canthus-left","eye-inner-canthus-right","eye-outer-canthus-left","eye-outer-canthus-right"].every(name=>html.includes(name)));
 check("facial features use independent transform groups", ["facial-eyes","facial-nose","facial-mouth"].every(name => html.includes('name="'+name+'"')));
 check("face controls modify only their intended feature groups", html.includes('getObjectByName("facial-eyes")') && html.includes('getObjectByName("facial-nose")') && html.includes('getObjectByName("facial-mouth")'));
 check("bob hairstyle has a distinct rear volume and crown", html.includes('name="hair-rear-bob"') && html.includes('name="hair-crown"'));
