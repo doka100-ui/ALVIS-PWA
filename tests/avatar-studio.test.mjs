@@ -72,3 +72,5 @@ check("white top includes shoulder straps, neckline and rib details", html.inclu
 check("both single and independent left/right blink expressions are exported", html.includes('targetNames=["blink",sideBlink]') && html.includes('"blinkLeft","blinkRight"'));
 
 check("left and right wink controls are exposed and connected to the matching eyelids", ["blinkLeft","blinkRight"].every(id=>html.includes('id="'+id+'"') && html.includes('values.'+id)) && html.includes('leftLid.morphTargetInfluences[1]=values.blinkLeft') && html.includes('rightLid.morphTargetInfluences[1]=values.blinkRight'));
+
+check("sclera uses a curved almond-shaped mesh instead of a spherical placeholder", html.includes("function almondEye(") && html.includes("new THREE.ShapeGeometry(shape,32)") && html.includes("vertices.setZ(i,.038*dome)") && html.includes("almondEye(eyesGroup,white,[x,.34,.675],.225,.105)"));

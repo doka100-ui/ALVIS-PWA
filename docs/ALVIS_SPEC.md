@@ -1,3 +1,7 @@
+## Avatar Studio — almond-shaped sclera geometry
+- Replace spherical eye-white placeholders with a curved almond-outline ShapeGeometry with a shallow convex dome, retaining separate iris, pupil, glint, lids, lashes and lookAt morphs.
+- This is a procedural approximation of the approved reference shape; face identity and photorealism remain unverified.
+
 ## Avatar Studio — 左右独立ウインク操作
 - 通常の両目blinkに加え、左目blinkLeftと右目blinkRightを個別に調整できるUIを追加。
 - それぞれのスライダーは対応する左右まぶたモーフだけを操作する。保存形式・ユーザーデータへの影響なし。
