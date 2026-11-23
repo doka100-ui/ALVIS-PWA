@@ -1,3 +1,9 @@
+## 2026-11-23 — v342 VRM描画エラー時の連続フレーム予約を防止（development）
+- `assets/alvis-vrm-runtime.js` の描画処理をtry/catchで保護し、描画が成功した場合だけ次のrequestAnimationFrameを予約する。フレーム内例外時はループを停止して診断ログへ記録し、毎フレーム同じ例外を繰り返さない。
+- 自動回帰テストを追加し、描画成功後の予約順序と例外時の停止処理を確認する。
+- build ID / Service Worker cacheをv342へ更新し、refresh-v342.htmlを追加。既存のVRM保存データ、Qwen/Kokoroキャッシュ、記憶/履歴/AES-GCM/同期/バックアップは変更なし。本番mainは変更しない。
+- CIおよびCloudflare Pages previewのChromium/WebKit検証結果を確認後に追記。iPad Safari実機のGPU/描画挙動は未確認。
+
 ## 2026-11-23 — v341 VRM診断パネルの改行表示を修正（development）
 - `index-integrated.html` のVRM診断パネルで、複数行テキストが `\\n` の文字列として表示される問題を修正し、実際の改行で表示する。
 - 回帰テストを追加。診断ロジック、VRM/GLBモデル、IndexedDB、Qwen/Kokoroキャッシュ、記憶/履歴/暗号化/同期/バックアップは変更なし。本番mainは変更しない。
