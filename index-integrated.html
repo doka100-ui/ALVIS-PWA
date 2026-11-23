@@ -520,6 +520,14 @@ body.auth-transitioning:after{background:radial-gradient(circle at 50% 46%,trans
 <p id="copyDeviceDiagnosticsStatus" class="small" aria-live="polite" style="margin-top:8px">診断を実行するとコピーできます。</p>
 </div>
 <div class="panel">
+<h2>ALVIS 開発管制・引き継ぎ</h2>
+<p class="small">開発状況と、必要に応じてこの端末の診断要約をまとめます。生成内容を確認してから、次のAIへコピーしてください。個人の記憶・会話履歴・同期情報は含めません。</p>
+<button id="generateDevelopmentHandoff" type="button">AI引き継ぎ文を作成</button>
+<textarea id="developmentHandoffOutput" readonly rows="14" placeholder="作成した引き継ぎ文がここに表示されます。" style="margin-top:10px"></textarea>
+<button id="copyDevelopmentHandoff" class="secondary" type="button" disabled>引き継ぎ文をコピー</button>
+<p id="developmentHandoffStatus" class="small" aria-live="polite" style="margin-top:8px">必要なときに作成してください。作成・コピーだけで、ALVISのデータは変更しません。</p>
+</div>
+<div class="panel">
 <h2>オフライン動作の確認方法</h2>
 <ol class="small" style="line-height:1.8;padding-left:20px">
 <li>オンラインでこの画面を開き、AIモデルとKokoroをそれぞれ一度準備します。メモリ競合を避けるため同時に読み込まず、片方を終了してからもう片方を準備してください。</li>
