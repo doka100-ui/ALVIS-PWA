@@ -1,3 +1,10 @@
+## 2026-11-23 — Avatarモード非表示中のVRM描画を停止（development / v337）
+- VRM runtimeにsetActiveを追加し、Avatarモード以外ではrequestAnimationFrameの描画ループを停止。Avatarモードへ戻ると同じVRMインスタンスで再開する。
+- アバター切替時に表示状態をruntimeへ伝え、VRM読み込み完了後も現在の表示モードに同期する。モデルを破棄/再読込せず、表情・口パク・視線などの機能を維持。
+- 目的は、JARVISモード表示中に非表示の3DアバターがGPU/CPUフレームを消費し続けることを防ぎ、iPad Safariの描画負荷を下げること。
+- Service Worker cacheをv337へ更新し、安全な更新ページrefresh-v337.htmlを追加。WebLLM/Kokoroキャッシュ、記憶/履歴/同期/バックアップは変更しない。本番mainは変更なし。
+- 自動回帰テストを追加。実機iPad SafariでのGPU使用量・切替時の滑らかさは未確認。
+
 ## 2026-11-23 — Qwen初期化中のWebGPU停止競合を実動作テスト化（development / v336）
 - `CreateMLCEngine`完了前にWebGPU device lostが発生した場合、古いエンジンを公開せずunloadして初期化を失敗扱いにする実際のガード分岐をテスト。
 - unload成功時の二重destroy回避、unload失敗時の捕捉済みGPUDevice個別解放フォールバック、エラー診断保持を確認。
