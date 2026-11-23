@@ -65,7 +65,7 @@ check("ALVIS VRM runtime dependencies resolve through the main app import map", 
 check("VRM runtime creates, tracks, and disposes an actual LookAt target", vrmRuntimeSource.includes("const lookAtTarget = vrm.lookAt ? new THREE.Object3D() : null;") && vrmRuntimeSource.includes("vrm.lookAt.target = lookAtTarget") && vrmRuntimeSource.includes("if (lookAtTarget) lookAtTarget.position.copy(avatarFocus)") && vrmRuntimeSource.includes("if (lookAtTarget) scene.remove(lookAtTarget)"));
 
 check("procedural skin base-color and subtle pore texture are exported locally", html.includes("function makeSkinTexture()") && html.includes("skin.map=skinTexture") && html.includes("skin.bumpScale=.0025"));
-check("eyes include iris rings, radial fibers, and individual lash strands", html.includes("iris-border-left") && html.includes("for(let ray=0;ray<14;ray++)") && html.includes("for(let lash=0;lash<4;lash++)"));
+check("eyes include iris rings, radial fibers, and individual lash strands", html.includes("iris-border-left") && html.includes("for(let ray=0;ray<12;ray++)") && html.includes("ray*Math.PI*2/12") && html.includes("for(let lash=0;lash<4;lash++)"));
 check("brows use the light taupe tone from the approved model sheet", html.includes("browMat=mat(0x927c69"));
 check("nose and lips include fine anatomical contour details", html.includes("noseGroup") && html.includes("lipOutline") && html.includes("lipHighlight"));
 check("bob includes independent fine hair strands on both sides", html.includes("for(let strand=0;strand<4;strand++)") && html.includes("hair-side-left") && html.includes("hair-side-right"));
