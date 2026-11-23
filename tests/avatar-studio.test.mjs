@@ -32,7 +32,7 @@ check("Three.js modules are vendored locally with license", vendorContents.slice
 check("Avatar Studio import map has no external CDN dependency", html.includes('"three":"./vendor/three.module.js"') && html.includes('"three/addons/":"./vendor/"') && !html.includes("cdn.jsdelivr.net"));
 check("face rebuild disposes replaced geometries", html.includes("o.geometry.dispose()"));
 const faceBuilder = html.slice(html.indexOf("function makeFace()"), html.indexOf("makeFace();"));
-check("shared eye and brow materials are declared", html.includes("eyeGlint=mat(0xffffff,.2)") && html.includes("browMat=mat(0x493a36,.8)"));
+check("shared eye and brow materials are declared", html.includes("eyeGlint=mat(0xffffff,.2)") && html.includes("browMat=mat(0x927c69,.82)"));
 check("facial features use independent transform groups", ["facial-eyes","facial-nose","facial-mouth"].every(name => html.includes('name="'+name+'"')));
 check("face controls modify only their intended feature groups", html.includes('getObjectByName("facial-eyes")') && html.includes('getObjectByName("facial-nose")') && html.includes('getObjectByName("facial-mouth")'));
 check("bob hairstyle has a distinct rear volume and crown", html.includes('name="hair-rear-bob"') && html.includes('name="hair-crown"'));
