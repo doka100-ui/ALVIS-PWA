@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import vm from "node:vm";
 
 const app = await readFile(new URL("../index-integrated.html", import.meta.url), "utf8");
 const appCss = await readFile(new URL("../assets/alvis-app.css", import.meta.url), "utf8");
@@ -1382,3 +1383,101 @@ const ttsEngineChangeHandler=app.slice(ttsEngineChangeStart,ttsEngineChangeEnd);
 assert.doesNotMatch(ttsEngineChangeHandler,/prepareKokoroTTS\(/,"selecting Kokoro must not eagerly load its model");
 assert.match(ttsEngineChangeHandler,/実際の読み上げ時にだけ準備します/,"the UI must explain that Kokoro loads only when speech is actually requested");
 assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動できません/,"Kokoro must remain mutually exclusive with Qwen while loading");
+
+
+// v334: execute the real Service Worker handlers with isolated Cache API/network fakes.
+{
+  const cacheStore=new Map();
+  const deletedCaches=[];
+  const makeCache=()=>{
+    const entries=new Map();
+    return {
+      async match(input,options={}){
+        const url=typeof input==="string"?input:input.url;
+        if(entries.has(url))return entries.get(url).clone();
+        if(options.ignoreSearch){
+          const target=new URL(url);
+          for(const [key,value] of entries){
+            const candidate=new URL(key);
+            if(candidate.origin===target.origin&&candidate.pathname===target.pathname)return value.clone();
+          }
+        }
+        return undefined;
+      },
+      async put(input,response){
+        const url=typeof input==="string"?input:input.url;
+        entries.set(url,response.clone());
+      }
+    };
+  };
+  const cacheApi={
+    async open(name){
+      if(!cacheStore.has(name))cacheStore.set(name,makeCache());
+      return cacheStore.get(name);
+    },
+    async keys(){return [...cacheStore.keys()];},
+    async delete(name){deletedCaches.push(name);return cacheStore.delete(name);}
+  };
+  const listeners={};
+  const selfFake={
+    location:{origin:"https://alvis.test"},
+    registration:{scope:"https://alvis.test/"},
+    clients:{claim:async()=>{}},
+    skipWaiting:async()=>{},
+    addEventListener(type,handler){listeners[type]=handler;}
+  };
+  let networkFetch=async()=>{throw new Error("offline");};
+  const workerContext={
+    self:selfFake,caches:cacheApi,URL,Request,Response,Headers,
+    fetch:(...args)=>networkFetch(...args),console
+  };
+  vm.runInNewContext(sw,workerContext,{filename:"service-worker.js"});
+  await cacheApi.open("alvis-cache-v330-integrated");
+  await cacheApi.open("alvis-deps-v1");
+  const modelCache=await cacheApi.open("webllm/model");
+  const configCache=await cacheApi.open("webllm/config");
+  const wasmCache=await cacheApi.open("webllm/wasm");
+  await modelCache.put("https://huggingface.co/alvis/model.bin",new Response("preserve model weights"));
+  await configCache.put("https://huggingface.co/alvis/config.json",new Response("preserve model config"));
+  await wasmCache.put("https://cdn.example.test/webllm.wasm",new Response("preserve wasm"));
+  let activationPromise;
+  listeners.activate({waitUntil(promise){activationPromise=promise;}});
+  await activationPromise;
+  assert.ok(deletedCaches.includes("alvis-cache-v330-integrated"),"activation must retire only old ALVIS app caches");
+  assert.ok(deletedCaches.includes("alvis-deps-v1"),"activation must retire old ALVIS dependency caches");
+  for(const key of ["webllm/model","webllm/config","webllm/wasm"]){
+    assert.ok(cacheStore.has(key),key+" must survive Service Worker activation");
+  }
+
+  let networkCalls=0;
+  const modelRequest={method:"GET",url:"https://huggingface.co/alvis/model.bin",mode:"cors",headers:new Headers()};
+  let modelResponsePromise;
+  listeners.fetch({request:modelRequest,respondWith(promise){modelResponsePromise=promise;}});
+  const modelResponse=await modelResponsePromise;
+  assert.equal(await modelResponse.text(),"preserve model weights","existing WebLLM model cache must win before network");
+  assert.equal(networkCalls,0,"cached model assets must not require a network request");
+
+  networkFetch=async()=>{networkCalls++;return new Response("trusted dependency", {status:200});};
+  const dependencyRequest={method:"GET",url:"https://esm.run/@mlc-ai/web-llm@0.2.87",mode:"cors",headers:new Headers()};
+  let dependencyResponsePromise;
+  listeners.fetch({request:dependencyRequest,respondWith(promise){dependencyResponsePromise=promise;}});
+  const dependencyResponse=await dependencyResponsePromise;
+  assert.equal(await dependencyResponse.text(),"trusted dependency");
+  assert.ok(await (await cacheApi.open("alvis-deps-v2")).match(dependencyRequest),"successful trusted CDN dependencies must be cached");
+
+  networkFetch=async()=>{throw new Error("offline");};
+  const appCache=await cacheApi.open("alvis-cache-v331-integrated");
+  await appCache.put("https://alvis.test/index-integrated.html",new Response("cached ALVIS shell"));
+  const navigationRequest={method:"GET",url:"https://alvis.test/index-integrated.html",mode:"navigate",headers:new Headers()};
+  let navigationResponsePromise;
+  listeners.fetch({request:navigationRequest,respondWith(promise){navigationResponsePromise=promise;}});
+  const navigationResponse=await navigationResponsePromise;
+  assert.equal(await navigationResponse.text(),"cached ALVIS shell","offline navigation must return the cached integrated shell");
+
+  const missingRequest={method:"GET",url:"https://cdn.jsdelivr.net/npm/missing-module.js",mode:"cors",headers:new Headers()};
+  let missingResponsePromise;
+  listeners.fetch({request:missingRequest,respondWith(promise){missingResponsePromise=promise;}});
+  const missingResponse=await missingResponsePromise;
+  assert.equal(missingResponse.status,503,"uncached offline dependencies must fail explicitly rather than return HTML");
+  assert.match(await missingResponse.text(),/オフライン/);
+}
