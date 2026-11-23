@@ -1,3 +1,8 @@
+## Avatar Studio — Chromium実書き出し確認結果
+- 2026-11-23のCloudflare previewでWebGL 2.0表示、外部CDN通信なし、Service Workerキャッシュ経由のオフライン再読込を確認。
+- GLB v2（1,627,416 bytes）を実際にダウンロードし、blink / happy / sad / angry / surprised / relaxed / aa / ih / ou / ee / oh のtargetNamesをJSONチャンク内で確認。
+- これはChromium CI結果であり、iPad Safari実機・VRM変換・18号との顔一致・本体統合の検証ではない。
+
 ## Avatar Studio — relaxed表情互換
 - 口元の名前付き表情セットに relaxed を追加し、ALVIS VRM runtimeの感情プリセット名と揃える。
 

@@ -1,3 +1,9 @@
+## Verified Avatar Studio browser/export result (2026-11-23)
+- Commit `697bee83ff0a2ab213100c1085b075c889324d31`, preview run `45172947684`: dashboard browser smoke and standalone Avatar Studio smoke both succeeded.
+- Chromium/SwiftShader reported WebGL 2.0; Avatar Studio made no external-origin requests; the page reloaded offline through the existing ALVIS Service Worker cache.
+- The browser downloaded a 1,627,416-byte GLB v2 file. Its JSON chunk retained morph target names for blink, happy, sad, angry, surprised, relaxed, aa, ih, ou, ee, and oh.
+- This is a real Chromium browser/export result, stronger than source-only tests. It still does not verify VRM conversion, visual fidelity to 18号, iPad Safari GPU behavior, or production integration. Current subsequent change only updates regression assertions for the relaxed target; the Avatar Studio runtime code is unchanged from this verified preview.
+
 ## Latest Avatar Studio relaxed-expression compatibility (2026-11-23)
 - Added a named relaxed mouth morph target and preview slider so the expression set matches the existing ALVIS VRM runtime emotion presets: happy, sad, angry, surprised, and relaxed.
 - Static and deployed GLB browser checks now expect the relaxed target as well.
