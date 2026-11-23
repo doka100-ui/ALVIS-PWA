@@ -173,13 +173,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
-    const refreshResponse = await page.request.get(new URL("refresh-v345.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v345 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh-v346.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": v346 Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v345-integrated"), browserName + ": refresh page must verify the v345 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=345"), browserName + ": refresh page must return to the integrated app only after v345 activation");
+    assert.ok(refreshHtml.includes("alvis-cache-v346-integrated"), browserName + ": refresh page must verify the v346 worker before redirecting");
+    assert.ok(refreshHtml.includes("index-integrated.html?refresh=346"), browserName + ": refresh page must return to the integrated app only after v346 activation");
     assert.ok((await page.locator("#generateDevelopmentHandoff").count())===1, browserName + ": development handoff generator must exist");
     assert.ok((await page.locator("#developmentHandoffOutput").count())===1, browserName + ": handoff output must exist");
 
@@ -396,7 +396,7 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v345.html", previewUrl).href;
+    const refreshUrl = new URL("refresh-v346.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForFunction(() => {
       const current = new URL(window.location.href);
@@ -422,9 +422,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v345-integrated",
-      browserName + ": refresh flow must verify the actual v345 worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v345 before redirect");
+    assert.equal(state.cacheName, "alvis-cache-v346-integrated",
+      browserName + ": refresh flow must verify the actual v346 worker before redirecting");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v346 before redirect");
   } finally {
     await browser.close();
   }
