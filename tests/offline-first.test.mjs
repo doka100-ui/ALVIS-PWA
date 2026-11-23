@@ -636,7 +636,7 @@ let maximumConcurrentInferenceCount=0;
 let unloadCompleted=false;
 let releaseSlowInference;
 const slowInferenceGate=new Promise(resolve=>{releaseSlowInference=resolve;});
-const fakeEngine={
+const shutdownProbeEngine={
   chat:{completions:{create:async({id,slow})=>{
     activeInferenceCount++;
     maximumConcurrentInferenceCount=Math.max(maximumConcurrentInferenceCount,activeInferenceCount);
@@ -647,14 +647,14 @@ const fakeEngine={
   }}},
   unload:async()=>{unloadCompleted=true;}
 };
-serializeInference(fakeEngine);
-const serializedResults=await Promise.all([1,2,3,4].map(id=>fakeEngine.chat.completions.create({id})));
+serializeInference(shutdownProbeEngine);
+const serializedResults=await Promise.all([1,2,3,4].map(id=>shutdownProbeEngine.chat.completions.create({id})));
 assert.deepEqual(serializedResults.map(item=>item.id),[1,2,3,4]);
 assert.equal(maximumConcurrentInferenceCount,1,"Qwen inference must never overlap");
-const slowRequest=fakeEngine.chat.completions.create({id:5,slow:true});
+const slowRequest=shutdownProbeEngine.chat.completions.create({id:5,slow:true});
 await Promise.resolve();
 await Promise.resolve();
-const pendingUnload=fakeEngine.unload();
+const pendingUnload=shutdownProbeEngine.unload();
 await Promise.resolve();
 assert.equal(unloadCompleted,false,"unload must wait while inference is active");
 releaseSlowInference();
@@ -1145,32 +1145,32 @@ assert.match(sw,/alvis-cache-v\d+-integrated/,"v231 app shell must use refreshed
 
 // v333: verify inference serialization and safe, idempotent shutdown with an in-flight request.
 const makeSerializedInference=new Function(serializedInferenceSource+"; return serializeAlvisInference;")();
-let releaseFirstInference;
-const firstInferenceGate=new Promise(resolve=>{releaseFirstInference=resolve;});
-const inferenceEvents=[];
-const fakeEngine={
+let releaseShutdownProbeInference;
+const shutdownProbeGate=new Promise(resolve=>{releaseShutdownProbeInference=resolve;});
+const shutdownProbeEvents=[];
+const shutdownProbeEngine={
   chat:{completions:{create:async label=>{
-    inferenceEvents.push("start:"+label);
-    if(label==="first")await firstInferenceGate;
-    inferenceEvents.push("end:"+label);
+    shutdownProbeEvents.push("start:"+label);
+    if(label==="first")await shutdownProbeGate;
+    shutdownProbeEvents.push("end:"+label);
     return label;
   }}},
-  unload:async()=>{inferenceEvents.push("unload");}
+  unload:async()=>{shutdownProbeEvents.push("unload");}
 };
-const serializedEngine=makeSerializedInference(fakeEngine);
-const firstInference=serializedEngine.chat.completions.create("first");
+const shutdownProbeWrappedEngine=makeSerializedInference(shutdownProbeEngine);
+const shutdownProbeFirst=shutdownProbeWrappedEngine.chat.completions.create("first");
 await Promise.resolve();
-assert.deepEqual(inferenceEvents,["start:first"],"the first inference must begin before shutdown is requested");
-const queuedInference=serializedEngine.chat.completions.create("queued");
-const firstUnload=serializedEngine.unload();
-const secondUnload=serializedEngine.unload();
-assert.equal(firstUnload,secondUnload,"concurrent shutdown calls must share the same promise");
-await assert.rejects(serializedEngine.chat.completions.create("after-shutdown"),/終了処理中/);
-releaseFirstInference();
-assert.equal(await firstInference,"first");
-await assert.rejects(queuedInference,/終了処理中/);
-await Promise.all([firstUnload,secondUnload]);
-assert.deepEqual(inferenceEvents,["start:first","end:first","unload"],"shutdown must wait for active inference, skip queued work, and unload once");
+assert.deepEqual(shutdownProbeEvents,["start:first"],"the first inference must begin before shutdown is requested");
+const shutdownProbeQueued=shutdownProbeWrappedEngine.chat.completions.create("queued");
+const shutdownProbeUnloadA=shutdownProbeWrappedEngine.unload();
+const shutdownProbeUnloadB=shutdownProbeWrappedEngine.unload();
+assert.equal(shutdownProbeUnloadA,shutdownProbeUnloadB,"concurrent shutdown calls must share the same promise");
+await assert.rejects(shutdownProbeWrappedEngine.chat.completions.create("after-shutdown"),/終了処理中/);
+releaseShutdownProbeInference();
+assert.equal(await shutdownProbeFirst,"first");
+await assert.rejects(shutdownProbeQueued,/終了処理中/);
+await Promise.all([shutdownProbeUnloadA,shutdownProbeUnloadB]);
+assert.deepEqual(shutdownProbeEvents,["start:first","end:first","unload"],"shutdown must wait for active inference, skip queued work, and unload once");
 
 // v232: keep the referenced user question and assistant answer for follow-ups with a strict context budget.
 const contextHelperStart=app.indexOf("function buildBoundedGenerationMessages(recent,currentText){");
