@@ -1,3 +1,8 @@
+## v346 — GLBの読み込み完了確認
+- GLBの表示成功判定はmodel-viewerのloadイベント後に行う。
+- errorイベントまたは30秒タイムアウトは失敗として扱い、仮Object URLを解放する。
+- 新モデルが失敗した場合、既存IndexedDBモデルの復元フローを維持する。
+
 ## v345 — WebGL初期化失敗時のVRM解放
 - WebGLRenderer生成が失敗した場合、VRM sceneのGPU関連リソースを解放してからエラーを返す。
 - モデルBlob、IndexedDB保存形式、既存ユーザーデータは変更しない。
