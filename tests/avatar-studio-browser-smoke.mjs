@@ -90,6 +90,13 @@ try {
   assert.equal(jsonType, 0x4e4f534a, "GLB first chunk must be JSON");
   const gltf = JSON.parse(buffer.toString("utf8", 20, 20 + jsonLength).trim());
   const targetNames = (gltf.meshes || []).flatMap(mesh => mesh.extras?.targetNames || []);
+  const triangleCount=(gltf.meshes||[]).reduce((sum,mesh)=>sum+(mesh.primitives||[]).reduce((subtotal,primitive)=>{
+    const count=primitive.indices!==undefined?gltf.accessors[primitive.indices]?.count:gltf.accessors[primitive.attributes.POSITION]?.count;
+    return subtotal+(count||0)/(primitive.indices!==undefined?3:3);
+  },0),0);
+  assert.ok(triangleCount>0&&triangleCount<100000,"VRM must stay below the 100k-triangle mobile performance budget; got "+triangleCount);
+  console.log("PASS mobile geometry budget: "+triangleCount+" triangles");
+
   assert.ok((gltf.images||[]).length>0 && (gltf.textures||[]).length>0, "VRM must embed its locally generated skin texture");
   assert.ok((gltf.materials||[]).some(material=>material.pbrMetallicRoughness?.baseColorTexture?.index!==undefined), "VRM must assign the skin base-color texture to a PBR material");
   for (const name of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {

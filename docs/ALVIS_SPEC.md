@@ -1,3 +1,7 @@
+## Avatar Studio — mobile geometry budget
+- Browser smoke calculates triangle counts from exported GLB primitives and enforces a strict under-100,000-triangle budget to keep the upper-body prototype lightweight for iPad-class devices.
+- This budget does not replace real iPad Safari performance testing.
+
 ## Avatar Studio — tapered bob hair strands
 - Add a tapered tube helper for hair strands, replace uniform side-lock curves with tapered strands, and add a deep side-part seam plus seven rear bob flow strands.
 - Hair remains procedural geometry; final photoreal hair texture and exact reference match remain outstanding.
