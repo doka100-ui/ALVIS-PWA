@@ -59,7 +59,7 @@ const key=new THREE.DirectionalLight(0xffe8d5,3.0);key.position.set(-3,4,5);scen
 const rim=new THREE.DirectionalLight(0x8acbff,2.1);rim.position.set(3,2,-4);scene.add(rim);
 const root=new THREE.Group();scene.add(root);
 const mat=(color,rough=.65,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
-const skin=mat(0xf0cbb8,.72),skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),dark=mat(0x493a36,.8),gold=mat(0xc6a15a,.3,.7);
+const skin=mat(0xf0cbb8,.72),skinShade=mat(0xd9a995,.8),hair=mat(0xe5c276,.48),hairLight=mat(0xf2d99a,.48),white=mat(0xf8f4ef,.7),iris=mat(0x8198a7,.28),pupil=mat(0x263644,.25),lip=mat(0xb96f72,.55),dark=mat(0x493a36,.8),gold=mat(0xc6a15a,.3,.7),eyeGlint=mat(0xffffff,.2),browMat=mat(0x493a36,.8);
 let faceGroup;
 function ell(parent,material,pos,scale,seg=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(16,Math.floor(seg*.7))),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
 function curve(parent,points,r,material){const path=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(path,32,r,8,false),material);parent.add(m);return m}
@@ -67,29 +67,32 @@ function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
  const geo=new THREE.SphereGeometry(1,64,48);const pos=geo.attributes.position;
- for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.82+.18*((y+1)/2);pos.setXYZ(i,x*taper,y,z*(.94+.06*((y+1)/2)));}
+ for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.055*Math.exp(-Math.pow((y-.02)/.24,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));pos.setXYZ(i,x*taper*cheek,y,z*depth);}
  geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
  // ears
  for(const side of [-1,1]){ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ell(faceGroup,skinShade,[side*.94,.02,.075],[.065,.16,.035]);}
  // eye sockets, whites, irises and upper/lower lids
+ const eyesGroup=new THREE.Group();eyesGroup.name="facial-eyes";faceGroup.add(eyesGroup);
  for(const side of [-1,1]){
   const x=side*.37;
-  ell(faceGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
-  ell(faceGroup,white,[x,.34,.675],[.225,.115,.07]);
-  ell(faceGroup,iris,[x,.34,.735],[.078,.084,.025]);
-  ell(faceGroup,pupil,[x,.34,.755],[.037,.052,.014]);
-  ell(faceGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);
-  curve(faceGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
-  curve(faceGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
-  curve(faceGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);
+  ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
+  ell(eyesGroup,white,[x,.34,.675],[.225,.115,.07]);
+  ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);
+  ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);
+  ell(eyesGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);
+  curve(eyesGroup,[[x-.22,.36,.71],[x-.12,.45,.735],[x,.47,.74],[x+.12,.45,.735],[x+.22,.36,.71]],.018,dark);
+  curve(eyesGroup,[[x-.20,.29,.71],[x,.255,.73],[x+.20,.29,.71]],.012,skinShade);
+  curve(eyesGroup,[[x-.20,.56,.61],[x-.08,.61,.67],[x+.08,.59,.67],[x+.20,.54,.61]],.027,browMat);
  }
  // nose bridge and tip, nostrils
- ell(faceGroup,skin,[0,.04,.68],[.105,.30,.16]);
- ell(faceGroup,skin,[0,-.13,.79],[.15,.105,.13]);
- for(const side of [-1,1])ell(faceGroup,skinShade,[side*.105,-.17,.77],[.055,.04,.055],20);
+ const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
+ ell(noseGroup,skin,[0,.04,.68],[.105,.30,.16]);
+ ell(noseGroup,skin,[0,-.13,.79],[.15,.105,.13]);
+ for(const side of [-1,1])ell(noseGroup,skinShade,[side*.105,-.17,.77],[.055,.04,.055],20);
  // lips
- ell(faceGroup,lip,[0,-.43,.66],[.22,.055,.045]);
- ell(faceGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
+ const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
+ ell(mouthGroup,lip,[0,-.43,.66],[.22,.055,.045]);
+ ell(mouthGroup,skinShade,[0,-.49,.65],[.17,.025,.025]);
  // hair cap, swept side fringe and bob side locks
  const cap=new THREE.Mesh(new THREE.SphereGeometry(1,48,32,0,Math.PI*2,0,Math.PI*.57),hair);
  cap.scale.set(.94,1.28,.78);cap.position.set(0,.25,-.015);faceGroup.add(cap);
@@ -111,12 +114,9 @@ function rebuild(){
  const values=Object.fromEntries(sliders.map(id=>[id,Number(document.getElementById(id).value)]));
  root.remove(faceGroup);faceGroup.traverse(o=>{if(o.geometry)o.geometry.dispose()});makeFace();
  faceGroup.scale.set(values.faceWidth,values.faceLength,1);
- // Apply focused feature proportions after the base sculpt.
- faceGroup.children.forEach(o=>{
-  if(o.position.y>.20&&o.position.y<.52&&Math.abs(o.position.x)<.7){o.scale.x*=values.eyeSize;if(Math.abs(o.position.x)>.2)o.position.x*=values.eyeSpacing;}
-  if(o.position.y<.2&&o.position.y>-.25&&Math.abs(o.position.x)<.2)o.scale.multiplyScalar(values.noseSize);
-  if(o.position.y<-.35&&o.position.y>-.55)o.scale.x*=values.mouthSize;
- });
+ const eyes=faceGroup.getObjectByName("facial-eyes");eyes.scale.x=values.eyeSize;eyes.children.forEach(o=>{o.position.x*=values.eyeSpacing;});
+ faceGroup.getObjectByName("facial-nose").scale.setScalar(values.noseSize);
+ faceGroup.getObjectByName("facial-mouth").scale.x=values.mouthSize;
  sliders.forEach(id=>document.getElementById(id+"Value").value=values[id].toFixed(2));
 }
 sliders.forEach(id=>document.getElementById(id).addEventListener("input",rebuild));
