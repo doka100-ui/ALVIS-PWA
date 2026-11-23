@@ -108,6 +108,7 @@ try {
   assert.equal(vrmExtension.meta?.allowRedistribution,false,"personal ALVIS avatar must not permit redistribution");
   for (const nodeName of ["shoulder-left","shoulder-right","upper-arm-left","upper-arm-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must include chest-attached upper-body geometry: "+nodeName);
   for (let strand=0;strand<5;strand++) assert.ok(gltf.nodes.some(node=>node.name==="hair-fringe-strand-"+strand),"VRM must preserve swept fringe strand "+strand);
+  for (const nodeName of ["nostril-left","nostril-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve sculpted nose detail: "+nodeName);
   for (const [meshName,boneName] of [["upper-arm-left","leftUpperArm"],["upper-arm-right","rightUpperArm"]]) {
     const meshIndex=gltf.nodes.findIndex(node=>node.name===meshName),boneIndex=gltf.nodes.findIndex(node=>node.name===boneName);
     assert.ok(meshIndex>=0&&boneIndex>=0&&gltf.nodes[boneIndex].children?.includes(meshIndex),"upper-arm mesh must be parented to its matching humanoid bone: "+meshName);

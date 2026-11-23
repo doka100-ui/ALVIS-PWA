@@ -106,3 +106,5 @@ check("shoulders attach to chest and upper-arm meshes attach to their matching h
 check("skin hair eye and lip palette follows the approved light-blonde blue-eyed reference", html.includes("242+grain") && html.includes("216+grain") && html.includes("204+grain") && html.includes("hair=mat(0xe6d0a5") && html.includes("hairLight=mat(0xf4e3c4") && html.includes("iris=mat(0x7899bd") && html.includes("lip=mat(0xc98584"));
 
 check("five named tapered fringe locks layer the swept side-parted bob", html.includes('for(let strand=0;strand<5;strand++)') && html.includes('lock.name="hair-fringe-strand-"+strand') && html.includes("Five fine, swept fringe locks"));
+
+check("nose recesses use soft warm shading rather than hard dark lash material", html.includes('noseShadow=mat(0x986f67,.94)') && html.includes('nostril.name=side<0?"nostril-left":"nostril-right"'));
