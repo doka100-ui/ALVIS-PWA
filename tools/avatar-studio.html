@@ -204,14 +204,18 @@ function makeContinuousHeadGeometry(){
    const noseBridge=.16*Math.exp(-Math.pow(x/.18,2))*Math.exp(-Math.pow((y-.015)/.50,2));
    const noseTip=.10*Math.exp(-Math.pow(x/.23,2))*Math.exp(-Math.pow((y+.10)/.24,2));
    const noseWing=.04*Math.exp(-Math.pow((Math.abs(x)-.16)/.085,2))*Math.exp(-Math.pow((y+.12)/.15,2));
-   const cheekbone=.026*Math.exp(-Math.pow((Math.abs(x)-.56)/.23,2))*Math.exp(-Math.pow((y-.02)/.26,2));
-   const eyeSocket=-.045*Math.exp(-Math.pow((Math.abs(x)-.37)/.23,2)-Math.pow((y-.31)/.16,2));
-   const browRidge=.028*Math.exp(-Math.pow((Math.abs(x)-.37)/.25,2)-Math.pow((y-.55)/.085,2));
-   const glabella=.014*Math.exp(-Math.pow(x/.11,2)-Math.pow((y-.40)/.19,2));
-   const mouthMound=.022*Math.exp(-Math.pow(x/.27,2)-Math.pow((y+.45)/.17,2));
-   const philtrum=-.009*Math.exp(-Math.pow(x/.055,2)-Math.pow((y+.27)/.09,2));
-   const chin=.018*Math.exp(-Math.pow(x/.34,2))*Math.exp(-Math.pow((y+.82)/.13,2));
-   positions.push(x,y,zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+eyeSocket+browRidge+glabella+mouthMound+philtrum+chin));
+   const cheekbone=.042*Math.exp(-Math.pow((Math.abs(x)-.53)/.25,2))*Math.exp(-Math.pow((y-.015)/.25,2));
+   const cheekPad=.026*Math.exp(-Math.pow((Math.abs(x)-.43)/.30,2)-Math.pow((y+.12)/.30,2));
+   const underEyeTransition=.012*Math.exp(-Math.pow((Math.abs(x)-.36)/.24,2)-Math.pow((y-.12)/.075,2));
+   const eyeSocket=-.060*Math.exp(-Math.pow((Math.abs(x)-.37)/.23,2)-Math.pow((y-.31)/.16,2));
+   const browRidge=.038*Math.exp(-Math.pow((Math.abs(x)-.37)/.25,2)-Math.pow((y-.55)/.085,2));
+   const glabella=.018*Math.exp(-Math.pow(x/.11,2)-Math.pow((y-.40)/.19,2));
+   const forehead=.018*Math.exp(-Math.pow(x/.58,2)-Math.pow((y-.70)/.25,2));
+   const mouthMound=.032*Math.exp(-Math.pow(x/.27,2)-Math.pow((y+.45)/.17,2));
+   const philtrum=-.012*Math.exp(-Math.pow(x/.055,2)-Math.pow((y+.27)/.09,2));
+   const nasolabial=-.009*Math.exp(-Math.pow((Math.abs(x)-.20)/.035,2)-Math.pow((y+.31)/.13,2));
+   const chin=.030*Math.exp(-Math.pow(x/.34,2))*Math.exp(-Math.pow((y+.82)/.13,2));
+   positions.push(x,y,zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+cheekPad+underEyeTransition+eyeSocket+browRidge+glabella+forehead+mouthMound+philtrum+nasolabial+chin));
    uvs.push(col/segments,1-row/rows);
   }
  }
@@ -350,6 +354,7 @@ function makeFace(){
  for(const side of [-1,1]){
   const x=side*.37;
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
+  const eyeball=ell(eyesGroup,sclera,[x,.34,.635],[.218,.086,.052],32);eyeball.name=side<0?"eyeball-left":"eyeball-right";
   almondEye(eyesGroup,sclera,[x,.34,.675],.225,.09);
   const irisMesh=ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";addEyeGazeMorphTargets(irisMesh);
   const pupilMesh=ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";addEyeGazeMorphTargets(pupilMesh);
