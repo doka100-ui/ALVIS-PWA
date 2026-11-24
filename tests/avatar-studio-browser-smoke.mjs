@@ -106,6 +106,7 @@ try {
   assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.8), "VRM must export the pupil clearcoat layer");
   assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_sheen?.sheenColorFactor?.some(value=>value>0.7)), "VRM must export the blonde hair sheen layer");
   assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_clearcoat?.clearcoatFactor>=0.12 && material.extensions?.KHR_materials_sheen), "VRM must export layered sheen and clearcoat on the hair material");
+  assert.ok((gltf.materials||[]).some(material=>material.extensions?.KHR_materials_anisotropy?.anisotropyStrength>=0.18 && material.extensions?.KHR_materials_sheen), "VRM must export directional anisotropic highlights on the blonde hair");
 
 
   for (const name of ["blink","blinkLeft","blinkRight","happy","sad","angry","surprised","relaxed","aa","ih","ou","ee","oh","lookUp","lookDown","lookLeft","lookRight"]) {
