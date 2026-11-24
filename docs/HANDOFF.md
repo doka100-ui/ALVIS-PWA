@@ -1,3 +1,9 @@
+## 18号ブロンド髪に異方性ハイライトを追加 (2026-11-24)
+- 変更: 髪の基本材質/明るい毛束に控えめなanisotropyを追加し、毛流れ方向に沿う細長い反射を狙う。Sheen/clearcoatと併用。既存形状・毛束数・リグ・ポリゴン数は変更しない。
+- 検証追加: 同梱GLTFExporterのKHR_materials_anisotropy対応をソース確認し、静的テストとVRM browser smokeでanisotropyStrengthの出力を検査。
+- 回帰修正: 髪の材質をPBR化した際に旧 `hair=mat(...)` を前提としていた色調静的テストを新しいMeshPhysicalMaterial定義に更新。
+- 未確認: 最新HEADのCI実行結果・VRM書き出し実測・iPad実機の反射の見え方。異方性は表示環境の対応状況により見え方が異なる。
+
 ## 18号のブロンドボブに毛髪PBR反射を追加 (2026-11-24)
 - 変更: 既存の毛束・毛量・輪郭・三角形数を変えず、ベース髪と明るい毛束をMeshPhysicalMaterial化。控えめなsheen/clearcoatで髪の広がる柔らかい反射を表現し、金属的なテカリは避ける。
 - 検証: 同梱Three.js r180 GLTFExporterがKHR_materials_sheenとKHR_materials_clearcoatを書き出せることをソースで確認。静的テストとChromium/WebKit VRM smokeに書き出し検査を追加。
