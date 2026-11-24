@@ -86,6 +86,13 @@ jobs:
           }
           throw new Error("Cloudflare Pages check did not complete successfully within 15 minutes.");
           NODE
+      - name: Restore Playwright browser cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-ubuntu-latest-${{ hashFiles('tests/avatar-studio-browser-smoke.mjs') }}
+          restore-keys: |
+            playwright-browsers-ubuntu-latest-
       - name: Install Playwright browsers
         run: |
           npm install --no-save playwright
