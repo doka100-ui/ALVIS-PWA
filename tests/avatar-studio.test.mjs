@@ -109,7 +109,7 @@ check("Avatar Studio uses mobile-optimized sphere and tube segment counts", html
 
 check("shoulders attach to chest and upper-arm meshes attach to their matching humanoid bones", html.includes('"shoulder-left","shoulder-right","necklace-chain"') && html.includes('part.name==="upper-arm-left"?"leftUpperArm":part.name==="upper-arm-right"?"rightUpperArm":null') && html.includes("bones[armBoneName].attach(part)"));
 
-check("skin hair eye and lip palette follows the approved light-blonde blue-eyed reference", html.includes("242+grain") && html.includes("216+grain") && html.includes("204+grain") && html.includes("hair=new THREE.MeshPhysicalMaterial({color:0xe6d0a5") && html.includes("hairLight=new THREE.MeshPhysicalMaterial({color:0xf4e3c4") && html.includes("sheenColor:new THREE.Color(0xffe9c8)") && html.includes("iris=mat(0x7899bd") && html.includes("lip=mat(0xc98584"));
+check("skin hair eye and lip palette follows the approved light-blonde blue-eyed reference", html.includes("242+tone") && html.includes("216+tone*.88") && html.includes("204+tone*.82") && html.includes("hair=new THREE.MeshPhysicalMaterial({color:0xe6d0a5") && html.includes("hairLight=new THREE.MeshPhysicalMaterial({color:0xf4e3c4") && html.includes("sheenColor:new THREE.Color(0xffe9c8)") && html.includes("iris=mat(0x7899bd") && html.includes("lip=mat(0xc98584"));
 
 check("five named tapered fringe locks layer the swept side-parted bob", html.includes('for(let strand=0;strand<5;strand++)') && html.includes('lock.name="hair-fringe-strand-"+strand') && html.includes("Five fine, swept fringe locks"));
 
