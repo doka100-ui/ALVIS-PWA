@@ -193,8 +193,8 @@ function makeContinuousHeadGeometry(){
  for(let row=0;row<=rows;row++){
   const phi=Math.PI*row/rows,y=Math.cos(phi),ring=Math.sin(phi);
   const vertical=(y+1)*.5;
-  const jaw=.76+.24*Math.min(1,Math.max(0,(y+.72)/1.35));
-  const cheek=1+.055*Math.exp(-Math.pow((y-.02)/.29,2));
+  const jaw=.68+.32*Math.min(1,Math.max(0,(y+.72)/1.35));
+  const cheek=1+.035*Math.exp(-Math.pow((y-.02)/.29,2));
   const rx=ring*jaw*cheek;
   const rz=ring*(.92+.08*vertical+.025*Math.exp(-Math.pow((y+.02)/.32,2)));
   for(let col=0;col<=segments;col++){
