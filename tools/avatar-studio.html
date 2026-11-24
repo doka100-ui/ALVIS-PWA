@@ -193,10 +193,21 @@ function makeContinuousHeadGeometry(){
  for(let row=0;row<=rows;row++){
   const phi=Math.PI*row/rows,y=Math.cos(phi),ring=Math.sin(phi);
   const vertical=(y+1)*.5;
-  const jaw=.64+.36*Math.min(1,Math.max(0,(y+.78)/1.40));
-  const cheek=1+.022*Math.exp(-Math.pow((y-.02)/.29,2));
-  const rx=ring*jaw*cheek;
-  const rz=ring*(.92+.08*vertical+.025*Math.exp(-Math.pow((y+.02)/.32,2)));
+  // Reference-led oval/V jaw silhouette. Width is shaped by vertical facial landmarks,
+  // not a single linear taper: chin -> jaw angle -> cheekbone -> temple.
+  const widthProfile=[[-.98,.22],[-.88,.43],[-.72,.57],[-.52,.69],[-.28,.83],[.00,.95],[.22,1.00],[.46,.97],[.68,.89],[.86,.72],[.98,.18]];
+  let profileIndex=0;
+  while(profileIndex<widthProfile.length-2&&y>widthProfile[profileIndex+1][0])profileIndex++;
+  const lower=widthProfile[profileIndex],upper=widthProfile[profileIndex+1];
+  const profileT=THREE.MathUtils.clamp((y-lower[0])/(upper[0]-lower[0]),0,1);
+  const profileBlend=profileT*profileT*(3-2*profileT);
+  const contourWidth=THREE.MathUtils.lerp(lower[1],upper[1],profileBlend);
+  const cheek=1+.018*Math.exp(-Math.pow((y-.02)/.27,2));
+  const rx=ring*contourWidth*cheek;
+  // Slightly fuller chin plane and a softer mandibular turn in profile.
+  const chinDepth=.035*Math.exp(-Math.pow((y+.78)/.16,2));
+  const jawDepth=-.025*Math.exp(-Math.pow((y+.48)/.20,2));
+  const rz=ring*(.92+.08*vertical+.025*Math.exp(-Math.pow((y+.02)/.32,2))+chinDepth+jawDepth);
   for(let col=0;col<=segments;col++){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const x=xUnit*rx;
