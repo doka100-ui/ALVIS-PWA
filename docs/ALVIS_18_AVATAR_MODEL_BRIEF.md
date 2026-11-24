@@ -82,8 +82,8 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 - 制作仕様: 本書で確定。
 - 3Dメッシュ生成: Three.jsによる手続き生成の顔/上半身プロトタイプを実装済み。左右の肩・上腕を追加し、腕メッシュをHumanoid UpperArmボーンへ接続。
 - 顔リグ/表情設定: blink/左右ウインク、happy/sad/angry/relaxed/surprised、5母音、視線モーフを実装済み。
-- VRM書き出し: VRM 1.0の試作書き出しを実装・ブラウザ検証済み。現在の試作は約59k triangles。専用アバターの利用権限はonlyAuthor、再配布不可。
-- ALVIS統合: Chromium/WebKitの自動テストでALVIS runtimeへの読み込み/描画/表情/視線/口パク/呼吸を検証済み。実機iPad Safariは未検証。
+- VRM書き出し: VRM 1.0の試作書き出しを実装・ブラウザ検証済み。今回のPreview browser smoke実測は63,412 triangles（75,000未満）。専用アバターの利用権限はonlyAuthor、再配布不可。
+- ALVIS統合: 2026-11-24のPreview browser smokeでChromium/WebKit両方のALVIS runtime読み込み/描画/表情/視線/口パク/呼吸を検証。VRM 1.0は3,629,992 bytes、実測63,412 triangles。WebKitの左右ウインク・Studioオフライン再読込も成功。実機iPad Safariは未検証。
 - 未完了: 写実的な顔の一致度、髪の毛束と背面形状、自然な肩/腕の動き、iPad実機負荷、完成モデルの承認。
 
 次の工程は、保存済み参照シートに合わせて顔・髪・肌の立体形状を段階的に改善し、各変更をChromium/WebKitとポリゴン数の回帰テストで確認すること。外部画像/3D生成サービスへの送信や課金は行わない。
