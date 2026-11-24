@@ -92,6 +92,13 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 
 次工程は最新のneutral front/profileレンダーを確認し、頭蓋/鼻/目/髪の接続を修正する。見た目の合格はユーザー自身の確認まで保留する。
 
+## 2026-11-25 端末内3D生成の実行可能性を再確認
+- Microsoft TRELLIS.2公式README: 4Bモデル、Linuxでのみテスト済み、NVIDIA GPU 24GB以上を要求。iPad Pro M1/iPadOS Safari上でローカル実行する候補にはならない。https://github.com/microsoft/TRELLIS.2
+- Tencent Hunyuan3D-2.1公式README: 形状生成10GB VRAM、テクスチャ生成21GB VRAM、形状+テクスチャ合計29GB VRAMを提示。macOS対応の記載はあるが、iPadOS/Safari対応ではなく、M1 iPadでの実行可能性は示されていない。https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1
+- 判断: 現在確認できた高品質な公開image-to-3DモデルをiPad Pro M1単体で無料・オフライン実行する経路は確認できない。モデル生成を実現するには、(a) ユーザーが明示許可した外部生成サービス、(b) 対応GPUを持つ別の計算機、または (c) 手作業のローカル造形が必要。許可なく18号参照画像を外部へ送らない。課金・クレジット購入はしない。
+- したがって現在のThree.js手続き生成は「完成モデル」ではなく、VRM表示/表情/ALVIS統合の仮モデルとして維持する。顔の微調整を繰り返して完成扱いにせず、実際の高品質メッシュを入手できる条件が整うまで、参照一致度は未達と明記する。
+- 参考: TRELLIS.2は生成メッシュ/テクスチャを出力するモデルであり、Humanoid rigやVRM表情の完成は別工程。GLB生成だけでALVIS要件を満たすわけではない。
+
 ## 2026-11-08 生成サービス候補の検討メモ
 
 ### 第一候補: 3DAI Studio
