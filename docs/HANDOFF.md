@@ -1,3 +1,10 @@
+## 18号の前髪レイヤー改善と鼻筋の一体造形 (2026-11-24)
+- Commit `f1d9f6b9b240fcd97ede6a152bdddc9e6250119e` のPreview browser smokeはsuccess。前髪の顔周りリボン3本がVRM export後も保持されることをChromium smokeで検証。
+- 同時点の実測は66,364 triangles、VRM 1.0 GLB 3,715,000 bytes。前回より増えたが75k未満。Chromium/WebKitのStudio描画、VRM export、既存ALVIS runtime読込/描画/操作、offline reloadも合格。
+- 続く改善: 鼻筋・鼻先・小鼻の隆起を別の球体オーバーレイから、顔面 `facial-skull` の頂点変位へ移行。顔メッシュ解像度を64x48へ上げ、鼻の独立球体を削除。鼻孔の浅い陰影だけを独立ディテールとして残す。
+- 静的テストとVRM browser smokeを更新し、顔メッシュに鼻形状が含まれ、独立鼻球体がVRMに残らないことを検証する。Commit `a6a0fa6887a3db2de3e4747c8aaa441c7287dd8b` のPreview deployとChromium/WebKit smokeは現在実行待ち/実行中。合格前に鼻造形を成功扱いしない。
+- 目的: 顔・鼻・頬・顎を連続した面で造形し、球体の継ぎ目を減らす。現状の顔メッシュはまだ初期段階で、最終的な人間らしさ/18号との一致はユーザー確認待ち。
+
 ## 18号の耳の立体構造・最新Preview smoke 合格 (2026-11-24)
 - Commit `3f699d65c15a8f769dafa97c928f7e9a3a2974ea` をCloudflare Pagesへ正常deploy。Preview: `https://41fba61f.alvis-pwa.pages.dev`。
 - Chromium/WebKitのdashboard smokeとAvatar Studio smokeが両方success。更新ページ、Service Worker、offline reload、WebGL 2、VRM 1.0 export、ALVIS runtime import/render/controlを確認。
