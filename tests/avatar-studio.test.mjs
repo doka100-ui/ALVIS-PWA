@@ -127,6 +127,7 @@ check("skin hair eye and lip palette follows the approved light-blonde blue-eyed
 check("five named tapered fringe locks layer the swept side-parted bob", html.includes('for(let strand=0;strand<5;strand++)') && html.includes('lock.name="hair-fringe-strand-"+strand') && html.includes("Five fine, swept fringe locks"));
 
 check("rounded sclera eye globes are positioned behind the almond-shaped eye openings", html.includes('eyeball=ell(eyesGroup,sclera,[x,.34,.635],[.218,.086,.052],32)'));
+check("browser smoke verifies both rounded eye globes survive VRM export", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes('["eyeball-left","eyeball-right"]'));
 check("nose projection, smaller ears and integrated lips are scaled for a more natural face", html.includes("skull.scale.set(.92,1.15,.78)") && html.includes("[side*.83,.02,-.005],[.135,.225,.105]") && html.includes("upperLip.position.set(0,-.43,.70)") && html.includes("lowerLip.position.set(0,-.50,.69)") && html.includes("[side*.067,-.19,.925]"));
 check("nose recesses use soft warm shading rather than hard dark lash material", html.includes('noseShadow=mat(0x986f67,.94)') && html.includes('nostril.name=side<0?"nostril-left":"nostril-right"'));
 
