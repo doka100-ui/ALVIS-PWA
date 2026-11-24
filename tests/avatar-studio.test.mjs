@@ -108,7 +108,7 @@ check("browser smoke enforces a sub-75k triangle mobile geometry budget", (await
 
 check("browser smoke verifies the Avatar Studio entry from both Chromium and WebKit app pages", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes('studioLink,"./tools/avatar-studio.html"'));
 
-check("Avatar Studio uses mobile-optimized sphere and tube segment counts", html.includes("seg=24") && html.includes("new THREE.SphereGeometry(1,48,36)") && html.includes("new THREE.TubeGeometry(path,24,r,6,false)") && html.includes("tubularSegments=24,radialSegments=5"));
+check("Avatar Studio uses a higher-resolution continuous head and mobile-optimized detail meshes", html.includes("const rows=72,segments=96") && html.includes("seg=24") && html.includes("new THREE.SphereGeometry(1,24,16)") && html.includes("new THREE.TubeGeometry(path,24,r,6,false)") && html.includes("tubularSegments=24,radialSegments=5"));
 
 check("shoulders attach to chest and upper-arm meshes attach to their matching humanoid bones", html.includes('"shoulder-left","shoulder-right","necklace-chain"') && html.includes('part.name==="upper-arm-left"?"leftUpperArm":part.name==="upper-arm-right"?"rightUpperArm":null') && html.includes("bones[armBoneName].attach(part)"));
 
