@@ -201,9 +201,9 @@ function makeContinuousHeadGeometry(){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const x=xUnit*rx;
    const front=Math.max(0,zUnit);
-   const noseBridge=.24*Math.exp(-Math.pow(x/.18,2))*Math.exp(-Math.pow((y-.015)/.50,2));
-   const noseTip=.18*Math.exp(-Math.pow(x/.23,2))*Math.exp(-Math.pow((y+.10)/.24,2));
-   const noseWing=.075*Math.exp(-Math.pow((Math.abs(x)-.16)/.085,2))*Math.exp(-Math.pow((y+.12)/.15,2));
+   const noseBridge=.14*Math.exp(-Math.pow(x/.145,2))*Math.exp(-Math.pow((y-.015)/.40,2));
+   const noseTip=.105*Math.exp(-Math.pow(x/.17,2))*Math.exp(-Math.pow((y+.10)/.17,2));
+   const noseWing=.045*Math.exp(-Math.pow((Math.abs(x)-.135)/.065,2))*Math.exp(-Math.pow((y+.12)/.12,2));
    const cheekbone=.048*Math.exp(-Math.pow((Math.abs(x)-.53)/.25,2))*Math.exp(-Math.pow((y-.015)/.25,2));
    const cheekPad=.026*Math.exp(-Math.pow((Math.abs(x)-.43)/.30,2)-Math.pow((y+.12)/.30,2));
    const underEyeTransition=.012*Math.exp(-Math.pow((Math.abs(x)-.36)/.24,2)-Math.pow((y-.12)/.075,2));
@@ -350,7 +350,7 @@ function makeFace(){
  }
  // eye sockets, whites, irises and upper/lower lids
  const eyesGroup=new THREE.Group();eyesGroup.name="facial-eyes";faceGroup.add(eyesGroup);
- eyesGroup.position.z=.19; // Bring the eyeballs and lids out of the facial surface instead of burying them.
+ eyesGroup.position.z=.035; // Seat the eyeballs and lids into the sculpted orbital plane; avoid protruding spheres.
  for(const side of [-1,1]){
   const x=side*.37;
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
