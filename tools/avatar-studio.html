@@ -693,21 +693,25 @@ function countAvatarTriangles(){
  });
  return triangles;
 }
+const MOBILE_TRIANGLE_WARNING=75000;
+const INTERIM_TRIANGLE_HARD_LIMIT=100000;
 document.getElementById("export").onclick=async()=>{
  try{
   const triangleCount=countAvatarTriangles();
-  status.textContent="ポリゴン数を確認中: "+triangleCount.toLocaleString("ja-JP")+" triangles";
-  if(triangleCount>=75000){
-   status.textContent="書き出しを中止しました: "+triangleCount.toLocaleString("ja-JP")+" triangles（上限75,000未満）。形状の密度を下げてください。";
+  const formattedCount=triangleCount.toLocaleString("ja-JP");
+  const overMobileWarning=triangleCount>=MOBILE_TRIANGLE_WARNING;
+  status.textContent="ポリゴン数を確認中: "+formattedCount+" triangles";
+  if(triangleCount>=INTERIM_TRIANGLE_HARD_LIMIT){
+   status.textContent="書き出しを中止しました: "+formattedCount+" triangles（暫定安全上限100,000）。実機負荷を確認するまで、この上限以上のモデルは書き出せません。";
    return;
   }
-  status.textContent="VRM 1.0を書き出しています…（"+triangleCount.toLocaleString("ja-JP")+" triangles）";
+  status.textContent=(overMobileWarning?"注意: モバイル計測目安75,000を超えています。実機iPad/iPhoneでの負荷確認が必要です。\n":"")+"VRM 1.0を書き出しています…（"+formattedCount+" triangles）";
   const exporter=new GLTFExporter();
   const glb=await exporter.parseAsync(root,{binary:true,onlyVisible:true});
   const vrm=attachVrm10Extension(glb);
   const blob=new Blob([vrm],{type:"model/gltf-binary"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alvis-face-prototype.vrm";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
-  status.textContent="VRM 1.0を書き出しました（"+triangleCount.toLocaleString("ja-JP")+" triangles）。Humanoid骨格と表情・母音モーフを含みます。これは18号の完成モデルではなく制作試作です。";
+  status.textContent="VRM 1.0を書き出しました（"+formattedCount+" triangles）。Humanoid骨格と表情・母音モーフを含みます。"+(overMobileWarning?"\n注意: 75,000 triangles以上です。実機iPad/iPhoneで負荷を確認してください。":"")+"\nこれは18号の完成モデルではなく制作試作です。";
  }catch(e){status.textContent="VRM書き出しに失敗: "+(e?.message||String(e));}
 };
 function resize(){const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
