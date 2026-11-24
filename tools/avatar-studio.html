@@ -202,8 +202,8 @@ function makeContinuousHeadGeometry(){
    const x=xUnit*rx;
    const front=Math.max(0,zUnit);
    const noseBridge=.20*Math.exp(-Math.pow(x/.17,2))*Math.exp(-Math.pow((y-.015)/.48,2));
-   const noseTip=.15*Math.exp(-Math.pow(x/.20,2))*Math.exp(-Math.pow((y+.39)/.22,2));
-   const noseWing=.04*Math.exp(-Math.pow((Math.abs(x)-.16)/.085,2))*Math.exp(-Math.pow((y+.37)/.15,2));
+   const noseTip=.15*Math.exp(-Math.pow(x/.20,2))*Math.exp(-Math.pow((y+.10)/.20,2));
+   const noseWing=.04*Math.exp(-Math.pow((Math.abs(x)-.16)/.085,2))*Math.exp(-Math.pow((y+.12)/.15,2));
    const cheekbone=.026*Math.exp(-Math.pow((Math.abs(x)-.56)/.23,2))*Math.exp(-Math.pow((y-.02)/.26,2));
    const eyeSocket=-.045*Math.exp(-Math.pow((Math.abs(x)-.37)/.23,2)-Math.pow((y-.31)/.16,2));
    const browRidge=.028*Math.exp(-Math.pow((Math.abs(x)-.37)/.25,2)-Math.pow((y-.55)/.085,2));
@@ -346,7 +346,7 @@ function makeFace(){
  }
  // eye sockets, whites, irises and upper/lower lids
  const eyesGroup=new THREE.Group();eyesGroup.name="facial-eyes";faceGroup.add(eyesGroup);
- eyesGroup.position.z=-.025;
+ eyesGroup.position.z=-.065;
  for(const side of [-1,1]){
   const x=side*.37;
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
