@@ -119,6 +119,7 @@ try {
   assert.equal(vrmExtension.meta?.allowRedistribution,false,"personal ALVIS avatar must not permit redistribution");
   for (const nodeName of ["shoulder-left","shoulder-right","upper-arm-left","upper-arm-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must include chest-attached upper-body geometry: "+nodeName);
   for (let strand=0;strand<5;strand++) assert.ok(gltf.nodes.some(node=>node.name==="hair-fringe-strand-"+strand),"VRM must preserve swept fringe strand "+strand);
+  for (let strand=0;strand<3;strand++) assert.ok(gltf.nodes.some(node=>node.name==="hair-face-framing-fringe-"+strand),"VRM must preserve layered face-framing fringe strand "+strand);
   for (const nodeName of ["nostril-left","nostril-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve sculpted nose detail: "+nodeName);
   for (const nodeName of ["ear-helix-left","ear-helix-right","ear-antihelix-left","ear-antihelix-right","ear-concha-left","ear-concha-right","ear-tragus-left","ear-tragus-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve sculpted ear anatomy: "+nodeName);
   for (const nodeName of ["upper-eyelid-crease-left","upper-eyelid-crease-right","eye-inner-canthus-left","eye-inner-canthus-right","eye-outer-canthus-left","eye-outer-canthus-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve refined eye contour detail: "+nodeName);
