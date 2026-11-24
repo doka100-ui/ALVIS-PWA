@@ -368,6 +368,19 @@ function makeFace(){
   ],.012,strand%2?hairLight:hair);
   lock.name="hair-fringe-strand-"+strand;
  }
+ // Three finer face-framing ribbons trace the long diagonal sweep toward the temple.
+ // Their shallow depth offsets keep the strands layered without obscuring the forehead.
+ for(let strand=0;strand<3;strand++){
+  const offset=(strand-1)*.035;
+  const lock=taperedCurve(faceGroup,[
+   [-.50+offset,.83+offset*.35,.665],
+   [-.29+offset,.89+offset*.25,.735],
+   [-.02+offset,.82+offset*.18,.785],
+   [.24+offset,.66+offset*.12,.755],
+   [.48+offset,.42+offset*.08,.665]
+  ],.0095,strand===1?hairLight:hair);
+  lock.name="hair-face-framing-fringe-"+strand;
+ }
  for(let strand=-3;strand<=3;strand++){
   const x=strand*.18;
   taperedCurve(faceGroup,[[x*.15,.80,-.34],[x*.55,.43,-.64],[x,-.10,-.75],[x*.92,-.48,-.61]],.010,strand%2?hairLight:hair);
