@@ -26,6 +26,8 @@ check("expression sliders drive independent morph influences", ["values.smile","
 check("render loop fully pauses while the page is hidden", html.includes("cancelAnimationFrame(frameId)") && html.includes("setRenderActive(document.visibilityState===\"visible\")"));
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
 check("VRM export warns above 75k triangles but only blocks at the interim 100k safety ceiling", html.includes("const MOBILE_TRIANGLE_WARNING=75000") && html.includes("const INTERIM_TRIANGLE_HARD_LIMIT=100000") && html.includes("triangleCount>=INTERIM_TRIANGLE_HARD_LIMIT") && html.includes("triangleCount>=MOBILE_TRIANGLE_WARNING") && html.includes("実機iPad/iPhoneでの負荷確認が必要"));
+const avatarSpec = await readFile(new URL("../docs/ALVIS_SPEC.md", import.meta.url), "utf8");
+check("avatar specification keeps 75k as a warning and 100k as the interim hard ceiling", avatarSpec.includes("75,000 trianglesはモバイル実機プロファイルの警告目安") && avatarSpec.includes("暫定hard ceilingは100,000 triangles") && !avatarSpec.includes("三角形数を75,000未満に制限する"));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
 const vendorPaths = ["../tools/vendor/three.core.js","../tools/vendor/three.module.js","../tools/vendor/controls/OrbitControls.js","../tools/vendor/exporters/GLTFExporter.js","../tools/vendor/THREE-LICENSE.txt"];
 const vendorContents = await Promise.all(vendorPaths.map(path => readFile(new URL(path, import.meta.url), "utf8")));
