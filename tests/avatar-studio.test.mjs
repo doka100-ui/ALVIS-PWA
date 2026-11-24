@@ -45,6 +45,7 @@ check("facial features use independent transform groups", ["facial-eyes","facial
 check("face controls modify only their intended feature groups", html.includes('getObjectByName("facial-eyes")') && html.includes('getObjectByName("facial-nose")') && html.includes('getObjectByName("facial-mouth")'));
 check("bob hairstyle has a distinct rear volume and crown", html.includes('name="hair-rear-bob"') && html.includes('name="hair-crown"'));
 check("swept fringe includes separate curved strand geometry", (html.match(/curve\(faceGroup,/g)||[]).length >= 6 && html.includes('name="hair-swept-fringe"'));
+check("three layered face-framing fringe ribbons are generated and named", html.includes('name="hair-face-framing-fringe-"+strand') && html.includes('strand<3') && html.includes('],.0095,strand===1?hairLight:hair'));
 check("side hair has independent left/right locks", html.includes('name=side<0?"hair-side-left":"hair-side-right"'));
 check("necklace pendant and barcode-style neck details are modeled", html.includes('name="necklace-pendant"') && html.includes('name="neck-mark-"+index'));
 check("jaw and cheek profile receives refined vertex sculpting", html.includes("const cheek=1+.068") && html.includes("const cheekbone=.038") && html.includes("const jawTaper=1-.045") && html.includes("const taper=.78+.22"));
