@@ -1,3 +1,8 @@
+## 更新ページ smoke の過剰な文字列一致を修正 (2026-11-24)
+- 最新PreviewでPlaywrightのブラウザ導入とChromium/WebKitの更新ページ起動は通過したが、静的テストが正規表現ソースのバックスラッシュ表記を完全一致で比較し、更新ページのバージョン付きcacheName検証を誤って失敗扱いにしていた。
+- 修正: smokeは特定のエスケープ表記ではなく、可変ビルド名の識別子（alvis-cache-v / -integrated）と旧固定値が残っていないことを確認する。実際の稼働中WorkerのcacheName形式は別途ブラウザ内で厳密に検証する。
+- 18号Studioのbrowser smokeはdashboard smoke通過後に実行されるため、次のCIで続けて確認する。合格前に成功とは扱わない。
+
 ## Preview smokeの旧更新URL依存を解消 (2026-11-24)
 - 検出: `tests/dashboard-preview-smoke.mjs` が、整理済みでdevelopmentに存在しない `refresh-v347.html` と固定キャッシュ名 `alvis-cache-v347-integrated` を要求していたため、dashboard preview smokeが60秒でタイムアウト。
 - 修正: 正規の `refresh.html` を開き、`index-integrated.html` へ遷移することと、現在の `alvis-cache-v数字-integrated` を検証する形へ更新。削除済みの旧ページは復活させない。
