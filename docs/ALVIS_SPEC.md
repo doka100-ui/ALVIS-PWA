@@ -1,6 +1,7 @@
-## Avatar Studio — tighter mobile geometry budget
-- Reduce non-silhouette sphere/tube subdivisions while retaining the face outline, almond-eye geometry, and fine details.
-- Enforce under 75,000 triangles in the exported VRM (previous cap 100,000) and report the actual count in browser smoke. Real iPad Safari profiling remains required.
+## Avatar Studio — mobile geometry budget (quality-first)
+- Keep low-cost detail meshes efficient, but do not reduce face silhouette, continuous anatomy, eye shape, or hair mass merely to meet a fixed triangle count.
+- 75,000 triangles is the current CI/mobile profiling warning threshold, not a permanent quality ceiling. Report actual triangle count in browser smoke. If a necessary continuous anatomical mesh exceeds it, measure iPad/iPhone Safari memory, frame time, and thermal behavior before deciding whether to optimize or allow a higher budget.
+- Prefer geometry reuse, sensible subdivision, texture detail, and level-of-detail options over reverting to intersecting spheres/ellipsoids. Real iPad Safari profiling remains required.
 
 # ALVIS PWA 現行仕様
 
