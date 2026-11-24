@@ -87,7 +87,7 @@ check("sclera uses a curved almond-shaped mesh instead of a spherical placeholde
 
 check("browser smoke exercises WebKit Avatar Studio and ALVIS VRM runtime", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("webkit.launch") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("WebKit runtime must recognize split blink expressions"));
 
-check("nose bridge and tip form one continuous sculpted 3D surface", html.includes("const noseGeometry=new THREE.SphereGeometry(1,36,24)") && html.includes("const tip=Math.exp(-Math.pow((y+.43)/.24,2))") && html.includes('noseMesh.name="sculpted-nose-bridge-tip"') && !html.includes('ell(noseGroup,skin,[0,.04,.68]'));
+check("nose bridge tip and wings are sculpted into the continuous facial skull mesh", html.includes("new THREE.SphereGeometry(1,64,48)") && html.includes("const noseBridge=.17") && html.includes("const noseTip=.115") && html.includes("const noseWing=.035") && html.includes("z>0?noseBridge+noseTip+noseWing:0") && !html.includes("sculpted-nose-bridge-tip") && !html.includes("noseGeometry=new THREE.SphereGeometry"));
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
