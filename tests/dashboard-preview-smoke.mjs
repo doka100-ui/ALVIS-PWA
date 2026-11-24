@@ -173,13 +173,13 @@ async function verifyBrowser(browserType, verifyOffline) {
       browserName + ": outer ring C must render as a true circle rather than a flattened ellipse");
     assert.equal(outerRingMotion.gearTickCount, 48, browserName + ": outer rim must render 48 subtle index ticks");
     assert.equal(outerRingMotion.majorTickCount, 8, browserName + ": outer rim must render 8 longer clock-index ticks");
-    const refreshResponse = await page.request.get(new URL("refresh-v347.html", previewUrl).href);
-    assert.ok(refreshResponse.ok(), browserName + ": v347 Service Worker refresh page must return HTTP 200");
+    const refreshResponse = await page.request.get(new URL("refresh.html", previewUrl).href);
+    assert.ok(refreshResponse.ok(), browserName + ": canonical Service Worker refresh page must return HTTP 200");
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("alvis-cache-v347-integrated"), browserName + ": refresh page must verify the v347 worker before redirecting");
-    assert.ok(refreshHtml.includes("index-integrated.html?refresh=347"), browserName + ": refresh page must return to the integrated app only after v347 activation");
+    assert.match(refreshHtml, /alvis-cache-v\\d+-integrated/, browserName + ": refresh page must verify a versioned integrated worker before redirecting");
+    assert.ok(refreshHtml.includes('const target="./index-integrated.html"'), browserName + ": refresh page must return to the canonical integrated app after activation");
     assert.ok((await page.locator("#generateDevelopmentHandoff").count())===1, browserName + ": development handoff generator must exist");
     assert.ok((await page.locator("#developmentHandoffOutput").count())===1, browserName + ": handoff output must exist");
 
