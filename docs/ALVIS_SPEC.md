@@ -1,6 +1,6 @@
 ## Avatar Studio — mobile geometry budget (quality-first)
 - Keep low-cost detail meshes efficient, but do not reduce face silhouette, continuous anatomy, eye shape, or hair mass merely to meet a fixed triangle count.
-- 75,000 triangles is the current CI/mobile profiling warning threshold, not a permanent quality ceiling. Report actual triangle count in browser smoke. If a necessary continuous anatomical mesh exceeds it, measure iPad/iPhone Safari memory, frame time, and thermal behavior before deciding whether to optimize or allow a higher budget.
+- 75,000 triangles is the current CI/mobile profiling warning threshold, not a permanent quality ceiling. Report actual triangle count in browser smoke. If a necessary continuous anatomical mesh exceeds it, measure iPad/iPhone Safari memory, frame time, and thermal behavior before deciding whether to optimize or allow a higher budget. Until real-device profiling is available, CI keeps an interim hard safety ceiling of 100,000 triangles to catch runaway geometry.
 - Prefer geometry reuse, sensible subdivision, texture detail, and level-of-detail options over reverting to intersecting spheres/ellipsoids. Real iPad Safari profiling remains required.
 
 # ALVIS PWA 現行仕様
