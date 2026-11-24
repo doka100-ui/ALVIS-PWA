@@ -219,15 +219,18 @@ function makeContinuousHeadGeometry(){
   const cheek=1+.018*Math.exp(-Math.pow((y-.015)/.31,2));
   const rx=ring*contourWidth*cheek;
   // Slightly fuller chin plane and a softer mandibular turn in profile.
-  const chinDepth=.028*Math.exp(-Math.pow((y+.80)/.17,2));
-  const jawDepth=-.006*Math.exp(-Math.pow((y+.50)/.24,2));
+  const chinDepth=.052*Math.exp(-Math.pow((y+.80)/.17,2));
+  const jawDepth=-.010*Math.exp(-Math.pow((y+.50)/.24,2));
   const rz=ring*(.92+.08*vertical+.025*Math.exp(-Math.pow((y+.02)/.32,2))+chinDepth+jawDepth);
   for(let col=0;col<=segments;col++){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const x=xUnit*rx;
    const front=Math.max(0,zUnit);
-   const noseBridge=.18*Math.exp(-Math.pow(x/.135,2))*Math.exp(-Math.pow((y-.015)/.40,2));
-   const noseTip=.145*Math.exp(-Math.pow(x/.16,2))*Math.exp(-Math.pow((y+.10)/.17,2));
+   // Compress the rear cranium slightly while preserving the frontal facial plane.
+   // A continuous depth blend avoids a hard seam along the side silhouette.
+   const depthFactor=THREE.MathUtils.lerp(.82,1,(zUnit+1)*.5);
+   const noseBridge=.22*Math.exp(-Math.pow(x/.135,2))*Math.exp(-Math.pow((y-.015)/.40,2));
+   const noseTip=.19*Math.exp(-Math.pow(x/.16,2))*Math.exp(-Math.pow((y+.10)/.17,2));
    const noseWing=.055*Math.exp(-Math.pow((Math.abs(x)-.135)/.065,2))*Math.exp(-Math.pow((y+.12)/.12,2));
    const cheekbone=.048*Math.exp(-Math.pow((Math.abs(x)-.53)/.25,2))*Math.exp(-Math.pow((y-.015)/.25,2));
    const cheekPad=.026*Math.exp(-Math.pow((Math.abs(x)-.43)/.30,2)-Math.pow((y+.12)/.30,2));
@@ -240,7 +243,7 @@ function makeContinuousHeadGeometry(){
    const philtrum=-.012*Math.exp(-Math.pow(x/.055,2)-Math.pow((y+.27)/.09,2));
    const nasolabial=-.009*Math.exp(-Math.pow((Math.abs(x)-.20)/.035,2)-Math.pow((y+.31)/.13,2));
    const chin=.036*Math.exp(-Math.pow(x/.34,2))*Math.exp(-Math.pow((y+.82)/.13,2));
-   positions.push(x,y,zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+cheekPad+underEyeTransition+eyeSocket+browRidge+glabella+forehead+mouthMound+philtrum+nasolabial+chin));
+   positions.push(x,y,zUnit*rz*depthFactor+front*(noseBridge+noseTip+noseWing+cheekbone+cheekPad+underEyeTransition+eyeSocket+browRidge+glabella+forehead+mouthMound+philtrum+nasolabial+chin));
    uvs.push(col/segments,1-row/rows);
   }
  }
@@ -364,7 +367,7 @@ function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
  const geo=makeContinuousHeadGeometry();
- const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.95,1.08,.74);skull.position.y=.08;faceGroup.add(skull);
+ const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.90,1.04,.72);skull.position.y=.08;faceGroup.add(skull);
  // Ears: outer volume, concha shading, helix rim, antihelix fold and tragus.
  for(const side of [-1,1]){
   const ear=ell(faceGroup,skin,[side*.83,.02,-.005],[.135,.225,.105]);ear.name=side<0?"ear-left":"ear-right";
