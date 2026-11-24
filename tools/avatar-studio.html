@@ -399,18 +399,19 @@ function makeFace(){
  lowerLip.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4};
  lowerLip.position.set(0,-.50,.655);lowerLip.scale.set(.17,.026,.035);lowerLip.name="lower-lip";mouthGroup.add(lowerLip);
  // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
- const rearBob=ell(faceGroup,hair,[0,-.20,-.34],[.82,.88,.43],48);
+ const rearBob=ell(faceGroup,hair,[0,-.18,-.30],[.78,.82,.34],48);
  rearBob.name="hair-rear-bob";
- const cap=new THREE.Mesh(new THREE.SphereGeometry(1,36,24,0,Math.PI*2,0,Math.PI*.57),hair);
- cap.scale.set(.94,1.28,.78);cap.position.set(0,.25,-.015);cap.name="hair-crown";faceGroup.add(cap);
- const fringe=ell(faceGroup,hairLight,[-.18,.72,.49],[.57,.20,.28]);fringe.rotation.z=-.24;fringe.rotation.y=-.15;fringe.name="hair-swept-fringe";
+ const cap=new THREE.Mesh(new THREE.SphereGeometry(1,36,24,0,Math.PI*2,0,Math.PI*.42),hair);
+ cap.scale.set(.92,1.24,.62);cap.position.set(0,.25,.045);cap.name="hair-crown";faceGroup.add(cap);
+ // The swept fringe is built from tapered locks below; avoid a solid ellipsoid
+ // crossing the forehead and hiding the brow/eye transition.
+ const fringe=new THREE.Group();fringe.name="hair-swept-fringe";faceGroup.add(fringe);
  // Fine curved ribbons create a visible side part and layered front strands without a solid helmet look.
  curve(faceGroup,[[-.58,.79,.55],[-.36,.91,.61],[-.10,.91,.61],[.18,.83,.57],[.39,.69,.49]],.035,hair);
  curve(faceGroup,[[-.42,.82,.58],[-.22,.88,.63],[.04,.83,.62],[.28,.70,.54],[.48,.52,.43]],.024,hairLight);
  curve(faceGroup,[[-.24,.88,.60],[-.02,.84,.64],[.20,.73,.59],[.39,.55,.49],[.52,.34,.39]],.022,hair);
  for(const side of [-1,1]){
-  const lock=ell(faceGroup,hair,[side*.77,-.03,.05],[.22,.82,.34]);lock.rotation.z=side*-.08;lock.name=side<0?"hair-side-left":"hair-side-right";
-  ell(faceGroup,hairLight,[side*.77,-.48,.10],[.20,.22,.30]);
+  const lock=ell(faceGroup,hair,[side*.77,-.03,.05],[.20,.78,.29]);lock.rotation.z=side*-.08;lock.name=side<0?"hair-side-left":"hair-side-right";
   taperedCurve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
   taperedCurve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
   for(let strand=0;strand<4;strand++){
