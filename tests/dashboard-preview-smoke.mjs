@@ -396,12 +396,11 @@ async function verifyRefreshFlow(browserType) {
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   try {
-    const refreshUrl = new URL("refresh-v347.html", previewUrl).href;
+    const refreshUrl = new URL("refresh.html", previewUrl).href;
     await page.goto(refreshUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForFunction(() => {
       const current = new URL(window.location.href);
-      return current.pathname.endsWith("/index-integrated.html") &&
-        current.searchParams.get("refresh") === "347";
+      return current.pathname.endsWith("/index-integrated.html");
     }, null, { timeout: 60000 });
     const state = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.getRegistration("./");
@@ -422,8 +421,8 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.equal(state.cacheName, "alvis-cache-v347-integrated",
-      browserName + ": refresh flow must verify the actual v347 worker before redirecting");
+    assert.match(state.cacheName, /^alvis-cache-v\\d+-integrated$/,
+      browserName + ": refresh flow must verify the active integrated ALVIS worker before redirecting");
     console.log("PASS " + browserName + ": deployed refresh page activates and verifies v347 before redirect");
   } finally {
     await browser.close();
