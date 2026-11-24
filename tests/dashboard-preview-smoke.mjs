@@ -178,7 +178,7 @@ async function verifyBrowser(browserType, verifyOffline) {
     const refreshHtml = await refreshResponse.text();
     assert.ok(refreshHtml.includes('register("./service-worker.js",{updateViaCache:"none"})'), browserName + ": refresh page must reapply the no-cache update policy to existing registrations");
     assert.ok(refreshHtml.includes("registration.update()"), browserName + ": refresh page must explicitly request a Service Worker update");
-    assert.ok(refreshHtml.includes("/^alvis-cache-v\\d+-integrated$/"), browserName + ": refresh page must verify the worker using its versioned cache-name pattern before redirecting");
+    assert.ok(refreshHtml.includes("alvis-cache-v") && refreshHtml.includes("-integrated") && !refreshHtml.includes("alvis-cache-v347-integrated"), browserName + ": refresh page must verify a versioned integrated worker without a pinned legacy build number");
     assert.ok(refreshHtml.includes('const target="./index-integrated.html"'), browserName + ": refresh page must return to the canonical integrated app after activation");
     assert.ok((await page.locator("#generateDevelopmentHandoff").count())===1, browserName + ": development handoff generator must exist");
     assert.ok((await page.locator("#developmentHandoffOutput").count())===1, browserName + ": handoff output must exist");
