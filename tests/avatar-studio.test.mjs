@@ -126,4 +126,4 @@ check("five named tapered fringe locks layer the swept side-parted bob", html.in
 
 check("nose recesses use soft warm shading rather than hard dark lash material", html.includes('noseShadow=mat(0x986f67,.94)') && html.includes('nostril.name=side<0?"nostril-left":"nostril-right"'));
 
-check("continuous head profile shapes jaw cheeks and chin before adding facial details", html.includes('const jaw=.76') && html.includes('const cheek=1+.055*Math.exp') && html.includes('const cheekbone=.026*Math.exp') && html.includes('const chin=.018*Math.exp') && html.includes('skull.name="facial-skull"'));
+check("continuous head profile uses a narrower tapered jaw and restrained cheek fullness before adding facial details", html.includes('const jaw=.64+.36*Math.min(1,Math.max(0,(y+.78)/1.40))') && html.includes('const cheek=1+.022*Math.exp') && html.includes('const cheekbone=.026*Math.exp') && html.includes('const chin=.018*Math.exp') && html.includes('skull.name="facial-skull"'));
