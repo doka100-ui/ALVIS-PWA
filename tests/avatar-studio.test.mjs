@@ -99,7 +99,7 @@ check("head is generated as a continuous anatomical surface with integrated nose
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
-check("face base includes continuous cheekbone, jaw taper and chin projection sculpting", html.includes("const cheekbone=.048*Math.exp") && html.includes("const cheekPad=.026*Math.exp") && html.includes("const jaw=.64+.36") && html.includes("const chin=.036*Math.exp") && html.includes("const rx=ring*jaw*cheek") && html.includes("const philtrum=-.012") && html.includes("const nasolabial=-.009") && html.includes("zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+cheekPad+underEyeTransition+eyeSocket+browRidge+glabella+forehead+mouthMound+philtrum+nasolabial+chin)"));
+check("face base includes continuous cheekbone, landmark-based jaw contour and chin projection sculpting", html.includes("const cheekbone=.048*Math.exp") && html.includes("const cheekPad=.026*Math.exp") && html.includes("const widthProfile=[[-.98,.22]") && html.includes("const contourWidth=THREE.MathUtils.lerp") && html.includes("const chinDepth=.035") && html.includes("const jawDepth=-.025") && html.includes("const rx=ring*contourWidth*cheek") && html.includes("const philtrum=-.012") && html.includes("const nasolabial=-.009") && html.includes("chinDepth+jawDepth"));
 
 check("each eye has a rounded sclera globe behind the shaped almond opening", html.includes('const eyeball=ell(eyesGroup,sclera,[x,.34,.635],[.218,.086,.052],32)') && html.includes('eyeball.name=side<0?"eyeball-left":"eyeball-right"'));
 
