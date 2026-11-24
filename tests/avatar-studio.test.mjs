@@ -107,7 +107,7 @@ check("VRM runtime exposes subtle chest breathing for rigs with a chest bone", (
 check("browser smoke measures chest-bone motion rather than only checking for a chest node", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("chestDelta") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("low-amplitude chest breathing motion"));
 
 check("bob hair includes tapered strand geometry and a distinct side-part seam", html.includes("function taperedCurve(") && html.includes("taper=.08+.92*Math.pow(1-t,1.05)") && html.includes("Deep side-part seam") && html.includes("strand=-3;strand<=3;strand++"));
-check("side and back bob locks use tapered strand geometry", html.includes("taperedCurve(faceGroup,[[side*.68,.47,.43]") && html.includes("taperedCurve(faceGroup,[[x*.15,.80,-.34]"));
+check("side and back bob locks use tapered strand geometry", html.includes("taperedCurve(lock,[[side*.68,.47,.43]") && html.includes("taperedCurve(faceGroup,[[x*.15,.80,-.34]"));
 
 check("browser smoke reports 75k mobile profiling threshold and enforces interim 100k safety ceiling", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("triangleCount<100000") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("triangleCount>=75000"));
 
