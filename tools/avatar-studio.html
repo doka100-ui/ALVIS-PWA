@@ -195,7 +195,7 @@ function makeContinuousHeadGeometry(){
   const vertical=(y+1)*.5;
   // Reference-led oval/V jaw silhouette. Width is shaped by vertical facial landmarks,
   // not a single linear taper: chin -> jaw angle -> cheekbone -> temple.
-  const widthProfile=[[-.98,.22],[-.90,.44],[-.76,.60],[-.58,.70],[-.34,.82],[-.08,.92],[.18,.98],[.44,.96],[.68,.88],[.86,.72],[.98,.18]];
+  const widthProfile=[[-.98,.24],[-.90,.54],[-.76,.70],[-.58,.80],[-.34,.88],[-.08,.95],[.18,.99],[.44,.96],[.68,.88],[.86,.72],[.98,.18]];
   let profileIndex=0;
   while(profileIndex<widthProfile.length-2&&y>widthProfile[profileIndex+1][0])profileIndex++;
   const lower=widthProfile[profileIndex],upper=widthProfile[profileIndex+1];
@@ -216,19 +216,19 @@ function makeContinuousHeadGeometry(){
   }
   const t2=profileT*profileT,t3=t2*profileT;
   const contourWidth=(2*t3-3*t2+1)*lower[1]+(t3-2*t2+profileT)*span*tangent0+(-2*t3+3*t2)*upper[1]+(t3-t2)*span*tangent1;
-  const cheek=1+.022*Math.exp(-Math.pow((y-.015)/.31,2));
+  const cheek=1+.018*Math.exp(-Math.pow((y-.015)/.31,2));
   const rx=ring*contourWidth*cheek;
   // Slightly fuller chin plane and a softer mandibular turn in profile.
   const chinDepth=.028*Math.exp(-Math.pow((y+.80)/.17,2));
-  const jawDepth=-.010*Math.exp(-Math.pow((y+.50)/.24,2));
+  const jawDepth=-.006*Math.exp(-Math.pow((y+.50)/.24,2));
   const rz=ring*(.92+.08*vertical+.025*Math.exp(-Math.pow((y+.02)/.32,2))+chinDepth+jawDepth);
   for(let col=0;col<=segments;col++){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const x=xUnit*rx;
    const front=Math.max(0,zUnit);
-   const noseBridge=.14*Math.exp(-Math.pow(x/.145,2))*Math.exp(-Math.pow((y-.015)/.40,2));
-   const noseTip=.105*Math.exp(-Math.pow(x/.17,2))*Math.exp(-Math.pow((y+.10)/.17,2));
-   const noseWing=.045*Math.exp(-Math.pow((Math.abs(x)-.135)/.065,2))*Math.exp(-Math.pow((y+.12)/.12,2));
+   const noseBridge=.18*Math.exp(-Math.pow(x/.135,2))*Math.exp(-Math.pow((y-.015)/.40,2));
+   const noseTip=.145*Math.exp(-Math.pow(x/.16,2))*Math.exp(-Math.pow((y+.10)/.17,2));
+   const noseWing=.055*Math.exp(-Math.pow((Math.abs(x)-.135)/.065,2))*Math.exp(-Math.pow((y+.12)/.12,2));
    const cheekbone=.048*Math.exp(-Math.pow((Math.abs(x)-.53)/.25,2))*Math.exp(-Math.pow((y-.015)/.25,2));
    const cheekPad=.026*Math.exp(-Math.pow((Math.abs(x)-.43)/.30,2)-Math.pow((y+.12)/.30,2));
    const underEyeTransition=.012*Math.exp(-Math.pow((Math.abs(x)-.36)/.24,2)-Math.pow((y-.12)/.075,2));
