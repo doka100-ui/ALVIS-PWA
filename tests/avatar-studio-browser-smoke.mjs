@@ -64,6 +64,10 @@ try {
     }, value);
     assert.equal(await page.locator("#"+id+"Value").evaluate(element => element.value), Number(value).toFixed(2), id+" slider must update its value output");
   }
+  // Capture the reference-comparison views in the normal neutral expression,
+  // after first exercising every slider above.
+  await page.locator("#reset").click();
+  await page.waitForTimeout(180);
   for (const id of ["front","rightAngle","rightProfile","back","leftAngle","leftProfile"]) {
     await page.locator("#"+id).click();
     assert.ok(await page.locator("#stage canvas").count()===1, "Avatar Studio view preset must keep the live 3D canvas: "+id);
