@@ -87,7 +87,7 @@ check("sclera uses a curved almond-shaped mesh instead of a spherical placeholde
 
 check("browser smoke exercises WebKit Avatar Studio and ALVIS VRM runtime", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("webkit.launch") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("WebKit runtime must recognize split blink expressions"));
 
-check("nose bridge tip and wings are sculpted into the continuous facial skull mesh", html.includes("new THREE.SphereGeometry(1,64,48)") && html.includes("const noseBridge=.17") && html.includes("const noseTip=.115") && html.includes("const noseWing=.035") && html.includes("z>0?noseBridge+noseTip+noseWing:0") && !html.includes("sculpted-nose-bridge-tip") && !html.includes("noseGeometry=new THREE.SphereGeometry"));
+check("head is generated as a continuous anatomical surface with integrated nose relief", html.includes("function makeContinuousHeadGeometry()") && html.includes("const rows=72,segments=96") && html.includes("const jaw=.76") && html.includes("const noseBridge=.165") && html.includes("const noseTip=.112") && html.includes("geometry.setIndex(indices)") && html.includes("const geo=makeContinuousHeadGeometry()") && !html.includes("sculpted-nose-bridge-tip") && !html.includes("noseGeometry=new THREE.SphereGeometry"));
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
@@ -118,4 +118,4 @@ check("five named tapered fringe locks layer the swept side-parted bob", html.in
 
 check("nose recesses use soft warm shading rather than hard dark lash material", html.includes('noseShadow=mat(0x986f67,.94)') && html.includes('nostril.name=side<0?"nostril-left":"nostril-right"'));
 
-check("facial skull has refined cheekbone and tapered jaw sculpt", html.includes('const cheek=1+.068*Math.exp') && html.includes('const cheekbone=.038*Math.exp') && html.includes('const jawTaper=1-.045*Math.exp') && html.includes('skull.name="facial-skull"'));
+check("continuous head profile shapes jaw cheeks and chin before adding facial details", html.includes('const jaw=.76') && html.includes('const cheek=1+.055*Math.exp') && html.includes('const cheekbone=.026*Math.exp') && html.includes('const chin=.018*Math.exp') && html.includes('skull.name="facial-skull"'));
