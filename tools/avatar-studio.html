@@ -180,8 +180,8 @@ function makeContinuousHeadGeometry(){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const x=xUnit*rx;
    const front=Math.max(0,zUnit);
-   const noseBridge=.205*Math.exp(-Math.pow(x/.145,2))*Math.exp(-Math.pow((y-.015)/.48,2));
-   const noseTip=.18*Math.exp(-Math.pow(x/.18,2))*Math.exp(-Math.pow((y+.39)/.16,2));
+   const noseBridge=.24*Math.exp(-Math.pow(x/.15,2))*Math.exp(-Math.pow((y-.015)/.48,2));
+   const noseTip=.22*Math.exp(-Math.pow(x/.19,2))*Math.exp(-Math.pow((y+.39)/.16,2));
    const noseWing=.05*Math.exp(-Math.pow((Math.abs(x)-.16)/.08,2))*Math.exp(-Math.pow((y+.37)/.15,2));
    const cheekbone=.026*Math.exp(-Math.pow((Math.abs(x)-.56)/.23,2))*Math.exp(-Math.pow((y-.02)/.26,2));
    const eyeSocket=-.045*Math.exp(-Math.pow((Math.abs(x)-.37)/.23,2)-Math.pow((y-.31)/.16,2));
@@ -329,7 +329,7 @@ function makeFace(){
  for(const side of [-1,1]){
   const x=side*.37;
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
-  almondEye(eyesGroup,sclera,[x,.34,.675],.225,.105);
+  almondEye(eyesGroup,sclera,[x,.34,.675],.225,.09);
   const irisMesh=ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";addEyeGazeMorphTargets(irisMesh);
   const pupilMesh=ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";addEyeGazeMorphTargets(pupilMesh);
   const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,24),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";eyesGroup.add(irisBorder);
@@ -438,12 +438,13 @@ function makeFace(){
  curve(faceGroup,[[-.42,.82,.58],[-.22,.88,.63],[.04,.83,.62],[.28,.70,.54],[.48,.52,.43]],.024,hairLight);
  curve(faceGroup,[[-.24,.88,.60],[-.02,.84,.64],[.20,.73,.59],[.39,.55,.49],[.52,.34,.39]],.022,hair);
  for(const side of [-1,1]){
-  const lock=ell(faceGroup,hair,[side*.77,-.03,-.13],[.14,.75,.20]);lock.rotation.z=side*-.08;lock.name=side<0?"hair-side-left":"hair-side-right";
-  taperedCurve(faceGroup,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.028,hairLight);
-  taperedCurve(faceGroup,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.018,hair);
+  // Side locks are grouped flowing strands, not a solid oval plate over the ear.
+  const lock=new THREE.Group();lock.name=side<0?"hair-side-left":"hair-side-right";faceGroup.add(lock);
+  taperedCurve(lock,[[side*.68,.47,.43],[side*.86,.18,.39],[side*.88,-.18,.34],[side*.78,-.49,.30],[side*.66,-.64,.20]],.038,hairLight);
+  taperedCurve(lock,[[side*.78,.34,.35],[side*.94,.02,.29],[side*.93,-.30,.25],[side*.78,-.55,.18]],.026,hair);
   for(let strand=0;strand<4;strand++){
    const offset=strand*.035;
-   curve(faceGroup,[[side*(.64+offset),.56,.42],[side*(.78+offset),.28,.43],[side*(.82+offset),-.05,.38],[side*(.78+offset*.5),-.36,.31],[side*(.67+offset*.4),-.58,.22]],.0065,strand%2?hair:hairLight);
+   curve(lock,[[side*(.64+offset),.56,.42],[side*(.78+offset),.28,.43],[side*(.82+offset),-.05,.38],[side*(.78+offset*.5),-.36,.31],[side*(.67+offset*.4),-.58,.22]],.009,strand%2?hair:hairLight);
   }
  }
  // Deep side-part seam and fine tapered strands across the crown and back of the bob.
@@ -457,7 +458,7 @@ function makeFace(){
    [-.10+offset*.55,.88,.755],
    [.15+offset*.55,.76,.745],
    [.39+offset*.45,.57+Math.abs(offset)*.10,.665]
-  ],.012,strand%2?hairLight:hair);
+  ],.018,strand%2?hairLight:hair);
   lock.name="hair-fringe-strand-"+strand;
  }
  // Three finer face-framing ribbons trace the long diagonal sweep toward the temple.
@@ -470,7 +471,7 @@ function makeFace(){
    [-.02+offset,.82+offset*.18,.785],
    [.24+offset,.66+offset*.12,.755],
    [.48+offset,.42+offset*.08,.665]
-  ],.0095,strand===1?hairLight:hair);
+  ],.014,strand===1?hairLight:hair);
   lock.name="hair-face-framing-fringe-"+strand;
  }
  for(let strand=-3;strand<=3;strand++){
