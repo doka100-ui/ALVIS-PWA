@@ -247,3 +247,10 @@
 - Fritsch-Carlson系の接線制限で顎から下顎角、頬骨、こめかみの幅変化を滑らかにしつつ、補間のオーバーシュートを抑える。
 - 変更コミット: `605fe729`、テスト修正 `66c3b30`。最新 offline-first regression と isolated avatar studio regression は成功。dashboard-image も成功。
 - 最新ブラウザ描画/VRM smokeはデプロイ待ち。実際の正面・横顔画像の確認までは輪郭の見た目を合格としない。
+
+
+### 2026-11-24 18号輪郭調整
+- `tools/avatar-studio.html` の `makeContinuousHeadGeometry()` にある landmark width profile を更新。顎先から下顎角の幅を絞り、頬の膨らみと顎の前後起伏を弱めた。
+- `tests/avatar-studio.test.mjs` の輪郭期待値を更新。
+- 詳細は `docs/ALVIS_18_AVATAR_MODEL_BRIEF.md` の「2026-11-24 輪郭調整（第2段階）」を参照。
+- 正面/斜め/横顔の実レンダーを確認するまでは視覚品質の改善を断定しない。
