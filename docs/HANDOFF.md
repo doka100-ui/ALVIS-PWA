@@ -1,3 +1,10 @@
+## 18号 Avatar Studio Preview browser smoke 合格 (2026-11-24)
+- Commit `8057daed799caa26c3561249b65b1ece95eaccf9` のCloudflare Preview deployと`preview-browser-smoke`がsuccess。
+- Dashboard: Chromium/WebKitの更新ページ、Service Worker cacheName検証、画面UI、Chromium offline reload、iPhone相当WebKit初期表示を通過。
+- Avatar Studio: 実測63,412 triangles（75k未満）、VRM 1.0 GLB 3,629,992 bytes、WebGL2描画、表情/5母音/左右ウインク、VRM humanoid/lookAt/expression binds、ALVIS runtimeでの読み込み・描画・操作、WebKit、外部CDNなし、Service Worker cache後offline reloadを通過。
+- runtime diagnostics: neck/head/chest motion、lookAt、blink/blinkLeft/blinkRight、aa/ih/ou/ee/oh、happy/sad/angry/relaxed/surprised、head gestureを確認。WebKitでは左右winkと視線操作を確認。
+- iPhone相当WebKit CIは実機Safariの代替ではない。iPad Pro M1/iPhone実機のGPUメモリ・熱・長時間安定性、18号本人との顔一致度は未承認。`main`には未マージ。
+
 ## 更新ページ smoke の過剰な文字列一致を修正 (2026-11-24)
 - 最新PreviewでPlaywrightのブラウザ導入とChromium/WebKitの更新ページ起動は通過したが、静的テストが正規表現ソースのバックスラッシュ表記を完全一致で比較し、更新ページのバージョン付きcacheName検証を誤って失敗扱いにしていた。
 - 修正: smokeは特定のエスケープ表記ではなく、可変ビルド名の識別子（alvis-cache-v / -integrated）と旧固定値が残っていないことを確認する。実際の稼働中WorkerのcacheName形式は別途ブラウザ内で厳密に検証する。
