@@ -1,3 +1,8 @@
+## Preview smokeの旧更新URL依存を解消 (2026-11-24)
+- 検出: `tests/dashboard-preview-smoke.mjs` が、整理済みでdevelopmentに存在しない `refresh-v347.html` と固定キャッシュ名 `alvis-cache-v347-integrated` を要求していたため、dashboard preview smokeが60秒でタイムアウト。
+- 修正: 正規の `refresh.html` を開き、`index-integrated.html` へ遷移することと、現在の `alvis-cache-v数字-integrated` を検証する形へ更新。削除済みの旧ページは復活させない。
+- これはAvatar Studioのコード変更ではなく、既存の更新ページ整理とテスト条件の不整合修正。次のPreview smokeでChromium/WebKit両方を再確認する。
+
 ## 直近CIで検出した回帰の修正 (2026-11-24)
 - CIで2点を検出: 髪テクスチャ割当が髪材質宣言より前にありTDZ参照となる初期化順序ミス、眼球材質をwhiteからscleraへ変更した際の静的テスト期待値の古さ。
 - 修正: 髪テクスチャの割当をMeshPhysicalMaterial宣言の後へ移動。静的テストのアーモンド形白目を`sclera`、青い虹彩をMeshPhysicalMaterialとして期待するよう更新。肌色テクスチャ生成も`grain`単独から`tone`合成へ進化していたため、色調テストを現行式に合わせて更新。
