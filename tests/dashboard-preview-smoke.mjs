@@ -421,9 +421,9 @@ async function verifyRefreshFlow(browserType) {
       };
     });
     assert.equal(state.active, true, browserName + ": refresh flow must leave an activated worker");
-    assert.match(state.cacheName, /^alvis-cache-v\\d+-integrated$/,
+    assert.match(state.cacheName, /^alvis-cache-v\d+-integrated$/,
       browserName + ": refresh flow must verify the active integrated ALVIS worker before redirecting");
-    console.log("PASS " + browserName + ": deployed refresh page activates and verifies v347 before redirect");
+    console.log("PASS " + browserName + ": deployed refresh page activates and verifies the current integrated worker before redirect");
   } finally {
     await browser.close();
   }
