@@ -52,7 +52,7 @@ check("side bob locks are grouped flowing strands instead of solid oval plates",
 check("three layered face-framing fringe ribbons are generated and named", html.includes('name="hair-face-framing-fringe-"+strand') && html.includes('strand<3') && html.includes('],.014,strand===1?hairLight:hair'));
 check("side hair has independent left/right locks", html.includes('name=side<0?"hair-side-left":"hair-side-right"'));
 check("necklace pendant and barcode-style neck details are modeled", html.includes('name="necklace-pendant"') && html.includes('name="neck-mark-"+index'));
-check("jaw and cheek profile receives refined continuous-surface sculpting", html.includes("const jaw=.64+.36") && html.includes("const cheek=1+.022") && html.includes("const cheekbone=.042") && html.includes("const chin=.030") && html.includes("function makeContinuousHeadGeometry()"));
+check("jaw and cheek profile receives refined continuous-surface sculpting", html.includes("const jaw=.64+.36") && html.includes("const cheek=1+.022") && html.includes("const cheekbone=.048") && html.includes("const chin=.036") && html.includes("function makeContinuousHeadGeometry()"));
 const moduleScript = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)].at(-1)?.[1];
 assert.ok(moduleScript, "module script exists");
 const syntax = spawnSync(process.execPath, ["--check", "--input-type=module"], { input: moduleScript, encoding: "utf8" });
