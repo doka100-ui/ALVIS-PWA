@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
 
 const previewUrl = process.env.ALVIS_PREVIEW_URL;
@@ -70,10 +70,13 @@ try {
   }
   await page.locator("#front").click();
   await page.waitForTimeout(180);
+  await mkdir("artifacts",{recursive:true});
   const frontViewPixels=await page.locator("#stage canvas").screenshot();
+  await writeFile("artifacts/avatar-studio-front.png",frontViewPixels);
   await page.locator("#rightProfile").click();
   await page.waitForTimeout(180);
   const profileViewPixels=await page.locator("#stage canvas").screenshot();
+  await writeFile("artifacts/avatar-studio-profile.png",profileViewPixels);
   assert.ok(!frontViewPixels.equals(profileViewPixels), "front and profile camera presets must produce different 3D views");
   const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
   await page.locator("#export").click();
