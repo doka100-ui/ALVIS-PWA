@@ -217,8 +217,14 @@ function makeFace(){
  const geo=new THREE.SphereGeometry(1,48,36);const pos=geo.attributes.position;
  for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.068*Math.exp(-Math.pow((y-.015)/.27,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));const cheekbone=.038*Math.exp(-Math.pow((Math.abs(x)-.57)/.22,2))*Math.exp(-Math.pow((y-.015)/.27,2));const jawTaper=1-.045*Math.exp(-Math.pow((y+.52)/.25,2))*Math.pow(Math.abs(x),1.4);const chin=.024*Math.exp(-Math.pow(x/.36,2))*Math.exp(-Math.pow((y+.82)/.14,2));pos.setXYZ(i,x*taper*cheek*jawTaper,y,z*depth+cheekbone+chin);}
  geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
- // ears
- for(const side of [-1,1]){ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ell(faceGroup,skinShade,[side*.94,.02,.075],[.065,.16,.035]);}
+ // Ears: outer volume, concha shading, helix rim, antihelix fold and tragus.
+ for(const side of [-1,1]){
+  const ear=ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ear.name=side<0?"ear-left":"ear-right";
+  const concha=ell(faceGroup,skinShade,[side*.94,.02,.075],[.065,.16,.035]);concha.name=side<0?"ear-concha-left":"ear-concha-right";
+  const helix=curve(faceGroup,[[side*.84,.23,.105],[side*.94,.25,.125],[side*1.015,.16,.13],[side*1.02,.02,.13],[side*.98,-.13,.12],[side*.89,-.19,.105]],.012,skinShade);helix.name=side<0?"ear-helix-left":"ear-helix-right";
+  const antihelix=curve(faceGroup,[[side*.91,.14,.135],[side*.965,.07,.145],[side*.94,-.02,.145],[side*.91,-.09,.13]],.009,skin);antihelix.name=side<0?"ear-antihelix-left":"ear-antihelix-right";
+  const tragus=ell(faceGroup,skin,[side*.86,-.035,.145],[.035,.055,.035],18);tragus.name=side<0?"ear-tragus-left":"ear-tragus-right";
+ }
  // eye sockets, whites, irises and upper/lower lids
  const eyesGroup=new THREE.Group();eyesGroup.name="facial-eyes";faceGroup.add(eyesGroup);
  for(const side of [-1,1]){
