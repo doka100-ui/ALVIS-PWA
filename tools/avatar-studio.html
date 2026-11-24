@@ -200,8 +200,22 @@ function makeContinuousHeadGeometry(){
   while(profileIndex<widthProfile.length-2&&y>widthProfile[profileIndex+1][0])profileIndex++;
   const lower=widthProfile[profileIndex],upper=widthProfile[profileIndex+1];
   const profileT=THREE.MathUtils.clamp((y-lower[0])/(upper[0]-lower[0]),0,1);
-  const profileBlend=profileT*profileT*(3-2*profileT);
-  const contourWidth=THREE.MathUtils.lerp(lower[1],upper[1],profileBlend);
+  // Monotone cubic Hermite interpolation keeps the jaw/cheek contour flowing
+  // through the landmarks without the flat spots caused by per-segment smoothstep.
+  const previous=widthProfile[Math.max(0,profileIndex-1)];
+  const next=widthProfile[Math.min(widthProfile.length-1,profileIndex+2)];
+  const span=upper[0]-lower[0],secant=(upper[1]-lower[1])/span;
+  let tangent0=profileIndex===0?secant:(upper[1]-previous[1])/(upper[0]-previous[0]);
+  let tangent1=profileIndex>=widthProfile.length-2?secant:(next[1]-lower[1])/(next[0]-lower[0]);
+  if(Math.abs(secant)<1e-8){tangent0=0;tangent1=0;}
+  else{
+   if(tangent0*secant<0)tangent0=0;
+   if(tangent1*secant<0)tangent1=0;
+   const alpha=tangent0/secant,beta=tangent1/secant,limit=alpha*alpha+beta*beta;
+   if(limit>9){const scale=3/Math.sqrt(limit);tangent0=scale*alpha*secant;tangent1=scale*beta*secant;}
+  }
+  const t2=profileT*profileT,t3=t2*profileT;
+  const contourWidth=(2*t3-3*t2+1)*lower[1]+(t3-2*t2+profileT)*span*tangent0+(-2*t3+3*t2)*upper[1]+(t3-t2)*span*tangent1;
   const cheek=1+.018*Math.exp(-Math.pow((y-.02)/.27,2));
   const rx=ring*contourWidth*cheek;
   // Slightly fuller chin plane and a softer mandibular turn in profile.
