@@ -38,7 +38,7 @@
 - Studioを開くだけではユーザーデータへ書き込まない。新モデルは既存のファイル選択フローを経た場合のみ保存。
 
 ### 性能・オフライン
-- 目標はiPad Pro M1での軽量動作。書き出しVRMの三角形数を75,000未満に制限する。実機Safariでの負荷確認は別途必要。
+- 目標はiPad Pro M1での軽量動作。75,000 trianglesはモバイル実機プロファイルの警告目安であり、固定上限ではない。75,000以上でも必要な形状を維持し、実機iPad/iPhone Safariでメモリ・フレーム時間・発熱を測定して最適化可否を判断する。実機計測前の暫定hard ceilingは100,000 trianglesとし、これ以上のVRM書き出しは停止する。
 - Studioはローカル依存で動き、Service Workerキャッシュ後のオフライン再読込をテストする。
 - 本体runtimeのThree.js/three-vrm依存は現時点でCDN import map経由。Service Workerの依存キャッシュを利用するが、初回オフライン動作を保証しない。
 - Playwright ChromiumとWebKitで試験する。WebKit CIはiPad Safari実機検証の代替ではない。
