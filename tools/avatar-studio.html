@@ -165,6 +165,40 @@ function taperedCurve(parent,points,r,material){
  geometry.computeVertexNormals();
  const mesh=new THREE.Mesh(geometry,material);parent.add(mesh);return mesh;
 }
+function makeContinuousHeadGeometry(){
+ // A single lat-long surface with an anatomically shaped vertical profile.
+ // Face width, jaw taper, cheek volume and nose relief are evaluated per vertex.
+ const rows=72,segments=96,positions=[],uvs=[],indices=[];
+ for(let row=0;row<=rows;row++){
+  const phi=Math.PI*row/rows,y=Math.cos(phi),ring=Math.sin(phi);
+  const vertical=(y+1)*.5;
+  const jaw=.76+.24*Math.min(1,Math.max(0,(y+.72)/1.35));
+  const cheek=1+.055*Math.exp(-Math.pow((y-.02)/.29,2));
+  const rx=ring*jaw*cheek;
+  const rz=ring*(.92+.08*vertical+.025*Math.exp(-Math.pow((y+.02)/.32,2)));
+  for(let col=0;col<=segments;col++){
+   const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
+   const x=xUnit*rx;
+   const front=Math.max(0,zUnit);
+   const noseBridge=.165*Math.exp(-Math.pow(x/.13,2))*Math.exp(-Math.pow((y-.015)/.48,2));
+   const noseTip=.112*Math.exp(-Math.pow(x/.17,2))*Math.exp(-Math.pow((y+.39)/.16,2));
+   const noseWing=.032*Math.exp(-Math.pow((Math.abs(x)-.16)/.075,2))*Math.exp(-Math.pow((y+.37)/.15,2));
+   const cheekbone=.026*Math.exp(-Math.pow((Math.abs(x)-.56)/.23,2))*Math.exp(-Math.pow((y-.02)/.26,2));
+   const chin=.018*Math.exp(-Math.pow(x/.34,2))*Math.exp(-Math.pow((y+.82)/.13,2));
+   positions.push(x,y,zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+chin));
+   uvs.push(col/segments,1-row/rows);
+  }
+ }
+ for(let row=0;row<rows;row++)for(let col=0;col<segments;col++){
+  const a=row*(segments+1)+col,b=a+segments+1;
+  indices.push(a,b,a+1,b,b+1,a+1);
+ }
+ const geometry=new THREE.BufferGeometry();
+ geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
+ geometry.setAttribute("uv",new THREE.Float32BufferAttribute(uvs,2));
+ geometry.setIndex(indices);geometry.computeVertexNormals();
+ return geometry;
+}
 function almondEye(parent,material,position,halfWidth,halfHeight){
  const shape=new THREE.Shape();
  shape.moveTo(-halfWidth,0);
@@ -214,9 +248,8 @@ function addEyeGazeMorphTargets(mesh){
 function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
- const geo=new THREE.SphereGeometry(1,64,48);const pos=geo.attributes.position;
- for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.068*Math.exp(-Math.pow((y-.015)/.27,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));const cheekbone=.038*Math.exp(-Math.pow((Math.abs(x)-.57)/.22,2))*Math.exp(-Math.pow((y-.015)/.27,2));const jawTaper=1-.045*Math.exp(-Math.pow((y+.52)/.25,2))*Math.pow(Math.abs(x),1.4);const chin=.024*Math.exp(-Math.pow(x/.36,2))*Math.exp(-Math.pow((y+.82)/.14,2));const noseBridge=.17*Math.exp(-Math.pow(x/.125,2))*Math.exp(-Math.pow((y+.015)/.57,2));const noseTip=.115*Math.exp(-Math.pow(x/.17,2))*Math.exp(-Math.pow((y+.39)/.17,2));const noseWing=.035*Math.exp(-Math.pow((Math.abs(x)-.16)/.075,2))*Math.exp(-Math.pow((y+.37)/.16,2));pos.setXYZ(i,x*taper*cheek*jawTaper,y,z*depth+cheekbone+chin+(z>0?noseBridge+noseTip+noseWing:0));}
- geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
+ const geo=makeContinuousHeadGeometry();
+ const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
  // Ears: outer volume, concha shading, helix rim, antihelix fold and tragus.
  for(const side of [-1,1]){
   const ear=ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ear.name=side<0?"ear-left":"ear-right";
