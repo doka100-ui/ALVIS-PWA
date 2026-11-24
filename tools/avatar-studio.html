@@ -199,6 +199,40 @@ function makeContinuousHeadGeometry(){
  geometry.setIndex(indices);geometry.computeVertexNormals();
  return geometry;
 }
+function makeContinuousNeckShoulderGeometry(){
+ // One open-ended skin surface flows from the neck into both shoulder caps.
+ const rows=28,segments=56,positions=[],uvs=[],indices=[];
+ const profile=[
+  [0,.205,.205,0],
+  [.20,.22,.215,0],
+  [.40,.30,.235,0],
+  [.59,.58,.265,-.005],
+  [.77,.91,.295,-.018],
+  [1,.84,.285,-.02]
+ ];
+ const smooth=(a,b,t)=>{const u=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return u*u*(3-2*u);};
+ for(let row=0;row<=rows;row++){
+  const t=row/rows,y=-.78-1.08*t;
+  let segment=profile.length-2;
+  for(let i=0;i<profile.length-1;i++)if(t<=profile[i+1][0]){segment=i;break;}
+  const a=profile[segment],b=profile[segment+1],blend=smooth(a[0],b[0],t);
+  const rx=THREE.MathUtils.lerp(a[1],b[1],blend),rz=THREE.MathUtils.lerp(a[2],b[2],blend),centerZ=THREE.MathUtils.lerp(a[3],b[3],blend);
+  for(let col=0;col<=segments;col++){
+   const theta=Math.PI*2*col/segments;
+   positions.push(Math.cos(theta)*rx,y,centerZ+Math.sin(theta)*rz);
+   uvs.push(col/segments,1-t);
+  }
+ }
+ for(let row=0;row<rows;row++)for(let col=0;col<segments;col++){
+  const a=row*(segments+1)+col,b=a+segments+1;
+  indices.push(a,a+1,b,b,a+1,b+1);
+ }
+ const geometry=new THREE.BufferGeometry();
+ geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
+ geometry.setAttribute("uv",new THREE.Float32BufferAttribute(uvs,2));
+ geometry.setIndex(indices);geometry.computeVertexNormals();
+ return geometry;
+}
 function almondEye(parent,material,position,halfWidth,halfHeight){
  const shape=new THREE.Shape();
  shape.moveTo(-halfWidth,0);
@@ -411,13 +445,15 @@ function makeFace(){
   taperedCurve(faceGroup,[[x*.15,.80,-.34],[x*.55,.43,-.64],[x,-.10,-.75],[x*.92,-.48,-.61]],.010,strand%2?hairLight:hair);
  }
  // Neck and upper-body geometry are separate rigid parts for the humanoid rig.
- const neck=ell(faceGroup,skin,[0,-1.12,.02],[.25,.48,.25]);neck.name="neck";
+ const neckShoulder=new THREE.Mesh(makeContinuousNeckShoulderGeometry(),skin);
+ neckShoulder.name="neck-shoulder-continuous";faceGroup.add(neckShoulder);
+ // Named attachment landmarks remain for VRM inspection; the visible skin
+ // silhouette is now one connected surface rather than three intersecting ellipsoids.
+ const neck= new THREE.Group();neck.name="neck";neck.position.set(0,-1.12,.02);faceGroup.add(neck);
  const bust=ell(faceGroup,white,[0,-1.65,-.02],[.83,.42,.39]);bust.scale.y=.42;bust.name="upper-body";
- // Exposed shoulders and cropped upper arms complete the bust silhouette.
- // These remain rigid chest-attached meshes to keep the mobile rig inexpensive.
  for(const side of [-1,1]){
-  const shoulder=ell(faceGroup,skin,[side*.66,-1.47,-.045],[.34,.29,.29],32);
-  shoulder.name=side<0?"shoulder-left":"shoulder-right";
+  const shoulder= new THREE.Group();shoulder.name=side<0?"shoulder-left":"shoulder-right";
+  shoulder.position.set(side*.66,-1.47,-.045);faceGroup.add(shoulder);
   const upperArm=ell(faceGroup,skin,[side*.94,-1.72,-.045],[.23,.42,.23],32);
   upperArm.name=side<0?"upper-arm-left":"upper-arm-right";
  }
@@ -458,7 +494,7 @@ function makeFace(){
  }
  // Reparent visible parts while preserving their world transforms.
  faceGroup.updateMatrixWorld(true);rigRoot.updateMatrixWorld(true);
- const torsoNames=new Set(["neck","upper-body","shoulder-left","shoulder-right","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
+ const torsoNames=new Set(["neck","neck-shoulder-continuous","upper-body","shoulder-left","shoulder-right","necklace-chain","necklace-loop","necklace-pendant","neck-mark-0","neck-mark-1","neck-mark-2","neck-mark-3","neck-mark-4"]);
  for(const part of [...faceGroup.children]){
   if(part===rigRoot)continue;
   const armBoneName=part.name==="upper-arm-left"?"leftUpperArm":part.name==="upper-arm-right"?"rightUpperArm":null;
