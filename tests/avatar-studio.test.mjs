@@ -87,7 +87,7 @@ check("sclera uses a curved almond-shaped mesh instead of a spherical placeholde
 
 check("browser smoke exercises WebKit Avatar Studio and ALVIS VRM runtime", (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("webkit.launch") && (await readFile(new URL("./avatar-studio-browser-smoke.mjs", import.meta.url), "utf8")).includes("WebKit runtime must recognize split blink expressions"));
 
-check("head is generated as a continuous anatomical surface with integrated nose relief", html.includes("function makeContinuousHeadGeometry()") && html.includes("const rows=72,segments=96") && html.includes("const jaw=.76") && html.includes("const noseBridge=.165") && html.includes("const noseTip=.112") && html.includes("geometry.setIndex(indices)") && html.includes("const geo=makeContinuousHeadGeometry()") && !html.includes("sculpted-nose-bridge-tip") && !html.includes("noseGeometry=new THREE.SphereGeometry"));
+check("head is generated as a continuous anatomical surface with integrated nose relief", html.includes("function makeContinuousHeadGeometry()") && html.includes("const rows=72,segments=96") && html.includes("const jaw=.76") && html.includes("const noseBridge=.165") && html.includes("const noseTip=.112") && html.includes("geometry.setIndex(indices)") && html.includes("indices.push(a,a+1,b,b,a+1,b+1)") && html.includes("const geo=makeContinuousHeadGeometry()") && !html.includes("sculpted-nose-bridge-tip") && !html.includes("noseGeometry=new THREE.SphereGeometry"));
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
