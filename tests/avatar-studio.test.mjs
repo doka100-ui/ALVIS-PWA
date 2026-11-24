@@ -43,8 +43,9 @@ check("upper eyelid crease and inner/outer eye corners are modeled on both sides
 check("subtle lower eyelid waterlines are modeled symmetrically", ["lower-eyelid-waterline-left","lower-eyelid-waterline-right"].every(name=>html.includes(name)));
 check("facial features use independent transform groups", ["facial-eyes","facial-nose","facial-mouth"].every(name => html.includes('name="'+name+'"')));
 check("face controls modify only their intended feature groups", html.includes('getObjectByName("facial-eyes")') && html.includes('getObjectByName("facial-nose")') && html.includes('getObjectByName("facial-mouth")'));
-check("bob hairstyle has a distinct rear volume and crown", html.includes('name="hair-rear-bob"') && html.includes('name="hair-crown"'));
-check("swept fringe includes separate curved strand geometry", (html.match(/curve\(faceGroup,/g)||[]).length >= 6 && html.includes('name="hair-swept-fringe"'));
+check("bob hairstyle has a distinct reduced rear volume and a raised hairline scalp cap", html.includes('name="hair-rear-bob"') && html.includes('name="hair-crown"') && html.includes("Math.PI*.42") && html.includes("cap.scale.set(.92,1.24,.62)"));
+check("swept fringe is a strand group rather than a bulky forehead ellipsoid", (html.match(/curve\(faceGroup,/g)||[]).length >= 6 && html.includes('fringe.name="hair-swept-fringe"') && !html.includes('ell(faceGroup,hairLight,[-.18,.72,.49]'));
+check("side bob locks taper without separate bulb-shaped hair tips", html.includes('name=side<0?"hair-side-left":"hair-side-right"') && !html.includes('ell(faceGroup,hairLight,[side*.77,-.48,.10]'));
 check("three layered face-framing fringe ribbons are generated and named", html.includes('name="hair-face-framing-fringe-"+strand') && html.includes('strand<3') && html.includes('],.0095,strand===1?hairLight:hair'));
 check("side hair has independent left/right locks", html.includes('name=side<0?"hair-side-left":"hair-side-right"'));
 check("necklace pendant and barcode-style neck details are modeled", html.includes('name="necklace-pendant"') && html.includes('name="neck-mark-"+index'));
