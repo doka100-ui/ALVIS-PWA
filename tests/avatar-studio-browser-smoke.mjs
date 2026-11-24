@@ -129,6 +129,7 @@ try {
   for (let strand=0;strand<5;strand++) assert.ok(gltf.nodes.some(node=>node.name==="hair-fringe-strand-"+strand),"VRM must preserve swept fringe strand "+strand);
   for (let strand=0;strand<3;strand++) assert.ok(gltf.nodes.some(node=>node.name==="hair-face-framing-fringe-"+strand),"VRM must preserve layered face-framing fringe strand "+strand);
   assert.ok(gltf.nodes.some(node=>node.name==="facial-skull"),"VRM must preserve the continuous facial mesh carrying the sculpted nose");
+  for (const nodeName of ["eyeball-left","eyeball-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve rounded sclera globe: "+nodeName);
   for (const nodeName of ["nostril-left","nostril-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve sculpted nose recess: "+nodeName);
   assert.ok(!gltf.nodes.some(node=>node.name==="sculpted-nose-bridge-tip"),"VRM must not contain a separate spherical nose overlay");
   for (const nodeName of ["ear-helix-left","ear-helix-right","ear-antihelix-left","ear-antihelix-right","ear-concha-left","ear-concha-right","ear-tragus-left","ear-tragus-right"]) assert.ok(gltf.nodes.some(node=>node.name===nodeName),"VRM must preserve sculpted ear anatomy: "+nodeName);
