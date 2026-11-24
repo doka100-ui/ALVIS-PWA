@@ -118,3 +118,10 @@
 - `docs/ALVIS_SPEC.md`: 現行仕様
 - `docs/ALVIS_18_AVATAR_MODEL_BRIEF.md`: 18号の外観・品質・リグ要件
 - `docs/HANDOFF_ARCHIVE.md` / `docs/ALVIS_SPEC_HISTORY.md`: 旧引き継ぎ・仕様履歴。通常の作業では読まなくてよい
+
+
+## Preview smokeの更新ページ正規表現検査を修正 (2026-11-24)
+- Playwrightブラウザのキャッシュ復元/インストールは成功し、Chromium/WebKitでrefresh.htmlのHTTP 200と更新ページの初期遷移まで確認。
+- 失敗原因: dashboard smokeの静的検査が、refresh.html内の正規表現リテラル `/^alvis-cache-v\\d+-integrated$/` を、実行時のキャッシュ名に見えるパターンとして誤って検査していた。更新ページ本体ではなくテストの照合対象が誤り。
+- 修正: refresh.htmlに含まれる正規表現リテラルそのものを文字列として検査するよう変更。実際のWorker cacheName値は、後段のrefresh flow smokeで引き続き `^alvis-cache-v\\d+-integrated$` に一致することを検査する。
+- 次: 最新Previewでdashboard smoke全体とAvatar Studio Chromium/WebKit VRM export smokeを再実行し、実測三角形数/マテリアル拡張を確認。まだ成功扱いしない。
