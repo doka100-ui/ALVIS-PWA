@@ -91,7 +91,7 @@ check("head is generated as a continuous anatomical surface with integrated nose
 
 check("ALVIS model diagnostics report independent left/right wink support", appHtml.includes('"左右ウインク: "+mark(report?.blinkLeft&&report?.blinkRight)') && appHtml.includes('report.blinkLeft&&report.blinkRight&&"WINK"'));
 
-check("face base includes refined cheekbone, jaw taper and chin projection sculpting", html.includes("const cheekbone=.038*Math.exp") && html.includes("const jawTaper=1-.045") && html.includes("const chin=.024*Math.exp") && html.includes("x*taper*cheek*jawTaper") && html.includes("z*depth+cheekbone+chin"));
+check("face base includes continuous cheekbone, jaw taper and chin projection sculpting", html.includes("const cheekbone=.026*Math.exp") && html.includes("const jaw=.76") && html.includes("const chin=.018*Math.exp") && html.includes("const rx=ring*jaw*cheek") && html.includes("zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+chin)"));
 
 check("eyelid blink target closes from the upper lid edge across the almond eye", html.includes("openEdge=.095*shape,closedEdge=-.095*shape") && html.includes("lidClosedPositions.push(localX,top+(closedEdge-top)*t,z)") && html.includes("lidGeometry.computeVertexNormals()"));
 
