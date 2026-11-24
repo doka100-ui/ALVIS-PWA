@@ -1,3 +1,9 @@
+## 18号ブロンド髪にローカル微細テクスチャを追加 (2026-11-24)
+- 変更: 256×256の決定論的CanvasTextureを端末内で生成し、髪色の微細な繊維状ゆらぎとroughness variationを追加。髪/明るい毛束で共有し、外部画像/APIは使用しない。
+- 性能配慮: 既存ジオメトリ・毛束数・ポリゴン数は変更せず、テクスチャは2枚（色/roughness）を共有。肌の512×512テクスチャとは別サイズ。
+- テスト: 静的回帰で生成・割当を確認し、Chromium/WebKit VRM smokeで髪材質のbaseColorTexture/roughnessTextureとsheen/anisotropy拡張の同時出力を検査。
+- 注意: VRM出力の実測サイズ/三角形数とiPad Safariのメモリ・見た目はCIおよび実機確認が必要。
+
 ## 18号ブロンド髪に異方性ハイライトを追加 (2026-11-24)
 - 変更: 髪の基本材質/明るい毛束に控えめなanisotropyを追加し、毛流れ方向に沿う細長い反射を狙う。Sheen/clearcoatと併用。既存形状・毛束数・リグ・ポリゴン数は変更しない。
 - 検証追加: 同梱GLTFExporterのKHR_materials_anisotropy対応をソース確認し、静的テストとVRM browser smokeでanisotropyStrengthの出力を検査。
