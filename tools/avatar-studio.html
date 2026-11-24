@@ -201,10 +201,10 @@ function makeContinuousHeadGeometry(){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const x=xUnit*rx;
    const front=Math.max(0,zUnit);
-   const noseBridge=.16*Math.exp(-Math.pow(x/.18,2))*Math.exp(-Math.pow((y-.015)/.50,2));
-   const noseTip=.10*Math.exp(-Math.pow(x/.23,2))*Math.exp(-Math.pow((y+.10)/.24,2));
-   const noseWing=.04*Math.exp(-Math.pow((Math.abs(x)-.16)/.085,2))*Math.exp(-Math.pow((y+.12)/.15,2));
-   const cheekbone=.042*Math.exp(-Math.pow((Math.abs(x)-.53)/.25,2))*Math.exp(-Math.pow((y-.015)/.25,2));
+   const noseBridge=.24*Math.exp(-Math.pow(x/.18,2))*Math.exp(-Math.pow((y-.015)/.50,2));
+   const noseTip=.18*Math.exp(-Math.pow(x/.23,2))*Math.exp(-Math.pow((y+.10)/.24,2));
+   const noseWing=.075*Math.exp(-Math.pow((Math.abs(x)-.16)/.085,2))*Math.exp(-Math.pow((y+.12)/.15,2));
+   const cheekbone=.048*Math.exp(-Math.pow((Math.abs(x)-.53)/.25,2))*Math.exp(-Math.pow((y-.015)/.25,2));
    const cheekPad=.026*Math.exp(-Math.pow((Math.abs(x)-.43)/.30,2)-Math.pow((y+.12)/.30,2));
    const underEyeTransition=.012*Math.exp(-Math.pow((Math.abs(x)-.36)/.24,2)-Math.pow((y-.12)/.075,2));
    const eyeSocket=-.060*Math.exp(-Math.pow((Math.abs(x)-.37)/.23,2)-Math.pow((y-.31)/.16,2));
@@ -214,7 +214,7 @@ function makeContinuousHeadGeometry(){
    const mouthMound=.032*Math.exp(-Math.pow(x/.27,2)-Math.pow((y+.45)/.17,2));
    const philtrum=-.012*Math.exp(-Math.pow(x/.055,2)-Math.pow((y+.27)/.09,2));
    const nasolabial=-.009*Math.exp(-Math.pow((Math.abs(x)-.20)/.035,2)-Math.pow((y+.31)/.13,2));
-   const chin=.030*Math.exp(-Math.pow(x/.34,2))*Math.exp(-Math.pow((y+.82)/.13,2));
+   const chin=.036*Math.exp(-Math.pow(x/.34,2))*Math.exp(-Math.pow((y+.82)/.13,2));
    positions.push(x,y,zUnit*rz+front*(noseBridge+noseTip+noseWing+cheekbone+cheekPad+underEyeTransition+eyeSocket+browRidge+glabella+forehead+mouthMound+philtrum+nasolabial+chin));
    uvs.push(col/segments,1-row/rows);
   }
@@ -236,8 +236,8 @@ function makeScalpCapGeometry(){
   for(let col=0;col<=segments;col++){
    const theta=Math.PI*2*col/segments,xUnit=Math.cos(theta),zUnit=Math.sin(theta);
    const front=Math.max(0,zUnit);
-   const hairlineY=.57+.12*Math.abs(xUnit)+.04*xUnit;
-   const frontPhi=Math.acos(THREE.MathUtils.clamp((hairlineY-.25)/1.24,-1,1));
+   const hairlineY=.42+.12*Math.abs(xUnit)+.04*xUnit;
+   const frontPhi=Math.acos(THREE.MathUtils.clamp((hairlineY-.20)/1.16,-1,1));
    const sideBackPhi=1.62;
    const maxPhi=THREE.MathUtils.lerp(sideBackPhi,frontPhi,front*front);
    const phi=maxPhi*v,ring=Math.sin(phi);
@@ -339,14 +339,14 @@ function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
  const geo=makeContinuousHeadGeometry();
- const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
+ const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.92,1.15,.78);skull.position.y=.08;faceGroup.add(skull);
  // Ears: outer volume, concha shading, helix rim, antihelix fold and tragus.
  for(const side of [-1,1]){
-  const ear=ell(faceGroup,skin,[side*.88,.02,-.01],[.17,.29,.13]);ear.name=side<0?"ear-left":"ear-right";
-  const concha=ell(faceGroup,skinShade,[side*.94,.02,.075],[.065,.16,.035]);concha.name=side<0?"ear-concha-left":"ear-concha-right";
-  const helix=curve(faceGroup,[[side*.84,.23,.105],[side*.94,.25,.125],[side*1.015,.16,.13],[side*1.02,.02,.13],[side*.98,-.13,.12],[side*.89,-.19,.105]],.012,skinShade);helix.name=side<0?"ear-helix-left":"ear-helix-right";
-  const antihelix=curve(faceGroup,[[side*.91,.14,.135],[side*.965,.07,.145],[side*.94,-.02,.145],[side*.91,-.09,.13]],.009,skin);antihelix.name=side<0?"ear-antihelix-left":"ear-antihelix-right";
-  const tragus=ell(faceGroup,skin,[side*.86,-.035,.145],[.035,.055,.035],18);tragus.name=side<0?"ear-tragus-left":"ear-tragus-right";
+  const ear=ell(faceGroup,skin,[side*.83,.02,-.005],[.135,.225,.105]);ear.name=side<0?"ear-left":"ear-right";
+  const concha=ell(faceGroup,skinShade,[side*.88,.02,.075],[.050,.125,.030]);concha.name=side<0?"ear-concha-left":"ear-concha-right";
+  const helix=curve(faceGroup,[[side*.79,.19,.105],[side*.88,.20,.125],[side*.94,.13,.13],[side*.95,.02,.13],[side*.91,-.10,.12],[side*.84,-.15,.105]],.010,skinShade);helix.name=side<0?"ear-helix-left":"ear-helix-right";
+  const antihelix=curve(faceGroup,[[side*.86,.11,.135],[side*.91,.05,.145],[side*.89,-.02,.145],[side*.86,-.07,.13]],.007,skin);antihelix.name=side<0?"ear-antihelix-left":"ear-antihelix-right";
+  const tragus=ell(faceGroup,skin,[side*.80,-.025,.145],[.028,.045,.028],18);tragus.name=side<0?"ear-tragus-left":"ear-tragus-right";
  }
  // eye sockets, whites, irises and upper/lower lids
  const eyesGroup=new THREE.Group();eyesGroup.name="facial-eyes";faceGroup.add(eyesGroup);
@@ -409,10 +409,10 @@ function makeFace(){
  // Nose bridge, tip and alar transitions are sculpted directly into facial-skull.
  // Only the recessed nostril shadows remain as fine surface details; no spherical nose overlay.
  for(const side of [-1,1]){
-  const nostril=ell(noseGroup,noseShadow,[side*.067,-.19,.858],[.014,.0045,.0035],16);nostril.name=side<0?"nostril-left":"nostril-right";
+  const nostril=ell(noseGroup,noseShadow,[side*.067,-.19,.925],[.014,.0045,.0035],16);nostril.name=side<0?"nostril-left":"nostril-right";
  }
- curve(noseGroup,[[0,.30,.79],[0,.16,.80],[0,.02,.825]],.0035,skinShade);
- curve(noseGroup,[[-.045,-.225,.79],[0,-.238,.80],[.045,-.225,.79]],.0035,skinShade);
+ curve(noseGroup,[[0,.30,.88],[0,.16,.90],[0,.02,.925]],.0028,skinShade);
+ curve(noseGroup,[[-.045,-.225,.91],[0,-.238,.925],[.045,-.225,.91]],.0028,skinShade);
  // lips
  const mouthGroup=new THREE.Group();mouthGroup.name="facial-mouth";faceGroup.add(mouthGroup);
  const lipGeometry=new THREE.SphereGeometry(1,24,16);
@@ -421,9 +421,9 @@ function makeFace(){
  const lipTargets=["happy","sad","angry","surprised","relaxed"].map(makeLipTarget);
  lipGeometry.morphAttributes.position=lipTargets;
  lipGeometry.userData.targetNames=["happy","sad","angry","surprised","relaxed"];
- const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3,relaxed:4};upperLip.position.set(0,-.43,.66);upperLip.scale.set(.22,.055,.045);upperLip.name="upper-lip";mouthGroup.add(upperLip);
- curve(mouthGroup,[[-.22,-.43,.694],[-.14,-.408,.704],[-.075,-.415,.709],[0,-.432,.711],[.075,-.415,.709],[.14,-.408,.704],[.22,-.43,.694]],.005,lipOutline);
- curve(mouthGroup,[[-.13,-.505,.695],[0,-.516,.705],[.13,-.505,.695]],.006,lipHighlight);
+ const upperLip=new THREE.Mesh(lipGeometry,lip);upperLip.morphTargetDictionary={happy:0,sad:1,angry:2,surprised:3,relaxed:4};upperLip.position.set(0,-.43,.70);upperLip.scale.set(.18,.042,.032);upperLip.name="upper-lip";mouthGroup.add(upperLip);
+ curve(mouthGroup,[[-.18,-.43,.724],[-.12,-.408,.732],[-.065,-.415,.737],[0,-.432,.739],[.065,-.415,.737],[.12,-.408,.732],[.18,-.43,.724]],.005,lipOutline);
+ curve(mouthGroup,[[-.12,-.505,.715],[0,-.516,.724],[.12,-.505,.715]],.006,lipHighlight);
  curve(mouthGroup,[[-.055,-.53,.64],[0,-.54,.65],[.055,-.53,.64]],.003,skinShade);
  curve(mouthGroup,[[-.035,-.29,.704],[0,-.34,.716],[.035,-.29,.704]],.004,skinShade);
  const mouthInteriorGeometry=new THREE.SphereGeometry(1,24,16);
@@ -438,7 +438,7 @@ function makeFace(){
  mouthInteriorGeometry.userData.targetNames=Object.keys(visemeScales);
  const mouthInterior=new THREE.Mesh(mouthInteriorGeometry,dark);
  mouthInterior.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4};
- mouthInterior.position.set(0,-.465,.625);mouthInterior.scale.set(.17,.045,.022);mouthInterior.name="mouth-viseme-interior";mouthGroup.add(mouthInterior);
+ mouthInterior.position.set(0,-.465,.67);mouthInterior.scale.set(.15,.038,.018);mouthInterior.name="mouth-viseme-interior";mouthGroup.add(mouthInterior);
  const lowerLipGeometry=new THREE.SphereGeometry(1,24,16);
  const lowerLipBase=lowerLipGeometry.attributes.position.clone();
  const lowerLipTargets=Object.entries({aa:[1,.48],ih:[1.02,.12],ou:[.82,.24],ee:[1.18,.08],oh:[.9,.30]}).map(([name,shape])=>{
@@ -450,12 +450,12 @@ function makeFace(){
  lowerLipGeometry.userData.targetNames=["aa","ih","ou","ee","oh"];
  const lowerLip=new THREE.Mesh(lowerLipGeometry,lip);
  lowerLip.morphTargetDictionary={aa:0,ih:1,ou:2,ee:3,oh:4};
- lowerLip.position.set(0,-.50,.655);lowerLip.scale.set(.17,.026,.035);lowerLip.name="lower-lip";mouthGroup.add(lowerLip);
+ lowerLip.position.set(0,-.50,.69);lowerLip.scale.set(.15,.022,.028);lowerLip.name="lower-lip";mouthGroup.add(lowerLip);
  // Layered bob: rear volume, crown cap, swept fringe, and separate tapered strand curves.
  const rearBob=ell(faceGroup,hair,[0,-.18,-.28],[.55,.72,.22],48);
  rearBob.name="hair-rear-bob";
  const cap=new THREE.Mesh(makeScalpCapGeometry(),hair);
- cap.scale.set(.92,1.24,.62);cap.position.set(0,.25,.045);cap.name="hair-crown";faceGroup.add(cap);
+ cap.scale.set(.94,1.16,.68);cap.position.set(0,.20,.045);cap.name="hair-crown";faceGroup.add(cap);
  // The swept fringe is built from tapered locks below; avoid a solid ellipsoid
  // crossing the forehead and hiding the brow/eye transition.
  const fringe=new THREE.Group();fringe.name="hair-swept-fringe";faceGroup.add(fringe);
