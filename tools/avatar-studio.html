@@ -350,7 +350,7 @@ function makeFace(){
  }
  // eye sockets, whites, irises and upper/lower lids
  const eyesGroup=new THREE.Group();eyesGroup.name="facial-eyes";faceGroup.add(eyesGroup);
- eyesGroup.position.z=-.065;
+ eyesGroup.position.z=.19; // Bring the eyeballs and lids out of the facial surface instead of burying them.
  for(const side of [-1,1]){
   const x=side*.37;
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
