@@ -193,9 +193,9 @@ function makeContinuousHeadGeometry(){
  for(let row=0;row<=rows;row++){
   const phi=Math.PI*row/rows,y=Math.cos(phi),ring=Math.sin(phi);
   const vertical=(y+1)*.5;
-  // Reference-led oval/V jaw silhouette. Width is shaped by vertical facial landmarks,
-  // not a single linear taper: chin -> jaw angle -> cheekbone -> temple.
-  const widthProfile=[[-.98,.24],[-.90,.54],[-.76,.70],[-.58,.80],[-.34,.88],[-.08,.95],[.18,.99],[.44,.96],[.68,.88],[.86,.72],[.98,.18]];
+  // Reference-led soft oval silhouette. Keep lower cheek and mandibular width fuller,
+  // then turn gradually into a rounded chin rather than a sharp V-shaped jaw.
+  const widthProfile=[[-.98,.32],[-.90,.64],[-.76,.77],[-.58,.85],[-.34,.91],[-.08,.96],[.18,.99],[.44,.96],[.68,.88],[.86,.72],[.98,.18]];
   let profileIndex=0;
   while(profileIndex<widthProfile.length-2&&y>widthProfile[profileIndex+1][0])profileIndex++;
   const lower=widthProfile[profileIndex],upper=widthProfile[profileIndex+1];
@@ -364,7 +364,7 @@ function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
  const geo=makeContinuousHeadGeometry();
- const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.92,1.15,.78);skull.position.y=.08;faceGroup.add(skull);
+ const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.95,1.08,.74);skull.position.y=.08;faceGroup.add(skull);
  // Ears: outer volume, concha shading, helix rim, antihelix fold and tragus.
  for(const side of [-1,1]){
   const ear=ell(faceGroup,skin,[side*.83,.02,-.005],[.135,.225,.105]);ear.name=side<0?"ear-left":"ear-right";
