@@ -25,6 +25,7 @@ check("expression sliders also drive eyebrow shape targets", html.includes('brow
 check("expression sliders drive independent morph influences", ["values.smile","values.sad","values.angry","values.surprised","values.relaxed"].every(value=>html.includes("upperLip.morphTargetInfluences") && html.includes(value)));
 check("render loop fully pauses while the page is hidden", html.includes("cancelAnimationFrame(frameId)") && html.includes("setRenderActive(document.visibilityState===\"visible\")"));
 check("GLB export is implemented", html.includes("GLTFExporter") && html.includes("parseAsync(root") && html.includes('type:"model/gltf-binary"'));
+check("VRM export warns above 75k triangles but only blocks at the interim 100k safety ceiling", html.includes("const MOBILE_TRIANGLE_WARNING=75000") && html.includes("const INTERIM_TRIANGLE_HARD_LIMIT=100000") && html.includes("triangleCount>=INTERIM_TRIANGLE_HARD_LIMIT") && html.includes("triangleCount>=MOBILE_TRIANGLE_WARNING") && html.includes("実機iPad/iPhoneでの負荷確認が必要"));
 check("no image upload or remote inference endpoint is present", !/FormData|XMLHttpRequest|fetch\s*\(|https?:\/\/[^"'\s]+\/(?:api|upload|generate)/i.test(html));
 const vendorPaths = ["../tools/vendor/three.core.js","../tools/vendor/three.module.js","../tools/vendor/controls/OrbitControls.js","../tools/vendor/exporters/GLTFExporter.js","../tools/vendor/THREE-LICENSE.txt"];
 const vendorContents = await Promise.all(vendorPaths.map(path => readFile(new URL(path, import.meta.url), "utf8")));
