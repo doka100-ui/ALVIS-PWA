@@ -1,3 +1,12 @@
+## 18号の耳の立体構造・最新Preview smoke 合格 (2026-11-24)
+- Commit `3f699d65c15a8f769dafa97c928f7e9a3a2974ea` をCloudflare Pagesへ正常deploy。Preview: `https://41fba61f.alvis-pwa.pages.dev`。
+- Chromium/WebKitのdashboard smokeとAvatar Studio smokeが両方success。更新ページ、Service Worker、offline reload、WebGL 2、VRM 1.0 export、ALVIS runtime import/render/controlを確認。
+- 追加した左右耳のhelix / antihelix / concha / tragus 8ノードがVRM export後も保持されることを検証。
+- 最新実測: 65,644 triangles（75k未満）、VRM GLB 3,692,968 bytes。前回63,412から耳の追加で増加。
+- Runtime diagnostics: head/neck/chest、lookAt、blink左右、5母音、happy/sad/angry/relaxed/surprised、head gesture、胸部呼吸変位0.001079を確認。WebKitでも描画/左右wink/視線/VRM runtimeを確認。
+- 外部CDNなし・Service Workerキャッシュ後のAvatar Studio offline reloadも合格。
+- 制約: WebKit CIは実機Safariではない。iPad Pro M1/iPhoneの実機GPU/発熱/長時間動作と18号本人との顔一致度は未承認。main未マージ。
+
 ## 18号 Avatar Studio Preview browser smoke 合格 (2026-11-24)
 - Commit `8057daed799caa26c3561249b65b1ece95eaccf9` のCloudflare Preview deployと`preview-browser-smoke`がsuccess。
 - Dashboard: Chromium/WebKitの更新ページ、Service Worker cacheName検証、画面UI、Chromium offline reload、iPhone相当WebKit初期表示を通過。
