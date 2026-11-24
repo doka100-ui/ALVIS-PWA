@@ -214,8 +214,8 @@ function addEyeGazeMorphTargets(mesh){
 function makeFace(){
  faceGroup=new THREE.Group();root.add(faceGroup);
  // Sculpted oval base; the lower jaw tapers toward the chin.
- const geo=new THREE.SphereGeometry(1,48,36);const pos=geo.attributes.position;
- for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.068*Math.exp(-Math.pow((y-.015)/.27,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));const cheekbone=.038*Math.exp(-Math.pow((Math.abs(x)-.57)/.22,2))*Math.exp(-Math.pow((y-.015)/.27,2));const jawTaper=1-.045*Math.exp(-Math.pow((y+.52)/.25,2))*Math.pow(Math.abs(x),1.4);const chin=.024*Math.exp(-Math.pow(x/.36,2))*Math.exp(-Math.pow((y+.82)/.14,2));pos.setXYZ(i,x*taper*cheek*jawTaper,y,z*depth+cheekbone+chin);}
+ const geo=new THREE.SphereGeometry(1,64,48);const pos=geo.attributes.position;
+ for(let i=0;i<pos.count;i++){const y=pos.getY(i),x=pos.getX(i),z=pos.getZ(i);const taper=.78+.22*((y+1)/2);const cheek=1+.068*Math.exp(-Math.pow((y-.015)/.27,2));const depth=.94+.06*((y+1)/2)+.035*Math.exp(-Math.pow((y+.02)/.3,2));const cheekbone=.038*Math.exp(-Math.pow((Math.abs(x)-.57)/.22,2))*Math.exp(-Math.pow((y-.015)/.27,2));const jawTaper=1-.045*Math.exp(-Math.pow((y+.52)/.25,2))*Math.pow(Math.abs(x),1.4);const chin=.024*Math.exp(-Math.pow(x/.36,2))*Math.exp(-Math.pow((y+.82)/.14,2));const noseBridge=.17*Math.exp(-Math.pow(x/.125,2))*Math.exp(-Math.pow((y+.015)/.57,2));const noseTip=.115*Math.exp(-Math.pow(x/.17,2))*Math.exp(-Math.pow((y+.39)/.17,2));const noseWing=.035*Math.exp(-Math.pow((Math.abs(x)-.16)/.075,2))*Math.exp(-Math.pow((y+.37)/.16,2));pos.setXYZ(i,x*taper*cheek*jawTaper,y,z*depth+cheekbone+chin+(z>0?noseBridge+noseTip+noseWing:0));}
  geo.computeVertexNormals();const skull=new THREE.Mesh(geo,skin);skull.name="facial-skull";skull.scale.set(.88,1.23,.72);skull.position.y=.08;faceGroup.add(skull);
  // Ears: outer volume, concha shading, helix rim, antihelix fold and tragus.
  for(const side of [-1,1]){
@@ -281,18 +281,10 @@ function makeFace(){
  }
  // nose bridge and tip, nostrils
  const noseGroup=new THREE.Group();noseGroup.name="facial-nose";faceGroup.add(noseGroup);
- const noseGeometry=new THREE.SphereGeometry(1,36,24),nosePosition=noseGeometry.attributes.position;
- for(let i=0;i<nosePosition.count;i++){
-  const x=nosePosition.getX(i),y=nosePosition.getY(i),z=nosePosition.getZ(i);
-  const tip=Math.exp(-Math.pow((y+.43)/.24,2));
-  const width=.72+.28*Math.exp(-Math.pow((y+.38)/.42,2));
-  nosePosition.setXYZ(i,x*.105*width,y*.29,z*(.065+.025*tip)+.035*tip);
- }
- noseGeometry.computeVertexNormals();
- const noseMesh=new THREE.Mesh(noseGeometry,skin);noseMesh.position.set(0,.02,.72);noseMesh.name="sculpted-nose-bridge-tip";noseGroup.add(noseMesh);
+ // Nose bridge, tip and alar transitions are sculpted directly into facial-skull.
+ // Only the recessed nostril shadows remain as fine surface details; no spherical nose overlay.
  for(const side of [-1,1]){
-  ell(noseGroup,skin,[side*.087,-.15,.785],[.048,.036,.043],24);
-  const nostril=ell(noseGroup,noseShadow,[side*.067,-.19,.836],[.015,.006,.004],16);nostril.name=side<0?"nostril-left":"nostril-right";
+  const nostril=ell(noseGroup,noseShadow,[side*.067,-.19,.858],[.014,.0045,.0035],16);nostril.name=side<0?"nostril-left":"nostril-right";
  }
  curve(noseGroup,[[0,.30,.79],[0,.16,.80],[0,.02,.825]],.0035,skinShade);
  curve(noseGroup,[[-.045,-.225,.79],[0,-.238,.80],[.045,-.225,.79]],.0035,skinShade);
