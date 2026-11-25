@@ -114,3 +114,21 @@
 - 重要な未解決点: 2026-08-19更新の利用規約を紹介する独立レビューは、規約6.1に入力/出力のAI技術の訓練・改善利用権がある一方、private設定時はサービス提供以外に使わないとする条項もあると指摘。公式FAQの「学習不使用」と文面に矛盾/解釈差がある可能性。利用規約本文の一次確認が必要。
 - 判定: 技術/無料枠の候補として有望だが、プライバシーの矛盾を解消できるまで18号参照画像をアップロードしない。まず新規アカウントの無料credit数、private設定の初期値、無料GLB exportの有無だけを、画像を送らず確認する段階に進める。
 - 根拠: https://docs.3daistudio.com/faq / https://docs.3daistudio.com/3d-generation/image-to-3d / https://docs.3daistudio.com/mcp/security-privacy / https://docs.3daistudio.com/utilities/model-storage / https://www.3daistudio.com/Pricing
+
+
+## 2026-11-25 3D AI Studio公式規約・Privacy一次資料の照合結果
+- 公式Terms of Use（最終更新2026-08-19）: https://www.3daistudio.com/AGB
+  - §2: 無料利用で生成したOutputは個人・非商用に限る。私的設定のOutputは、アカウント表示とサービス提供に必要な処理以外には使わないと記載（§2のprivate Output条項）。
+  - §2: Prompt/Outputについてサービス提供・維持・改善等に必要な範囲で処理するライセンスを規定。
+  - §6.1: Customer Input/OutputをAI技術の訓練・改善・強化に利用する権利を付与すると記載。§2のprivate Output例外との関係が文面上明瞭でなく、Input（参照画像）自体がprivate扱いで除外されるかも明確でない。
+  - §35-36: 入力素材を送る権利・必要な同意を利用者が保証する。18号参照シートの権利関係も別途考慮する。
+- 公式Privacy Notice: https://www.3daistudio.com/privacy-policy
+  - 2026-10-23以降の運営者SaaS.groupへ契約移転に同意した顧客に適用。未同意顧客は旧Hammer Creations通知が引き続き適用されると明記。
+  - §2はprompts/uploads/outputsをAIモデル訓練に使わないと明記。ただし適用範囲が契約移転済み顧客に限定される点に注意。
+  - §5で3D生成エンジン（Tripo/VAST、Meshy、Deemos、Hitem3D、Tencent/Hunyuan等）へプロンプト・画像・3Dモデルを送信すると明記。サービス提供会社へはアカウントID/emailを渡さないと説明。
+  - §6で生成3Dモデルは通常180日、staging/input objectsとMCP uploadsは1日、その他生成コンテンツはユーザー削除またはアカウント削除まで保持と記載。
+- 公式MCP Privacy説明はconnector uploads 24h削除を示すが、Web Studioのすべての画像入力に24h削除が適用されるとは解釈しない。
+- 無料利用の出力権利は個人・非商用のみ。ALVIS個人プロジェクト内利用がこの条件に該当するかは、配布/公開/商用化の範囲により変わるため、将来の一般公開や配布には使わない。
+- 無料credit数やWeb Studioの無料GLB完全ダウンロード条件は公式資料に明確な固定数の記載を確認できていない。無料creditsはあるが、生成前に画面で費用とexport可否を確認する必要。
+- 判定: 技術候補としては維持するが、現時点では18号参照シートをWeb Studioへアップロードしない。Terms §6.1とprivate設定、Privacy Noticeの契約移転条件、第三者AIエンジンへの画像送信、保存期間の不確実性が残る。運営者へ「参照画像/Inputも学習利用対象外か」「private設定で§6.1がどう制限されるか」「未移転顧客に適用されるPrivacy Notice」「無料アカウントのGLB export条件」を文書で確認できた場合に再評価する。
+- 今回はTerms/Privacyの一次資料を確認したのみ。アカウント作成、ログイン、規約同意、画像アップロード、生成、支払いは行っていない。
