@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   avatar-studio:
-    name: Avatar and GLB inspector regression tests
+    name: Avatar Studio regression tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out development
@@ -31,5 +31,16 @@ jobs:
           node-version: "22"
       - name: Run Avatar Studio regression tests
         run: node tests/avatar-studio.test.mjs
+
+  glb-inspector:
+    name: Offline GLB inspector tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out development
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Run offline GLB inspector tests
         run: node tests/glb-inspector.test.mjs
