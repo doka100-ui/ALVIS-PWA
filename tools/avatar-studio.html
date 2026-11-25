@@ -386,17 +386,19 @@ function makeFace(){
   ell(eyesGroup,skinShade,[x,.34,.61],[.27,.19,.10]);
   const eyeball=ell(eyesGroup,sclera,[x,.34,.635],[.218,.086,.052],32);eyeball.name=side<0?"eyeball-left":"eyeball-right";
   almondEye(eyesGroup,sclera,[x,.34,.675],.225,.09);
-  const irisMesh=ell(eyesGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";addEyeGazeMorphTargets(irisMesh);
-  const pupilMesh=ell(eyesGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";addEyeGazeMorphTargets(pupilMesh);
-  const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,24),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";eyesGroup.add(irisBorder);
+  const gazeGroup=new THREE.Group();gazeGroup.name=side<0?"iris-assembly-left":"iris-assembly-right";eyesGroup.add(gazeGroup);
+  const irisMesh=ell(gazeGroup,iris,[x,.34,.735],[.078,.084,.025]);irisMesh.name=side<0?"iris-left":"iris-right";
+  const pupilMesh=ell(gazeGroup,pupil,[x,.34,.755],[.037,.052,.014]);pupilMesh.name=side<0?"pupil-left":"pupil-right";
+  const irisBorder=new THREE.Mesh(new THREE.TorusGeometry(.066,.004,6,24),irisRing);irisBorder.position.set(x,.34,.756);irisBorder.scale.y=1.08;irisBorder.name=side<0?"iris-border-left":"iris-border-right";gazeGroup.add(irisBorder);
   for(let ray=0;ray<12;ray++){
    const angle=ray*Math.PI*2/12;
    const r1=.045,r2=.061;
    const a=[x+Math.cos(angle)*r1,.34+Math.sin(angle)*r1*1.05,.761];
    const b=[x+Math.cos(angle)*r2,.34+Math.sin(angle)*r2*1.05,.759];
-   curve(eyesGroup,[a,[(a[0]+b[0])/2,(a[1]+b[1])/2,.762],b],.0015,irisFiber);
+   const fiber=curve(gazeGroup,[a,[(a[0]+b[0])/2,(a[1]+b[1])/2,.762],b],.0015,irisFiber);fiber.name=(side<0?"iris-fiber-left-":"iris-fiber-right-")+ray;
   }
-  const glintMesh=ell(eyesGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);glintMesh.name=side<0?"eye-glint-left":"eye-glint-right";addEyeGazeMorphTargets(glintMesh);
+  const glintMesh=ell(gazeGroup,eyeGlint,[x-.018,.375,.77],[.018,.018,.008],16);glintMesh.name=side<0?"eye-glint-left":"eye-glint-right";
+  gazeGroup.traverse(object=>{if(object.isMesh)addEyeGazeMorphTargets(object);});
   curve(eyesGroup,[[x-.22,.36,.71],[x-.15,.425,.738],[x-.06,.465,.747],[x+.04,.47,.747],[x+.15,.425,.738],[x+.22,.36,.71]],.015,lashMat);
   curve(eyesGroup,[[x-.20,.29,.71],[x-.10,.265,.729],[x,.255,.733],[x+.10,.265,.729],[x+.20,.29,.71]],.009,skinShade);
   const waterline=curve(eyesGroup,[[x-.17,.292,.728],[x-.085,.274,.741],[x,.269,.744],[x+.085,.274,.741],[x+.17,.292,.728]],.0032,skinShade);waterline.name=side<0?"lower-eyelid-waterline-left":"lower-eyelid-waterline-right";
@@ -615,8 +617,8 @@ function rebuild(){
  const leftLid=eyes.getObjectByName("eyelid-left"),rightLid=eyes.getObjectByName("eyelid-right");
  if(leftLid?.morphTargetInfluences){leftLid.morphTargetInfluences[0]=values.blink;leftLid.morphTargetInfluences[1]=values.blinkLeft;}
  if(rightLid?.morphTargetInfluences){rightLid.morphTargetInfluences[0]=values.blink;rightLid.morphTargetInfluences[1]=values.blinkRight;}
- const gazeTargets=[["iris-left","pupil-left"],["iris-right","pupil-right"]];
- gazeTargets.flat().forEach(name=>{const eye=eyes.getObjectByName(name);if(!eye?.morphTargetInfluences)return;eye.morphTargetInfluences[0]=Math.max(0,values.gazeVertical);eye.morphTargetInfluences[1]=Math.max(0,-values.gazeVertical);eye.morphTargetInfluences[2]=Math.max(0,-values.gazeHorizontal);eye.morphTargetInfluences[3]=Math.max(0,values.gazeHorizontal);});
+ const gazeGroups=["iris-assembly-left","iris-assembly-right"].map(name=>eyes.getObjectByName(name)).filter(Boolean);
+ gazeGroups.forEach(group=>group.traverse(eye=>{if(!eye.isMesh||!eye.morphTargetInfluences)return;eye.morphTargetInfluences[0]=Math.max(0,values.gazeVertical);eye.morphTargetInfluences[1]=Math.max(0,-values.gazeVertical);eye.morphTargetInfluences[2]=Math.max(0,-values.gazeHorizontal);eye.morphTargetInfluences[3]=Math.max(0,values.gazeHorizontal);}));
  const mouth=faceGroup.getObjectByName("facial-mouth");
  const upperLip=mouth.getObjectByName("upper-lip");
  if(upperLip?.morphTargetInfluences){upperLip.morphTargetInfluences[0]=values.smile;upperLip.morphTargetInfluences[1]=values.sad;upperLip.morphTargetInfluences[2]=values.angry;upperLip.morphTargetInfluences[3]=values.surprised;upperLip.morphTargetInfluences[4]=values.relaxed;}
