@@ -6,8 +6,11 @@ on:
       - development
     paths:
       - "tools/avatar-studio.html"
+      - "tools/glb-inspector.html"
+      - "tools/glb-inspector.js"
       - "tools/vendor/**"
       - "tests/avatar-studio.test.mjs"
+      - "tests/glb-inspector.test.mjs"
       - "docs/ALVIS_SPEC.md"
       - ".github/workflows/avatar-studio-tests.yml"
   workflow_dispatch:
@@ -17,7 +20,7 @@ permissions:
 
 jobs:
   avatar-studio:
-    name: Avatar Studio static and syntax checks
+    name: Avatar and GLB inspector regression tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out development
@@ -28,3 +31,5 @@ jobs:
           node-version: "22"
       - name: Run Avatar Studio regression tests
         run: node tests/avatar-studio.test.mjs
+      - name: Run offline GLB inspector tests
+        run: node tests/glb-inspector.test.mjs
