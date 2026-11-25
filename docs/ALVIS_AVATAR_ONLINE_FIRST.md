@@ -165,3 +165,13 @@
 - .github/workflows/avatar-studio-tests.ymlを更新し、development pushで既存Avatar Studioテストに加えてGLB Inspectorテストを実行する。
 - ページURL: https://development.alvis-pwa.pages.dev/tools/glb-inspector.html
 - 追加直後のCIはまだ実行中/結果未確認。成功扱いしない。実機SafariでのGLBファイル選択・大容量モデルのメモリ性能も未検証。
+
+
+## 2026-11-25 GLB Inspector / Avatar Studio CI実行結果
+- tests/glb-inspector.test.mjs: GitHub Actionsで成功。GLB parserの5ケースを通過。
+- tests/avatar-studio.test.mjs: 古いテストが現在の左右iris assembly構造に対して旧変数addEyeGazeMorphTargets(irisMesh)を要求して失敗していた。実装を変更せず、テストを現行のgazeGroup.traverse / iris-assembly-left/rightに合わせて修正し、再実行で成功。
+- Avatar Studio / GLB InspectorのCIを別々のjobに分離し、一方の失敗で他方の結果がスキップされないようにした。
+- CI run: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577663654 — 両job success。
+- Offline-first regression: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577658023 — success。
+- Dashboard preview browser smoke: commit dde011fはCloudflare Pagesの該当デプロイ待ち。完了前にURLの実機動作・デプロイ成功を断定しない。
+- 既存の見た目/VRMモデルは変更していない。iPad/iPhone Safariの実機テストも未実施。
