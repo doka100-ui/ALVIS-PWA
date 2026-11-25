@@ -360,3 +360,11 @@
 - 3DAI Studioは無料/複数ビュー/GLBを掲示するが、Privacy/Terms/学習利用/処理委託/出力権利を確認できず保留。18号参照画像は引き続き外部送信していない。
 - 結論: 無料・非公開・条件明確・高品質人物GLBを同時に満たす生成先はまだ未確定。課金や公開化で妥協せず、次は3DAI Studioの規約発見またはローカル/オープンソース生成経路を調査する。
 - 詳細は docs/ALVIS_AVATAR_ONLINE_FIRST.md。変更はdevelopmentのみ。ALVIS本体ソース/ユーザーデータ/production/mainは未変更。
+
+
+## 2026-11-25 3D AI Studio候補の公式Docs再調査
+- 3D AI Studio公式Docsでは新規登録無料credits、Image-to-3D 15〜75 credits（Prism 3.1=35）、Rigging 15〜20、Animation 15。Safari/モバイル対応、GLB/FBX等のexportを案内。無料プランのモデル保存は6か月。
+- ただし複数視点入力モデルは有料プラン限定。無料枠は単一画像生成が中心で、背面/側面は推測になるため18号の高精度再現には限界。
+- 公式FAQは非公開・学習不使用と説明する一方、独立レビューが利用規約6.1の入力/出力のAI技術改善利用権とprivate設定例外の曖昧さを指摘。公式規約本文の一次確認が終わるまで参照画像アップロード禁止。
+- 次の確認は画像なしでアカウント無料credit数/private初期値/GLB無料exportを確認するだけ。支払い登録なし。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md。変更はdevelopmentのみ。
