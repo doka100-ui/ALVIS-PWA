@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<title>ALVIS GLB Inspector</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#111a2b;--line:#263650;--cyan:#79d9ec;--muted:#9aabc2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#edf5ff;font:15px system-ui,-apple-system,sans-serif}
+header,main{max-width:900px;margin:auto;padding:18px}header{border-bottom:1px solid var(--line)}
+h1{font-size:20px;margin:0 0 6px}p{color:var(--muted);line-height:1.6;margin:6px 0}
+main{display:grid;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+label,button{display:inline-flex;align-items:center;justify-content:center;border:1px solid #3b5876;border-radius:10px;padding:12px 16px;color:#edf5ff;background:#17283e;font:inherit}
+input{max-width:100%}button{cursor:pointer}button:disabled{opacity:.5}
+#drop{border:1px dashed #55718d;border-radius:12px;padding:24px;text-align:center}
+#status{color:var(--cyan);min-height:1.5em}table{width:100%;border-collapse:collapse}td{padding:9px 4px;border-bottom:1px solid var(--line)}td:last-child{text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.good{color:#9be3b2}.warn{color:#ffd18a}.bad{color:#ff9d9d}.small{font-size:12px}
+@media(max-width:600px){header,main{padding:12px}.panel{padding:12px}}
+</style>
+</head>
+<body>
+<header><h1>ALVIS GLB Inspector</h1><p>生成した3Dモデルを端末内で検査します。ファイルは外部送信・保存されません。</p></header>
+<main>
+<section class="panel">
+<div id="drop"><p><strong>GLB 2.0ファイルを選択</strong></p><p class="small">iPad/iPhoneの「ファイル」から選べます。ネット接続・アカウント不要。</p><input id="file" type="file" accept=".glb,model/gltf-binary"></div>
+<p id="status" role="status">待機中 — ファイルを選択してください。</p>
+</section>
+<section class="panel" aria-live="polite"><h2>モデル構成</h2><table id="stats"><tbody><tr><td colspan="2">まだ検査していません。</td></tr></tbody></table></section>
+<section class="panel"><h2>ALVIS互換チェック</h2><div id="checks"><p>GLBを選択するとVRM 1.0・Humanoid・骨格・表情を確認します。</p></div></section>
+<section class="panel"><h2>検査について</h2><p>これは読み取り専用です。モデルの変形・変換・アップロード・IndexedDBへの保存は行いません。</p><p>GLBはVRMと同じではありません。ALVISの現行アバター読み込みはVRM 1.0を要求するため、GLBだけのモデルは検査合格でも、そのまま本体に登録できません。</p></section>
+</main>
+<script type="module">
+import { parseGlb } from "./glb-inspector.js";
+const input=document.querySelector("#file"),status=document.querySelector("#status"),stats=document.querySelector("#stats tbody"),checks=document.querySelector("#checks");
+const fmt=n=>Number(n||0).toLocaleString("ja-JP");
+function row(label,value){return "<tr><td>"+label+"</td><td>"+value+"</td></tr>";}
+function check(ok,label,detail){return '<p class="'+(ok?"good":"warn")+'">'+(ok?"✓ ":"△ ")+label+" — "+detail+"</p>";}
+input.addEventListener("change",async()=>{
+ const file=input.files&&input.files[0];if(!file)return;
+ status.textContent="検査中…";stats.innerHTML="";checks.innerHTML="";
+ try{
+  const result=parseGlb(await file.arrayBuffer());
+  status.textContent="検査完了: "+file.name;
+  const rows=[
+   ["ファイル容量",fmt(result.fileBytes)+" bytes"],["メッシュ / プリミティブ",fmt(result.meshCount)+" / "+fmt(result.primitiveCount)],
+   ["頂点数 / 三角形数",fmt(result.vertexCount)+" / "+fmt(result.triangleCount)],
+   ["ノード / スキン / ボーン",fmt(result.nodeCount)+" / "+fmt(result.skinCount)+" / "+fmt(result.jointCount)],
+   ["アニメーション",fmt(result.animationCount)],["モーフターゲット",fmt(result.morphTargetCount)],
+   ["モーフ名",result.morphTargetNames.join(", ")||"なし"],["マテリアル / テクスチャ / 画像",fmt(result.materialCount)+" / "+fmt(result.textureCount)+" / "+fmt(result.imageCount)],
+   ["拡張",result.extensionsUsed.join(", ")||"なし"],["外部ファイル参照",result.externalUris.join(", ")||"なし"]
+  ];
+  stats.innerHTML=rows.map(x=>row(x[0],x[1])).join("");
+  const required=["blink","happy","sad","angry","surprised","aa","ih","ou","ee","oh"];
+  const available=new Set([...result.presetExpressions,...result.customExpressions].map(x=>x.toLowerCase()));
+  const missing=required.filter(x=>!available.has(x));
+  checks.innerHTML=
+   check(result.hasVrm1,"VRM 1.0",result.hasVrm1?"VRMC_vrmあり":"未検出（通常GLB）")+
+   check(result.hasHumanoid,"Humanoid骨格",result.hasHumanoid?fmt(result.humanoidBoneCount)+" bones":"VRM humanoid情報が不足")+
+   check(result.hasSkin,"スキン/ウェイト",result.hasSkin?fmt(result.jointCount)+" joints":"スキン情報なし")+
+   check(result.hasLookAt,"視線",result.hasLookAt?"lookAtあり":"lookAt未設定")+
+   check(missing.length===0,"表情・口形",missing.length===0?"必要な表情あり":"不足: "+missing.join(", "))+
+   check(result.animationCount>0,"アニメーション",fmt(result.animationCount)+" clips")+
+   check(result.externalUris.length===0,"自己完結ファイル",result.externalUris.length===0?"外部ファイル参照なし":"外部参照があるため同梱が必要");
+  if(result.triangleCount>75000)checks.innerHTML+='<p class="bad">! 三角形数が75,000を超えています。iPad向け軽量化が必要です。</p>';
+  if(!result.looksALVISReady)checks.innerHTML+='<p class="warn">現時点ではALVIS本体へ直接登録できません。VRM変換・不足リグの追加が必要です。</p>';
+ }catch(error){status.textContent="検査失敗: "+error.message;stats.innerHTML=row("結果","有効なGLB 2.0を選択してください。");checks.innerHTML="";}
+});
+</script>
+</body>
+</html>
