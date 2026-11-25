@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { parseGlb } from "../tools/glb-inspector.js";
 
 function makeGlb(document) {
@@ -68,4 +69,11 @@ test("reports ordinary GLB without VRM as not ready", () => {
   const result = parseGlb(makeGlb({ asset: { version: "2.0" }, meshes: [], nodes: [] }));
   assert.equal(result.hasVrm1, false);
   assert.equal(result.looksALVISReady, false);
+});
+
+test("inspector page escapes untrusted metadata and caps file size", async () => {
+  const page = await readFile(new URL("../tools/glb-inspector.html", import.meta.url), "utf8");
+  assert.match(page, /escapeHtml=value=>/);
+  assert.match(page, /escapeHtml\(value\)/);
+  assert.match(page, /100\*1024\*1024/);
 });
