@@ -132,3 +132,21 @@
 - 無料credit数やWeb Studioの無料GLB完全ダウンロード条件は公式資料に明確な固定数の記載を確認できていない。無料creditsはあるが、生成前に画面で費用とexport可否を確認する必要。
 - 判定: 技術候補としては維持するが、現時点では18号参照シートをWeb Studioへアップロードしない。Terms §6.1とprivate設定、Privacy Noticeの契約移転条件、第三者AIエンジンへの画像送信、保存期間の不確実性が残る。運営者へ「参照画像/Inputも学習利用対象外か」「private設定で§6.1がどう制限されるか」「未移転顧客に適用されるPrivacy Notice」「無料アカウントのGLB export条件」を文書で確認できた場合に再評価する。
 - 今回はTerms/Privacyの一次資料を確認したのみ。アカウント作成、ログイン、規約同意、画像アップロード、生成、支払いは行っていない。
+
+
+## 2026-11-25 追加候補：iPadブラウザ編集と無料生成環境
+### Mesh Editor (peer2p/mesheditor)
+- 公式ページ https://peer2p.github.io/mesheditor/ はiPad/iPhone Safariを含むブラウザ動作、タッチ操作、GLB/OBJ/STL import/export、リギング/skin weight編集、ブラウザ内処理を掲示。
+- AI機能はBYO-AI（利用者自身のAI接続）方式。TRELLIS 2/Hunyuan3D/Hi3D等のニューラル生成は任意の外部接続であり、サイト単体が無料で18号画像から3D生成する機能ではない。
+- 判定: 生成先ではなく、GLB取得後のiPad上での確認・軽量編集・リギング候補として調査を継続。実機Safariでの性能/VRM出力は未確認。
+### Modly / PIXFORM / SF3D WebGPU
+- Modly (https://modly3d.app/) は無料・オープンソース・ローカル生成だがWindows/Linux専用でNVIDIA GPUが必要。iPad/iPhoneでは実行できない。
+- PIXFORM (https://github.com/dmonfrooij/pixform) はTripoSRがCPU/MPSに対応する一方、Hunyuan/TRELLIS系はNVIDIA CUDA依存。ローカルwebappはPC環境向け。
+- SF3D WebGPU (https://github.com/lyonsno/sf3d-webgpu) はブラウザ内WebGPU生成の研究実装だが、ローカル開発環境・約2.1GBのモデル重みを要し、現時点でiPad Safari向け完成サービスではない。M4 Maxでの実測値でありM1 iPadに外挿しない。
+- 判定: プライバシー面は魅力だが、ユーザーのiPad/iPhone単独環境では実用生成経路として採用しない。
+### TRELLIS2.com
+- https://trellis2.com/image-to-3d はブラウザでGLB出力を掲示するが、確認時の残高は0 credits、生成費用は30〜42 credits。無料生成可能な残高は確認できず、今回の無料条件に合うと判断できない。
+- 判定: 無料枠の実残高/付与条件が明確になるまで保留。参照画像は送信しない。
+### 方針
+- 現時点でiPadから無料・非公開・学習利用条件明確・完全GLB取得まで一貫して満たす生成サービスは未確定。
+- iPadでのGLB後処理候補としてMesh Editorを別途評価し、生成先の候補と混同しない。
