@@ -1,3 +1,10 @@
+## KeenFaceを18号頭部生成の第一候補に選定 (2026-11-25)
+- KeenFace公式の2026-11 pricing/docs/privacy/termsを確認。新規450 credits、頭部生成150 credits、Studioの料金表はGLB+ARKit blendshapes込み。無料枠だけで最大3回の候補。ただしAPI未購入アカウントはpreview GLB（縮小・表情なし）制限があるため、Studio側の無料フル出力可否を先に確認する。
+- Defaultモードは異なる撮影条件の同一人物1〜15枚に対応し、51 ARKit blendshapes付きGLB頭部を生成可能。今回の資料に適合する可能性が高いが、頭部のみでHumanoid全身骨格は別工程。
+- Defaultはfal/OpenRouter/Google/OpenAIへ画像をスクリーニング/参照画像生成/品質確認目的で送信する。KeenFaceは画像/モデルをML訓練に使わない（別途明示同意を除く）が、head削除までアクティブ保存、CDN 24時間、バックアップ等は別管理。Scan Reconstructionは第三者AI画像処理を避けられるが同一撮影セッションの一貫した写真セットが必要で、既存参照シートには不適。
+- 450 credits/150 credits/無料Studio出力が実画面で確認できた場合のみ1体試す。購入/支払情報登録は禁止。今回はアカウント作成・画像アップロード・生成は未実施。ユーザーが全体工程を委任したため、無料条件の範囲で次工程へ進める。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md。Studio: https://keenface.ai/studio
+
 ## 18号アバターをオンライン先行で制作する方針を確定 (2026-11-25)
 - ユーザーがアバター開発を「オンライン先行で高品質モデルを完成→ALVISへ統合→最後にオフライン対応」とする方針を確定し、制作工程を委任。
 - 無料限定。購入クレジット/サブスク/従量課金/支払情報登録は禁止。ALVIS本体の会話・記憶・履歴・端末情報は外部へ送らない。
