@@ -32,13 +32,19 @@ assert.match(app,/function unlockWithFaceId\(\)/);
 assert.match(app,/function deriveKey\(password,salt\)/);
 assert.match(app,/async function decryptRecord\(record,password\)/);
 assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>app.indexOf("function lockApp(){"));
-assert.match(sw,/alvis-cache-v347-integrated/);
-assert.match(app,/const ALVIS_APP_BUILD_ID="v347"/);
+assert.match(sw,/alvis-cache-v348-integrated/);
+assert.match(app,/const ALVIS_APP_BUILD_ID="v348"/);
 assert.match(app,/alvisModelLoadTrace/);
 assert.ok(app.includes("let avatarLoadInProgress=false"));
 assert.ok(app.includes("if(avatarLoadInProgress)"));
 assert.ok(app.includes("avatarLoadInProgress=true"));
 assert.ok(app.includes("avatarLoadInProgress=false"));
+const avatarLoadHandlerStart=app.indexOf('fileInput.addEventListener("change",async()=>{');
+const avatarLoadHandlerEnd=app.indexOf("\n  (async()=>{",avatarLoadHandlerStart);
+assert.ok(avatarLoadHandlerStart>=0&&avatarLoadHandlerEnd>avatarLoadHandlerStart,"avatar file handler must exist");
+const avatarLoadHandler=app.slice(avatarLoadHandlerStart,avatarLoadHandlerEnd);
+assert.ok(avatarLoadHandler.indexOf("try{")<avatarLoadHandler.indexOf('if(extension!=="glb"&&extension!=="vrm")'),"file validation must run inside try/finally after acquiring the load lock");
+assert.match(avatarLoadHandler,/finally\{\s*avatarLoadInProgress=false;/,"every validation/load exit must release the avatar load lock");
 assert.match(app,/ALVIS_DIAGNOSTIC_SESSION_KEY/);
 assert.match(app,/id="copyDeviceDiagnostics"/);
 assert.match(app,/navigator\.clipboard\.writeText\(textToCopy\)/);
@@ -59,7 +65,7 @@ assert.match(app,/recordAlvisModelLoadTrace/);
 assert.match(app,/WebLLM進捗/);
 assert.match(app,/モデル起動時の読み込み記録/);
 assert.match(app,/ALVIS_MODEL_VRAM_ESTIMATE_MB/);
-assert.match(sw,/alvis-cache-v347-integrated/);
+assert.match(sw,/alvis-cache-v348-integrated/);
 assert.match(app,/現在この画面を制御するWorker版/);
 assert.match(app,/登録済みactive Worker版/);
 assert.match(app,/ALVISアプリキャッシュ一覧/);
@@ -103,7 +109,7 @@ assert.ok(refresh.includes("alvis-cache-v\\d+-integrated"),"the shared refresh p
 assert.ok(refresh.includes('const target="./index-integrated.html"'),"the shared refresh page must always return to the integrated app");
 assert.ok(refresh.includes('retry.addEventListener("click",update)'),"the refresh page must offer a retry after an update error");
 assert.ok(refresh.includes("open.hidden=false"),"the refresh page must offer a direct app link if updating fails");
-assert.ok(!refresh.includes("alvis-cache-v290-integrated") && !refresh.includes("alvis-cache-v331-integrated") && !refresh.includes("alvis-cache-v347-integrated") && !refresh.includes("refresh=290"),"the shared refresh page must not contain version-pinned checks or URLs");
+assert.ok(!refresh.includes("alvis-cache-v290-integrated") && !refresh.includes("alvis-cache-v331-integrated") && !refresh.includes("alvis-cache-v348-integrated") && !refresh.includes("refresh=290"),"the shared refresh page must not contain version-pinned checks or URLs");
 assert.ok(!/caches\.delete|deleteDatabase|localStorage\.clear|indexedDB\.deleteDatabase/.test(refresh),"refresh must never clear user data or model caches");
 
 // v253: normalize redirected responses before returning them from the Service Worker on iOS Safari.
@@ -117,7 +123,7 @@ assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(cachedAppAsset\) return makeServiceWorkerSafeResponse\(cachedAppAsset\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /makeServiceWorkerSafeResponse\(await fetch\(request\)\)/);
 assert.match((await readFile(new URL("../service-worker.js", import.meta.url), "utf8")), /if \(appShell\) return makeServiceWorkerSafeResponse\(appShell\)/);
-assert.match(sw, /alvis-cache-v347-integrated/);
+assert.match(sw, /alvis-cache-v348-integrated/);
 // v271: a stalled Service Worker install must not block WebLLM model startup.
 assert.match(app,/function waitForAlvisServiceWorkerReady\(timeoutMs=3500\)/);
 assert.match(app,/await waitForAlvisServiceWorkerReady\(\)/);
@@ -128,7 +134,7 @@ assert.match(app,/保存済みモデルキャッシュを確認中/);
 assert.match(app,/WebGPU・モデルエンジンを初期化中/);
 assert.ok(app.includes('停止段階："+alvisLoadStage+"／経過："+alvisLoadElapsed()'),"startup errors must include the exact stopped stage and elapsed time");
 assert.match(app,/clearInterval\(alvisLoadWatchdog\)/);
-assert.match(sw,/alvis-cache-v347-integrated/);
+assert.match(sw,/alvis-cache-v348-integrated/);
 assert.ok(app.includes('Service Worker待機を終了・AI読み込みへ移行'),"Service Worker timeout must be visible before WebLLM startup continues");
 // v285: repeat launches use the app-shell cache immediately without scanning model caches.
 const shellNavigationIndex = sw.indexOf("if (isIntegratedShellNavigation)");
@@ -1310,7 +1316,7 @@ assert.ok(app.includes("applyAvatarEmotionFromConversation(text,instantReply);")
 assert.ok(app.includes("applyAvatarEmotionFromConversation(text,reply);"),"generated replies must update avatar emotion");
 assert.ok(app.includes("},5200);"),"temporary expressions must return to neutral after a short interval");
 assert.ok(app.includes('window.ALVISAvatarSetEmotion?.("neutral");'),"leaving avatar mode must clear its expression without changing the HUD");
-assert.ok(sw.includes("alvis-cache-v347-integrated"),"v346 app shell cache must be refreshed");
+assert.ok(sw.includes("alvis-cache-v348-integrated"),"v346 app shell cache must be refreshed");
 assert.ok(appStyles.includes("@media(max-width:600px) and (orientation:portrait)"), "v249 mobile layout is limited to narrow portrait screens");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .display-dock .alvis-hologram-frame{') && appStyles.includes("width:calc(100% + 12px)!important;"), "v249 slightly widens the ALVIS hologram only");
 assert.ok(appStyles.includes('#chatPage[data-display-mode="jarvis"] .hud-shortcuts+.inline-option{') && appStyles.includes("margin:24px 0 10px!important;"), "v249 moves online AI note below the shortcuts");
@@ -1455,7 +1461,7 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
   assert.ok(await (await cacheApi.open("alvis-deps-v2")).match(dependencyRequest),"successful trusted CDN dependencies must be cached");
 
   networkFetch=async()=>{throw new Error("offline");};
-  const appCache=await cacheApi.open("alvis-cache-v347-integrated");
+  const appCache=await cacheApi.open("alvis-cache-v348-integrated");
   await appCache.put("https://alvis.test/index-integrated.html",new Response("cached ALVIS shell"));
   const navigationRequest={method:"GET",url:"https://alvis.test/index-integrated.html",mode:"navigate",headers:new Headers()};
   let navigationResponsePromise;
