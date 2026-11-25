@@ -175,3 +175,11 @@
 - Offline-first regression: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577658023 — success。
 - Dashboard preview browser smoke: commit dde011fはCloudflare Pagesの該当デプロイ待ち。完了前にURLの実機動作・デプロイ成功を断定しない。
 - 既存の見た目/VRMモデルは変更していない。iPad/iPhone Safariの実機テストも未実施。
+
+
+## 2026-11-25 GLB Inspector安全性強化と再テスト
+- GLBに含まれるmorph名/extension名/外部URIは任意の文字列なので、結果表示前にHTML escapeを適用し、ローカルファイル由来のHTML injectionを防止。
+- iPad/iPhoneのメモリ保護のため、入力ファイルは100MB以下に制限。超過時は解析せず案内する。
+- tests/glb-inspector.test.mjsへXSS escapeとサイズ上限の静的チェックを追加。
+- 最新CI run https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577776959 — GLB InspectorとAvatar Studioの両job success。
+- 追加後のGLB Inspectorテストもsuccess。Cloudflare Pages preview smokeはまだdeployment待ちで、実機Safariのファイル選択/大容量メモリは未確認。
