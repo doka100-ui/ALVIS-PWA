@@ -67,3 +67,15 @@
 - Offline: 初回セットアップ後、通信を切ってもモデル/テクスチャ/リグ/モーションをロードできる。
 - 実機: iPad SafariとiPhone Safariでメモリ、描画速度、発熱、ページ復帰を確認。
 - 上記を確認するまで「18号完成」と呼ばない。
+
+
+## 2026-11-25 追加候補：KeenFace（頭部メッシュ＋ARKit表情）
+- 公式料金: https://keenface.ai/pricing — 新規アカウント450 credits、頭部生成150 credits/回。無料枠だけなら最大3回分。クレジット購入・支払情報登録は行わない。
+- Studioの料金表はGLB/OBJ/PLY/STL/FBX、テクスチャ、Expression blendshapes、ARKit blendshapesを含むと記載。ただしAPIでは未購入アカウントに対して縮小・表情なしのpreview GLBしか返さない制約がある。Studio側で無料枠の完全GLB/ARKitを書き出せるかはログイン後に確認が必要。確認できるまで生成を実行しない。
+- API仕様: https://keenface.ai/docs/reference — Defaultは異なる撮影条件の同一人物1〜15枚に対応。Scan Reconstructionは同一撮影セッションの2〜15枚が必要。今回の確定参照シートはScan条件に合わないためDefault候補。
+- Defaultでは画像が第三者AIサービス（fal、OpenRouter、Google、OpenAI）へスクリーニング/参照画像生成/品質確認のため送信される。Scan Reconstructionをアップロード前にONにすればこの画像処理ルートを回避できるが、今回の資料は一貫した実写スキャンセットではない。
+- Privacy Policy（2026-11-10）: https://keenface.ai/legal/privacy-policy — アップロード画像/生成モデルを機械学習モデルの訓練には使用しない（別途明示同意がある場合を除く）。マーケティング/ショーケースも事前同意なしには使わない。画像/モデルはユーザーが削除するかアカウント閉鎖までアクティブ保存。head削除後CDNは24時間以内にpurge、バックアップは別管理で最大約30日。fal一時ファイルは24時間期限設定だが、下流プロバイダのログまでゼロ保持を保証するものではない。
+- Terms（2026-11-10）: https://keenface.ai/legal/terms-of-service — 出力はユーザー所有（元素材の第三者権利は別）、生成AIの限界と出力検査責任あり。入力権利/必要な同意は利用者が確保。
+- 技術適合性: 51 ARKit blendshapes付きGLBの頭部を生成可能。全身Humanoid骨格は含まれず、頭部と身体の接合・髪/耳/首・全身リグ・VRM化は別工程。
+- 判定: 現在の第一候補。無料450 credits/Studioフル出力/ログイン時の条件を実画面で確認後、無料枠の範囲内で1体だけ試す。外部処理は上記のDefault経路であることを理解し、不要な画像は送らず、取得後はhead削除を行う。今回は画像送信・アカウント作成・生成は未実施。
+- Studio URL: https://keenface.ai/studio
