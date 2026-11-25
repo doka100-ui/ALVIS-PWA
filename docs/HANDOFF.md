@@ -405,3 +405,11 @@
 - Offline-first regressionもsuccess: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577658023
 - dashboard preview browser smokeはCloudflare Pages deployment待ち。実機Safariは未確認。
 - 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
+
+
+## 2026-11-25 GLB Inspector安全性強化
+- GLB内のmorph名/extension名/外部URIは不正なHTMLを含み得るため、Inspector表示時にHTML escapeを追加。入力サイズ上限100MBを設定しiPadメモリ負荷を抑制。
+- 追加静的テストを含め、Avatar StudioとGLB InspectorのGitHub Actions両jobがsuccess: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577776959
+- ページ: https://development.alvis-pwa.pages.dev/tools/glb-inspector.html （Cloudflare deployment smoke / 実機Safariは未確認）
+- Avatar StudioからInspectorへのリンクも追加。既存VRM/ユーザーデータは変更なし。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
