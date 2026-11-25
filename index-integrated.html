@@ -4759,6 +4759,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   if(!chatPage||!host||!status||!loadButton||!fileInput)return;
   const DB_NAME="ALVISAvatarAssets",STORE="models",MODEL_KEY="android18",VRM_KEY="android18-vrm";
   let currentUrl=null,modelBlob=null,vrmBlob=null,viewerReady=null,vrmRuntime=null,modelFailed=false;
+  let avatarLoadInProgress=false;
   const isActive=()=>!chatPage.classList.contains("hidden")&&chatPage.dataset.displayMode==="avatar";
   const setStatus=value=>{status.textContent=value;};
   const renderDiagnostics=report=>{
@@ -4895,6 +4896,12 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   loadButton.addEventListener("click",()=>fileInput.click());
   fileInput.addEventListener("change",async()=>{
     const file=fileInput.files&&fileInput.files[0];if(!file)return;
+    if(avatarLoadInProgress){
+      setStatus("別の3Dモデルを読み込み中です。完了後に再試行してください");
+      fileInput.value="";
+      return;
+    }
+    avatarLoadInProgress=true;
     const extension=file.name.toLowerCase().split(".").pop();
     if(extension!=="glb"&&extension!=="vrm"){setStatus("GLBまたはVRM形式のファイルを選択してください");return;}
     try{
@@ -4924,7 +4931,10 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
         }
       }
     }catch(error){setStatus("MODEL SAVE FAILED — 端末の空き容量を確認");}
-    fileInput.value="";
+    finally{
+      avatarLoadInProgress=false;
+      fileInput.value="";
+    }
   });
   (async()=>{
     try{
