@@ -150,3 +150,18 @@
 ### 方針
 - 現時点でiPadから無料・非公開・学習利用条件明確・完全GLB取得まで一貫して満たす生成サービスは未確定。
 - iPadでのGLB後処理候補としてMesh Editorを別途評価し、生成先の候補と混同しない。
+
+
+## 2026-11-25 Mesh Editorのソース確認とALVIS統合ギャップ
+- Mesh Editor公式GitHub https://github.com/peer2p/mesheditor を確認。Apache-2.0、Babylon.js 9系、Web/iPad/iPhone touch UI、GLB/GLTF/OBJ/STL/PLY import/exportを掲示。公開READMEはVitest 232 tests passedと記載（外部プロジェクトの自己申告であり、ALVIS側の検証結果ではない）。
+- RiggingEditorTool.tsの実装説明はHumanoid/Quadruped/Prop rig、20-bone humanoid、weight paint、joint bend testを明記。GLB exporterはBabylon GLTF2Exportを使用。
+- 公開ソースを確認した範囲ではVRM/VRMC_vrm exporterやVRM表情セットを確認できない。したがってMesh Editorは「GLBの形状修正・簡易Humanoidリグ・ウェイト調整」の補助ツール候補であり、ALVIS完成VRMを直接作るツールではない。ブラウザ内の編集はローカル処理をうたうが、BYO-AI接続を有効にすると接続先へプロンプト/画像が送信され得るため、AI接続を使わず手動ツールだけで利用する。
+- ALVIS現行runtime assets/alvis-vrm-runtime.js はGLTFLoader+VRMLoaderPluginでVRM extensionを検出し、VRMがないGLBは拒否する。Avatar Studio tools/avatar-studio.html は現状手続き生成シーンからVRM 1.0をexportする機能で、任意GLBを取り込むインポート導線はない。したがってGLB生成後に必要な作業は、骨格確認、顔モーフ/表情、lookAt、VRMC_vrm metadataを付与する変換工程。単にMesh EditorからGLBを書き出すだけではALVISに登録できない。
+- 参照: https://peer2p.github.io/mesheditor/ / https://github.com/peer2p/mesheditor / https://github.com/peer2p/mesheditor/blob/main/src/tools/editor/RiggingEditorTool.ts
+## 2026-11-25 ALVISローカルGLB検査ツールを追加
+- tools/glb-inspector.html + tools/glb-inspector.js を追加。ローカル選択したGLB 2.0をブラウザ内だけで読み取り、ファイル容量、mesh/primitive、頂点/三角形、skin/joints、animation、morph targets、materials/textures/images、外部URI、extensions、VRMC_vrm humanoid/lookAt/expressionsを検査する。
+- ファイルを外部送信せず、IndexedDB/localStorageへ保存せず、元ファイルを変更しない。既存Avatar Studio/ALVIS runtime/ユーザーデータに影響しない独立ページ。
+- tests/glb-inspector.test.mjs を追加。GLB parserの正常系、VRM metadata、通常GLBの未対応判定、ヘッダー破損、JSON破損を検査。
+- .github/workflows/avatar-studio-tests.ymlを更新し、development pushで既存Avatar Studioテストに加えてGLB Inspectorテストを実行する。
+- ページURL: https://development.alvis-pwa.pages.dev/tools/glb-inspector.html
+- 追加直後のCIはまだ実行中/結果未確認。成功扱いしない。実機SafariでのGLBファイル選択・大容量モデルのメモリ性能も未検証。
