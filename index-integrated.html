@@ -573,7 +573,7 @@ let data = {memories:[],candidates:[],history:[],improvements:[],autonomyTasks:[
 let cryptoKey = null;
 let encryptionSalt = null;
 let serverRevision = null;
-const ALVIS_APP_BUILD_ID="v347";
+const ALVIS_APP_BUILD_ID="v348";
 let unlocked = false;
 let autoSyncEnabled = false;
 let localDirty = false;
@@ -4902,9 +4902,9 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
       return;
     }
     avatarLoadInProgress=true;
-    const extension=file.name.toLowerCase().split(".").pop();
-    if(extension!=="glb"&&extension!=="vrm"){setStatus("GLBまたはVRM形式のファイルを選択してください");return;}
     try{
+      const extension=file.name.toLowerCase().split(".").pop();
+      if(extension!=="glb"&&extension!=="vrm"){setStatus("GLBまたはVRM形式のファイルを選択してください");return;}
       if(extension==="vrm"){
         const previous=await readModel(VRM_KEY);
         const displayed=await showVrm(file);
