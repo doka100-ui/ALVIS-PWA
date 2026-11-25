@@ -34,10 +34,12 @@ input{max-width:100%}button{cursor:pointer}button:disabled{opacity:.5}
 import { parseGlb } from "./glb-inspector.js";
 const input=document.querySelector("#file"),status=document.querySelector("#status"),stats=document.querySelector("#stats tbody"),checks=document.querySelector("#checks");
 const fmt=n=>Number(n||0).toLocaleString("ja-JP");
-function row(label,value){return "<tr><td>"+label+"</td><td>"+value+"</td></tr>";}
-function check(ok,label,detail){return '<p class="'+(ok?"good":"warn")+'">'+(ok?"✓ ":"△ ")+label+" — "+detail+"</p>";}
+const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+function row(label,value){return "<tr><td>"+escapeHtml(label)+"</td><td>"+escapeHtml(value)+"</td></tr>";}
+function check(ok,label,detail){return '<p class="'+(ok?"good":"warn")+'">'+(ok?"✓ ":"△ ")+escapeHtml(label)+" — "+escapeHtml(detail)+"</p>";}
 input.addEventListener("change",async()=>{
  const file=input.files&&input.files[0];if(!file)return;
+ if(file.size>100*1024*1024){status.textContent="検査できません: 100MB以下のGLBを選択してください。";return;}
  status.textContent="検査中…";stats.innerHTML="";checks.innerHTML="";
  try{
   const result=parseGlb(await file.arrayBuffer());
