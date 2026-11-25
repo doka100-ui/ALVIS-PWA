@@ -73,7 +73,7 @@ check("visible face and torso geometry are rigidly attached to head and chest bo
 check("VRM extension is declared as used and required", html.includes('gltf.extensionsRequired=[...new Set') && html.includes('"VRMC_vrm"'));
 check("VRM expression presets are generated from actual mesh target names", html.includes("expressions.preset[preset]={morphTargetBinds}") && html.includes("names.forEach((name,index)"));
 
-check("both eyes export named VRM look-at morph targets", html.includes("addEyeGazeMorphTargets(irisMesh)") && html.includes("addEyeGazeMorphTargets(pupilMesh)") && html.includes('mesh.morphTargetDictionary={lookUp:0,lookDown:1,lookLeft:2,lookRight:3}'));
+check("both eyes export named VRM look-at morph targets through grouped iris assemblies", html.includes('gazeGroup.name=side<0?"iris-assembly-left":"iris-assembly-right"') && html.includes("gazeGroup.traverse(object=>{if(object.isMesh)addEyeGazeMorphTargets(object);})") && html.includes('mesh.morphTargetDictionary={lookUp:0,lookDown:1,lookLeft:2,lookRight:3}'));
 check("VRM look-at expression presets and range maps are included", html.includes('lookAt:{type:"expression"') && ["lookUp","lookDown","lookLeft","lookRight"].every(name=>html.includes('"'+name+'"')));
 
 check("VRM metadata restricts this personal ALVIS avatar to its author and disables redistribution", html.includes('avatarPermission:"onlyAuthor"') && html.includes('commercialUsage:"personalNonProfit"') && html.includes('allowRedistribution:false') && html.includes('modification:"allowModification"'));
