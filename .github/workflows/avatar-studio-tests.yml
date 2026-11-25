@@ -1,0 +1,30 @@
+name: Avatar Studio regression tests
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - "tools/avatar-studio.html"
+      - "tools/vendor/**"
+      - "tests/avatar-studio.test.mjs"
+      - "docs/ALVIS_SPEC.md"
+      - ".github/workflows/avatar-studio-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  avatar-studio:
+    name: Avatar Studio static and syntax checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out development
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run Avatar Studio regression tests
+        run: node tests/avatar-studio.test.mjs
