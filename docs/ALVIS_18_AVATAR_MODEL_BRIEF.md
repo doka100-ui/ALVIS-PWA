@@ -337,3 +337,12 @@ VRM 1.0を第一候補、VRM 0.xも互換性対象とする。GLBのみの場合
 - **Grab3D Character Mixer / Auto-Rig Studio** (`https://grab3d.com/tools/`): 無料・アカウント不要・ローカル処理。Character Mixerは198パーツの3スタイルからリグ済みGLB/VRMを作れるが、写真/参照シートから本人そっくりのキャラクターを生成するものではなく、スタイルも低ポリ寄り。Auto-Rig StudioはGLB/FBX/OBJをリグ付きGLB/FBXへ変換する補助候補。
 - **Ekza Studio** (`https://studio.ekza.io/`, source `https://github.com/ekza-space/ekza-studio`): MITライセンスのブラウザ型VRM/VRMA編集環境。現状の公開説明ではモデリングはlow-poly box modeling中心で、写実的な18号の顔を画像から生成する用途ではない。iPad Safari対応は未確認。
 - 判断: これらは「生成済み3Dメッシュのリギング/VRM化/検査」には候補となるが、最重要課題の「確定参照シートから似た顔の高品質メッシュを作る」問題は解決しない。無料条件を満たさない自動生成クレジットは使用しない。参照画像を外部送信しない。ユーザーが明示的に承認するまで外部サービスへファイルを渡さない。
+
+
+## 追加調査: ブラウザで無料リギングできるMesh2Motion (2026-11-25)
+
+- 公式サイト `https://mesh2motion.org/` と公式GitHub `https://github.com/Mesh2Motion/mesh2motion-app` を確認。無料・オープンソースのブラウザ型3Dリギング/アニメーションツール。GLB/GLTF/DAE/FBXを読み込み、Human等の骨格を配置し、複数アニメーションを含むGLB/FBXを書き出せる。コードMIT、収録アート/アニメーションCC0。公式サイトはサブスクリプション不要・ブラウザ内動作・オフライン版ありと説明。
+- 重要な制約: これは画像から3Dメッシュを作るツールではない。既にあるGLB等のモデルをリギング/アニメーションする工程。出力はGLB/FBXでありVRM 1.0ではないため、ALVISへ入れるにはHumanoid骨名/ウェイト/表情モーフを検査し、VRM 1.0メタデータを追加・検証する変換工程が別途必要。現行の上半身中心プロトタイプにHuman全身リグを適用できるかも未確認。
+- iPad Safariの操作/メモリ/ファイル出力は未実機確認。参照画像のアップロードは不要な用途だが、モデルファイルを外部サービスへ送ることをユーザーに代わって実施しない。
+- 判断: 無料の「GLB入手後のリギング/アニメーション候補」として有望。画像→3D生成の代替ではない。リンク: `https://app.mesh2motion.org/`。
+- 参考: AssetFurnaceはApple Silicon Mac/NVIDIA向けローカル画像→3D/リグ工程をうたうが、iPadOSで動くものではない。Pixal StudioもComfyUIバックエンド/Windows等のデスクトップ環境が前提。いずれもiPad単体解決策として扱わない。
