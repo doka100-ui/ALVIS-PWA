@@ -35,6 +35,10 @@ assert.ok(app.indexOf("resetFaceIdSetup();",app.indexOf("function lockApp(){"))>
 assert.match(sw,/alvis-cache-v347-integrated/);
 assert.match(app,/const ALVIS_APP_BUILD_ID="v347"/);
 assert.match(app,/alvisModelLoadTrace/);
+assert.ok(app.includes("let avatarLoadInProgress=false"));
+assert.ok(app.includes("if(avatarLoadInProgress)"));
+assert.ok(app.includes("avatarLoadInProgress=true"));
+assert.ok(app.includes("avatarLoadInProgress=false"));
 assert.match(app,/ALVIS_DIAGNOSTIC_SESSION_KEY/);
 assert.match(app,/id="copyDeviceDiagnostics"/);
 assert.match(app,/navigator\.clipboard\.writeText\(textToCopy\)/);
