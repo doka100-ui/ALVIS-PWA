@@ -368,3 +368,13 @@
 - 公式FAQは非公開・学習不使用と説明する一方、独立レビューが利用規約6.1の入力/出力のAI技術改善利用権とprivate設定例外の曖昧さを指摘。公式規約本文の一次確認が終わるまで参照画像アップロード禁止。
 - 次の確認は画像なしでアカウント無料credit数/private初期値/GLB無料exportを確認するだけ。支払い登録なし。
 - 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md。変更はdevelopmentのみ。
+
+
+## 2026-11-25 3D AI Studio公式規約・Privacy一次確認
+- Terms §2/§6.1にprivate Outputの例外と、Input/OutputをAI技術の訓練・改善に使う権利が併存。参照画像Inputが確実に除外されるか文面で明確でない。
+- 新Privacy Noticeは2026-10-23以降の運営者SaaS.groupへの契約移転に同意した顧客に適用。未同意顧客は旧Hammer Creations通知。新Privacy §2はprompts/uploads/outputsを学習に使わないと記載するが、適用範囲に注意。
+- 新Privacy §5では画像/プロンプト/3Dモデルが複数の第三者AIエンジンへ送信される。§6では生成3Dモデル180日、staging/input objectsとMCP uploadsは1日、その他生成コンテンツは削除まで保持。
+- 無料生成物は個人・非商用利用のみ。無料creditsの具体数・Web Studioでの完全GLB export条件は未確定。
+- 結論: 3D AI Studioは技術候補として残すが、参照シートはアップロードしない。運営者からInputの学習除外/private設定の関係、適用Privacy Notice、無料GLB export条件の文書回答を得るまで保留。
+- 今回は公式一次資料の調査のみ。アカウント作成/ログイン/同意/アップロード/生成/支払いなし。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
