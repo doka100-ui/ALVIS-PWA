@@ -396,3 +396,12 @@
 - Mesh Editor公式ソースはiPad touch/GLB/20-bone Humanoid rig/weight paintを掲示するが、公開ソースにVRM exporter・VRM expression authoringを確認できない。GLB補助編集用候補に限定し、AI接続を使わず手動編集のみを想定。
 - ALVIS runtimeはVRM extension必須、Avatar Studioは現状独自の手続き生成VRM exporterのみで任意GLB importなし。GLB→VRM conversion/顔blendshape/lookAt追加が今後の主要な技術課題。
 - 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
+
+
+## 2026-11-25 GLB Inspector追加後のCI結果
+- tests/glb-inspector.test.mjsがGitHub Actionsで成功。5つのparserテストを通過。
+- Avatar Studioテストは旧iris変数名を参照していたため一度失敗。現行のiris assembly実装に合わせてテストだけを更新し、再実行で成功。
+- CIをAvatar Studio jobとGLB Inspector jobに分離。両方success: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577663654
+- Offline-first regressionもsuccess: https://github.com/doka100-ui/ALVIS-PWA/actions/runs/45577658023
+- dashboard preview browser smokeはCloudflare Pages deployment待ち。実機Safariは未確認。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
