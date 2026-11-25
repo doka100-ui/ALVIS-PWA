@@ -1,3 +1,16 @@
+## 視線アセンブリを一体で動かす修正とCI追加 (2026-11-25)
+- 発見した表示上の問題: 視線モーフが虹彩/瞳孔/反射だけに付いており、虹彩リング・放射状模様が追従しない。視線移動時に虹彩パーツが分離して見える可能性があった。
+- 修正: 左右の虹彩・瞳孔・リング・12本の虹彩ファイバー・キャッチライトを左右別の `iris-assembly-left/right` Groupにまとめ、配下の全MeshへlookUp/lookDown/lookLeft/lookRight morph targetを付与。Studioのプレビューも左右アセンブリ全体を同じ値で駆動する。VRM出力も各パーツへ視線表情bindを生成する。
+- 実装commit: `a7141463751ef6cbdf39b6ce964187ce64fcdab5`。テスト更新commit: `8e18ac204c6287961010b1c20497376e3b8fe86a`。
+- 回帰テストにアセンブリ構造/虹彩パーツ/二軸制御を追加。GitHub Actions workflow `.github/workflows/avatar-studio-tests.yml` を追加し、developmentブランチの関連変更でNode 22の `node tests/avatar-studio.test.mjs` を実行する。workflow commit: `3c8a188d9a3e383f80a80460db6c2403f3c9860e`。
+- このセッション内でソース文字列の静的チェック11項目はすべてtrue。ローカルNode実行は環境のGitHub接続不可で実施できず、GitHub Actionsの実行結果も現時点で取得できていない。CI成功とは扱わない。
+- 外部生成/課金/画像アップロードなし。main未変更。既存ALVIS本体のデータ保存経路に変更なし。
+ 
+## Mesh2Motionの無料リギング工程を調査 (2026-11-25)
+- 公式Mesh2Motionはブラウザ内の無料オープンソース3Dリギング/アニメーション候補。既存GLB/GLTF等を読み、Human等の骨格を合わせ、GLB/FBX出力。画像→3Dではなく、VRM出力でもないため、モデル入手後の補助工程と位置づける。
+- iPad Safari実機対応は未確認。詳細・制約は `docs/ALVIS_18_AVATAR_MODEL_BRIEF.md` に記録。ユーザー承認なしにモデル/参照画像を外部へアップロードしない。
+- 詳細記録commit: `1efbbb2c3db3559127a92f8829bb271a0cf1877c`。
+
 ## 無料ブラウザ型3D補助工程の調査を記録 (2026-11-25)
 - Dasoni Studio（手動VRM編集無料/自動化はクレジット）、AnnoMotion Rig Lab（端末内無料auto-rigだが全身T/A-pose向けGLB出力）、Grab3D（無料ローカルツール/低ポリ寄りCharacter Mixer）、Ekza Studio（MIT/low-poly中心）を調査。
 - いずれも参照シートから18号の似顔を高品質に生成する手段とは確認できず、画像→3D問題は未解決。無料条件・参照画像の非送信を維持し、外部サービスへのアップロード/クレジット使用はしない。
