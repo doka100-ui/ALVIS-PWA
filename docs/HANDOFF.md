@@ -1,3 +1,11 @@
+## Avatar Studioの視線プレビュー調整を追加 (2026-11-25)
+- 顔の造形を直接変更せず、虹彩/瞳孔に既存のlookUp/lookDown/lookLeft/lookRight morph targetを反映する左右・上下2軸の視線プレビューを追加。
+- 2本のスライダーは -1〜+1、中央が正面。左右両眼の虹彩と瞳孔へ同じ方向のモーフを適用し、既存のVRM lookAt expression bindと整合させる。リセットで中央へ戻す。
+- 回帰テストにUI存在、モーフ接続、上下左右の符号、初期値/リセット値を確認する静的ガードを追加。
+- 変更: `tools/avatar-studio.html` commit `39bbcb9447704aa0e9a80394804b6fc5bd15ac7f`; `tests/avatar-studio.test.mjs` commit `206ec8734d8dafe7a0d5a02b9b79de5578bc9c2a`.
+- 未確認: この変更後のNodeテスト、Chromium/WebKitブラウザSmoke、Preview deploy、iPad実機操作。CI結果確認後に合否を更新する。
+- 影響範囲: Avatar Studioのローカルプレビューとテストのみ。ALVIS本体のチャット/AI/記憶/履歴/同期/暗号化バックアップ/VRM runtime保存経路は変更なし。main未マージ。
+ 
 ## iPad Pro M1での高品質image-to-3D実行条件を再評価 (2026-11-25)
 - 18号の確定ビジュアル参照シートをLibraryから再確認。正面/斜め/横顔/背面/表情の基準資料は保持されており、再アップロード不要。
 - 公式要件を確認: Microsoft TRELLIS.2はLinuxでのみテスト済み、NVIDIA GPU 24GB以上。Tencent Hunyuan3D-2.1は形状10GB VRAM、テクスチャ21GB VRAM、両方で29GB VRAMを提示。いずれもiPadOS/Safariローカル生成経路ではない。
