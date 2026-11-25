@@ -378,3 +378,11 @@
 - 結論: 3D AI Studioは技術候補として残すが、参照シートはアップロードしない。運営者からInputの学習除外/private設定の関係、適用Privacy Notice、無料GLB export条件の文書回答を得るまで保留。
 - 今回は公式一次資料の調査のみ。アカウント作成/ログイン/同意/アップロード/生成/支払いなし。
 - 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
+
+
+## 2026-11-25 iPad向け生成/編集候補の追加調査
+- Mesh EditorはiPad/iPhoneブラウザ対応、GLB編集/タッチ操作/リギング機能を掲示。ただしAI生成はBYO-AI接続方式で、無料画像→3D生成サービスそのものではない。GLB取得後のiPad編集候補。
+- Modly/PIXFORMはローカル生成だがPC/NVIDIA GPU依存。SF3D WebGPUは研究実装でモデル重み約2.1GBと開発環境を要し、M1 iPad Safariでの実用性未確認。
+- TRELLIS2.comは生成コスト30〜42 credits、確認時残高0。無料生成枠は確認できず保留。
+- 結論: iPadだけで無料・非公開・学習条件明確・完全GLB出力を満たす生成経路はまだ未確定。Mesh Editorは後処理候補として別評価。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
