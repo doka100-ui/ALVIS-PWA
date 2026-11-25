@@ -386,3 +386,13 @@
 - TRELLIS2.comは生成コスト30〜42 credits、確認時残高0。無料生成枠は確認できず保留。
 - 結論: iPadだけで無料・非公開・学習条件明確・完全GLB出力を満たす生成経路はまだ未確定。Mesh Editorは後処理候補として別評価。
 - 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
+
+
+## 2026-11-25 ALVIS内にオフラインGLB検査ページを追加
+- 新規: tools/glb-inspector.html / tools/glb-inspector.js。ローカルGLB 2.0のmesh/vertex/triangle/skin/joint/animation/morph/material/texture/external URI/VRMC_vrm/humanoid/lookAt/expressionsを検査。ファイルは外部送信・永続保存・変更なし。
+- 新規: tests/glb-inspector.test.mjs。正常GLB/VRM metadata/通常GLB/壊れたヘッダー/壊れたJSONの5系統をテスト。
+- CI: .github/workflows/avatar-studio-tests.ymlを更新し、development pushでAvatar StudioとGLB Inspectorの両テストを実行。
+- URL: https://development.alvis-pwa.pages.dev/tools/glb-inspector.html （deployment反映とSafari実機動作は未確認）
+- Mesh Editor公式ソースはiPad touch/GLB/20-bone Humanoid rig/weight paintを掲示するが、公開ソースにVRM exporter・VRM expression authoringを確認できない。GLB補助編集用候補に限定し、AI接続を使わず手動編集のみを想定。
+- ALVIS runtimeはVRM extension必須、Avatar Studioは現状独自の手続き生成VRM exporterのみで任意GLB importなし。GLB→VRM conversion/顔blendshape/lookAt追加が今後の主要な技術課題。
+- 詳細: docs/ALVIS_AVATAR_ONLINE_FIRST.md
