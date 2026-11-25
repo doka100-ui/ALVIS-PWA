@@ -1,3 +1,10 @@
+## 3Dモデル読み込みの二重実行ガード (2026-11-26)
+- 課題: VRM/GLBの読み込み・検証・IndexedDB保存中にファイル選択を重ねると、複数の非同期ロードが並行し、Canvas/rendererの差し替えやGPUリソース解放が競合する可能性があった。
+- 対応: ファイル入力ハンドラに単一ロードロックを追加。処理中の重複changeイベントは案内を表示して破棄し、成功/失敗どちらでもfinallyでロックとinput値を確実に解除する。
+- 対象: index-integrated.htmlのVRM/GLB読み込み入口とoffline-first回帰テストのみ。モデル形式、既存IndexedDBキー/保存データ、チャット/Qwen/Kokoro/記憶/履歴/同期/暗号化バックアップには変更なし。
+- 未確認: GitHub Actions実行結果、iPad/iPhone Safariでの実機操作。CIが成功するまで完了扱いしない。
+- main/本番は変更していない。参照画像の外部送信・課金なし。
+
 ## KeenFace用の参照素材をローカル準備 (2026-11-25)
 - 既存Libraryの確定参照シートをローカルで確認し、顔メイン1枚＋正面/右3/4/右横顔/背面/左3/4/左横顔の7枚を切り出した。
 - ZIPにはREADMEを同梱し、KeenFace Defaultモード・1体のみ・150 free credits確認・無料GLB/ARKit出力確認・課金/支払情報登録禁止・取得後head削除を明記。
