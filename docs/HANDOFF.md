@@ -1,3 +1,8 @@
+## 無料ブラウザ型3D補助工程の調査を記録 (2026-11-25)
+- Dasoni Studio（手動VRM編集無料/自動化はクレジット）、AnnoMotion Rig Lab（端末内無料auto-rigだが全身T/A-pose向けGLB出力）、Grab3D（無料ローカルツール/低ポリ寄りCharacter Mixer）、Ekza Studio（MIT/low-poly中心）を調査。
+- いずれも参照シートから18号の似顔を高品質に生成する手段とは確認できず、画像→3D問題は未解決。無料条件・参照画像の非送信を維持し、外部サービスへのアップロード/クレジット使用はしない。
+- 詳細: `docs/ALVIS_18_AVATAR_MODEL_BRIEF.md`。記録commit `29202da7b831646eb597e867b25448667a6c2847`。
+
 ## 視線モーフのVRM出力回帰ガードを追加 (2026-11-25)
 - 既存の左右/上下視線プレビューについて、虹彩・瞳孔それぞれの4方向モーフ名/変位方向/スケール補正、左右両眼への適用、VRM 1.0 look expression必須bindを静的回帰テストで検査するよう追加。
 - テスト変更 commit `1d51323bd6cfff6baea2d0d003d5e1e0bdb5c89b`。
