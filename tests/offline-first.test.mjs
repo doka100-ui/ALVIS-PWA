@@ -1460,7 +1460,30 @@ assert.match(app,/if\(aiEngine\|\|aiLoading\)\{[\s\S]*?Kokoroを同時に起動�
   assert.equal(await dependencyResponse.text(),"trusted dependency");
   assert.ok(await (await cacheApi.open("alvis-deps-v2")).match(dependencyRequest),"successful trusted CDN dependencies must be cached");
 
+  // Avatar runtime modules must be reusable offline after their first successful online load.
+  const avatarDependencies=[
+    ["https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js","three runtime"],
+    ["https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js","VRM runtime"],
+    ["https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js","GLB viewer"]
+  ];
+  for(const [url,label] of avatarDependencies){
+    const request={method:"GET",url,mode:"cors",headers:new Headers()};
+    let responsePromise;
+    listeners.fetch({request,respondWith(promise){responsePromise=promise;}});
+    const response=await responsePromise;
+    assert.equal(await response.text(),"trusted dependency",label+" must load online");
+    assert.ok(await (await cacheApi.open("alvis-deps-v2")).match(request),label+" must be cached for offline reuse");
+  }
+
   networkFetch=async()=>{throw new Error("offline");};
+  for(const [url,label] of avatarDependencies){
+    const request={method:"GET",url,mode:"cors",headers:new Headers()};
+    let responsePromise;
+    listeners.fetch({request,respondWith(promise){responsePromise=promise;}});
+    const response=await responsePromise;
+    assert.equal(response.status,200,label+" must load from dependency cache offline");
+    assert.equal(await response.text(),"trusted dependency",label+" offline response must match cached bytes");
+  }
   const appCache=await cacheApi.open("alvis-cache-v348-integrated");
   await appCache.put("https://alvis.test/index-integrated.html",new Response("cached ALVIS shell"));
   const navigationRequest={method:"GET",url:"https://alvis.test/index-integrated.html",mode:"navigate",headers:new Headers()};
