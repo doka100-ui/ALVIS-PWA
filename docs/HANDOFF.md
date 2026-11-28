@@ -1,11 +1,21 @@
-## 3D依存CDNのオフライン再利用テスト追加 (2026-11-28)
-- Three.js 0.186.0、three-vrm 3.5.5、model-viewer 4.1.0の3つが現在のアバター表示経路で使われていることを確認。
-- Service Workerの既存trusted CDN cache（`alvis-deps-v2`）について、jsDelivrのThree.js/three-vrmとGoogle CDNのmodel-viewerがオンライン取得後にキャッシュされ、通信断後に同じ依存ファイルをキャッシュから返すことをoffline-firstテストへ追加。
-- 追加テストを含むoffline-first run `46131230369` はsuccess。dashboard-imageもsuccess。Cloudflare Pages deploymentもsuccess。
-- この変更はテストのみ。Service Worker実装、CDN URL、import map、モデル保存形式、ユーザーデータは変更していない。依存のローカル同梱そのものは未実施。
-- ブラウザSmokeは直前のhandoff更新commit `4422d2bd` のrun `46131181969` で実行中。v348アプリ自体は前回commit `99293220` のPlaywright dashboard/Avatar Studio smoke successを確認済み。
-- 次工程: 3D依存のローカル同梱に進む前に、現行CDNキャッシュ動作を保持したままローカル版のThree.js/three-vrm/model-viewerを導入できる構成とライセンスを確認する。導入する場合は小さな段階に分け、同一Three.jsバージョンを保つ。
-- main/本番変更なし。参照画像の外部送信・課金なし。
+## 3D依存CDNのオフライン再利用テストとブラウザSmoke完了 (2026-11-28)
+- 現在のdevelopment HEAD: `5c8d7350c4894448e67fb2aa21814f544903c68c`。アプリ本体ビルドはv348。main/本番は未変更。
+- GitHub Actions run `46131281205` (Dashboard preview browser smoke): completed/success。job `preview-browser-smoke` success。
+- GitHub Actions run `46131230369` (Offline-first regression): completed/success。jobs `offline-first` と `dashboard-image` の両方success。
+- Cloudflare Pages deployment for this development commit: success。これらはCI/preview確認であり、iPad Pro M1 / iPhone 17 Pro Maxの実機Safari確認ではない。
+- Service Workerのtrusted CDN cache (`alvis-deps-v2`)について、jsDelivrのThree.js 0.186.0 / three-vrm 3.5.5とGoogle CDNのmodel-viewer 4.1.0を、オンライン初回取得後にキャッシュし、通信断時に再利用できる回帰テストを追加。テストのみの変更で、Service Worker実装、CDN URL、import map、モデル保存形式、ユーザーデータは変更していない。
+- 現行の依存参照を再点検:
+  - ALVIS VRM runtime (`assets/alvis-vrm-runtime.js`) はbare importの `three` / `three/addons` / `@pixiv/three-vrm` を使用。主import mapはThree.js 0.186.0とthree-vrm 3.5.5をjsDelivrから参照。
+  - 既存GLB表示はmodel-viewer 4.1.0をGoogle CDNから遅延import。
+  - Kokoro音声は `kokoro-js-jp@0.2.0` をjsDelivrから遅延importし、同CDNのdistをassetsUrlに指定。今回の3D依存オフラインテストの対象外で、モデル/音声アセットの完全オフライン保証とは別扱い。
+  - HTMLにはThree.js 0.180.0 / three-vrm 3.5.5を参照する別のimport mapも存在し、Avatar Studioのローカルvendor Three.js r180とは別経路。バージョンを混在させず、各実行コンテキストを分けて検証する。
+  - `@interviewflowai/talking-avatar@0.3.0` はimport mapに登録されているが、現行HTML内に実際のimport/use参照は見つからなかった。未使用と確定するまでは削除しない。
+- 重要: 今回のオフラインテストが保証するのは、対象3D依存をオンラインで一度取得した後のキャッシュ再利用。初回から完全オフラインでのAvatar/GLB表示、Kokoro初回起動、モデル重み/音声アセットの完全キャッシュは保証しない。
+- 次工程: CDN依存の完全なmodule dependency closure、各packageの公式ライセンス/NOTICE、ファイル容量、同一オリジンでのmodule path/import map整合性を確認する。まずThree.js 0.186.0とthree-vrm 3.5.5を既存CDN fallbackを壊さずローカル同梱できるか、小さな独立検証で判断する。Avatar Studioのr180 vendorをALVIS runtimeへ流用しない。
+- 18号高品質実メッシュは未取得。無料・権利・プライバシー条件を満たす生成経路は未確定。参照画像の外部送信・課金なし。
+- iPad/iPhone実機SafariでのGPUメモリ・長時間表示・初回オフライン起動は未確認。CI成功を実機検証済みと表現しない。
+- 既存IndexedDB、Qwen、Kokoro、記憶、履歴、同期、暗号化バックアップの保存形式/ユーザーデータは変更していない。
+
 
 ## 開発再開時の状態確認・v348最終検証 (2026-11-28)
 - 休止後にdevelopmentブランチを再確認。HEADは `99293220cbcb2b10a9216457eaa6c4d483342c76`（2026-11-25）。main/本番には変更なし。
