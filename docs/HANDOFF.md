@@ -1,3 +1,15 @@
+## 開発再開時の状態確認・v348最終検証 (2026-11-28)
+- 休止後にdevelopmentブランチを再確認。HEADは `99293220cbcb2b10a9216457eaa6c4d483342c76`（2026-11-25）。main/本番には変更なし。
+- v348の不正拡張子ロードロック解除、二重読み込み防止、関連回帰テストを再確認。
+- 最終CI: Offline-first regression checks run `45707943102` success。Dashboard preview browser smoke run `45707942919` success。後者のPlaywright検証では統合ダッシュボードとAvatar Studioの描画/GLB morph exportまで成功。Cloudflare Pages preview deploymentもsuccess。
+- 直前の失敗run `45707862082` はdashboardテストがService Worker v347を期待していた古いassertionによるもの。テストをv348へ揃えた後、最新run `45707943102` でoffline-first成功を確認。アプリ側のv348キャッシュをv347へ戻す修正はしていない。
+- VRM runtimeを再監査。WebGL context lost/restored、Avatar非表示時のrender loop停止、dispose時のResizeObserver/event listener解除、VRMUtils.deepDispose、renderer.dispose/forceContextLossは実装済み。現時点でGPU解放ロジックに新たなコード変更は不要と判断。
+- オフライン依存の残課題: import mapのThree.js/three-vrmはjsDelivr、GLB表示用model-viewerはGoogle CDNから遅延import。Service Workerは成功した信頼CDN依存を `alvis-deps-v2` にキャッシュし、既に一度オンライン取得した依存は再利用可能。ただし初回Avatar/GLB表示を通信なしで行う保証はまだない。次工程で依存のローカル同梱可否とライセンス/バージョン整合性を調査する。現状のThree.js runtimeは0.186.0、three-vrm 3.5.5、Avatar Studio vendor Three.jsは別バージョンのため、単純なファイル流用は禁止。
+- 18号高品質実メッシュは未取得。無料・権利・プライバシー条件を満たす生成経路は未確定。参照画像の外部送信・課金は引き続き未実施。
+- iPad Pro M1 / iPhone 17 Pro Maxの実機SafariでのGPUメモリ・長時間表示・オフライン初回起動は未確認。CIの成功を実機検証済みと表現しない。
+- 次の作業: まず3D依存ライブラリのローカル同梱可能性をバージョン整合性・ライセンス・容量・Safari動作の観点で調査し、ALVIS本体の既存データ/モデル保存形式を変えずに段階的にオフライン化する。その後18号の無料実メッシュ生成経路を再調査する。
+- 開発方針: developmentのみ。main/本番変更禁止。既存のQwen、Kokoro、記憶、履歴、同期、暗号化バックアップは維持。
+
 ## 不正な拡張子選択時の3Dモデル読み込みロック解除 (2026-11-26)
 - 調査で、VRM/GLB以外のファイルを選択した場合、ロードロックを取得した直後に try/finally の外で return しており、ロックが解除されない不具合を確認。
 - 修正: 拡張子の検証を try 内へ移動。無効形式で早期 return しても finally が必ず実行され、ロックと file input が解除される。
