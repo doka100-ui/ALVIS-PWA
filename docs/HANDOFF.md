@@ -1,3 +1,12 @@
+## 3D依存CDNのオフライン再利用テスト追加 (2026-11-28)
+- Three.js 0.186.0、three-vrm 3.5.5、model-viewer 4.1.0の3つが現在のアバター表示経路で使われていることを確認。
+- Service Workerの既存trusted CDN cache（`alvis-deps-v2`）について、jsDelivrのThree.js/three-vrmとGoogle CDNのmodel-viewerがオンライン取得後にキャッシュされ、通信断後に同じ依存ファイルをキャッシュから返すことをoffline-firstテストへ追加。
+- 追加テストを含むoffline-first run `46131230369` はsuccess。dashboard-imageもsuccess。Cloudflare Pages deploymentもsuccess。
+- この変更はテストのみ。Service Worker実装、CDN URL、import map、モデル保存形式、ユーザーデータは変更していない。依存のローカル同梱そのものは未実施。
+- ブラウザSmokeは直前のhandoff更新commit `4422d2bd` のrun `46131181969` で実行中。v348アプリ自体は前回commit `99293220` のPlaywright dashboard/Avatar Studio smoke successを確認済み。
+- 次工程: 3D依存のローカル同梱に進む前に、現行CDNキャッシュ動作を保持したままローカル版のThree.js/three-vrm/model-viewerを導入できる構成とライセンスを確認する。導入する場合は小さな段階に分け、同一Three.jsバージョンを保つ。
+- main/本番変更なし。参照画像の外部送信・課金なし。
+
 ## 開発再開時の状態確認・v348最終検証 (2026-11-28)
 - 休止後にdevelopmentブランチを再確認。HEADは `99293220cbcb2b10a9216457eaa6c4d483342c76`（2026-11-25）。main/本番には変更なし。
 - v348の不正拡張子ロードロック解除、二重読み込み防止、関連回帰テストを再確認。
